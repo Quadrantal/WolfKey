@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Helvetica+Neue:wght@400;700&display=swap" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Help Forums</title>
+    <link rel="stylesheet" href="../styles/styles.css">
+</head>
+<body>
+    <nav class="top-nav">
+        <div class="nav-links">
+            <a href="../../public/index.html">Home</a>
+            <a href="#about">About</a>
+            <a href="#learn">Learn More</a>
+            <a href="#support">Support</a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <h1>Student Help Forums</h1>
+        
+        <!-- New Question Form -->
+        <div class="new-question section">
+            <h2>Ask a Question</h2>
+            <form id="questionForm">
+                <div>
+                    <label for="title">Title:</label><br>
+                    <input type="text" id="title" name="title" required style="width: 100%">
+                </div>
+                <div>
+                    <label for="question">Question:</label><br>
+                    <textarea id="question" name="question" rows="4" required style="width: 100%"></textarea>
+                </div>
+                <div>
+                    <label for="subject">Subject:</label><br>
+                    <select id="subject" name="subject" required>
+                        <option value="math">Mathematics</option>
+                        <option value="science">Science</option>
+                        <option value="english">English</option>
+                        <option value="history">History</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="attachment">Attachment:</label><br>
+                    <input type="file" id="attachment" name="attachment">
+                </div>
+                <button type="submit">Post Question</button>
+            </form>
+        </div>
+
+        <!-- Questions Feed -->
+        <div id="questionsFeed" class="section">
+            <!-- Sample Question -->
+            <div class="post">
+                <div class="post-header">
+                    <h3>Need help with calculus derivatives</h3>
+                    <span class="timestamp">Posted 2 hours ago</span>
+                </div>
+                <div class="post-content">
+                    <p>I'm struggling with understanding the chain rule. Can someone explain it with examples?</p>
+                </div>
+                <div class="vote-buttons">
+                    <button onclick="upvote(this)">👍 <span>0</span></button>
+                    <button onclick="downvote(this)">👎 <span>0</span></button>
+                </div>
+                <button onclick="toggleAnswerForm(this)">Answer</button>
+                <div class="answer-form" style="display: none;">
+                    <textarea placeholder="Write your answer..." rows="4"></textarea>
+                    <button onclick="submitAnswer(this)">Submit Answer</button>
+                </div>
+                <div class="answers">
+                    <!-- Sample Answer -->
+                    <div class="post">
+                        <p>The chain rule is used for differentiating composite functions...</p>
+                        <div class="vote-buttons">
+                            <button onclick="upvote(this)">👍 <span>2</span></button>
+                            <button onclick="downvote(this)">👎 <span>0</span></button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="../src/scripts/questions.js"></script>
+</body>
+</html>
