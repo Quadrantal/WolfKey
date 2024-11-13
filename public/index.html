@@ -26,41 +26,64 @@
         </div>
     </nav>
 
-    <div class="container">
-        <h1>Student Help Forums</h1>
+    <div class="layout-container">
+        <aside class="sidebar">
+            <nav class="sidebar-nav">
+                <a href="index.html" class="sidebar-item active">
+                    <span class="icon">🏠</span>
+                    <span>Home</span>
+                </a>
+                <a href="../src/pages/ask_question.html" class="sidebar-item">
+                    <span class="icon">❓</span>
+                    <span>Questions</span>
+                </a>
+                <a href="#tags" class="sidebar-item">
+                    <span class="icon">🏷️</span>
+                    <span>Tags</span>
+                </a>
+                <a href="#users" class="sidebar-item">
+                    <span class="icon">👥</span>
+                    <span>Users</span>
+                </a>
+            </nav>
+        </aside>
 
-        <!-- Ask a Question Button -->
-        <button class="new-question-button" onclick="window.location.href='../src/pages/ask_question.html'">Ask a Question</button>
+        <div class="container">
+            <h1>Student Help Forums</h1>
 
-        <!-- Recent Questions Feed -->
-        <div class="questions-feed">
-            <div class="section">
-                <h2>Recent Questions</h2>
+            <!-- Ask a Question Button -->
+            <button class="new-question-button" onclick="window.location.href='../src/pages/ask_question.html'">Ask a Question</button>
 
-                <!-- Sample Question -->
-                <div class="post">
-                    <div class="post-header">
-                        <h3>Need help with calculus derivatives</h3>
-                        <span class="timestamp">Posted 2 hours ago</span>
+            <!-- Recent Questions Feed -->
+            <div class="questions-feed">
+                <div class="section">
+                    <h2>Recent Questions</h2>
+
+                    <!-- Sample Question -->
+                    <div class="post">
+                        <div class="post-header">
+                            <h3>Need help with calculus derivatives</h3>
+                            <span class="timestamp">Posted 2 hours ago</span>
+                        </div>
+                        <div class="post-content">
+                            <p>I'm struggling with understanding the chain rule. Can someone explain it with examples?</p>
+                        </div>
                     </div>
-                    <div class="post-content">
-                        <p>I'm struggling with understanding the chain rule. Can someone explain it with examples?</p>
-                    </div>
-                </div>
 
-                <!-- Another Sample Question -->
-                <div class="post">
-                    <div class="post-header">
-                        <h3>What are the different types of chemical bonds?</h3>
-                        <span class="timestamp">Posted 4 hours ago</span>
-                    </div>
-                    <div class="post-content">
-                        <p>Can someone explain the differences between covalent and ionic bonds?</p>
+                    <!-- Another Sample Question -->
+                    <div class="post">
+                        <div class="post-header">
+                            <h3>What are the different types of chemical bonds?</h3>
+                            <span class="timestamp">Posted 4 hours ago</span>
+                        </div>
+                        <div class="post-content">
+                            <p>Can someone explain the differences between covalent and ionic bonds?</p>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
 
+        </div>
     </div>
 
     <script src="scripts.js"></script>
