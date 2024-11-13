@@ -8,11 +8,17 @@
 </head>
 <body>
     <nav class="top-nav">
-        <div class="nav-links">
-            <a href="../../public/index.html">Home</a>
-            <a href="#about">About</a>
-            <a href="#learn">Learn More</a>
-            <a href="#support">Support</a>
+        <div class="nav-container">
+            <div class="search-bar">
+                <input type="text" placeholder="Search questions...">
+                <button type="button">🔍</button>
+            </div>
+            <div class="nav-links">
+                <a href="../../public/index.html">Home</a>
+                <a href="#about">About</a>
+                <a href="#learn">Learn More</a>
+                <a href="#support">Support</a>
+            </div>
         </div>
     </nav>
     <div class="container">
@@ -29,19 +35,24 @@
                 <textarea id="question" name="question" rows="4" required style="width: 100%"></textarea>
             </div>
             <div>
+                <label for="code">Code (optional):</label><br>
+                <textarea id="code" name="code" rows="6" class="code-input" placeholder="Paste your code here..."></textarea>
+            </div>
+            <div>
                 <label for="subject">Subject:</label><br>
                 <select id="subject" name="subject" required>
                     <option value="math">Mathematics</option>
                     <option value="science">Science</option>
                     <option value="english">English</option>
                     <option value="history">History</option>
+                    <option value="programming">Programming</option>
                 </select>
             </div>
             <div>
                 <label for="attachment">Attachment:</label><br>
                 <input type="file" id="attachment" name="attachment">
             </div>
-                <button type="submit">Post Question</button>
+                <button class="submit-button" type="submit">Post Question</button>
             </form>
         </div>
     </div>
