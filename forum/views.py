@@ -3,16 +3,52 @@ from django.contrib.auth import login, logout, authenticate
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm  
 from django.contrib import messages 
 from django.contrib.auth.decorators import login_required
-from .models import Post
-from .forms import PostForm
-from django.http import HttpResponseForbidden 
+from .models import Post, Comment
+from .forms import PostForm, CommentForm
+from django.http import HttpResponseForbidden, JsonResponse
 def home(request):
     posts = Post.objects.all().order_by('-created_at')
     return render(request, 'forum/home.html', {'posts': posts})
 
 def post_detail(request, post_id):
     post = get_object_or_404(Post, id=post_id)
-    return render(request, 'forum/post_detail.html', {'post': post})
+    comments = post.comments.all()
+    comment_form = CommentForm()
+
+    if request.method == 'POST':
+        if not request.user.is_authenticated:
+            return redirect('login')
+            
+        action = request.POST.get('action')
+        if action == 'create':
+            comment_form = CommentForm(request.POST)
+            if comment_form.is_valid():
+                comment = comment_form.save(commit=False)
+                comment.post = post
+                comment.author = request.user
+                comment.save()
+                messages.success(request, 'Comment added successfully!')
+        
+        elif action == 'edit':
+            comment_id = request.POST.get('comment_id')
+            comment = get_object_or_404(Comment, id=comment_id, author=request.user)
+            comment.content = request.POST.get('content')
+            comment.save()
+            messages.success(request, 'Comment updated successfully!')
+        
+        elif action == 'delete':
+            comment_id = request.POST.get('comment_id')
+            comment = get_object_or_404(Comment, id=comment_id, author=request.user)
+            comment.delete()
+            messages.success(request, 'Comment deleted successfully!')
+        
+        return redirect('post_detail', post_id=post.id)
+
+    return render(request, 'forum/post_detail.html', {
+        'post': post,
+        'comments': comments,
+        'comment_form': comment_form
+    })
 
 def register(request):
     if request.method == 'POST':
@@ -94,3 +130,43 @@ def delete_post(request, post_id):
         return redirect('home')
         
     return render(request, 'forum/delete_confirm.html', {'post': post})
+
+@login_required
+def edit_comment(request, comment_id):
+    comment = get_object_or_404(Comment, id=comment_id)
+    
+    # Check if user is the author
+    if comment.author != request.user:
+        return HttpResponseForbidden("You cannot edit this comment")
+    
+    if request.method == 'POST':
+        form = CommentForm(request.POST, instance=comment)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Comment updated successfully!')
+            return redirect('post_detail', post_id=comment.post.id)
+    else:
+        form = CommentForm(instance=comment)
+    
+    return render(request, 'forum/comment_form.html', {
+        'form': form,
+        'comment': comment,
+        'action': 'Edit'
+    })
+
+@login_required
+def delete_comment(request, comment_id):
+    comment = get_object_or_404(Comment, id=comment_id)
+    
+    # Check if user is the author
+    if comment.author != request.user:
+        return HttpResponseForbidden("You cannot delete this comment")
+    
+    post_id = comment.post.id  # Store post_id before deleting comment
+    
+    if request.method == 'POST':
+        comment.delete()
+        messages.success(request, 'Comment deleted successfully!')
+        return redirect('post_detail', post_id=post_id)
+    
+    return render(request, 'forum/comment_delete.html', {'comment': comment})
