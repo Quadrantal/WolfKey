@@ -1,11 +1,17 @@
 {% extends 'forum/base.html' %}
 
 {% block content %}
+<!-- Post Details Section -->
 <div class="card mb-4">
     <div class="card-body">
         <h1 class="card-title">{{ post.title }}</h1>
         <p class="text-muted">Posted by {{ post.author.username }} on {{ post.created_at|date:"F d, Y" }}</p>
         <p class="card-text">{{ post.content }}</p>
+        <p>Tags: 
+            {% for tag in post.tags.all %}
+                <span class="badge badge-primary">{{ tag.name }}</span>
+            {% endfor %}
+        </p>
     </div>
 </div>
 
@@ -25,14 +31,19 @@
         <div class="card-body">
             <p>{{ solution.content }}</p>
             <small class="text-muted">Solution by {{ solution.author.username }} on {{ solution.created_at|date:"F d, Y" }}</small>
+            <p>Upvotes: {{ solution.upvotes }}</p>
+            <a href="{% url 'upvote_solution' solution.id %}" class="btn btn-sm btn-success">Upvote</a>
             {% if user.is_authenticated and user == solution.author %}
+                <!-- Edit Solution Button -->
                 <button class="btn btn-sm btn-warning" onclick="showEditSolutionForm('{{ solution.id }}');">Edit</button>
+                <!-- Delete Solution Form -->
                 <form method="post" action="{% url 'post_detail' post.id %}" style="display:inline;">
                     {% csrf_token %}
                     <input type="hidden" name="action" value="delete_solution">
                     <input type="hidden" name="solution_id" value="{{ solution.id }}">
                     <button type="submit" class="btn btn-sm btn-danger">Delete</button>
                 </form>
+                <!-- Edit Solution Form -->
                 <form method="post" action="{% url 'post_detail' post.id %}" class="edit-solution-form" id="edit-solution-form-{{ solution.id }}" style="display:none;">
                     {% csrf_token %}
                     <input type="hidden" name="action" value="edit_solution">
@@ -42,19 +53,25 @@
                     <button type="button" class="btn btn-sm btn-secondary" onclick="hideEditSolutionForm('{{ solution.id }}')">Cancel</button>
                 </form>
             {% endif %}
+            <!-- Comments Section for Each Solution -->
             <h5>Comments:</h5>
             {% for comment in solution.comments.all %}
                 <div class="comment" id="comment-{{ comment.id }}">
                     <p>{{ comment.content }}</p>
                     <small class="text-muted">Comment by {{ comment.author.username }} on {{ comment.created_at|date:"F d, Y" }}</small>
+                    <p>Upvotes: {{ comment.upvotes }}</p>
+                    <a href="{% url 'upvote_comment' comment.id %}" class="btn btn-sm btn-success">Upvote</a>
                     {% if user.is_authenticated and user == comment.author %}
+                        <!-- Edit Comment Button -->
                         <button class="btn btn-sm btn-warning" onclick="showEditCommentForm('{{ comment.id }}');">Edit</button>
+                        <!-- Delete Comment Form -->
                         <form method="post" action="{% url 'post_detail' post.id %}" style="display:inline;">
                             {% csrf_token %}
                             <input type="hidden" name="action" value="delete_comment">
                             <input type="hidden" name="comment_id" value="{{ comment.id }}">
                             <button type="submit" class="btn btn-sm btn-danger">Delete</button>
                         </form>
+                        <!-- Edit Comment Form -->
                         <form method="post" action="{% url 'post_detail' post.id %}" class="edit-comment-form" id="edit-comment-form-{{ comment.id }}" style="display:none;">
                             {% csrf_token %}
                             <input type="hidden" name="action" value="edit_comment">
@@ -77,18 +94,22 @@
 
 {% block extra_js %}
 <script>
+// Show the edit solution form
 function showEditSolutionForm(solutionId) {
     document.getElementById('edit-solution-form-' + solutionId).style.display = 'block';
 }
 
+// Hide the edit solution form
 function hideEditSolutionForm(solutionId) {
     document.getElementById('edit-solution-form-' + solutionId).style.display = 'none';
 }
 
+// Show the edit comment form
 function showEditCommentForm(commentId) {
     document.getElementById('edit-comment-form-' + commentId).style.display = 'block';
 }
 
+// Hide the edit comment form
 function hideEditCommentForm(commentId) {
     document.getElementById('edit-comment-form-' + commentId).style.display = 'none';
 }

@@ -3,8 +3,8 @@ from django.contrib.auth import login, logout, authenticate
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm  
 from django.contrib import messages 
 from django.contrib.auth.decorators import login_required
-from .models import Post, Solution, Comment
-from .forms import PostForm, CommentForm, SolutionForm
+from .models import Post, Solution, Comment, SolutionUpvote, CommentUpvote, Tag
+from .forms import PostForm, CommentForm, SolutionForm, TagForm
 from django.http import HttpResponseForbidden, JsonResponse
 
 def home(request):
@@ -124,6 +124,7 @@ def create_post(request):
             post = form.save(commit=False)
             post.author = request.user
             post.save()
+            form.save_m2m()  # Save the many-to-many data for the form
             messages.success(request, 'Post created successfully!')
             return redirect('post_detail', post_id=post.id)
     else:
@@ -164,3 +165,40 @@ def delete_post(request, post_id):
         return redirect('home')
         
     return render(request, 'forum/delete_confirm.html', {'post': post})
+
+@login_required
+def upvote_solution(request, solution_id):
+    solution = get_object_or_404(Solution, id=solution_id)
+    if not SolutionUpvote.objects.filter(solution=solution, user=request.user).exists():
+        SolutionUpvote.objects.create(solution=solution, user=request.user)
+        solution.upvotes += 1
+        solution.save()
+        messages.success(request, 'Solution upvoted successfully!')
+    else:
+        messages.warning(request, 'You have already upvoted this solution.')
+    return redirect('post_detail', post_id=solution.post.id)
+
+@login_required
+def upvote_comment(request, comment_id):
+    comment = get_object_or_404(Comment, id=comment_id)
+    if not CommentUpvote.objects.filter(comment=comment, user=request.user).exists():
+        CommentUpvote.objects.create(comment=comment, user=request.user)
+        comment.upvotes += 1
+        comment.save()
+        messages.success(request, 'Comment upvoted successfully!')
+    else:
+        messages.warning(request, 'You have already upvoted this comment.')
+    return redirect('post_detail', post_id=comment.solution.post.id)
+
+
+@login_required
+def create_tag(request):
+    if request.method == 'POST':
+        form = TagForm(request.POST)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Tag created successfully!')
+            return redirect('home')
+    else:
+        form = TagForm()
+    return render(request, 'forum/tag_form.html', {'form': form})
