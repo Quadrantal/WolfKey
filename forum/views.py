@@ -3,51 +3,63 @@ from django.contrib.auth import login, logout, authenticate
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm  
 from django.contrib import messages 
 from django.contrib.auth.decorators import login_required
-from .models import Post, Comment
-from .forms import PostForm, CommentForm
+from .models import Post, Solution, Comment
+from .forms import PostForm, CommentForm, SolutionForm
 from django.http import HttpResponseForbidden, JsonResponse
+
 def home(request):
     posts = Post.objects.all().order_by('-created_at')
     return render(request, 'forum/home.html', {'posts': posts})
 
 def post_detail(request, post_id):
     post = get_object_or_404(Post, id=post_id)
-    comments = post.comments.all()
-    comment_form = CommentForm()
+    solutions = post.solutions.all()
+    solution_form = SolutionForm()
 
     if request.method == 'POST':
         if not request.user.is_authenticated:
             return redirect('login')
-            
+
         action = request.POST.get('action')
-        if action == 'create':
+
+        # Handle solution creation
+        if action == 'create_solution':
+            solution_form = SolutionForm(request.POST)
+            if solution_form.is_valid():
+                solution = solution_form.save(commit=False)
+                solution.post = post
+                solution.author = request.user
+                solution.save()
+                messages.success(request, 'Solution added successfully!')
+
+        # Handle comment creation or editing
+        elif action in ['create_comment', 'edit_comment']:
             comment_form = CommentForm(request.POST)
-            if comment_form.is_valid():
-                comment = comment_form.save(commit=False)
-                comment.post = post
-                comment.author = request.user
+            solution_id = request.POST.get('solution_id')
+            solution = get_object_or_404(Solution, id=solution_id)
+
+            if action == 'create_comment':
+                if comment_form.is_valid():
+                    comment = comment_form.save(commit=False)
+                    comment.solution = solution
+                    comment.author = request.user
+                    comment.save()
+                    messages.success(request, 'Comment added successfully!')
+
+            elif action == 'edit_comment':
+                comment_id = request.POST.get('comment_id')
+                comment = get_object_or_404(Comment, id=comment_id, author=request.user)
+                comment.content = comment_form.cleaned_data['content']
                 comment.save()
-                messages.success(request, 'Comment added successfully!')
-        
-        elif action == 'edit':
-            comment_id = request.POST.get('comment_id')
-            comment = get_object_or_404(Comment, id=comment_id, author=request.user)
-            comment.content = request.POST.get('content')
-            comment.save()
-            messages.success(request, 'Comment updated successfully!')
-        
-        elif action == 'delete':
-            comment_id = request.POST.get('comment_id')
-            comment = get_object_or_404(Comment, id=comment_id, author=request.user)
-            comment.delete()
-            messages.success(request, 'Comment deleted successfully!')
-        
+                messages.success(request, 'Comment updated successfully!')
+
         return redirect('post_detail', post_id=post.id)
 
     return render(request, 'forum/post_detail.html', {
         'post': post,
-        'comments': comments,
-        'comment_form': comment_form
+        'solutions': solutions,
+        'solution_form': solution_form,
+        'comment_form': CommentForm(),  # Initialize a new comment form
     })
 
 def register(request):
@@ -75,13 +87,30 @@ def login_view(request):
     return render(request, 'forum/login.html', {'form': form})
 
 def logout_view(request):
+    """
+    Log out the current user and redirect to the home page.
+    
+    Args:
+        request (HttpRequest): The request object.
+    
+    Returns:
+        HttpResponse: Redirect to the home page.
+    """
     logout(request)
     messages.success(request, 'You have been logged out.')
     return redirect('home')
 
-
 @login_required  # This ensures only logged-in users can access this view
 def create_post(request):
+    """
+    Create a new post. Only logged-in users can access this view.
+    
+    Args:
+        request (HttpRequest): The request object.
+    
+    Returns:
+        HttpResponse: Render the post form or redirect to the post detail page.
+    """
     if request.method == 'POST':
         form = PostForm(request.POST)
         if form.is_valid():
@@ -96,6 +125,16 @@ def create_post(request):
 
 @login_required
 def edit_post(request, post_id):
+    """
+    Edit an existing post. Only the author of the post can edit it.
+    
+    Args:
+        request (HttpRequest): The request object.
+        post_id (int): The ID of the post to edit.
+    
+    Returns:
+        HttpResponse: Render the post form or return a forbidden response.
+    """
     post = get_object_or_404(Post, id=post_id)
     
     # Check if user is the author
@@ -144,14 +183,15 @@ def edit_comment(request, comment_id):
         if form.is_valid():
             form.save()
             messages.success(request, 'Comment updated successfully!')
-            return redirect('post_detail', post_id=comment.post.id)
+            return redirect('post_detail', post_id=comment.solution.post.id)
     else:
         form = CommentForm(instance=comment)
     
     return render(request, 'forum/comment_form.html', {
         'form': form,
         'comment': comment,
-        'action': 'Edit'
+        'action': 'Edit',
+        'post_id': comment.solution.post.id
     })
 
 @login_required
