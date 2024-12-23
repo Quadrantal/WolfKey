@@ -9,6 +9,15 @@
     </div>
 </div>
 
+<!-- Add Solution Section -->
+<h3>Add Solution</h3>
+<form method="post" action="{% url 'post_detail' post.id %}">
+    {% csrf_token %}
+    <input type="hidden" name="action" value="create_solution">
+    {{ solution_form.as_p }}
+    <button type="submit" class="btn btn-primary">Submit Solution</button>
+</form>
+
 <!-- Solutions Section -->
 <h3>Solutions</h3>
 {% for solution in solutions %}
@@ -16,45 +25,72 @@
         <div class="card-body">
             <p>{{ solution.content }}</p>
             <small class="text-muted">Solution by {{ solution.author.username }} on {{ solution.created_at|date:"F d, Y" }}</small>
+            {% if user.is_authenticated and user == solution.author %}
+                <button class="btn btn-sm btn-warning" onclick="showEditSolutionForm('{{ solution.id }}');">Edit</button>
+                <form method="post" action="{% url 'post_detail' post.id %}" style="display:inline;">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="delete_solution">
+                    <input type="hidden" name="solution_id" value="{{ solution.id }}">
+                    <button type="submit" class="btn btn-sm btn-danger">Delete</button>
+                </form>
+                <form method="post" action="{% url 'post_detail' post.id %}" class="edit-solution-form" id="edit-solution-form-{{ solution.id }}" style="display:none;">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="edit_solution">
+                    <input type="hidden" name="solution_id" value="{{ solution.id }}">
+                    {{ solution_form.as_p }}
+                    <button type="submit" class="btn btn-sm btn-primary">Save</button>
+                    <button type="button" class="btn btn-sm btn-secondary" onclick="hideEditSolutionForm('{{ solution.id }}')">Cancel</button>
+                </form>
+            {% endif %}
             <h5>Comments:</h5>
             {% for comment in solution.comments.all %}
-                <div class="comment">
+                <div class="comment" id="comment-{{ comment.id }}">
                     <p>{{ comment.content }}</p>
                     <small class="text-muted">Comment by {{ comment.author.username }} on {{ comment.created_at|date:"F d, Y" }}</small>
                     {% if user.is_authenticated and user == comment.author %}
-                        <a href="{% url 'edit_comment' comment.id %}" class="btn btn-sm btn-warning">Edit</a>
-                        <form method="post" action="{% url 'delete_comment' comment.id %}" style="display:inline;">
+                        <button class="btn btn-sm btn-warning" onclick="showEditCommentForm('{{ comment.id }}');">Edit</button>
+                        <form method="post" action="{% url 'post_detail' post.id %}" style="display:inline;">
                             {% csrf_token %}
+                            <input type="hidden" name="action" value="delete_comment">
+                            <input type="hidden" name="comment_id" value="{{ comment.id }}">
                             <button type="submit" class="btn btn-sm btn-danger">Delete</button>
+                        </form>
+                        <form method="post" action="{% url 'post_detail' post.id %}" class="edit-comment-form" id="edit-comment-form-{{ comment.id }}" style="display:none;">
+                            {% csrf_token %}
+                            <input type="hidden" name="action" value="edit_comment">
+                            <input type="hidden" name="comment_id" value="{{ comment.id }}">
+                            {{ comment_form.as_p }}
+                            <button type="submit" class="btn btn-sm btn-primary">Save</button>
+                            <button type="button" class="btn btn-sm btn-secondary" onclick="hideEditCommentForm('{{ comment.id }}')">Cancel</button>
                         </form>
                     {% endif %}
                 </div>
             {% empty %}
                 <p>No comments yet.</p>
             {% endfor %}
-            <form method="post">
-                {% csrf_token %}
-                <input type="hidden" name="action" value="create_comment">
-                <input type="hidden" name="solution_id" value="{{ solution.id }}">
-                {{ comment_form.content }}
-                <button type="submit" class="btn btn-sm btn-primary">Add Comment</button>
-            </form>
         </div>
     </div>
 {% empty %}
     <p>No solutions yet.</p>
 {% endfor %}
+{% endblock %}
 
-<!-- Add Solution Form -->
-<h4>Add a Solution</h4>
-<form method="post">
-    {% csrf_token %}
-    <input type="hidden" name="action" value="create_solution">
-    {{ solution_form.content }}
-    <button type="submit" class="btn btn-primary">Add Solution</button>
-</form>
+{% block extra_js %}
+<script>
+function showEditSolutionForm(solutionId) {
+    document.getElementById('edit-solution-form-' + solutionId).style.display = 'block';
+}
 
-<div class="mt-3">
-    <a href="{% url 'home' %}" class="btn btn-secondary">Back to Home</a>
-</div>
-{% endblock %} 
+function hideEditSolutionForm(solutionId) {
+    document.getElementById('edit-solution-form-' + solutionId).style.display = 'none';
+}
+
+function showEditCommentForm(commentId) {
+    document.getElementById('edit-comment-form-' + commentId).style.display = 'block';
+}
+
+function hideEditCommentForm(commentId) {
+    document.getElementById('edit-comment-form-' + commentId).style.display = 'none';
+}
+</script>
+{% endblock %}

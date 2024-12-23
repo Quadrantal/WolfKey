@@ -16,8 +16,19 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
+from forum import views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', include('forum.urls')),  # This will handle our main forum URLs
+    path('', views.home, name='home'),
+    path('post/<int:post_id>/', views.post_detail, name='post_detail'),
+    path('post/new/', views.create_post, name='create_post'),
+    path('register/', views.register, name='register'),
+    path('login/', views.login_view, name='login'),
+    path('logout/', views.logout_view, name='logout'),
+    path('post/<int:post_id>/edit/', views.edit_post, name='edit_post'),
+    path('post/<int:post_id>/delete/', views.delete_post, name='delete_post'),
+    path('comment/<int:comment_id>/edit/', views.edit_comment, name='edit_comment'),
+    path('comment/<int:comment_id>/delete/', views.delete_comment, name='delete_comment'),
+    path('accounts/', include('django.contrib.auth.urls')),  # Include the default auth URLs
 ]
