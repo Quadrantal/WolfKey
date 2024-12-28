@@ -9,7 +9,7 @@ This is a Django-based forum application where users can create posts, add solut
 1. **Clone the repository:**
 
     ```sh
-    git clone <repository-url>
+    git clone <https://github.com/HugoC1000/School-Forum>
     cd student_forum
     ```
 
