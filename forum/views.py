@@ -12,14 +12,20 @@ from django.db.models import F
 
 def home(request):
     query = request.GET.get('q')
+    tag_id = request.GET.get('tag')
+    posts = Post.objects.all().order_by('-created_at')
+
     if query:
         search_query = SearchQuery(query)
-        posts = Post.objects.annotate(
+        posts = posts.annotate(
             rank=SearchRank(F('search_vector'), search_query) + TrigramSimilarity('title', query)
         ).filter(rank__gte=0.3).order_by('-rank')
-    else:
-        posts = Post.objects.all().order_by('-created_at')
-    return render(request, 'forum/home.html', {'posts': posts, 'query': query})
+
+    if tag_id:
+        posts = posts.filter(tags__id=tag_id)
+
+    tags = Tag.objects.all()
+    return render(request, 'forum/home.html', {'posts': posts, 'query': query, 'tags': tags, 'selected_tag': tag_id})
 
 @login_required
 def post_detail(request, post_id):
@@ -216,20 +222,24 @@ def create_tag(request):
 
 def search_posts(request):
     query = request.GET.get('q', '')
+    tag_id = request.GET.get('tag', '')
+    posts = Post.objects.all().order_by('-created_at')
+
     if query:
         search_query = SearchQuery(query)
-        posts = Post.objects.annotate(
+        posts = posts.annotate(
             rank=SearchRank(F('search_vector'), search_query) + TrigramSimilarity('title', query)
         ).filter(rank__gte=0.3).order_by('-rank')
-    else:
-        posts = Post.objects.all().order_by('-created_at')
 
-    results = [{
-        'title': post.title,
-        'content': post.content[:100],  # Truncate content for preview
-        'url': request.build_absolute_uri(post.get_absolute_url()),
-        'author': post.author.username,
-        'created_at': post.created_at.strftime("%B %d, %Y")
-    } for post in posts]
+    if tag_id:
+        posts = posts.filter(tags__id=tag_id)
 
-    return JsonResponse({'results': results}, safe=False)
+    results = []
+    for post in posts:
+        results.append({
+            'title': post.title,
+            'content': post.content[:100],  # Truncate content for preview
+            'url': post.get_absolute_url(),  
+        })
+
+    return JsonResponse({'results': results})

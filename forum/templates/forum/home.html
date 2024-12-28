@@ -10,10 +10,21 @@
 
     <!-- Search Form -->
     <form method="get" action="{% url 'home' %}" class="mb-4" id="search-form">
-        <div class="input-group">
-            <input type="text" name="q" class="form-control" placeholder="Search posts..." id="search-input">
+        <div class="input-group mb-3">
+            <input type="text" name="q" class="form-control" placeholder="Search posts..." id="search-input" value="{{ query }}">
             <div class="input-group-append">
                 <button class="btn btn-outline-secondary" type="submit">Search</button>
+            </div>
+        </div>
+        <div class="input-group mb-3">
+            <select name="tag" class="form-control" id="tag-select">
+                <option value="">All Tags</option>
+                {% for tag in tags %}
+                    <option value="{{ tag.id }}" {% if tag.id|stringformat:"s" == selected_tag %}selected{% endif %}>{{ tag.name }}</option>
+                {% endfor %}
+            </select>
+            <div class="input-group-append">
+                <button class="btn btn-outline-secondary" type="submit">Filter</button>
             </div>
         </div>
     </form>
@@ -57,9 +68,10 @@ document.addEventListener('DOMContentLoaded', function() {
         
         debounceTimeout = setTimeout(() => {
             const query = searchInput.value;
-            
+            const tag = document.getElementById('tag-select').value;
+
             if (query.length > 0 && query.includes(' ')) {
-                fetch(`/search/?q=${encodeURIComponent(query)}`)
+                fetch(`/search/?q=${encodeURIComponent(query)}&tag=${encodeURIComponent(tag)}`)
                     .then(response => {
                         if (!response.ok) {
                             throw new Error(`HTTP error! status: ${response.status}`);
