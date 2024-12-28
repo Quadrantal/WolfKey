@@ -8,6 +8,16 @@
         {% endif %}
     </div>
     
+    <!-- Search Form -->
+    <form method="get" action="{% url 'home' %}" class="mb-4">
+        <div class="input-group">
+            <input type="text" name="q" class="form-control" placeholder="Search posts..." value="{{ query }}">
+            <div class="input-group-append">
+                <button class="btn btn-outline-secondary" type="submit">Search</button>
+            </div>
+        </div>
+    </form>
+
     <div class="row">
         {% for post in posts %}
             <div class="col-md-6 mb-4">
@@ -24,7 +34,7 @@
             </div>
         {% empty %}
             <div class="col-12">
-                <p>No posts yet.</p>
+                <p>No posts found.</p>
             </div>
         {% endfor %}
     </div>

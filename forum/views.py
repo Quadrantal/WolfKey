@@ -3,13 +3,23 @@ from django.contrib.auth import login, logout, authenticate
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm  
 from django.contrib import messages 
 from django.contrib.auth.decorators import login_required
+from django.contrib.postgres.search import SearchVector, SearchQuery, SearchRank, TrigramSimilarity
 from .models import Post, Solution, Comment, SolutionUpvote, CommentUpvote, Tag
 from .forms import PostForm, CommentForm, SolutionForm, TagForm
 from django.http import HttpResponseForbidden, JsonResponse
+from django.db.models import F
+
 
 def home(request):
-    posts = Post.objects.all().order_by('-created_at')
-    return render(request, 'forum/home.html', {'posts': posts})
+    query = request.GET.get('q')
+    if query:
+        search_query = SearchQuery(query)
+        posts = Post.objects.annotate(
+            rank=SearchRank(F('search_vector'), search_query) + TrigramSimilarity('title', query)
+        ).filter(rank__gte=0.3).order_by('-rank')
+    else:
+        posts = Post.objects.all().order_by('-created_at')
+    return render(request, 'forum/home.html', {'posts': posts, 'query': query})
 
 @login_required
 def post_detail(request, post_id):
