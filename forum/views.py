@@ -29,7 +29,7 @@ def post_detail(request, post_id):
     comment_form = CommentForm()
 
     if request.method == 'POST':
-        if not request.user.is_authenticated:
+        if not request.user.is_authenticated: 
             return redirect('login')
 
         action = request.POST.get('action')
@@ -212,3 +212,24 @@ def create_tag(request):
     else:
         form = TagForm()
     return render(request, 'forum/tag_form.html', {'form': form})
+
+
+def search_posts(request):
+    query = request.GET.get('q', '')
+    if query:
+        search_query = SearchQuery(query)
+        posts = Post.objects.annotate(
+            rank=SearchRank(F('search_vector'), search_query) + TrigramSimilarity('title', query)
+        ).filter(rank__gte=0.3).order_by('-rank')
+    else:
+        posts = Post.objects.all().order_by('-created_at')
+
+    results = [{
+        'title': post.title,
+        'content': post.content[:100],  # Truncate content for preview
+        'url': request.build_absolute_uri(post.get_absolute_url()),
+        'author': post.author.username,
+        'created_at': post.created_at.strftime("%B %d, %Y")
+    } for post in posts]
+
+    return JsonResponse({'results': results}, safe=False)

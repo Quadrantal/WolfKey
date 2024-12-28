@@ -3,6 +3,7 @@ from django.contrib.auth.models import User
 from django.contrib.postgres.search import SearchVectorField
 from django.contrib.postgres.search import SearchVector
 from django.db.models import F
+from django.urls import reverse
 
 
 class Tag(models.Model):
@@ -17,7 +18,7 @@ class Post(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     author = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
     tags = models.ManyToManyField(Tag, related_name='posts', blank=True)
-    search_vector = SearchVectorField(null=True, blank=True)  # Add this line
+    search_vector = SearchVectorField(null=True, blank=True)
 
     def __str__(self):
         return self.title
@@ -29,6 +30,9 @@ class Post(models.Model):
             SearchVector('content', weight='B')
         )
         Post.objects.filter(id=self.id).update(search_vector=search_vector)
+
+    def get_absolute_url(self):
+        return reverse('post_detail', args=[self.id])
 
 class Solution(models.Model):
     post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name='solutions')

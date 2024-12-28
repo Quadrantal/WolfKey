@@ -7,18 +7,21 @@
             <a href="{% url 'create_post' %}" class="btn btn-primary">Create Post</a>
         {% endif %}
     </div>
-    
+
     <!-- Search Form -->
-    <form method="get" action="{% url 'home' %}" class="mb-4">
+    <form method="get" action="{% url 'home' %}" class="mb-4" id="search-form">
         <div class="input-group">
-            <input type="text" name="q" class="form-control" placeholder="Search posts..." value="{{ query }}">
+            <input type="text" name="q" class="form-control" placeholder="Search posts..." id="search-input">
             <div class="input-group-append">
                 <button class="btn btn-outline-secondary" type="submit">Search</button>
             </div>
         </div>
     </form>
 
-    <div class="row">
+    <!-- Search Results -->
+    <div id="search-results" class="row"></div>
+
+    <div class="row" id="post-list">
         {% for post in posts %}
             <div class="col-md-6 mb-4">
                 <div class="card">
@@ -38,4 +41,75 @@
             </div>
         {% endfor %}
     </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById('search-input');
+    const searchResults = document.getElementById('search-results');
+    const postList = document.getElementById('post-list');
+
+    let debounceTimeout;
+
+    searchInput.addEventListener('input', function() {
+        clearTimeout(debounceTimeout);
+        
+        debounceTimeout = setTimeout(() => {
+            const query = searchInput.value;
+            
+            if (query.length > 0 && query.includes(' ')) {
+                fetch(`/search/?q=${encodeURIComponent(query)}`)
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error(`HTTP error! status: ${response.status}`);
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        searchResults.innerHTML = '';
+                        postList.style.display = 'none';
+
+                        
+                        data.results.forEach(result => {
+                            const resultDiv = document.createElement('div');
+                            resultDiv.classList.add('col-md-6', 'mb-4');
+                            resultDiv.innerHTML = `
+                                <div class="card">
+                                    <div class="card-body">
+                                        <h5 class="card-title">${escapeHtml(result.title)}</h5>
+                                        <p class="card-text">${escapeHtml(result.content)}</p>
+                                        <a href="${result.url}" class="btn btn-primary">Read More</a>
+                                    </div>
+                                    <div class="card-footer text-muted">
+                                        Posted by ${escapeHtml(result.author)} on ${result.created_at}
+                                    </div>
+                                </div>
+                            `;
+                            searchResults.appendChild(resultDiv);
+                        });
+                    })
+                    .catch(error => {
+
+                        console.error('Search error:', error);
+                        searchResults.innerHTML = '<div class="col-12"><p class="text-danger">An error occurred while searching. Please try again.</p></div>';
+                    });
+            } else {
+                searchResults.innerHTML = '';
+                postList.style.display = 'block';
+            }
+        }, 300);  // Debounce delay of 300ms
+    });
+
+    // Helper function to escape HTML and prevent XSS
+    function escapeHtml(unsafe) {
+        return unsafe
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#039;");
+    }
+});
+</script>
 {% endblock %}
