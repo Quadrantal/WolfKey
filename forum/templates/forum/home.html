@@ -17,17 +17,27 @@
             </div>
         </div>
         <div class="input-group mb-3">
-            <select name="tag" class="form-control" id="tag-select">
-                <option value="">All Tags</option>
-                {% for tag in tags %}
-                    <option value="{{ tag.id }}" {% if tag.id|stringformat:"s" == selected_tag %}selected{% endif %}>{{ tag.name }}</option>
-                {% endfor %}
-            </select>
-            <div class="input-group-append">
-                <button class="btn btn-outline-secondary" type="submit">Filter</button>
+            <div id="selected-tags" class="d-flex flex-wrap">
+                <!-- Selected tags will appear here -->
             </div>
+            <button type="button" class="btn btn-outline-secondary" id="toggle-tags">+</button>
         </div>
     </form>
+
+    <!-- Floating Tag Selector -->
+    <div id="tags-container" class="floating-tag-selector" style="display: none;">
+        <div class="input-group mb-3">
+            <input type="text" class="form-control" placeholder="Search tags..." id="tag-search-input">
+        </div>
+        <div class="input-group mb-3">
+            <select name="tag" class="form-control" id="tag-select" multiple>
+                {% for tag in tags %}
+                    <option value="{{ tag.id }}">{{ tag.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <button class="btn btn-primary" id="add-tags">Add Tags</button>
+    </div>
 
     <!-- Search Results -->
     <div id="search-results" class="row"></div>
@@ -60,68 +70,97 @@ document.addEventListener('DOMContentLoaded', function() {
     const searchInput = document.getElementById('search-input');
     const searchResults = document.getElementById('search-results');
     const postList = document.getElementById('post-list');
+    const toggleTagsButton = document.getElementById('toggle-tags');
+    const tagsContainer = document.getElementById('tags-container');
+    const tagSearchInput = document.getElementById('tag-search-input');
+    const tagSelect = document.getElementById('tag-select');
+    const selectedTagsContainer = document.getElementById('selected-tags');
+    const addTagsButton = document.getElementById('add-tags');
 
-    let debounceTimeout;
+    let selectedTags = [];
 
-    searchInput.addEventListener('input', function() {
-        clearTimeout(debounceTimeout);
-        
-        debounceTimeout = setTimeout(() => {
-            const query = searchInput.value;
-            const tag = document.getElementById('tag-select').value;
-
-            if (query.length > 0 && query.includes(' ')) {
-                fetch(`/search/?q=${encodeURIComponent(query)}&tag=${encodeURIComponent(tag)}`)
-                    .then(response => {
-                        if (!response.ok) {
-                            throw new Error(`HTTP error! status: ${response.status}`);
-                        }
-                        return response.json();
-                    })
-                    .then(data => {
-                        searchResults.innerHTML = '';
-                        postList.style.display = 'none';
-
-                        
-                        data.results.forEach(result => {
-                            const resultDiv = document.createElement('div');
-                            resultDiv.classList.add('col-md-6', 'mb-4');
-                            resultDiv.innerHTML = `
-                                <div class="card">
-                                    <div class="card-body">
-                                        <h5 class="card-title">${escapeHtml(result.title)}</h5>
-                                        <p class="card-text">${escapeHtml(result.content)}</p>
-                                        <a href="${result.url}" class="btn btn-primary">Read More</a>
-                                    </div>
-                                    <div class="card-footer text-muted">
-                                        Posted by ${escapeHtml(result.author)} on ${result.created_at}
-                                    </div>
-                                </div>
-                            `;
-                            searchResults.appendChild(resultDiv);
-                        });
-                    })
-                    .catch(error => {
-
-                        console.error('Search error:', error);
-                        searchResults.innerHTML = '<div class="col-12"><p class="text-danger">An error occurred while searching. Please try again.</p></div>';
-                    });
-            } else {
-                searchResults.innerHTML = '';
-                postList.style.display = 'block';
-            }
-        }, 300);  // Debounce delay of 300ms
+    toggleTagsButton.addEventListener('click', function() {
+        if (tagsContainer.style.display === 'none') {
+            tagsContainer.style.display = 'block';
+            toggleTagsButton.textContent = '-';
+        } else {
+            tagsContainer.style.display = 'none';
+            toggleTagsButton.textContent = '+';
+        }
     });
 
-    // Helper function to escape HTML and prevent XSS
-    function escapeHtml(unsafe) {
-        return unsafe
-            .replace(/&/g, "&amp;")
-            .replace(/</g, "&lt;")
-            .replace(/>/g, "&gt;")
-            .replace(/"/g, "&quot;")
-            .replace(/'/g, "&#039;");
+    tagSearchInput.addEventListener('input', function() {
+        const filter = tagSearchInput.value.toLowerCase();
+        const options = tagSelect.options;
+        for (let i = 0; i < options.length; i++) {
+            const option = options[i];
+            const text = option.text.toLowerCase();
+            if (text.includes(filter)) {
+                option.style.display = '';
+            } else {
+                option.style.display = 'none';
+            }
+        }
+    });
+
+    addTagsButton.addEventListener('click', function() {
+        const selectedOptions = Array.from(tagSelect.selectedOptions);
+        selectedOptions.forEach(option => {
+            if (!selectedTags.includes(option.value)) {
+                selectedTags.push(option.value);
+                const tagDiv = document.createElement('div');
+                tagDiv.classList.add('tag');
+                tagDiv.textContent = option.text;
+                const removeButton = document.createElement('span');
+                removeButton.textContent = ' x';
+                removeButton.classList.add('remove-tag');
+                removeButton.addEventListener('click', function() {
+                    selectedTags = selectedTags.filter(tag => tag !== option.value);
+                    tagDiv.remove();
+                    updateSearch();
+                });
+                tagDiv.appendChild(removeButton);
+                selectedTagsContainer.appendChild(tagDiv);
+            }
+        });
+        tagsContainer.style.display = 'none';
+        toggleTagsButton.textContent = '+';
+        updateSearch();
+    });
+
+    function updateSearch() {
+        const query = searchInput.value;
+        const tags = selectedTags.join(',');
+
+        if (query.includes(' ') || query.length === 0) {
+            fetch(`/search/?q=${encodeURIComponent(query)}&tags=${encodeURIComponent(tags)}`)
+                .then(response => response.json())
+                .then(data => {
+                    searchResults.innerHTML = '';
+                    postList.style.display = 'none';
+
+                    data.results.forEach(result => {
+                        const resultDiv = document.createElement('div');
+                        resultDiv.classList.add('col-md-6', 'mb-4');
+                        resultDiv.innerHTML = `
+                            <div class="card">
+                                <div class="card-body">
+                                    <h5 class="card-title">${result.title}</h5>
+                                    <p class="card-text">${result.content}</p>
+                                    <a href="${result.url}" class="btn btn-primary">Read More</a>
+                                </div>
+                            </div>
+                        `;
+                        searchResults.appendChild(resultDiv);
+                    });
+                })
+                .catch(error => {
+                    console.error('Fetch error:', error);
+                });
+        }
     }
+
+    searchInput.addEventListener('input', updateSearch);
 });
 </script>
 {% endblock %}

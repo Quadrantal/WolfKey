@@ -8,7 +8,9 @@ from .models import Post, Solution, Comment, SolutionUpvote, CommentUpvote, Tag
 from .forms import PostForm, CommentForm, SolutionForm, TagForm
 from django.http import HttpResponseForbidden, JsonResponse
 from django.db.models import F
+import logging
 
+logger = logging.getLogger(__name__)
 
 def home(request):
     query = request.GET.get('q')
@@ -222,24 +224,29 @@ def create_tag(request):
 
 def search_posts(request):
     query = request.GET.get('q', '')
-    tag_id = request.GET.get('tag', '')
+    tag_ids = request.GET.get('tags', '').split(',')
+    tag_ids = [tag_id for tag_id in tag_ids if tag_id]  # Filter out empty strings
     posts = Post.objects.all().order_by('-created_at')
 
-    if query:
-        search_query = SearchQuery(query)
-        posts = posts.annotate(
-            rank=SearchRank(F('search_vector'), search_query) + TrigramSimilarity('title', query)
-        ).filter(rank__gte=0.3).order_by('-rank')
+    try:
+        if query:
+            search_query = SearchQuery(query)
+            posts = posts.annotate(
+                rank=SearchRank(F('search_vector'), search_query) + TrigramSimilarity('title', query)
+            ).filter(rank__gte=0.3).order_by('-rank')
 
-    if tag_id:
-        posts = posts.filter(tags__id=tag_id)
+        if tag_ids:
+            posts = posts.filter(tags__id__in=tag_ids).distinct()
 
-    results = []
-    for post in posts:
-        results.append({
-            'title': post.title,
-            'content': post.content[:100],  # Truncate content for preview
-            'url': post.get_absolute_url(),  
-        })
+        results = []
+        for post in posts:
+            results.append({
+                'title': post.title,
+                'content': post.content[:100],  # Truncate content for preview
+                'url': post.get_absolute_url(),  # Ensure you have a get_absolute_url method in your Post model
+            })
 
-    return JsonResponse({'results': results})
+        return JsonResponse({'results': results})
+    except Exception as e:
+        logger.error(f"Error in search_posts: {e}")
+        return JsonResponse({'error': 'An error occurred while processing your request.'}, status=500)

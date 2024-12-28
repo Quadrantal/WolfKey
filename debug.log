@@ -2,3 +2,1113 @@ Watching for file changes with StatReloader
 /Users/a0014208/Documents/GitHub/School-Forum/student_forum/urls.py changed, reloading.
 Watching for file changes with StatReloader
 Watching for file changes with StatReloader
+/Users/a0014208/Documents/GitHub/School-Forum/forum/views.py changed, reloading.
+Watching for file changes with StatReloader
+Internal Server Error: /search/
+Traceback (most recent call last):
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/fields/__init__.py", line 2053, in get_prep_value
+    return int(value)
+ValueError: invalid literal for int() with base 10: ''
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/forum/views.py", line 235, in search_posts
+    posts = posts.filter(tags__id__in=tag_ids).distinct()
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/query.py", line 1436, in filter
+    return self._filter_or_exclude(False, args, kwargs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/query.py", line 1454, in _filter_or_exclude
+    clone._filter_or_exclude_inplace(negate, args, kwargs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/query.py", line 1461, in _filter_or_exclude_inplace
+    self._query.add_q(Q(*args, **kwargs))
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1546, in add_q
+    clause, _ = self._add_q(q_object, self.used_aliases)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1577, in _add_q
+    child_clause, needed_inner = self.build_filter(
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1492, in build_filter
+    condition = self.build_lookup(lookups, col, value)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1319, in build_lookup
+    lookup = lookup_class(lhs, rhs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/lookups.py", line 27, in __init__
+    self.rhs = self.get_prep_lookup()
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/lookups.py", line 426, in get_prep_lookup
+    return super().get_prep_lookup()
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/lookups.py", line 276, in get_prep_lookup
+    rhs_value = self.lhs.output_field.get_prep_value(rhs_value)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/fields/__init__.py", line 2055, in get_prep_value
+    raise e.__class__(
+ValueError: Field 'id' expected a number but got ''.
+Internal Server Error: /search/
+Traceback (most recent call last):
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/fields/__init__.py", line 2053, in get_prep_value
+    return int(value)
+ValueError: invalid literal for int() with base 10: ''
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/forum/views.py", line 235, in search_posts
+    posts = posts.filter(tags__id__in=tag_ids).distinct()
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/query.py", line 1436, in filter
+    return self._filter_or_exclude(False, args, kwargs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/query.py", line 1454, in _filter_or_exclude
+    clone._filter_or_exclude_inplace(negate, args, kwargs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/query.py", line 1461, in _filter_or_exclude_inplace
+    self._query.add_q(Q(*args, **kwargs))
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1546, in add_q
+    clause, _ = self._add_q(q_object, self.used_aliases)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1577, in _add_q
+    child_clause, needed_inner = self.build_filter(
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1492, in build_filter
+    condition = self.build_lookup(lookups, col, value)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1319, in build_lookup
+    lookup = lookup_class(lhs, rhs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/lookups.py", line 27, in __init__
+    self.rhs = self.get_prep_lookup()
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/lookups.py", line 426, in get_prep_lookup
+    return super().get_prep_lookup()
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/lookups.py", line 276, in get_prep_lookup
+    rhs_value = self.lhs.output_field.get_prep_value(rhs_value)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/fields/__init__.py", line 2055, in get_prep_value
+    raise e.__class__(
+ValueError: Field 'id' expected a number but got ''.
+Internal Server Error: /search/
+Traceback (most recent call last):
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/fields/__init__.py", line 2053, in get_prep_value
+    return int(value)
+ValueError: invalid literal for int() with base 10: ''
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/forum/views.py", line 235, in search_posts
+    posts = posts.filter(tags__id__in=tag_ids).distinct()
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/query.py", line 1436, in filter
+    return self._filter_or_exclude(False, args, kwargs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/query.py", line 1454, in _filter_or_exclude
+    clone._filter_or_exclude_inplace(negate, args, kwargs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/query.py", line 1461, in _filter_or_exclude_inplace
+    self._query.add_q(Q(*args, **kwargs))
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1546, in add_q
+    clause, _ = self._add_q(q_object, self.used_aliases)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1577, in _add_q
+    child_clause, needed_inner = self.build_filter(
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1492, in build_filter
+    condition = self.build_lookup(lookups, col, value)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1319, in build_lookup
+    lookup = lookup_class(lhs, rhs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/lookups.py", line 27, in __init__
+    self.rhs = self.get_prep_lookup()
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/lookups.py", line 426, in get_prep_lookup
+    return super().get_prep_lookup()
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/lookups.py", line 276, in get_prep_lookup
+    rhs_value = self.lhs.output_field.get_prep_value(rhs_value)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/fields/__init__.py", line 2055, in get_prep_value
+    raise e.__class__(
+ValueError: Field 'id' expected a number but got ''.
+Internal Server Error: /search/
+Traceback (most recent call last):
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/fields/__init__.py", line 2053, in get_prep_value
+    return int(value)
+ValueError: invalid literal for int() with base 10: ''
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/forum/views.py", line 235, in search_posts
+    posts = posts.filter(tags__id__in=tag_ids).distinct()
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/query.py", line 1436, in filter
+    return self._filter_or_exclude(False, args, kwargs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/query.py", line 1454, in _filter_or_exclude
+    clone._filter_or_exclude_inplace(negate, args, kwargs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/query.py", line 1461, in _filter_or_exclude_inplace
+    self._query.add_q(Q(*args, **kwargs))
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1546, in add_q
+    clause, _ = self._add_q(q_object, self.used_aliases)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1577, in _add_q
+    child_clause, needed_inner = self.build_filter(
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1492, in build_filter
+    condition = self.build_lookup(lookups, col, value)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1319, in build_lookup
+    lookup = lookup_class(lhs, rhs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/lookups.py", line 27, in __init__
+    self.rhs = self.get_prep_lookup()
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/lookups.py", line 426, in get_prep_lookup
+    return super().get_prep_lookup()
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/lookups.py", line 276, in get_prep_lookup
+    rhs_value = self.lhs.output_field.get_prep_value(rhs_value)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/fields/__init__.py", line 2055, in get_prep_value
+    raise e.__class__(
+ValueError: Field 'id' expected a number but got ''.
+Internal Server Error: /search/
+Traceback (most recent call last):
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/fields/__init__.py", line 2053, in get_prep_value
+    return int(value)
+ValueError: invalid literal for int() with base 10: ''
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/forum/views.py", line 235, in search_posts
+    posts = posts.filter(tags__id__in=tag_ids).distinct()
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/query.py", line 1436, in filter
+    return self._filter_or_exclude(False, args, kwargs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/query.py", line 1454, in _filter_or_exclude
+    clone._filter_or_exclude_inplace(negate, args, kwargs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/query.py", line 1461, in _filter_or_exclude_inplace
+    self._query.add_q(Q(*args, **kwargs))
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1546, in add_q
+    clause, _ = self._add_q(q_object, self.used_aliases)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1577, in _add_q
+    child_clause, needed_inner = self.build_filter(
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1492, in build_filter
+    condition = self.build_lookup(lookups, col, value)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1319, in build_lookup
+    lookup = lookup_class(lhs, rhs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/lookups.py", line 27, in __init__
+    self.rhs = self.get_prep_lookup()
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/lookups.py", line 426, in get_prep_lookup
+    return super().get_prep_lookup()
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/lookups.py", line 276, in get_prep_lookup
+    rhs_value = self.lhs.output_field.get_prep_value(rhs_value)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/fields/__init__.py", line 2055, in get_prep_value
+    raise e.__class__(
+ValueError: Field 'id' expected a number but got ''.
+Internal Server Error: /search/
+Traceback (most recent call last):
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/fields/__init__.py", line 2053, in get_prep_value
+    return int(value)
+ValueError: invalid literal for int() with base 10: ''
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/forum/views.py", line 235, in search_posts
+    posts = posts.filter(tags__id__in=tag_ids).distinct()
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/query.py", line 1436, in filter
+    return self._filter_or_exclude(False, args, kwargs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/query.py", line 1454, in _filter_or_exclude
+    clone._filter_or_exclude_inplace(negate, args, kwargs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/query.py", line 1461, in _filter_or_exclude_inplace
+    self._query.add_q(Q(*args, **kwargs))
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1546, in add_q
+    clause, _ = self._add_q(q_object, self.used_aliases)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1577, in _add_q
+    child_clause, needed_inner = self.build_filter(
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1492, in build_filter
+    condition = self.build_lookup(lookups, col, value)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1319, in build_lookup
+    lookup = lookup_class(lhs, rhs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/lookups.py", line 27, in __init__
+    self.rhs = self.get_prep_lookup()
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/lookups.py", line 426, in get_prep_lookup
+    return super().get_prep_lookup()
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/lookups.py", line 276, in get_prep_lookup
+    rhs_value = self.lhs.output_field.get_prep_value(rhs_value)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/fields/__init__.py", line 2055, in get_prep_value
+    raise e.__class__(
+ValueError: Field 'id' expected a number but got ''.
+Internal Server Error: /search/
+Traceback (most recent call last):
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/fields/__init__.py", line 2053, in get_prep_value
+    return int(value)
+ValueError: invalid literal for int() with base 10: ''
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/forum/views.py", line 235, in search_posts
+    posts = posts.filter(tags__id__in=tag_ids).distinct()
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/query.py", line 1436, in filter
+    return self._filter_or_exclude(False, args, kwargs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/query.py", line 1454, in _filter_or_exclude
+    clone._filter_or_exclude_inplace(negate, args, kwargs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/query.py", line 1461, in _filter_or_exclude_inplace
+    self._query.add_q(Q(*args, **kwargs))
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1546, in add_q
+    clause, _ = self._add_q(q_object, self.used_aliases)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1577, in _add_q
+    child_clause, needed_inner = self.build_filter(
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1492, in build_filter
+    condition = self.build_lookup(lookups, col, value)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1319, in build_lookup
+    lookup = lookup_class(lhs, rhs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/lookups.py", line 27, in __init__
+    self.rhs = self.get_prep_lookup()
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/lookups.py", line 426, in get_prep_lookup
+    return super().get_prep_lookup()
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/lookups.py", line 276, in get_prep_lookup
+    rhs_value = self.lhs.output_field.get_prep_value(rhs_value)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/fields/__init__.py", line 2055, in get_prep_value
+    raise e.__class__(
+ValueError: Field 'id' expected a number but got ''.
+Internal Server Error: /search/
+Traceback (most recent call last):
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/fields/__init__.py", line 2053, in get_prep_value
+    return int(value)
+ValueError: invalid literal for int() with base 10: ''
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/forum/views.py", line 235, in search_posts
+    posts = posts.filter(tags__id__in=tag_ids).distinct()
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/query.py", line 1436, in filter
+    return self._filter_or_exclude(False, args, kwargs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/query.py", line 1454, in _filter_or_exclude
+    clone._filter_or_exclude_inplace(negate, args, kwargs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/query.py", line 1461, in _filter_or_exclude_inplace
+    self._query.add_q(Q(*args, **kwargs))
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1546, in add_q
+    clause, _ = self._add_q(q_object, self.used_aliases)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1577, in _add_q
+    child_clause, needed_inner = self.build_filter(
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1492, in build_filter
+    condition = self.build_lookup(lookups, col, value)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1319, in build_lookup
+    lookup = lookup_class(lhs, rhs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/lookups.py", line 27, in __init__
+    self.rhs = self.get_prep_lookup()
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/lookups.py", line 426, in get_prep_lookup
+    return super().get_prep_lookup()
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/lookups.py", line 276, in get_prep_lookup
+    rhs_value = self.lhs.output_field.get_prep_value(rhs_value)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/fields/__init__.py", line 2055, in get_prep_value
+    raise e.__class__(
+ValueError: Field 'id' expected a number but got ''.
+Internal Server Error: /search/
+Traceback (most recent call last):
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/fields/__init__.py", line 2053, in get_prep_value
+    return int(value)
+ValueError: invalid literal for int() with base 10: ''
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/forum/views.py", line 235, in search_posts
+    posts = posts.filter(tags__id__in=tag_ids).distinct()
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/query.py", line 1436, in filter
+    return self._filter_or_exclude(False, args, kwargs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/query.py", line 1454, in _filter_or_exclude
+    clone._filter_or_exclude_inplace(negate, args, kwargs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/query.py", line 1461, in _filter_or_exclude_inplace
+    self._query.add_q(Q(*args, **kwargs))
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1546, in add_q
+    clause, _ = self._add_q(q_object, self.used_aliases)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1577, in _add_q
+    child_clause, needed_inner = self.build_filter(
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1492, in build_filter
+    condition = self.build_lookup(lookups, col, value)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1319, in build_lookup
+    lookup = lookup_class(lhs, rhs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/lookups.py", line 27, in __init__
+    self.rhs = self.get_prep_lookup()
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/lookups.py", line 426, in get_prep_lookup
+    return super().get_prep_lookup()
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/lookups.py", line 276, in get_prep_lookup
+    rhs_value = self.lhs.output_field.get_prep_value(rhs_value)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/fields/__init__.py", line 2055, in get_prep_value
+    raise e.__class__(
+ValueError: Field 'id' expected a number but got ''.
+Internal Server Error: /search/
+Traceback (most recent call last):
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/fields/__init__.py", line 2053, in get_prep_value
+    return int(value)
+ValueError: invalid literal for int() with base 10: ''
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/forum/views.py", line 235, in search_posts
+    posts = posts.filter(tags__id__in=tag_ids).distinct()
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/query.py", line 1436, in filter
+    return self._filter_or_exclude(False, args, kwargs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/query.py", line 1454, in _filter_or_exclude
+    clone._filter_or_exclude_inplace(negate, args, kwargs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/query.py", line 1461, in _filter_or_exclude_inplace
+    self._query.add_q(Q(*args, **kwargs))
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1546, in add_q
+    clause, _ = self._add_q(q_object, self.used_aliases)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1577, in _add_q
+    child_clause, needed_inner = self.build_filter(
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1492, in build_filter
+    condition = self.build_lookup(lookups, col, value)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1319, in build_lookup
+    lookup = lookup_class(lhs, rhs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/lookups.py", line 27, in __init__
+    self.rhs = self.get_prep_lookup()
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/lookups.py", line 426, in get_prep_lookup
+    return super().get_prep_lookup()
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/lookups.py", line 276, in get_prep_lookup
+    rhs_value = self.lhs.output_field.get_prep_value(rhs_value)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/fields/__init__.py", line 2055, in get_prep_value
+    raise e.__class__(
+ValueError: Field 'id' expected a number but got ''.
+Internal Server Error: /search/
+Traceback (most recent call last):
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/fields/__init__.py", line 2053, in get_prep_value
+    return int(value)
+ValueError: invalid literal for int() with base 10: ''
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/forum/views.py", line 235, in search_posts
+    posts = posts.filter(tags__id__in=tag_ids).distinct()
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/query.py", line 1436, in filter
+    return self._filter_or_exclude(False, args, kwargs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/query.py", line 1454, in _filter_or_exclude
+    clone._filter_or_exclude_inplace(negate, args, kwargs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/query.py", line 1461, in _filter_or_exclude_inplace
+    self._query.add_q(Q(*args, **kwargs))
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1546, in add_q
+    clause, _ = self._add_q(q_object, self.used_aliases)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1577, in _add_q
+    child_clause, needed_inner = self.build_filter(
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1492, in build_filter
+    condition = self.build_lookup(lookups, col, value)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1319, in build_lookup
+    lookup = lookup_class(lhs, rhs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/lookups.py", line 27, in __init__
+    self.rhs = self.get_prep_lookup()
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/lookups.py", line 426, in get_prep_lookup
+    return super().get_prep_lookup()
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/lookups.py", line 276, in get_prep_lookup
+    rhs_value = self.lhs.output_field.get_prep_value(rhs_value)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/fields/__init__.py", line 2055, in get_prep_value
+    raise e.__class__(
+ValueError: Field 'id' expected a number but got ''.
+Internal Server Error: /search/
+Traceback (most recent call last):
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/fields/__init__.py", line 2053, in get_prep_value
+    return int(value)
+ValueError: invalid literal for int() with base 10: ''
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/forum/views.py", line 235, in search_posts
+    posts = posts.filter(tags__id__in=tag_ids).distinct()
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/query.py", line 1436, in filter
+    return self._filter_or_exclude(False, args, kwargs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/query.py", line 1454, in _filter_or_exclude
+    clone._filter_or_exclude_inplace(negate, args, kwargs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/query.py", line 1461, in _filter_or_exclude_inplace
+    self._query.add_q(Q(*args, **kwargs))
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1546, in add_q
+    clause, _ = self._add_q(q_object, self.used_aliases)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1577, in _add_q
+    child_clause, needed_inner = self.build_filter(
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1492, in build_filter
+    condition = self.build_lookup(lookups, col, value)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1319, in build_lookup
+    lookup = lookup_class(lhs, rhs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/lookups.py", line 27, in __init__
+    self.rhs = self.get_prep_lookup()
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/lookups.py", line 426, in get_prep_lookup
+    return super().get_prep_lookup()
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/lookups.py", line 276, in get_prep_lookup
+    rhs_value = self.lhs.output_field.get_prep_value(rhs_value)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/fields/__init__.py", line 2055, in get_prep_value
+    raise e.__class__(
+ValueError: Field 'id' expected a number but got ''.
+Internal Server Error: /search/
+Traceback (most recent call last):
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/fields/__init__.py", line 2053, in get_prep_value
+    return int(value)
+ValueError: invalid literal for int() with base 10: ''
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/forum/views.py", line 235, in search_posts
+    posts = posts.filter(tags__id__in=tag_ids).distinct()
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/query.py", line 1436, in filter
+    return self._filter_or_exclude(False, args, kwargs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/query.py", line 1454, in _filter_or_exclude
+    clone._filter_or_exclude_inplace(negate, args, kwargs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/query.py", line 1461, in _filter_or_exclude_inplace
+    self._query.add_q(Q(*args, **kwargs))
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1546, in add_q
+    clause, _ = self._add_q(q_object, self.used_aliases)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1577, in _add_q
+    child_clause, needed_inner = self.build_filter(
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1492, in build_filter
+    condition = self.build_lookup(lookups, col, value)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1319, in build_lookup
+    lookup = lookup_class(lhs, rhs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/lookups.py", line 27, in __init__
+    self.rhs = self.get_prep_lookup()
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/lookups.py", line 426, in get_prep_lookup
+    return super().get_prep_lookup()
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/lookups.py", line 276, in get_prep_lookup
+    rhs_value = self.lhs.output_field.get_prep_value(rhs_value)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/fields/__init__.py", line 2055, in get_prep_value
+    raise e.__class__(
+ValueError: Field 'id' expected a number but got ''.
+Internal Server Error: /search/
+Traceback (most recent call last):
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/fields/__init__.py", line 2053, in get_prep_value
+    return int(value)
+ValueError: invalid literal for int() with base 10: ''
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/forum/views.py", line 235, in search_posts
+    posts = posts.filter(tags__id__in=tag_ids).distinct()
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/query.py", line 1436, in filter
+    return self._filter_or_exclude(False, args, kwargs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/query.py", line 1454, in _filter_or_exclude
+    clone._filter_or_exclude_inplace(negate, args, kwargs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/query.py", line 1461, in _filter_or_exclude_inplace
+    self._query.add_q(Q(*args, **kwargs))
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1546, in add_q
+    clause, _ = self._add_q(q_object, self.used_aliases)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1577, in _add_q
+    child_clause, needed_inner = self.build_filter(
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1492, in build_filter
+    condition = self.build_lookup(lookups, col, value)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1319, in build_lookup
+    lookup = lookup_class(lhs, rhs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/lookups.py", line 27, in __init__
+    self.rhs = self.get_prep_lookup()
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/lookups.py", line 426, in get_prep_lookup
+    return super().get_prep_lookup()
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/lookups.py", line 276, in get_prep_lookup
+    rhs_value = self.lhs.output_field.get_prep_value(rhs_value)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/fields/__init__.py", line 2055, in get_prep_value
+    raise e.__class__(
+ValueError: Field 'id' expected a number but got ''.
+Internal Server Error: /search/
+Traceback (most recent call last):
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/fields/__init__.py", line 2053, in get_prep_value
+    return int(value)
+ValueError: invalid literal for int() with base 10: ''
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/forum/views.py", line 235, in search_posts
+    posts = posts.filter(tags__id__in=tag_ids).distinct()
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/query.py", line 1436, in filter
+    return self._filter_or_exclude(False, args, kwargs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/query.py", line 1454, in _filter_or_exclude
+    clone._filter_or_exclude_inplace(negate, args, kwargs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/query.py", line 1461, in _filter_or_exclude_inplace
+    self._query.add_q(Q(*args, **kwargs))
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1546, in add_q
+    clause, _ = self._add_q(q_object, self.used_aliases)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1577, in _add_q
+    child_clause, needed_inner = self.build_filter(
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1492, in build_filter
+    condition = self.build_lookup(lookups, col, value)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1319, in build_lookup
+    lookup = lookup_class(lhs, rhs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/lookups.py", line 27, in __init__
+    self.rhs = self.get_prep_lookup()
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/lookups.py", line 426, in get_prep_lookup
+    return super().get_prep_lookup()
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/lookups.py", line 276, in get_prep_lookup
+    rhs_value = self.lhs.output_field.get_prep_value(rhs_value)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/fields/__init__.py", line 2055, in get_prep_value
+    raise e.__class__(
+ValueError: Field 'id' expected a number but got ''.
+Internal Server Error: /search/
+Traceback (most recent call last):
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/fields/__init__.py", line 2053, in get_prep_value
+    return int(value)
+ValueError: invalid literal for int() with base 10: ''
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/forum/views.py", line 235, in search_posts
+    posts = posts.filter(tags__id__in=tag_ids).distinct()
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/query.py", line 1436, in filter
+    return self._filter_or_exclude(False, args, kwargs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/query.py", line 1454, in _filter_or_exclude
+    clone._filter_or_exclude_inplace(negate, args, kwargs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/query.py", line 1461, in _filter_or_exclude_inplace
+    self._query.add_q(Q(*args, **kwargs))
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1546, in add_q
+    clause, _ = self._add_q(q_object, self.used_aliases)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1577, in _add_q
+    child_clause, needed_inner = self.build_filter(
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1492, in build_filter
+    condition = self.build_lookup(lookups, col, value)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1319, in build_lookup
+    lookup = lookup_class(lhs, rhs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/lookups.py", line 27, in __init__
+    self.rhs = self.get_prep_lookup()
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/lookups.py", line 426, in get_prep_lookup
+    return super().get_prep_lookup()
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/lookups.py", line 276, in get_prep_lookup
+    rhs_value = self.lhs.output_field.get_prep_value(rhs_value)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/fields/__init__.py", line 2055, in get_prep_value
+    raise e.__class__(
+ValueError: Field 'id' expected a number but got ''.
+Internal Server Error: /search/
+Traceback (most recent call last):
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/fields/__init__.py", line 2053, in get_prep_value
+    return int(value)
+ValueError: invalid literal for int() with base 10: ''
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/forum/views.py", line 235, in search_posts
+    posts = posts.filter(tags__id__in=tag_ids).distinct()
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/query.py", line 1436, in filter
+    return self._filter_or_exclude(False, args, kwargs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/query.py", line 1454, in _filter_or_exclude
+    clone._filter_or_exclude_inplace(negate, args, kwargs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/query.py", line 1461, in _filter_or_exclude_inplace
+    self._query.add_q(Q(*args, **kwargs))
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1546, in add_q
+    clause, _ = self._add_q(q_object, self.used_aliases)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1577, in _add_q
+    child_clause, needed_inner = self.build_filter(
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1492, in build_filter
+    condition = self.build_lookup(lookups, col, value)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1319, in build_lookup
+    lookup = lookup_class(lhs, rhs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/lookups.py", line 27, in __init__
+    self.rhs = self.get_prep_lookup()
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/lookups.py", line 426, in get_prep_lookup
+    return super().get_prep_lookup()
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/lookups.py", line 276, in get_prep_lookup
+    rhs_value = self.lhs.output_field.get_prep_value(rhs_value)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/fields/__init__.py", line 2055, in get_prep_value
+    raise e.__class__(
+ValueError: Field 'id' expected a number but got ''.
+Internal Server Error: /search/
+Traceback (most recent call last):
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/fields/__init__.py", line 2053, in get_prep_value
+    return int(value)
+ValueError: invalid literal for int() with base 10: ''
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/forum/views.py", line 235, in search_posts
+    posts = posts.filter(tags__id__in=tag_ids).distinct()
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/query.py", line 1436, in filter
+    return self._filter_or_exclude(False, args, kwargs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/query.py", line 1454, in _filter_or_exclude
+    clone._filter_or_exclude_inplace(negate, args, kwargs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/query.py", line 1461, in _filter_or_exclude_inplace
+    self._query.add_q(Q(*args, **kwargs))
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1546, in add_q
+    clause, _ = self._add_q(q_object, self.used_aliases)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1577, in _add_q
+    child_clause, needed_inner = self.build_filter(
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1492, in build_filter
+    condition = self.build_lookup(lookups, col, value)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1319, in build_lookup
+    lookup = lookup_class(lhs, rhs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/lookups.py", line 27, in __init__
+    self.rhs = self.get_prep_lookup()
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/lookups.py", line 426, in get_prep_lookup
+    return super().get_prep_lookup()
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/lookups.py", line 276, in get_prep_lookup
+    rhs_value = self.lhs.output_field.get_prep_value(rhs_value)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/fields/__init__.py", line 2055, in get_prep_value
+    raise e.__class__(
+ValueError: Field 'id' expected a number but got ''.
+Internal Server Error: /search/
+Traceback (most recent call last):
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/fields/__init__.py", line 2053, in get_prep_value
+    return int(value)
+ValueError: invalid literal for int() with base 10: ''
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/forum/views.py", line 235, in search_posts
+    posts = posts.filter(tags__id__in=tag_ids).distinct()
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/query.py", line 1436, in filter
+    return self._filter_or_exclude(False, args, kwargs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/query.py", line 1454, in _filter_or_exclude
+    clone._filter_or_exclude_inplace(negate, args, kwargs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/query.py", line 1461, in _filter_or_exclude_inplace
+    self._query.add_q(Q(*args, **kwargs))
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1546, in add_q
+    clause, _ = self._add_q(q_object, self.used_aliases)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1577, in _add_q
+    child_clause, needed_inner = self.build_filter(
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1492, in build_filter
+    condition = self.build_lookup(lookups, col, value)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1319, in build_lookup
+    lookup = lookup_class(lhs, rhs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/lookups.py", line 27, in __init__
+    self.rhs = self.get_prep_lookup()
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/lookups.py", line 426, in get_prep_lookup
+    return super().get_prep_lookup()
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/lookups.py", line 276, in get_prep_lookup
+    rhs_value = self.lhs.output_field.get_prep_value(rhs_value)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/fields/__init__.py", line 2055, in get_prep_value
+    raise e.__class__(
+ValueError: Field 'id' expected a number but got ''.
+Internal Server Error: /search/
+Traceback (most recent call last):
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/fields/__init__.py", line 2053, in get_prep_value
+    return int(value)
+ValueError: invalid literal for int() with base 10: ''
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/forum/views.py", line 235, in search_posts
+    posts = posts.filter(tags__id__in=tag_ids).distinct()
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/query.py", line 1436, in filter
+    return self._filter_or_exclude(False, args, kwargs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/query.py", line 1454, in _filter_or_exclude
+    clone._filter_or_exclude_inplace(negate, args, kwargs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/query.py", line 1461, in _filter_or_exclude_inplace
+    self._query.add_q(Q(*args, **kwargs))
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1546, in add_q
+    clause, _ = self._add_q(q_object, self.used_aliases)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1577, in _add_q
+    child_clause, needed_inner = self.build_filter(
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1492, in build_filter
+    condition = self.build_lookup(lookups, col, value)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1319, in build_lookup
+    lookup = lookup_class(lhs, rhs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/lookups.py", line 27, in __init__
+    self.rhs = self.get_prep_lookup()
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/lookups.py", line 426, in get_prep_lookup
+    return super().get_prep_lookup()
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/lookups.py", line 276, in get_prep_lookup
+    rhs_value = self.lhs.output_field.get_prep_value(rhs_value)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/fields/__init__.py", line 2055, in get_prep_value
+    raise e.__class__(
+ValueError: Field 'id' expected a number but got ''.
+/Users/a0014208/Documents/GitHub/School-Forum/forum/views.py changed, reloading.
+Watching for file changes with StatReloader
+Internal Server Error: /search/
+Traceback (most recent call last):
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/fields/__init__.py", line 2053, in get_prep_value
+    return int(value)
+ValueError: invalid literal for int() with base 10: ''
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/forum/views.py", line 236, in search_posts
+    posts = posts.filter(tags__id__in=tag_ids).distinct()
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/query.py", line 1436, in filter
+    return self._filter_or_exclude(False, args, kwargs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/query.py", line 1454, in _filter_or_exclude
+    clone._filter_or_exclude_inplace(negate, args, kwargs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/query.py", line 1461, in _filter_or_exclude_inplace
+    self._query.add_q(Q(*args, **kwargs))
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1546, in add_q
+    clause, _ = self._add_q(q_object, self.used_aliases)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1577, in _add_q
+    child_clause, needed_inner = self.build_filter(
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1492, in build_filter
+    condition = self.build_lookup(lookups, col, value)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1319, in build_lookup
+    lookup = lookup_class(lhs, rhs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/lookups.py", line 27, in __init__
+    self.rhs = self.get_prep_lookup()
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/lookups.py", line 426, in get_prep_lookup
+    return super().get_prep_lookup()
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/lookups.py", line 276, in get_prep_lookup
+    rhs_value = self.lhs.output_field.get_prep_value(rhs_value)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/fields/__init__.py", line 2055, in get_prep_value
+    raise e.__class__(
+ValueError: Field 'id' expected a number but got ''.
+Internal Server Error: /search/
+Traceback (most recent call last):
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/fields/__init__.py", line 2053, in get_prep_value
+    return int(value)
+ValueError: invalid literal for int() with base 10: ''
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/forum/views.py", line 236, in search_posts
+    posts = posts.filter(tags__id__in=tag_ids).distinct()
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/query.py", line 1436, in filter
+    return self._filter_or_exclude(False, args, kwargs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/query.py", line 1454, in _filter_or_exclude
+    clone._filter_or_exclude_inplace(negate, args, kwargs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/query.py", line 1461, in _filter_or_exclude_inplace
+    self._query.add_q(Q(*args, **kwargs))
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1546, in add_q
+    clause, _ = self._add_q(q_object, self.used_aliases)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1577, in _add_q
+    child_clause, needed_inner = self.build_filter(
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1492, in build_filter
+    condition = self.build_lookup(lookups, col, value)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1319, in build_lookup
+    lookup = lookup_class(lhs, rhs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/lookups.py", line 27, in __init__
+    self.rhs = self.get_prep_lookup()
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/lookups.py", line 426, in get_prep_lookup
+    return super().get_prep_lookup()
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/lookups.py", line 276, in get_prep_lookup
+    rhs_value = self.lhs.output_field.get_prep_value(rhs_value)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/fields/__init__.py", line 2055, in get_prep_value
+    raise e.__class__(
+ValueError: Field 'id' expected a number but got ''.
+Internal Server Error: /search/
+Traceback (most recent call last):
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/fields/__init__.py", line 2053, in get_prep_value
+    return int(value)
+ValueError: invalid literal for int() with base 10: ''
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/forum/views.py", line 236, in search_posts
+    posts = posts.filter(tags__id__in=tag_ids).distinct()
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/query.py", line 1436, in filter
+    return self._filter_or_exclude(False, args, kwargs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/query.py", line 1454, in _filter_or_exclude
+    clone._filter_or_exclude_inplace(negate, args, kwargs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/query.py", line 1461, in _filter_or_exclude_inplace
+    self._query.add_q(Q(*args, **kwargs))
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1546, in add_q
+    clause, _ = self._add_q(q_object, self.used_aliases)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1577, in _add_q
+    child_clause, needed_inner = self.build_filter(
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1492, in build_filter
+    condition = self.build_lookup(lookups, col, value)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1319, in build_lookup
+    lookup = lookup_class(lhs, rhs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/lookups.py", line 27, in __init__
+    self.rhs = self.get_prep_lookup()
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/lookups.py", line 426, in get_prep_lookup
+    return super().get_prep_lookup()
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/lookups.py", line 276, in get_prep_lookup
+    rhs_value = self.lhs.output_field.get_prep_value(rhs_value)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/fields/__init__.py", line 2055, in get_prep_value
+    raise e.__class__(
+ValueError: Field 'id' expected a number but got ''.
+/Users/a0014208/Documents/GitHub/School-Forum/forum/views.py changed, reloading.
+Watching for file changes with StatReloader
+Internal Server Error: /search/
+Traceback (most recent call last):
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/fields/__init__.py", line 2053, in get_prep_value
+    return int(value)
+ValueError: invalid literal for int() with base 10: ''
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/forum/views.py", line 235, in search_posts
+    posts = posts.filter(tags__id__in=tag_ids).distinct()
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/query.py", line 1436, in filter
+    return self._filter_or_exclude(False, args, kwargs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/query.py", line 1454, in _filter_or_exclude
+    clone._filter_or_exclude_inplace(negate, args, kwargs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/query.py", line 1461, in _filter_or_exclude_inplace
+    self._query.add_q(Q(*args, **kwargs))
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1546, in add_q
+    clause, _ = self._add_q(q_object, self.used_aliases)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1577, in _add_q
+    child_clause, needed_inner = self.build_filter(
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1492, in build_filter
+    condition = self.build_lookup(lookups, col, value)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1319, in build_lookup
+    lookup = lookup_class(lhs, rhs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/lookups.py", line 27, in __init__
+    self.rhs = self.get_prep_lookup()
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/lookups.py", line 426, in get_prep_lookup
+    return super().get_prep_lookup()
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/lookups.py", line 276, in get_prep_lookup
+    rhs_value = self.lhs.output_field.get_prep_value(rhs_value)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/fields/__init__.py", line 2055, in get_prep_value
+    raise e.__class__(
+ValueError: Field 'id' expected a number but got ''.
+Internal Server Error: /search/
+Traceback (most recent call last):
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/fields/__init__.py", line 2053, in get_prep_value
+    return int(value)
+ValueError: invalid literal for int() with base 10: ''
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/forum/views.py", line 235, in search_posts
+    posts = posts.filter(tags__id__in=tag_ids).distinct()
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/query.py", line 1436, in filter
+    return self._filter_or_exclude(False, args, kwargs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/query.py", line 1454, in _filter_or_exclude
+    clone._filter_or_exclude_inplace(negate, args, kwargs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/query.py", line 1461, in _filter_or_exclude_inplace
+    self._query.add_q(Q(*args, **kwargs))
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1546, in add_q
+    clause, _ = self._add_q(q_object, self.used_aliases)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1577, in _add_q
+    child_clause, needed_inner = self.build_filter(
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1492, in build_filter
+    condition = self.build_lookup(lookups, col, value)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1319, in build_lookup
+    lookup = lookup_class(lhs, rhs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/lookups.py", line 27, in __init__
+    self.rhs = self.get_prep_lookup()
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/lookups.py", line 426, in get_prep_lookup
+    return super().get_prep_lookup()
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/lookups.py", line 276, in get_prep_lookup
+    rhs_value = self.lhs.output_field.get_prep_value(rhs_value)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/fields/__init__.py", line 2055, in get_prep_value
+    raise e.__class__(
+ValueError: Field 'id' expected a number but got ''.
+Internal Server Error: /search/
+Traceback (most recent call last):
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/fields/__init__.py", line 2053, in get_prep_value
+    return int(value)
+ValueError: invalid literal for int() with base 10: ''
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/forum/views.py", line 235, in search_posts
+    posts = posts.filter(tags__id__in=tag_ids).distinct()
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/query.py", line 1436, in filter
+    return self._filter_or_exclude(False, args, kwargs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/query.py", line 1454, in _filter_or_exclude
+    clone._filter_or_exclude_inplace(negate, args, kwargs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/query.py", line 1461, in _filter_or_exclude_inplace
+    self._query.add_q(Q(*args, **kwargs))
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1546, in add_q
+    clause, _ = self._add_q(q_object, self.used_aliases)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1577, in _add_q
+    child_clause, needed_inner = self.build_filter(
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1492, in build_filter
+    condition = self.build_lookup(lookups, col, value)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1319, in build_lookup
+    lookup = lookup_class(lhs, rhs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/lookups.py", line 27, in __init__
+    self.rhs = self.get_prep_lookup()
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/lookups.py", line 426, in get_prep_lookup
+    return super().get_prep_lookup()
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/lookups.py", line 276, in get_prep_lookup
+    rhs_value = self.lhs.output_field.get_prep_value(rhs_value)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/fields/__init__.py", line 2055, in get_prep_value
+    raise e.__class__(
+ValueError: Field 'id' expected a number but got ''.
+Internal Server Error: /search/
+Traceback (most recent call last):
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/fields/__init__.py", line 2053, in get_prep_value
+    return int(value)
+ValueError: invalid literal for int() with base 10: ''
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/forum/views.py", line 235, in search_posts
+    posts = posts.filter(tags__id__in=tag_ids).distinct()
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/query.py", line 1436, in filter
+    return self._filter_or_exclude(False, args, kwargs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/query.py", line 1454, in _filter_or_exclude
+    clone._filter_or_exclude_inplace(negate, args, kwargs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/query.py", line 1461, in _filter_or_exclude_inplace
+    self._query.add_q(Q(*args, **kwargs))
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1546, in add_q
+    clause, _ = self._add_q(q_object, self.used_aliases)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1577, in _add_q
+    child_clause, needed_inner = self.build_filter(
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1492, in build_filter
+    condition = self.build_lookup(lookups, col, value)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1319, in build_lookup
+    lookup = lookup_class(lhs, rhs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/lookups.py", line 27, in __init__
+    self.rhs = self.get_prep_lookup()
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/lookups.py", line 426, in get_prep_lookup
+    return super().get_prep_lookup()
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/lookups.py", line 276, in get_prep_lookup
+    rhs_value = self.lhs.output_field.get_prep_value(rhs_value)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/fields/__init__.py", line 2055, in get_prep_value
+    raise e.__class__(
+ValueError: Field 'id' expected a number but got ''.
+Internal Server Error: /search/
+Traceback (most recent call last):
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/fields/__init__.py", line 2053, in get_prep_value
+    return int(value)
+ValueError: invalid literal for int() with base 10: ''
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/forum/views.py", line 235, in search_posts
+    posts = posts.filter(tags__id__in=tag_ids).distinct()
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/query.py", line 1436, in filter
+    return self._filter_or_exclude(False, args, kwargs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/query.py", line 1454, in _filter_or_exclude
+    clone._filter_or_exclude_inplace(negate, args, kwargs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/query.py", line 1461, in _filter_or_exclude_inplace
+    self._query.add_q(Q(*args, **kwargs))
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1546, in add_q
+    clause, _ = self._add_q(q_object, self.used_aliases)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1577, in _add_q
+    child_clause, needed_inner = self.build_filter(
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1492, in build_filter
+    condition = self.build_lookup(lookups, col, value)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1319, in build_lookup
+    lookup = lookup_class(lhs, rhs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/lookups.py", line 27, in __init__
+    self.rhs = self.get_prep_lookup()
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/lookups.py", line 426, in get_prep_lookup
+    return super().get_prep_lookup()
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/lookups.py", line 276, in get_prep_lookup
+    rhs_value = self.lhs.output_field.get_prep_value(rhs_value)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/fields/__init__.py", line 2055, in get_prep_value
+    raise e.__class__(
+ValueError: Field 'id' expected a number but got ''.
+Internal Server Error: /search/
+Traceback (most recent call last):
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/fields/__init__.py", line 2053, in get_prep_value
+    return int(value)
+ValueError: invalid literal for int() with base 10: ''
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/forum/views.py", line 235, in search_posts
+    posts = posts.filter(tags__id__in=tag_ids).distinct()
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/query.py", line 1436, in filter
+    return self._filter_or_exclude(False, args, kwargs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/query.py", line 1454, in _filter_or_exclude
+    clone._filter_or_exclude_inplace(negate, args, kwargs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/query.py", line 1461, in _filter_or_exclude_inplace
+    self._query.add_q(Q(*args, **kwargs))
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1546, in add_q
+    clause, _ = self._add_q(q_object, self.used_aliases)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1577, in _add_q
+    child_clause, needed_inner = self.build_filter(
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1492, in build_filter
+    condition = self.build_lookup(lookups, col, value)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1319, in build_lookup
+    lookup = lookup_class(lhs, rhs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/lookups.py", line 27, in __init__
+    self.rhs = self.get_prep_lookup()
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/lookups.py", line 426, in get_prep_lookup
+    return super().get_prep_lookup()
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/lookups.py", line 276, in get_prep_lookup
+    rhs_value = self.lhs.output_field.get_prep_value(rhs_value)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/fields/__init__.py", line 2055, in get_prep_value
+    raise e.__class__(
+ValueError: Field 'id' expected a number but got ''.
+/Users/a0014208/Documents/GitHub/School-Forum/forum/views.py changed, reloading.
+Watching for file changes with StatReloader
