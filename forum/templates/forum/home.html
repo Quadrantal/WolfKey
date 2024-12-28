@@ -11,7 +11,7 @@
     <!-- Search Form -->
     <form method="get" action="{% url 'home' %}" class="mb-4" id="search-form">
         <div class="input-group mb-3">
-            <input type="text" name="q" class="form-control" placeholder="Search posts..." id="search-input" value="{{ query }}">
+            <input type="text" name="q" class="form-control" placeholder="Search posts..." id="search-input" value="">
             <div class="input-group-append">
                 <button class="btn btn-outline-secondary" type="submit">Search</button>
             </div>
@@ -32,7 +32,7 @@
         <div class="input-group mb-3">
             <select name="tag" class="form-control" id="tag-select" multiple>
                 {% for tag in tags %}
-                    <option value="{{ tag.id }}">{{ tag.name }}</option>
+                    <option class = "tag-option" value="{{ tag.id }}">{{ tag.name }}</option>
                 {% endfor %}
             </select>
         </div>
@@ -81,6 +81,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
     toggleTagsButton.addEventListener('click', function() {
         if (tagsContainer.style.display === 'none') {
+            const rect = toggleTagsButton.getBoundingClientRect();
+            tagsContainer.style.top = `${rect.top - tagsContainer.offsetHeight + toggleTagsButton.offsetHeight + 10}px`; // Shift above the button
+            tagsContainer.style.left = `${rect.left}px`; // Align with the button
             tagsContainer.style.display = 'block';
             toggleTagsButton.textContent = '-';
         } else {
@@ -132,32 +135,35 @@ document.addEventListener('DOMContentLoaded', function() {
         const query = searchInput.value;
         const tags = selectedTags.join(',');
 
-        if (query.includes(' ') || query.length === 0) {
-            fetch(`/search/?q=${encodeURIComponent(query)}&tags=${encodeURIComponent(tags)}`)
-                .then(response => response.json())
-                .then(data => {
-                    searchResults.innerHTML = '';
-                    postList.style.display = 'none';
+        fetch(`/search/?q=${encodeURIComponent(query)}&tags=${encodeURIComponent(tags)}`)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(data => {
+                searchResults.innerHTML = '';
+                postList.style.display = 'none';
 
-                    data.results.forEach(result => {
-                        const resultDiv = document.createElement('div');
-                        resultDiv.classList.add('col-md-6', 'mb-4');
-                        resultDiv.innerHTML = `
-                            <div class="card">
-                                <div class="card-body">
-                                    <h5 class="card-title">${result.title}</h5>
-                                    <p class="card-text">${result.content}</p>
-                                    <a href="${result.url}" class="btn btn-primary">Read More</a>
-                                </div>
+                data.results.forEach(result => {
+                    const resultDiv = document.createElement('div');
+                    resultDiv.classList.add('col-md-6', 'mb-4');
+                    resultDiv.innerHTML = `
+                        <div class="card">
+                            <div class="card-body">
+                                <h5 class="card-title">${result.title}</h5>
+                                <p class="card-text">${result.content}</p>
+                                <a href="${result.url}" class="btn btn-primary">Read More</a>
                             </div>
-                        `;
-                        searchResults.appendChild(resultDiv);
-                    });
-                })
-                .catch(error => {
-                    console.error('Fetch error:', error);
+                        </div>
+                    `;
+                    searchResults.appendChild(resultDiv);
                 });
-        }
+            })
+            .catch(error => {
+                console.error('Fetch error:', error);
+            });
     }
 
     searchInput.addEventListener('input', updateSearch);
