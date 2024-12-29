@@ -20,21 +20,21 @@
             <div id="selected-tags" class="d-flex flex-wrap">
                 <!-- Selected tags will appear here -->
             </div>
-            <button type="button" class="btn btn-outline-secondary" id="toggle-tags">+</button>
+            <button type="button" class="btn btn-info btn-circle toggle-tags" id="toggle-tags">+</button>
         </div>
     </form>
 
     <!-- Floating Tag Selector -->
-    <div id="tags-container" class="floating-tag-selector" style="display: none;">
+    <div id="tags-container" class="floating-tag-selector">
         <div class="input-group mb-3">
             <input type="text" class="form-control" placeholder="Search tags..." id="tag-search-input">
         </div>
-        <div class="input-group mb-3">
-            <select name="tag" class="form-control" id="tag-select" multiple>
+        <div class="input-group mb-3 custom-select-container">
+            <div class="custom-select" id="custom-tag-select">
                 {% for tag in tags %}
-                    <option class = "tag-option" value="{{ tag.id }}">{{ tag.name }}</option>
+                    <div class="custom-select-option" data-value="{{ tag.id }}">{{ tag.name }}</div>
                 {% endfor %}
-            </select>
+            </div>
         </div>
         <button class="btn btn-primary" id="add-tags">Add Tags</button>
     </div>
@@ -73,7 +73,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const toggleTagsButton = document.getElementById('toggle-tags');
     const tagsContainer = document.getElementById('tags-container');
     const tagSearchInput = document.getElementById('tag-search-input');
-    const tagSelect = document.getElementById('tag-select');
+    const customTagSelect = document.getElementById('custom-tag-select');
     const selectedTagsContainer = document.getElementById('selected-tags');
     const addTagsButton = document.getElementById('add-tags');
 
@@ -82,8 +82,8 @@ document.addEventListener('DOMContentLoaded', function() {
     toggleTagsButton.addEventListener('click', function() {
         if (tagsContainer.style.display === 'none') {
             const rect = toggleTagsButton.getBoundingClientRect();
-            tagsContainer.style.top = `${rect.top - tagsContainer.offsetHeight + toggleTagsButton.offsetHeight + 10}px`; // Shift above the button
-            tagsContainer.style.left = `${rect.left}px`; // Align with the button
+            tagsContainer.style.top = `${rect.top - tagsContainer.offsetHeight - 10}px`; // Shift above the button
+            tagsContainer.style.left = `${rect.right + 12}px`; // Align with the button
             tagsContainer.style.display = 'block';
             toggleTagsButton.textContent = '-';
         } else {
@@ -94,10 +94,10 @@ document.addEventListener('DOMContentLoaded', function() {
 
     tagSearchInput.addEventListener('input', function() {
         const filter = tagSearchInput.value.toLowerCase();
-        const options = tagSelect.options;
+        const options = customTagSelect.children;
         for (let i = 0; i < options.length; i++) {
             const option = options[i];
-            const text = option.text.toLowerCase();
+            const text = option.textContent.toLowerCase();
             if (text.includes(filter)) {
                 option.style.display = '';
             } else {
@@ -106,25 +106,42 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
+    document.addEventListener('click', function(event) {
+        if (!tagsContainer.contains(event.target) && event.target !== toggleTagsButton) {
+            tagsContainer.style.display = 'none';
+            toggleTagsButton.textContent = '+';
+        }
+    });
+
+
+    customTagSelect.addEventListener('click', function(event) {
+        const option = event.target;
+        if (option.classList.contains('custom-select-option')) {
+            option.classList.toggle('selected');
+        }
+    });
+
     addTagsButton.addEventListener('click', function() {
-        const selectedOptions = Array.from(tagSelect.selectedOptions);
+        const selectedOptions = Array.from(customTagSelect.getElementsByClassName('selected'));
         selectedOptions.forEach(option => {
-            if (!selectedTags.includes(option.value)) {
-                selectedTags.push(option.value);
+            const value = option.getAttribute('data-value');
+            if (!selectedTags.includes(value)) {
+                selectedTags.push(value);
                 const tagDiv = document.createElement('div');
                 tagDiv.classList.add('tag');
-                tagDiv.textContent = option.text;
+                tagDiv.textContent = option.textContent;
                 const removeButton = document.createElement('span');
                 removeButton.textContent = ' x';
                 removeButton.classList.add('remove-tag');
                 removeButton.addEventListener('click', function() {
-                    selectedTags = selectedTags.filter(tag => tag !== option.value);
+                    selectedTags = selectedTags.filter(tag => tag !== value);
                     tagDiv.remove();
                     updateSearch();
                 });
                 tagDiv.appendChild(removeButton);
                 selectedTagsContainer.appendChild(tagDiv);
             }
+            option.classList.remove('selected');
         });
         tagsContainer.style.display = 'none';
         toggleTagsButton.textContent = '+';
