@@ -12,9 +12,11 @@ import logging
 
 logger = logging.getLogger(__name__)
 
+
 def home(request):
-    query = request.GET.get('q')
-    tag_id = request.GET.get('tag')
+    query = request.GET.get('q', '')
+    tag_ids = request.GET.get('tags', '').split(',')
+    tag_ids = [tag_id for tag_id in tag_ids if tag_id]  # Filter out empty strings
     posts = Post.objects.all().order_by('-created_at')
 
     if query:
@@ -23,11 +25,12 @@ def home(request):
             rank=SearchRank(F('search_vector'), search_query) + TrigramSimilarity('title', query)
         ).filter(rank__gte=0.3).order_by('-rank')
 
-    if tag_id:
-        posts = posts.filter(tags__id=tag_id)
+    if tag_ids:
+        posts = posts.filter(tags__id__in=tag_ids).distinct()
 
-    tags = Tag.objects.all()
-    return render(request, 'forum/home.html', {'posts': posts, 'query': query, 'tags': tags, 'selected_tag': tag_id})
+    tags = Tag.objects.all().order_by('name')  # Sort tags alphabetically
+
+    return render(request, 'forum/home.html', {'posts': posts, 'tags': tags, 'query': query, 'selected_tags': tag_ids})
 
 @login_required
 def post_detail(request, post_id):
