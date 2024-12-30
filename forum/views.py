@@ -3,13 +3,34 @@ from django.contrib.auth import login, logout, authenticate
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm  
 from django.contrib import messages 
 from django.contrib.auth.decorators import login_required
+from django.contrib.postgres.search import SearchVector, SearchQuery, SearchRank, TrigramSimilarity
 from .models import Post, Solution, Comment, SolutionUpvote, CommentUpvote, Tag
 from .forms import PostForm, CommentForm, SolutionForm, TagForm
 from django.http import HttpResponseForbidden, JsonResponse
+from django.db.models import F
+import logging
+
+logger = logging.getLogger(__name__)
+
 
 def home(request):
+    query = request.GET.get('q', '')
+    tag_ids = request.GET.get('tags', '').split(',')
+    tag_ids = [tag_id for tag_id in tag_ids if tag_id]  # Filter out empty strings
     posts = Post.objects.all().order_by('-created_at')
-    return render(request, 'forum/home.html', {'posts': posts})
+
+    if query:
+        search_query = SearchQuery(query)
+        posts = posts.annotate(
+            rank=SearchRank(F('search_vector'), search_query) + TrigramSimilarity('title', query)
+        ).filter(rank__gte=0.3).order_by('-rank')
+
+    if tag_ids:
+        posts = posts.filter(tags__id__in=tag_ids).distinct()
+
+    tags = Tag.objects.all().order_by('name')  # Sort tags alphabetically
+
+    return render(request, 'forum/home.html', {'posts': posts, 'tags': tags, 'query': query, 'selected_tags': tag_ids})
 
 @login_required
 def post_detail(request, post_id):
@@ -19,7 +40,7 @@ def post_detail(request, post_id):
     comment_form = CommentForm()
 
     if request.method == 'POST':
-        if not request.user.is_authenticated:
+        if not request.user.is_authenticated: 
             return redirect('login')
 
         action = request.POST.get('action')
@@ -202,3 +223,34 @@ def create_tag(request):
     else:
         form = TagForm()
     return render(request, 'forum/tag_form.html', {'form': form})
+
+
+def search_posts(request):
+    query = request.GET.get('q', '')
+    tag_ids = request.GET.get('tags', '').split(',')
+    tag_ids = [tag_id for tag_id in tag_ids if tag_id]  # Filter out empty strings
+    posts = Post.objects.all().order_by('-created_at')
+
+    if query:
+        search_query = SearchQuery(query)
+        posts = posts.annotate(
+            rank=SearchRank(F('search_vector'), search_query) + TrigramSimilarity('title', query)
+        ).filter(rank__gte=0.3).order_by('-rank')
+
+    if tag_ids:
+        posts = posts.filter(tags__id__in=tag_ids).distinct()
+
+    results = []
+    for post in posts:
+        results.append({
+            'id': post.id,
+            'title': post.title,
+            'content': post.content[:100],  # Truncate content for preview
+            'url': post.get_absolute_url(),
+            'author': post.author.username,
+            'created_at': post.created_at,
+        })
+
+
+
+    return JsonResponse({'results': results, 'query': query, 'selected_tags': tag_ids});

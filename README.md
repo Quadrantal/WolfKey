@@ -50,7 +50,7 @@ This is a Django-based forum application where users can create posts, add solut
 
 ## Database
 
-The application uses SQLite as the database. The database file is named [db.sqlite3](http://_vscodecontentref_/14) and is located in the root directory of the project. The database schema is defined using Django models in the [models.py](http://_vscodecontentref_/15) file.
+The application uses PostgreSQL as the database. Ensure you have PostgreSQL installed and a database created for the application. Update the `DATABASES` setting in `student_forum/settings.py` with your database credentials.
 
 ## User Authentication
 

@@ -26,7 +26,9 @@ urlpatterns = [
     path('register/', views.register, name='register'),
     path('login/', views.login_view, name='login'),
     path('logout/', views.logout_view, name='logout'),
-    path('tag/create/', views.create_tag, name='create_tag'),  # Add this line
+    path('tag/create/', views.create_tag, name='create_tag'),
     path('solution/<int:solution_id>/upvote/', views.upvote_solution, name='upvote_solution'),
     path('comment/<int:comment_id>/upvote/', views.upvote_comment, name='upvote_comment'),
+    path('search/', views.search_posts, name='search_posts'), 
+    path('admin/', admin.site.urls),
 ]

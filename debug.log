@@ -1,0 +1,1952 @@
+Watching for file changes with StatReloader
+/Users/a0014208/Documents/GitHub/School-Forum/student_forum/urls.py changed, reloading.
+Watching for file changes with StatReloader
+Watching for file changes with StatReloader
+/Users/a0014208/Documents/GitHub/School-Forum/forum/views.py changed, reloading.
+Watching for file changes with StatReloader
+Internal Server Error: /search/
+Traceback (most recent call last):
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/fields/__init__.py", line 2053, in get_prep_value
+    return int(value)
+ValueError: invalid literal for int() with base 10: ''
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/forum/views.py", line 235, in search_posts
+    posts = posts.filter(tags__id__in=tag_ids).distinct()
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/query.py", line 1436, in filter
+    return self._filter_or_exclude(False, args, kwargs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/query.py", line 1454, in _filter_or_exclude
+    clone._filter_or_exclude_inplace(negate, args, kwargs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/query.py", line 1461, in _filter_or_exclude_inplace
+    self._query.add_q(Q(*args, **kwargs))
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1546, in add_q
+    clause, _ = self._add_q(q_object, self.used_aliases)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1577, in _add_q
+    child_clause, needed_inner = self.build_filter(
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1492, in build_filter
+    condition = self.build_lookup(lookups, col, value)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1319, in build_lookup
+    lookup = lookup_class(lhs, rhs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/lookups.py", line 27, in __init__
+    self.rhs = self.get_prep_lookup()
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/lookups.py", line 426, in get_prep_lookup
+    return super().get_prep_lookup()
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/lookups.py", line 276, in get_prep_lookup
+    rhs_value = self.lhs.output_field.get_prep_value(rhs_value)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/fields/__init__.py", line 2055, in get_prep_value
+    raise e.__class__(
+ValueError: Field 'id' expected a number but got ''.
+Internal Server Error: /search/
+Traceback (most recent call last):
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/fields/__init__.py", line 2053, in get_prep_value
+    return int(value)
+ValueError: invalid literal for int() with base 10: ''
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/forum/views.py", line 235, in search_posts
+    posts = posts.filter(tags__id__in=tag_ids).distinct()
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/query.py", line 1436, in filter
+    return self._filter_or_exclude(False, args, kwargs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/query.py", line 1454, in _filter_or_exclude
+    clone._filter_or_exclude_inplace(negate, args, kwargs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/query.py", line 1461, in _filter_or_exclude_inplace
+    self._query.add_q(Q(*args, **kwargs))
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1546, in add_q
+    clause, _ = self._add_q(q_object, self.used_aliases)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1577, in _add_q
+    child_clause, needed_inner = self.build_filter(
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1492, in build_filter
+    condition = self.build_lookup(lookups, col, value)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1319, in build_lookup
+    lookup = lookup_class(lhs, rhs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/lookups.py", line 27, in __init__
+    self.rhs = self.get_prep_lookup()
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/lookups.py", line 426, in get_prep_lookup
+    return super().get_prep_lookup()
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/lookups.py", line 276, in get_prep_lookup
+    rhs_value = self.lhs.output_field.get_prep_value(rhs_value)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/fields/__init__.py", line 2055, in get_prep_value
+    raise e.__class__(
+ValueError: Field 'id' expected a number but got ''.
+Internal Server Error: /search/
+Traceback (most recent call last):
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/fields/__init__.py", line 2053, in get_prep_value
+    return int(value)
+ValueError: invalid literal for int() with base 10: ''
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/forum/views.py", line 235, in search_posts
+    posts = posts.filter(tags__id__in=tag_ids).distinct()
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/query.py", line 1436, in filter
+    return self._filter_or_exclude(False, args, kwargs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/query.py", line 1454, in _filter_or_exclude
+    clone._filter_or_exclude_inplace(negate, args, kwargs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/query.py", line 1461, in _filter_or_exclude_inplace
+    self._query.add_q(Q(*args, **kwargs))
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1546, in add_q
+    clause, _ = self._add_q(q_object, self.used_aliases)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1577, in _add_q
+    child_clause, needed_inner = self.build_filter(
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1492, in build_filter
+    condition = self.build_lookup(lookups, col, value)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1319, in build_lookup
+    lookup = lookup_class(lhs, rhs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/lookups.py", line 27, in __init__
+    self.rhs = self.get_prep_lookup()
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/lookups.py", line 426, in get_prep_lookup
+    return super().get_prep_lookup()
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/lookups.py", line 276, in get_prep_lookup
+    rhs_value = self.lhs.output_field.get_prep_value(rhs_value)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/fields/__init__.py", line 2055, in get_prep_value
+    raise e.__class__(
+ValueError: Field 'id' expected a number but got ''.
+Internal Server Error: /search/
+Traceback (most recent call last):
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/fields/__init__.py", line 2053, in get_prep_value
+    return int(value)
+ValueError: invalid literal for int() with base 10: ''
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/forum/views.py", line 235, in search_posts
+    posts = posts.filter(tags__id__in=tag_ids).distinct()
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/query.py", line 1436, in filter
+    return self._filter_or_exclude(False, args, kwargs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/query.py", line 1454, in _filter_or_exclude
+    clone._filter_or_exclude_inplace(negate, args, kwargs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/query.py", line 1461, in _filter_or_exclude_inplace
+    self._query.add_q(Q(*args, **kwargs))
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1546, in add_q
+    clause, _ = self._add_q(q_object, self.used_aliases)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1577, in _add_q
+    child_clause, needed_inner = self.build_filter(
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1492, in build_filter
+    condition = self.build_lookup(lookups, col, value)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1319, in build_lookup
+    lookup = lookup_class(lhs, rhs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/lookups.py", line 27, in __init__
+    self.rhs = self.get_prep_lookup()
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/lookups.py", line 426, in get_prep_lookup
+    return super().get_prep_lookup()
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/lookups.py", line 276, in get_prep_lookup
+    rhs_value = self.lhs.output_field.get_prep_value(rhs_value)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/fields/__init__.py", line 2055, in get_prep_value
+    raise e.__class__(
+ValueError: Field 'id' expected a number but got ''.
+Internal Server Error: /search/
+Traceback (most recent call last):
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/fields/__init__.py", line 2053, in get_prep_value
+    return int(value)
+ValueError: invalid literal for int() with base 10: ''
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/forum/views.py", line 235, in search_posts
+    posts = posts.filter(tags__id__in=tag_ids).distinct()
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/query.py", line 1436, in filter
+    return self._filter_or_exclude(False, args, kwargs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/query.py", line 1454, in _filter_or_exclude
+    clone._filter_or_exclude_inplace(negate, args, kwargs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/query.py", line 1461, in _filter_or_exclude_inplace
+    self._query.add_q(Q(*args, **kwargs))
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1546, in add_q
+    clause, _ = self._add_q(q_object, self.used_aliases)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1577, in _add_q
+    child_clause, needed_inner = self.build_filter(
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1492, in build_filter
+    condition = self.build_lookup(lookups, col, value)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1319, in build_lookup
+    lookup = lookup_class(lhs, rhs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/lookups.py", line 27, in __init__
+    self.rhs = self.get_prep_lookup()
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/lookups.py", line 426, in get_prep_lookup
+    return super().get_prep_lookup()
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/lookups.py", line 276, in get_prep_lookup
+    rhs_value = self.lhs.output_field.get_prep_value(rhs_value)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/fields/__init__.py", line 2055, in get_prep_value
+    raise e.__class__(
+ValueError: Field 'id' expected a number but got ''.
+Internal Server Error: /search/
+Traceback (most recent call last):
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/fields/__init__.py", line 2053, in get_prep_value
+    return int(value)
+ValueError: invalid literal for int() with base 10: ''
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/forum/views.py", line 235, in search_posts
+    posts = posts.filter(tags__id__in=tag_ids).distinct()
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/query.py", line 1436, in filter
+    return self._filter_or_exclude(False, args, kwargs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/query.py", line 1454, in _filter_or_exclude
+    clone._filter_or_exclude_inplace(negate, args, kwargs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/query.py", line 1461, in _filter_or_exclude_inplace
+    self._query.add_q(Q(*args, **kwargs))
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1546, in add_q
+    clause, _ = self._add_q(q_object, self.used_aliases)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1577, in _add_q
+    child_clause, needed_inner = self.build_filter(
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1492, in build_filter
+    condition = self.build_lookup(lookups, col, value)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1319, in build_lookup
+    lookup = lookup_class(lhs, rhs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/lookups.py", line 27, in __init__
+    self.rhs = self.get_prep_lookup()
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/lookups.py", line 426, in get_prep_lookup
+    return super().get_prep_lookup()
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/lookups.py", line 276, in get_prep_lookup
+    rhs_value = self.lhs.output_field.get_prep_value(rhs_value)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/fields/__init__.py", line 2055, in get_prep_value
+    raise e.__class__(
+ValueError: Field 'id' expected a number but got ''.
+Internal Server Error: /search/
+Traceback (most recent call last):
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/fields/__init__.py", line 2053, in get_prep_value
+    return int(value)
+ValueError: invalid literal for int() with base 10: ''
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/forum/views.py", line 235, in search_posts
+    posts = posts.filter(tags__id__in=tag_ids).distinct()
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/query.py", line 1436, in filter
+    return self._filter_or_exclude(False, args, kwargs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/query.py", line 1454, in _filter_or_exclude
+    clone._filter_or_exclude_inplace(negate, args, kwargs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/query.py", line 1461, in _filter_or_exclude_inplace
+    self._query.add_q(Q(*args, **kwargs))
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1546, in add_q
+    clause, _ = self._add_q(q_object, self.used_aliases)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1577, in _add_q
+    child_clause, needed_inner = self.build_filter(
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1492, in build_filter
+    condition = self.build_lookup(lookups, col, value)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1319, in build_lookup
+    lookup = lookup_class(lhs, rhs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/lookups.py", line 27, in __init__
+    self.rhs = self.get_prep_lookup()
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/lookups.py", line 426, in get_prep_lookup
+    return super().get_prep_lookup()
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/lookups.py", line 276, in get_prep_lookup
+    rhs_value = self.lhs.output_field.get_prep_value(rhs_value)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/fields/__init__.py", line 2055, in get_prep_value
+    raise e.__class__(
+ValueError: Field 'id' expected a number but got ''.
+Internal Server Error: /search/
+Traceback (most recent call last):
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/fields/__init__.py", line 2053, in get_prep_value
+    return int(value)
+ValueError: invalid literal for int() with base 10: ''
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/forum/views.py", line 235, in search_posts
+    posts = posts.filter(tags__id__in=tag_ids).distinct()
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/query.py", line 1436, in filter
+    return self._filter_or_exclude(False, args, kwargs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/query.py", line 1454, in _filter_or_exclude
+    clone._filter_or_exclude_inplace(negate, args, kwargs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/query.py", line 1461, in _filter_or_exclude_inplace
+    self._query.add_q(Q(*args, **kwargs))
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1546, in add_q
+    clause, _ = self._add_q(q_object, self.used_aliases)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1577, in _add_q
+    child_clause, needed_inner = self.build_filter(
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1492, in build_filter
+    condition = self.build_lookup(lookups, col, value)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1319, in build_lookup
+    lookup = lookup_class(lhs, rhs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/lookups.py", line 27, in __init__
+    self.rhs = self.get_prep_lookup()
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/lookups.py", line 426, in get_prep_lookup
+    return super().get_prep_lookup()
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/lookups.py", line 276, in get_prep_lookup
+    rhs_value = self.lhs.output_field.get_prep_value(rhs_value)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/fields/__init__.py", line 2055, in get_prep_value
+    raise e.__class__(
+ValueError: Field 'id' expected a number but got ''.
+Internal Server Error: /search/
+Traceback (most recent call last):
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/fields/__init__.py", line 2053, in get_prep_value
+    return int(value)
+ValueError: invalid literal for int() with base 10: ''
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/forum/views.py", line 235, in search_posts
+    posts = posts.filter(tags__id__in=tag_ids).distinct()
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/query.py", line 1436, in filter
+    return self._filter_or_exclude(False, args, kwargs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/query.py", line 1454, in _filter_or_exclude
+    clone._filter_or_exclude_inplace(negate, args, kwargs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/query.py", line 1461, in _filter_or_exclude_inplace
+    self._query.add_q(Q(*args, **kwargs))
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1546, in add_q
+    clause, _ = self._add_q(q_object, self.used_aliases)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1577, in _add_q
+    child_clause, needed_inner = self.build_filter(
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1492, in build_filter
+    condition = self.build_lookup(lookups, col, value)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1319, in build_lookup
+    lookup = lookup_class(lhs, rhs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/lookups.py", line 27, in __init__
+    self.rhs = self.get_prep_lookup()
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/lookups.py", line 426, in get_prep_lookup
+    return super().get_prep_lookup()
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/lookups.py", line 276, in get_prep_lookup
+    rhs_value = self.lhs.output_field.get_prep_value(rhs_value)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/fields/__init__.py", line 2055, in get_prep_value
+    raise e.__class__(
+ValueError: Field 'id' expected a number but got ''.
+Internal Server Error: /search/
+Traceback (most recent call last):
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/fields/__init__.py", line 2053, in get_prep_value
+    return int(value)
+ValueError: invalid literal for int() with base 10: ''
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/forum/views.py", line 235, in search_posts
+    posts = posts.filter(tags__id__in=tag_ids).distinct()
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/query.py", line 1436, in filter
+    return self._filter_or_exclude(False, args, kwargs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/query.py", line 1454, in _filter_or_exclude
+    clone._filter_or_exclude_inplace(negate, args, kwargs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/query.py", line 1461, in _filter_or_exclude_inplace
+    self._query.add_q(Q(*args, **kwargs))
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1546, in add_q
+    clause, _ = self._add_q(q_object, self.used_aliases)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1577, in _add_q
+    child_clause, needed_inner = self.build_filter(
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1492, in build_filter
+    condition = self.build_lookup(lookups, col, value)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1319, in build_lookup
+    lookup = lookup_class(lhs, rhs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/lookups.py", line 27, in __init__
+    self.rhs = self.get_prep_lookup()
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/lookups.py", line 426, in get_prep_lookup
+    return super().get_prep_lookup()
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/lookups.py", line 276, in get_prep_lookup
+    rhs_value = self.lhs.output_field.get_prep_value(rhs_value)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/fields/__init__.py", line 2055, in get_prep_value
+    raise e.__class__(
+ValueError: Field 'id' expected a number but got ''.
+Internal Server Error: /search/
+Traceback (most recent call last):
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/fields/__init__.py", line 2053, in get_prep_value
+    return int(value)
+ValueError: invalid literal for int() with base 10: ''
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/forum/views.py", line 235, in search_posts
+    posts = posts.filter(tags__id__in=tag_ids).distinct()
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/query.py", line 1436, in filter
+    return self._filter_or_exclude(False, args, kwargs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/query.py", line 1454, in _filter_or_exclude
+    clone._filter_or_exclude_inplace(negate, args, kwargs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/query.py", line 1461, in _filter_or_exclude_inplace
+    self._query.add_q(Q(*args, **kwargs))
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1546, in add_q
+    clause, _ = self._add_q(q_object, self.used_aliases)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1577, in _add_q
+    child_clause, needed_inner = self.build_filter(
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1492, in build_filter
+    condition = self.build_lookup(lookups, col, value)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1319, in build_lookup
+    lookup = lookup_class(lhs, rhs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/lookups.py", line 27, in __init__
+    self.rhs = self.get_prep_lookup()
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/lookups.py", line 426, in get_prep_lookup
+    return super().get_prep_lookup()
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/lookups.py", line 276, in get_prep_lookup
+    rhs_value = self.lhs.output_field.get_prep_value(rhs_value)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/fields/__init__.py", line 2055, in get_prep_value
+    raise e.__class__(
+ValueError: Field 'id' expected a number but got ''.
+Internal Server Error: /search/
+Traceback (most recent call last):
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/fields/__init__.py", line 2053, in get_prep_value
+    return int(value)
+ValueError: invalid literal for int() with base 10: ''
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/forum/views.py", line 235, in search_posts
+    posts = posts.filter(tags__id__in=tag_ids).distinct()
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/query.py", line 1436, in filter
+    return self._filter_or_exclude(False, args, kwargs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/query.py", line 1454, in _filter_or_exclude
+    clone._filter_or_exclude_inplace(negate, args, kwargs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/query.py", line 1461, in _filter_or_exclude_inplace
+    self._query.add_q(Q(*args, **kwargs))
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1546, in add_q
+    clause, _ = self._add_q(q_object, self.used_aliases)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1577, in _add_q
+    child_clause, needed_inner = self.build_filter(
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1492, in build_filter
+    condition = self.build_lookup(lookups, col, value)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1319, in build_lookup
+    lookup = lookup_class(lhs, rhs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/lookups.py", line 27, in __init__
+    self.rhs = self.get_prep_lookup()
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/lookups.py", line 426, in get_prep_lookup
+    return super().get_prep_lookup()
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/lookups.py", line 276, in get_prep_lookup
+    rhs_value = self.lhs.output_field.get_prep_value(rhs_value)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/fields/__init__.py", line 2055, in get_prep_value
+    raise e.__class__(
+ValueError: Field 'id' expected a number but got ''.
+Internal Server Error: /search/
+Traceback (most recent call last):
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/fields/__init__.py", line 2053, in get_prep_value
+    return int(value)
+ValueError: invalid literal for int() with base 10: ''
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/forum/views.py", line 235, in search_posts
+    posts = posts.filter(tags__id__in=tag_ids).distinct()
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/query.py", line 1436, in filter
+    return self._filter_or_exclude(False, args, kwargs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/query.py", line 1454, in _filter_or_exclude
+    clone._filter_or_exclude_inplace(negate, args, kwargs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/query.py", line 1461, in _filter_or_exclude_inplace
+    self._query.add_q(Q(*args, **kwargs))
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1546, in add_q
+    clause, _ = self._add_q(q_object, self.used_aliases)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1577, in _add_q
+    child_clause, needed_inner = self.build_filter(
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1492, in build_filter
+    condition = self.build_lookup(lookups, col, value)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1319, in build_lookup
+    lookup = lookup_class(lhs, rhs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/lookups.py", line 27, in __init__
+    self.rhs = self.get_prep_lookup()
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/lookups.py", line 426, in get_prep_lookup
+    return super().get_prep_lookup()
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/lookups.py", line 276, in get_prep_lookup
+    rhs_value = self.lhs.output_field.get_prep_value(rhs_value)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/fields/__init__.py", line 2055, in get_prep_value
+    raise e.__class__(
+ValueError: Field 'id' expected a number but got ''.
+Internal Server Error: /search/
+Traceback (most recent call last):
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/fields/__init__.py", line 2053, in get_prep_value
+    return int(value)
+ValueError: invalid literal for int() with base 10: ''
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/forum/views.py", line 235, in search_posts
+    posts = posts.filter(tags__id__in=tag_ids).distinct()
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/query.py", line 1436, in filter
+    return self._filter_or_exclude(False, args, kwargs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/query.py", line 1454, in _filter_or_exclude
+    clone._filter_or_exclude_inplace(negate, args, kwargs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/query.py", line 1461, in _filter_or_exclude_inplace
+    self._query.add_q(Q(*args, **kwargs))
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1546, in add_q
+    clause, _ = self._add_q(q_object, self.used_aliases)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1577, in _add_q
+    child_clause, needed_inner = self.build_filter(
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1492, in build_filter
+    condition = self.build_lookup(lookups, col, value)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1319, in build_lookup
+    lookup = lookup_class(lhs, rhs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/lookups.py", line 27, in __init__
+    self.rhs = self.get_prep_lookup()
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/lookups.py", line 426, in get_prep_lookup
+    return super().get_prep_lookup()
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/lookups.py", line 276, in get_prep_lookup
+    rhs_value = self.lhs.output_field.get_prep_value(rhs_value)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/fields/__init__.py", line 2055, in get_prep_value
+    raise e.__class__(
+ValueError: Field 'id' expected a number but got ''.
+Internal Server Error: /search/
+Traceback (most recent call last):
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/fields/__init__.py", line 2053, in get_prep_value
+    return int(value)
+ValueError: invalid literal for int() with base 10: ''
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/forum/views.py", line 235, in search_posts
+    posts = posts.filter(tags__id__in=tag_ids).distinct()
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/query.py", line 1436, in filter
+    return self._filter_or_exclude(False, args, kwargs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/query.py", line 1454, in _filter_or_exclude
+    clone._filter_or_exclude_inplace(negate, args, kwargs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/query.py", line 1461, in _filter_or_exclude_inplace
+    self._query.add_q(Q(*args, **kwargs))
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1546, in add_q
+    clause, _ = self._add_q(q_object, self.used_aliases)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1577, in _add_q
+    child_clause, needed_inner = self.build_filter(
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1492, in build_filter
+    condition = self.build_lookup(lookups, col, value)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1319, in build_lookup
+    lookup = lookup_class(lhs, rhs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/lookups.py", line 27, in __init__
+    self.rhs = self.get_prep_lookup()
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/lookups.py", line 426, in get_prep_lookup
+    return super().get_prep_lookup()
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/lookups.py", line 276, in get_prep_lookup
+    rhs_value = self.lhs.output_field.get_prep_value(rhs_value)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/fields/__init__.py", line 2055, in get_prep_value
+    raise e.__class__(
+ValueError: Field 'id' expected a number but got ''.
+Internal Server Error: /search/
+Traceback (most recent call last):
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/fields/__init__.py", line 2053, in get_prep_value
+    return int(value)
+ValueError: invalid literal for int() with base 10: ''
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/forum/views.py", line 235, in search_posts
+    posts = posts.filter(tags__id__in=tag_ids).distinct()
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/query.py", line 1436, in filter
+    return self._filter_or_exclude(False, args, kwargs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/query.py", line 1454, in _filter_or_exclude
+    clone._filter_or_exclude_inplace(negate, args, kwargs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/query.py", line 1461, in _filter_or_exclude_inplace
+    self._query.add_q(Q(*args, **kwargs))
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1546, in add_q
+    clause, _ = self._add_q(q_object, self.used_aliases)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1577, in _add_q
+    child_clause, needed_inner = self.build_filter(
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1492, in build_filter
+    condition = self.build_lookup(lookups, col, value)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1319, in build_lookup
+    lookup = lookup_class(lhs, rhs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/lookups.py", line 27, in __init__
+    self.rhs = self.get_prep_lookup()
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/lookups.py", line 426, in get_prep_lookup
+    return super().get_prep_lookup()
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/lookups.py", line 276, in get_prep_lookup
+    rhs_value = self.lhs.output_field.get_prep_value(rhs_value)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/fields/__init__.py", line 2055, in get_prep_value
+    raise e.__class__(
+ValueError: Field 'id' expected a number but got ''.
+Internal Server Error: /search/
+Traceback (most recent call last):
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/fields/__init__.py", line 2053, in get_prep_value
+    return int(value)
+ValueError: invalid literal for int() with base 10: ''
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/forum/views.py", line 235, in search_posts
+    posts = posts.filter(tags__id__in=tag_ids).distinct()
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/query.py", line 1436, in filter
+    return self._filter_or_exclude(False, args, kwargs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/query.py", line 1454, in _filter_or_exclude
+    clone._filter_or_exclude_inplace(negate, args, kwargs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/query.py", line 1461, in _filter_or_exclude_inplace
+    self._query.add_q(Q(*args, **kwargs))
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1546, in add_q
+    clause, _ = self._add_q(q_object, self.used_aliases)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1577, in _add_q
+    child_clause, needed_inner = self.build_filter(
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1492, in build_filter
+    condition = self.build_lookup(lookups, col, value)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1319, in build_lookup
+    lookup = lookup_class(lhs, rhs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/lookups.py", line 27, in __init__
+    self.rhs = self.get_prep_lookup()
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/lookups.py", line 426, in get_prep_lookup
+    return super().get_prep_lookup()
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/lookups.py", line 276, in get_prep_lookup
+    rhs_value = self.lhs.output_field.get_prep_value(rhs_value)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/fields/__init__.py", line 2055, in get_prep_value
+    raise e.__class__(
+ValueError: Field 'id' expected a number but got ''.
+Internal Server Error: /search/
+Traceback (most recent call last):
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/fields/__init__.py", line 2053, in get_prep_value
+    return int(value)
+ValueError: invalid literal for int() with base 10: ''
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/forum/views.py", line 235, in search_posts
+    posts = posts.filter(tags__id__in=tag_ids).distinct()
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/query.py", line 1436, in filter
+    return self._filter_or_exclude(False, args, kwargs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/query.py", line 1454, in _filter_or_exclude
+    clone._filter_or_exclude_inplace(negate, args, kwargs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/query.py", line 1461, in _filter_or_exclude_inplace
+    self._query.add_q(Q(*args, **kwargs))
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1546, in add_q
+    clause, _ = self._add_q(q_object, self.used_aliases)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1577, in _add_q
+    child_clause, needed_inner = self.build_filter(
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1492, in build_filter
+    condition = self.build_lookup(lookups, col, value)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1319, in build_lookup
+    lookup = lookup_class(lhs, rhs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/lookups.py", line 27, in __init__
+    self.rhs = self.get_prep_lookup()
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/lookups.py", line 426, in get_prep_lookup
+    return super().get_prep_lookup()
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/lookups.py", line 276, in get_prep_lookup
+    rhs_value = self.lhs.output_field.get_prep_value(rhs_value)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/fields/__init__.py", line 2055, in get_prep_value
+    raise e.__class__(
+ValueError: Field 'id' expected a number but got ''.
+Internal Server Error: /search/
+Traceback (most recent call last):
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/fields/__init__.py", line 2053, in get_prep_value
+    return int(value)
+ValueError: invalid literal for int() with base 10: ''
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/forum/views.py", line 235, in search_posts
+    posts = posts.filter(tags__id__in=tag_ids).distinct()
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/query.py", line 1436, in filter
+    return self._filter_or_exclude(False, args, kwargs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/query.py", line 1454, in _filter_or_exclude
+    clone._filter_or_exclude_inplace(negate, args, kwargs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/query.py", line 1461, in _filter_or_exclude_inplace
+    self._query.add_q(Q(*args, **kwargs))
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1546, in add_q
+    clause, _ = self._add_q(q_object, self.used_aliases)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1577, in _add_q
+    child_clause, needed_inner = self.build_filter(
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1492, in build_filter
+    condition = self.build_lookup(lookups, col, value)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1319, in build_lookup
+    lookup = lookup_class(lhs, rhs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/lookups.py", line 27, in __init__
+    self.rhs = self.get_prep_lookup()
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/lookups.py", line 426, in get_prep_lookup
+    return super().get_prep_lookup()
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/lookups.py", line 276, in get_prep_lookup
+    rhs_value = self.lhs.output_field.get_prep_value(rhs_value)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/fields/__init__.py", line 2055, in get_prep_value
+    raise e.__class__(
+ValueError: Field 'id' expected a number but got ''.
+Internal Server Error: /search/
+Traceback (most recent call last):
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/fields/__init__.py", line 2053, in get_prep_value
+    return int(value)
+ValueError: invalid literal for int() with base 10: ''
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/forum/views.py", line 235, in search_posts
+    posts = posts.filter(tags__id__in=tag_ids).distinct()
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/query.py", line 1436, in filter
+    return self._filter_or_exclude(False, args, kwargs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/query.py", line 1454, in _filter_or_exclude
+    clone._filter_or_exclude_inplace(negate, args, kwargs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/query.py", line 1461, in _filter_or_exclude_inplace
+    self._query.add_q(Q(*args, **kwargs))
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1546, in add_q
+    clause, _ = self._add_q(q_object, self.used_aliases)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1577, in _add_q
+    child_clause, needed_inner = self.build_filter(
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1492, in build_filter
+    condition = self.build_lookup(lookups, col, value)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1319, in build_lookup
+    lookup = lookup_class(lhs, rhs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/lookups.py", line 27, in __init__
+    self.rhs = self.get_prep_lookup()
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/lookups.py", line 426, in get_prep_lookup
+    return super().get_prep_lookup()
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/lookups.py", line 276, in get_prep_lookup
+    rhs_value = self.lhs.output_field.get_prep_value(rhs_value)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/fields/__init__.py", line 2055, in get_prep_value
+    raise e.__class__(
+ValueError: Field 'id' expected a number but got ''.
+/Users/a0014208/Documents/GitHub/School-Forum/forum/views.py changed, reloading.
+Watching for file changes with StatReloader
+Internal Server Error: /search/
+Traceback (most recent call last):
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/fields/__init__.py", line 2053, in get_prep_value
+    return int(value)
+ValueError: invalid literal for int() with base 10: ''
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/forum/views.py", line 236, in search_posts
+    posts = posts.filter(tags__id__in=tag_ids).distinct()
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/query.py", line 1436, in filter
+    return self._filter_or_exclude(False, args, kwargs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/query.py", line 1454, in _filter_or_exclude
+    clone._filter_or_exclude_inplace(negate, args, kwargs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/query.py", line 1461, in _filter_or_exclude_inplace
+    self._query.add_q(Q(*args, **kwargs))
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1546, in add_q
+    clause, _ = self._add_q(q_object, self.used_aliases)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1577, in _add_q
+    child_clause, needed_inner = self.build_filter(
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1492, in build_filter
+    condition = self.build_lookup(lookups, col, value)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1319, in build_lookup
+    lookup = lookup_class(lhs, rhs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/lookups.py", line 27, in __init__
+    self.rhs = self.get_prep_lookup()
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/lookups.py", line 426, in get_prep_lookup
+    return super().get_prep_lookup()
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/lookups.py", line 276, in get_prep_lookup
+    rhs_value = self.lhs.output_field.get_prep_value(rhs_value)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/fields/__init__.py", line 2055, in get_prep_value
+    raise e.__class__(
+ValueError: Field 'id' expected a number but got ''.
+Internal Server Error: /search/
+Traceback (most recent call last):
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/fields/__init__.py", line 2053, in get_prep_value
+    return int(value)
+ValueError: invalid literal for int() with base 10: ''
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/forum/views.py", line 236, in search_posts
+    posts = posts.filter(tags__id__in=tag_ids).distinct()
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/query.py", line 1436, in filter
+    return self._filter_or_exclude(False, args, kwargs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/query.py", line 1454, in _filter_or_exclude
+    clone._filter_or_exclude_inplace(negate, args, kwargs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/query.py", line 1461, in _filter_or_exclude_inplace
+    self._query.add_q(Q(*args, **kwargs))
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1546, in add_q
+    clause, _ = self._add_q(q_object, self.used_aliases)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1577, in _add_q
+    child_clause, needed_inner = self.build_filter(
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1492, in build_filter
+    condition = self.build_lookup(lookups, col, value)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1319, in build_lookup
+    lookup = lookup_class(lhs, rhs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/lookups.py", line 27, in __init__
+    self.rhs = self.get_prep_lookup()
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/lookups.py", line 426, in get_prep_lookup
+    return super().get_prep_lookup()
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/lookups.py", line 276, in get_prep_lookup
+    rhs_value = self.lhs.output_field.get_prep_value(rhs_value)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/fields/__init__.py", line 2055, in get_prep_value
+    raise e.__class__(
+ValueError: Field 'id' expected a number but got ''.
+Internal Server Error: /search/
+Traceback (most recent call last):
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/fields/__init__.py", line 2053, in get_prep_value
+    return int(value)
+ValueError: invalid literal for int() with base 10: ''
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/forum/views.py", line 236, in search_posts
+    posts = posts.filter(tags__id__in=tag_ids).distinct()
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/query.py", line 1436, in filter
+    return self._filter_or_exclude(False, args, kwargs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/query.py", line 1454, in _filter_or_exclude
+    clone._filter_or_exclude_inplace(negate, args, kwargs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/query.py", line 1461, in _filter_or_exclude_inplace
+    self._query.add_q(Q(*args, **kwargs))
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1546, in add_q
+    clause, _ = self._add_q(q_object, self.used_aliases)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1577, in _add_q
+    child_clause, needed_inner = self.build_filter(
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1492, in build_filter
+    condition = self.build_lookup(lookups, col, value)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1319, in build_lookup
+    lookup = lookup_class(lhs, rhs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/lookups.py", line 27, in __init__
+    self.rhs = self.get_prep_lookup()
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/lookups.py", line 426, in get_prep_lookup
+    return super().get_prep_lookup()
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/lookups.py", line 276, in get_prep_lookup
+    rhs_value = self.lhs.output_field.get_prep_value(rhs_value)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/fields/__init__.py", line 2055, in get_prep_value
+    raise e.__class__(
+ValueError: Field 'id' expected a number but got ''.
+/Users/a0014208/Documents/GitHub/School-Forum/forum/views.py changed, reloading.
+Watching for file changes with StatReloader
+Internal Server Error: /search/
+Traceback (most recent call last):
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/fields/__init__.py", line 2053, in get_prep_value
+    return int(value)
+ValueError: invalid literal for int() with base 10: ''
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/forum/views.py", line 235, in search_posts
+    posts = posts.filter(tags__id__in=tag_ids).distinct()
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/query.py", line 1436, in filter
+    return self._filter_or_exclude(False, args, kwargs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/query.py", line 1454, in _filter_or_exclude
+    clone._filter_or_exclude_inplace(negate, args, kwargs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/query.py", line 1461, in _filter_or_exclude_inplace
+    self._query.add_q(Q(*args, **kwargs))
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1546, in add_q
+    clause, _ = self._add_q(q_object, self.used_aliases)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1577, in _add_q
+    child_clause, needed_inner = self.build_filter(
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1492, in build_filter
+    condition = self.build_lookup(lookups, col, value)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1319, in build_lookup
+    lookup = lookup_class(lhs, rhs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/lookups.py", line 27, in __init__
+    self.rhs = self.get_prep_lookup()
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/lookups.py", line 426, in get_prep_lookup
+    return super().get_prep_lookup()
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/lookups.py", line 276, in get_prep_lookup
+    rhs_value = self.lhs.output_field.get_prep_value(rhs_value)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/fields/__init__.py", line 2055, in get_prep_value
+    raise e.__class__(
+ValueError: Field 'id' expected a number but got ''.
+Internal Server Error: /search/
+Traceback (most recent call last):
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/fields/__init__.py", line 2053, in get_prep_value
+    return int(value)
+ValueError: invalid literal for int() with base 10: ''
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/forum/views.py", line 235, in search_posts
+    posts = posts.filter(tags__id__in=tag_ids).distinct()
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/query.py", line 1436, in filter
+    return self._filter_or_exclude(False, args, kwargs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/query.py", line 1454, in _filter_or_exclude
+    clone._filter_or_exclude_inplace(negate, args, kwargs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/query.py", line 1461, in _filter_or_exclude_inplace
+    self._query.add_q(Q(*args, **kwargs))
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1546, in add_q
+    clause, _ = self._add_q(q_object, self.used_aliases)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1577, in _add_q
+    child_clause, needed_inner = self.build_filter(
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1492, in build_filter
+    condition = self.build_lookup(lookups, col, value)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1319, in build_lookup
+    lookup = lookup_class(lhs, rhs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/lookups.py", line 27, in __init__
+    self.rhs = self.get_prep_lookup()
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/lookups.py", line 426, in get_prep_lookup
+    return super().get_prep_lookup()
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/lookups.py", line 276, in get_prep_lookup
+    rhs_value = self.lhs.output_field.get_prep_value(rhs_value)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/fields/__init__.py", line 2055, in get_prep_value
+    raise e.__class__(
+ValueError: Field 'id' expected a number but got ''.
+Internal Server Error: /search/
+Traceback (most recent call last):
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/fields/__init__.py", line 2053, in get_prep_value
+    return int(value)
+ValueError: invalid literal for int() with base 10: ''
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/forum/views.py", line 235, in search_posts
+    posts = posts.filter(tags__id__in=tag_ids).distinct()
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/query.py", line 1436, in filter
+    return self._filter_or_exclude(False, args, kwargs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/query.py", line 1454, in _filter_or_exclude
+    clone._filter_or_exclude_inplace(negate, args, kwargs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/query.py", line 1461, in _filter_or_exclude_inplace
+    self._query.add_q(Q(*args, **kwargs))
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1546, in add_q
+    clause, _ = self._add_q(q_object, self.used_aliases)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1577, in _add_q
+    child_clause, needed_inner = self.build_filter(
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1492, in build_filter
+    condition = self.build_lookup(lookups, col, value)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1319, in build_lookup
+    lookup = lookup_class(lhs, rhs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/lookups.py", line 27, in __init__
+    self.rhs = self.get_prep_lookup()
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/lookups.py", line 426, in get_prep_lookup
+    return super().get_prep_lookup()
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/lookups.py", line 276, in get_prep_lookup
+    rhs_value = self.lhs.output_field.get_prep_value(rhs_value)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/fields/__init__.py", line 2055, in get_prep_value
+    raise e.__class__(
+ValueError: Field 'id' expected a number but got ''.
+Internal Server Error: /search/
+Traceback (most recent call last):
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/fields/__init__.py", line 2053, in get_prep_value
+    return int(value)
+ValueError: invalid literal for int() with base 10: ''
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/forum/views.py", line 235, in search_posts
+    posts = posts.filter(tags__id__in=tag_ids).distinct()
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/query.py", line 1436, in filter
+    return self._filter_or_exclude(False, args, kwargs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/query.py", line 1454, in _filter_or_exclude
+    clone._filter_or_exclude_inplace(negate, args, kwargs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/query.py", line 1461, in _filter_or_exclude_inplace
+    self._query.add_q(Q(*args, **kwargs))
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1546, in add_q
+    clause, _ = self._add_q(q_object, self.used_aliases)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1577, in _add_q
+    child_clause, needed_inner = self.build_filter(
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1492, in build_filter
+    condition = self.build_lookup(lookups, col, value)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1319, in build_lookup
+    lookup = lookup_class(lhs, rhs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/lookups.py", line 27, in __init__
+    self.rhs = self.get_prep_lookup()
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/lookups.py", line 426, in get_prep_lookup
+    return super().get_prep_lookup()
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/lookups.py", line 276, in get_prep_lookup
+    rhs_value = self.lhs.output_field.get_prep_value(rhs_value)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/fields/__init__.py", line 2055, in get_prep_value
+    raise e.__class__(
+ValueError: Field 'id' expected a number but got ''.
+Internal Server Error: /search/
+Traceback (most recent call last):
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/fields/__init__.py", line 2053, in get_prep_value
+    return int(value)
+ValueError: invalid literal for int() with base 10: ''
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/forum/views.py", line 235, in search_posts
+    posts = posts.filter(tags__id__in=tag_ids).distinct()
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/query.py", line 1436, in filter
+    return self._filter_or_exclude(False, args, kwargs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/query.py", line 1454, in _filter_or_exclude
+    clone._filter_or_exclude_inplace(negate, args, kwargs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/query.py", line 1461, in _filter_or_exclude_inplace
+    self._query.add_q(Q(*args, **kwargs))
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1546, in add_q
+    clause, _ = self._add_q(q_object, self.used_aliases)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1577, in _add_q
+    child_clause, needed_inner = self.build_filter(
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1492, in build_filter
+    condition = self.build_lookup(lookups, col, value)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1319, in build_lookup
+    lookup = lookup_class(lhs, rhs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/lookups.py", line 27, in __init__
+    self.rhs = self.get_prep_lookup()
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/lookups.py", line 426, in get_prep_lookup
+    return super().get_prep_lookup()
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/lookups.py", line 276, in get_prep_lookup
+    rhs_value = self.lhs.output_field.get_prep_value(rhs_value)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/fields/__init__.py", line 2055, in get_prep_value
+    raise e.__class__(
+ValueError: Field 'id' expected a number but got ''.
+Internal Server Error: /search/
+Traceback (most recent call last):
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/fields/__init__.py", line 2053, in get_prep_value
+    return int(value)
+ValueError: invalid literal for int() with base 10: ''
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/forum/views.py", line 235, in search_posts
+    posts = posts.filter(tags__id__in=tag_ids).distinct()
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/query.py", line 1436, in filter
+    return self._filter_or_exclude(False, args, kwargs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/query.py", line 1454, in _filter_or_exclude
+    clone._filter_or_exclude_inplace(negate, args, kwargs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/query.py", line 1461, in _filter_or_exclude_inplace
+    self._query.add_q(Q(*args, **kwargs))
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1546, in add_q
+    clause, _ = self._add_q(q_object, self.used_aliases)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1577, in _add_q
+    child_clause, needed_inner = self.build_filter(
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1492, in build_filter
+    condition = self.build_lookup(lookups, col, value)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1319, in build_lookup
+    lookup = lookup_class(lhs, rhs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/lookups.py", line 27, in __init__
+    self.rhs = self.get_prep_lookup()
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/lookups.py", line 426, in get_prep_lookup
+    return super().get_prep_lookup()
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/lookups.py", line 276, in get_prep_lookup
+    rhs_value = self.lhs.output_field.get_prep_value(rhs_value)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/fields/__init__.py", line 2055, in get_prep_value
+    raise e.__class__(
+ValueError: Field 'id' expected a number but got ''.
+/Users/a0014208/Documents/GitHub/School-Forum/forum/views.py changed, reloading.
+Watching for file changes with StatReloader
+Watching for file changes with StatReloader
+Internal Server Error: /
+Traceback (most recent call last):
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 505, in parse
+    compile_func = self.tags[command]
+KeyError: 'static'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/forum/views.py", line 30, in home
+    return render(request, 'forum/home.html', {'posts': posts, 'query': query, 'tags': tags, 'selected_tag': tag_id})
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/shortcuts.py", line 24, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/loader.py", line 62, in render_to_string
+    return template.render(context, request)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/backends/django.py", line 61, in render
+    return self.template.render(context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 175, in render
+    return self._render(context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 167, in _render
+    return self.nodelist.render(context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 1005, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 1005, in <listcomp>
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 966, in render_annotated
+    return self.render(context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/loader_tags.py", line 132, in render
+    compiled_parent = self.get_parent(context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/loader_tags.py", line 129, in get_parent
+    return self.find_template(parent, context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/loader_tags.py", line 107, in find_template
+    template, origin = context.template.engine.find_template(
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/engine.py", line 157, in find_template
+    template = loader.get_template(name, skip=skip)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/loaders/cached.py", line 57, in get_template
+    template = super().get_template(template_name, skip)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/loaders/base.py", line 28, in get_template
+    return Template(
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 154, in __init__
+    self.nodelist = self.compile_nodelist()
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 200, in compile_nodelist
+    return parser.parse()
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 507, in parse
+    self.invalid_block_tag(token, command, parse_until)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 568, in invalid_block_tag
+    raise self.error(
+django.template.exceptions.TemplateSyntaxError: Invalid block tag on line 8: 'static'. Did you forget to register or load this tag?
+Internal Server Error: /
+Traceback (most recent call last):
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/forum/views.py", line 30, in home
+    return render(request, 'forum/home.html', {'posts': posts, 'query': query, 'tags': tags, 'selected_tag': tag_id})
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/shortcuts.py", line 24, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/loader.py", line 61, in render_to_string
+    template = get_template(template_name, using=using)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/loader.py", line 15, in get_template
+    return engine.get_template(template_name)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/backends/django.py", line 33, in get_template
+    return Template(self.engine.get_template(template_name), self)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/engine.py", line 175, in get_template
+    template, origin = self.find_template(template_name)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/engine.py", line 157, in find_template
+    template = loader.get_template(name, skip=skip)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/loaders/cached.py", line 57, in get_template
+    template = super().get_template(template_name, skip)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/loaders/base.py", line 28, in get_template
+    return Template(
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 154, in __init__
+    self.nodelist = self.compile_nodelist()
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 200, in compile_nodelist
+    return parser.parse()
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 513, in parse
+    raise self.error(token, e)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 511, in parse
+    compiled_result = compile_func(self, token)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/loader_tags.py", line 293, in do_extends
+    nodelist = parser.parse()
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 513, in parse
+    raise self.error(token, e)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 511, in parse
+    compiled_result = compile_func(self, token)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/loader_tags.py", line 232, in do_block
+    nodelist = parser.parse(("endblock",))
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 478, in parse
+    raise self.error(
+django.template.exceptions.TemplateSyntaxError: Empty variable tag on line 14
+Watching for file changes with StatReloader
+Watching for file changes with StatReloader
+Not Found: /favicon.ico
+Watching for file changes with StatReloader
+/Users/a0014208/Documents/GitHub/School-Forum/forum/views.py changed, reloading.
+Watching for file changes with StatReloader
+/Users/a0014208/Documents/GitHub/School-Forum/forum/views.py changed, reloading.
+Watching for file changes with StatReloader
+Internal Server Error: /search/
+Traceback (most recent call last):
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/backends/django.py", line 61, in render
+    return self.template.render(context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 175, in render
+    return self._render(context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 167, in _render
+    return self.nodelist.render(context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 1005, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 1005, in <listcomp>
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 966, in render_annotated
+    return self.render(context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/loader_tags.py", line 132, in render
+    compiled_parent = self.get_parent(context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/loader_tags.py", line 129, in get_parent
+    return self.find_template(parent, context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/loader_tags.py", line 107, in find_template
+    template, origin = context.template.engine.find_template(
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/engine.py", line 161, in find_template
+    raise TemplateDoesNotExist(name, tried=tried)
+django.template.exceptions.TemplateDoesNotExist: base.html
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/forum/views.py", line 251, in search_posts
+    return render(request, 'forum/search_results.html', {'results': results, 'query': query, 'selected_tags': tag_ids})
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/shortcuts.py", line 24, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/loader.py", line 62, in render_to_string
+    return template.render(context, request)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/backends/django.py", line 63, in render
+    reraise(exc, self.backend)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/backends/django.py", line 84, in reraise
+    raise new from exc
+django.template.exceptions.TemplateDoesNotExist: base.html
+Internal Server Error: /search/
+Traceback (most recent call last):
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/backends/django.py", line 61, in render
+    return self.template.render(context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 175, in render
+    return self._render(context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 167, in _render
+    return self.nodelist.render(context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 1005, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 1005, in <listcomp>
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 966, in render_annotated
+    return self.render(context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/loader_tags.py", line 132, in render
+    compiled_parent = self.get_parent(context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/loader_tags.py", line 129, in get_parent
+    return self.find_template(parent, context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/loader_tags.py", line 107, in find_template
+    template, origin = context.template.engine.find_template(
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/engine.py", line 161, in find_template
+    raise TemplateDoesNotExist(name, tried=tried)
+django.template.exceptions.TemplateDoesNotExist: base.html
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/forum/views.py", line 251, in search_posts
+    return render(request, 'forum/search_results.html', {'results': results, 'query': query, 'selected_tags': tag_ids})
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/shortcuts.py", line 24, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/loader.py", line 62, in render_to_string
+    return template.render(context, request)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/backends/django.py", line 63, in render
+    reraise(exc, self.backend)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/backends/django.py", line 84, in reraise
+    raise new from exc
+django.template.exceptions.TemplateDoesNotExist: base.html
+/Users/a0014208/Documents/GitHub/School-Forum/student_forum/settings.py changed, reloading.
+Watching for file changes with StatReloader
+Internal Server Error: /search/
+Traceback (most recent call last):
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/backends/django.py", line 61, in render
+    return self.template.render(context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 175, in render
+    return self._render(context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 167, in _render
+    return self.nodelist.render(context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 1005, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 1005, in <listcomp>
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 966, in render_annotated
+    return self.render(context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/loader_tags.py", line 132, in render
+    compiled_parent = self.get_parent(context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/loader_tags.py", line 129, in get_parent
+    return self.find_template(parent, context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/loader_tags.py", line 107, in find_template
+    template, origin = context.template.engine.find_template(
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/engine.py", line 161, in find_template
+    raise TemplateDoesNotExist(name, tried=tried)
+django.template.exceptions.TemplateDoesNotExist: base.html
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/forum/views.py", line 251, in search_posts
+    return render(request, 'forum/search_results.html', {'results': results, 'query': query, 'selected_tags': tag_ids})
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/shortcuts.py", line 24, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/loader.py", line 62, in render_to_string
+    return template.render(context, request)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/backends/django.py", line 63, in render
+    reraise(exc, self.backend)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/backends/django.py", line 84, in reraise
+    raise new from exc
+django.template.exceptions.TemplateDoesNotExist: base.html
+Internal Server Error: /search/
+Traceback (most recent call last):
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/backends/django.py", line 61, in render
+    return self.template.render(context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 175, in render
+    return self._render(context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 167, in _render
+    return self.nodelist.render(context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 1005, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 1005, in <listcomp>
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 966, in render_annotated
+    return self.render(context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/loader_tags.py", line 132, in render
+    compiled_parent = self.get_parent(context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/loader_tags.py", line 129, in get_parent
+    return self.find_template(parent, context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/loader_tags.py", line 107, in find_template
+    template, origin = context.template.engine.find_template(
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/engine.py", line 161, in find_template
+    raise TemplateDoesNotExist(name, tried=tried)
+django.template.exceptions.TemplateDoesNotExist: base.html
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/forum/views.py", line 251, in search_posts
+    return render(request, 'forum/search_results.html', {'results': results, 'query': query, 'selected_tags': tag_ids})
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/shortcuts.py", line 24, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/loader.py", line 62, in render_to_string
+    return template.render(context, request)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/backends/django.py", line 63, in render
+    reraise(exc, self.backend)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/backends/django.py", line 84, in reraise
+    raise new from exc
+django.template.exceptions.TemplateDoesNotExist: base.html
+Internal Server Error: /search/
+Traceback (most recent call last):
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/backends/django.py", line 61, in render
+    return self.template.render(context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 175, in render
+    return self._render(context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 167, in _render
+    return self.nodelist.render(context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 1005, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 1005, in <listcomp>
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 966, in render_annotated
+    return self.render(context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/loader_tags.py", line 132, in render
+    compiled_parent = self.get_parent(context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/loader_tags.py", line 129, in get_parent
+    return self.find_template(parent, context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/loader_tags.py", line 107, in find_template
+    template, origin = context.template.engine.find_template(
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/engine.py", line 161, in find_template
+    raise TemplateDoesNotExist(name, tried=tried)
+django.template.exceptions.TemplateDoesNotExist: base.html
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/forum/views.py", line 251, in search_posts
+    return render(request, 'forum/search_results.html', {'results': results, 'query': query, 'selected_tags': tag_ids})
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/shortcuts.py", line 24, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/loader.py", line 62, in render_to_string
+    return template.render(context, request)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/backends/django.py", line 63, in render
+    reraise(exc, self.backend)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/backends/django.py", line 84, in reraise
+    raise new from exc
+django.template.exceptions.TemplateDoesNotExist: base.html
+Internal Server Error: /search/
+Traceback (most recent call last):
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/backends/django.py", line 61, in render
+    return self.template.render(context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 175, in render
+    return self._render(context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 167, in _render
+    return self.nodelist.render(context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 1005, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 1005, in <listcomp>
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 966, in render_annotated
+    return self.render(context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/loader_tags.py", line 132, in render
+    compiled_parent = self.get_parent(context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/loader_tags.py", line 129, in get_parent
+    return self.find_template(parent, context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/loader_tags.py", line 107, in find_template
+    template, origin = context.template.engine.find_template(
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/engine.py", line 161, in find_template
+    raise TemplateDoesNotExist(name, tried=tried)
+django.template.exceptions.TemplateDoesNotExist: base.html
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/forum/views.py", line 251, in search_posts
+    return render(request, 'forum/search_results.html', {'results': results, 'query': query, 'selected_tags': tag_ids})
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/shortcuts.py", line 24, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/loader.py", line 62, in render_to_string
+    return template.render(context, request)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/backends/django.py", line 63, in render
+    reraise(exc, self.backend)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/backends/django.py", line 84, in reraise
+    raise new from exc
+django.template.exceptions.TemplateDoesNotExist: base.html
+Internal Server Error: /search/
+Traceback (most recent call last):
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/backends/django.py", line 61, in render
+    return self.template.render(context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 175, in render
+    return self._render(context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 167, in _render
+    return self.nodelist.render(context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 1005, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 1005, in <listcomp>
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 966, in render_annotated
+    return self.render(context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/loader_tags.py", line 132, in render
+    compiled_parent = self.get_parent(context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/loader_tags.py", line 129, in get_parent
+    return self.find_template(parent, context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/loader_tags.py", line 107, in find_template
+    template, origin = context.template.engine.find_template(
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/engine.py", line 161, in find_template
+    raise TemplateDoesNotExist(name, tried=tried)
+django.template.exceptions.TemplateDoesNotExist: base.html
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/forum/views.py", line 251, in search_posts
+    return render(request, 'forum/search_results.html', {'results': results, 'query': query, 'selected_tags': tag_ids})
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/shortcuts.py", line 24, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/loader.py", line 62, in render_to_string
+    return template.render(context, request)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/backends/django.py", line 63, in render
+    reraise(exc, self.backend)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/backends/django.py", line 84, in reraise
+    raise new from exc
+django.template.exceptions.TemplateDoesNotExist: base.html
+Internal Server Error: /search/
+Traceback (most recent call last):
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/backends/django.py", line 61, in render
+    return self.template.render(context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 175, in render
+    return self._render(context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 167, in _render
+    return self.nodelist.render(context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 1005, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 1005, in <listcomp>
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 966, in render_annotated
+    return self.render(context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/loader_tags.py", line 132, in render
+    compiled_parent = self.get_parent(context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/loader_tags.py", line 129, in get_parent
+    return self.find_template(parent, context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/loader_tags.py", line 107, in find_template
+    template, origin = context.template.engine.find_template(
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/engine.py", line 161, in find_template
+    raise TemplateDoesNotExist(name, tried=tried)
+django.template.exceptions.TemplateDoesNotExist: base.html
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/forum/views.py", line 251, in search_posts
+    return render(request, 'forum/search_results.html', {'results': results, 'query': query, 'selected_tags': tag_ids})
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/shortcuts.py", line 24, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/loader.py", line 62, in render_to_string
+    return template.render(context, request)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/backends/django.py", line 63, in render
+    reraise(exc, self.backend)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/backends/django.py", line 84, in reraise
+    raise new from exc
+django.template.exceptions.TemplateDoesNotExist: base.html
+Internal Server Error: /search/
+Traceback (most recent call last):
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/backends/django.py", line 61, in render
+    return self.template.render(context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 175, in render
+    return self._render(context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 167, in _render
+    return self.nodelist.render(context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 1005, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 1005, in <listcomp>
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 966, in render_annotated
+    return self.render(context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/loader_tags.py", line 132, in render
+    compiled_parent = self.get_parent(context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/loader_tags.py", line 129, in get_parent
+    return self.find_template(parent, context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/loader_tags.py", line 107, in find_template
+    template, origin = context.template.engine.find_template(
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/engine.py", line 161, in find_template
+    raise TemplateDoesNotExist(name, tried=tried)
+django.template.exceptions.TemplateDoesNotExist: base.html
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/forum/views.py", line 251, in search_posts
+    return render(request, 'forum/search_results.html', {'results': results, 'query': query, 'selected_tags': tag_ids})
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/shortcuts.py", line 24, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/loader.py", line 62, in render_to_string
+    return template.render(context, request)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/backends/django.py", line 63, in render
+    reraise(exc, self.backend)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/backends/django.py", line 84, in reraise
+    raise new from exc
+django.template.exceptions.TemplateDoesNotExist: base.html
+Internal Server Error: /search/
+Traceback (most recent call last):
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/backends/django.py", line 61, in render
+    return self.template.render(context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 175, in render
+    return self._render(context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 167, in _render
+    return self.nodelist.render(context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 1005, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 1005, in <listcomp>
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 966, in render_annotated
+    return self.render(context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/loader_tags.py", line 132, in render
+    compiled_parent = self.get_parent(context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/loader_tags.py", line 129, in get_parent
+    return self.find_template(parent, context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/loader_tags.py", line 107, in find_template
+    template, origin = context.template.engine.find_template(
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/engine.py", line 161, in find_template
+    raise TemplateDoesNotExist(name, tried=tried)
+django.template.exceptions.TemplateDoesNotExist: base.html
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/forum/views.py", line 251, in search_posts
+    return render(request, 'forum/search_results.html', {'results': results, 'query': query, 'selected_tags': tag_ids})
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/shortcuts.py", line 24, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/loader.py", line 62, in render_to_string
+    return template.render(context, request)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/backends/django.py", line 63, in render
+    reraise(exc, self.backend)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/backends/django.py", line 84, in reraise
+    raise new from exc
+django.template.exceptions.TemplateDoesNotExist: base.html
+Internal Server Error: /search/
+Traceback (most recent call last):
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/backends/django.py", line 61, in render
+    return self.template.render(context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 175, in render
+    return self._render(context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 167, in _render
+    return self.nodelist.render(context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 1005, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 1005, in <listcomp>
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 966, in render_annotated
+    return self.render(context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/loader_tags.py", line 132, in render
+    compiled_parent = self.get_parent(context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/loader_tags.py", line 129, in get_parent
+    return self.find_template(parent, context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/loader_tags.py", line 107, in find_template
+    template, origin = context.template.engine.find_template(
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/engine.py", line 161, in find_template
+    raise TemplateDoesNotExist(name, tried=tried)
+django.template.exceptions.TemplateDoesNotExist: base.html
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/forum/views.py", line 251, in search_posts
+    return render(request, 'forum/search_results.html', {'results': results, 'query': query, 'selected_tags': tag_ids})
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/shortcuts.py", line 24, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/loader.py", line 62, in render_to_string
+    return template.render(context, request)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/backends/django.py", line 63, in render
+    reraise(exc, self.backend)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/backends/django.py", line 84, in reraise
+    raise new from exc
+django.template.exceptions.TemplateDoesNotExist: base.html
+Internal Server Error: /search/
+Traceback (most recent call last):
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/backends/django.py", line 61, in render
+    return self.template.render(context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 175, in render
+    return self._render(context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 167, in _render
+    return self.nodelist.render(context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 1005, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 1005, in <listcomp>
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 966, in render_annotated
+    return self.render(context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/loader_tags.py", line 132, in render
+    compiled_parent = self.get_parent(context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/loader_tags.py", line 129, in get_parent
+    return self.find_template(parent, context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/loader_tags.py", line 107, in find_template
+    template, origin = context.template.engine.find_template(
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/engine.py", line 161, in find_template
+    raise TemplateDoesNotExist(name, tried=tried)
+django.template.exceptions.TemplateDoesNotExist: base.html
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/forum/views.py", line 251, in search_posts
+    return render(request, 'forum/search_results.html', {'results': results, 'query': query, 'selected_tags': tag_ids})
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/shortcuts.py", line 24, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/loader.py", line 62, in render_to_string
+    return template.render(context, request)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/backends/django.py", line 63, in render
+    reraise(exc, self.backend)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/backends/django.py", line 84, in reraise
+    raise new from exc
+django.template.exceptions.TemplateDoesNotExist: base.html
+Internal Server Error: /search/
+Traceback (most recent call last):
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/backends/django.py", line 61, in render
+    return self.template.render(context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 175, in render
+    return self._render(context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 167, in _render
+    return self.nodelist.render(context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 1005, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 1005, in <listcomp>
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 966, in render_annotated
+    return self.render(context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/loader_tags.py", line 132, in render
+    compiled_parent = self.get_parent(context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/loader_tags.py", line 129, in get_parent
+    return self.find_template(parent, context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/loader_tags.py", line 107, in find_template
+    template, origin = context.template.engine.find_template(
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/engine.py", line 161, in find_template
+    raise TemplateDoesNotExist(name, tried=tried)
+django.template.exceptions.TemplateDoesNotExist: base.html
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/forum/views.py", line 251, in search_posts
+    return render(request, 'forum/search_results.html', {'results': results, 'query': query, 'selected_tags': tag_ids})
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/shortcuts.py", line 24, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/loader.py", line 62, in render_to_string
+    return template.render(context, request)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/backends/django.py", line 63, in render
+    reraise(exc, self.backend)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/backends/django.py", line 84, in reraise
+    raise new from exc
+django.template.exceptions.TemplateDoesNotExist: base.html
+Internal Server Error: /search/
+Traceback (most recent call last):
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/backends/django.py", line 61, in render
+    return self.template.render(context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 175, in render
+    return self._render(context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 167, in _render
+    return self.nodelist.render(context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 1005, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 1005, in <listcomp>
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 966, in render_annotated
+    return self.render(context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/loader_tags.py", line 132, in render
+    compiled_parent = self.get_parent(context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/loader_tags.py", line 129, in get_parent
+    return self.find_template(parent, context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/loader_tags.py", line 107, in find_template
+    template, origin = context.template.engine.find_template(
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/engine.py", line 161, in find_template
+    raise TemplateDoesNotExist(name, tried=tried)
+django.template.exceptions.TemplateDoesNotExist: base.html
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/forum/views.py", line 251, in search_posts
+    return render(request, 'forum/search_results.html', {'results': results, 'query': query, 'selected_tags': tag_ids})
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/shortcuts.py", line 24, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/loader.py", line 62, in render_to_string
+    return template.render(context, request)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/backends/django.py", line 63, in render
+    reraise(exc, self.backend)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/backends/django.py", line 84, in reraise
+    raise new from exc
+django.template.exceptions.TemplateDoesNotExist: base.html
+Internal Server Error: /search/
+Traceback (most recent call last):
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/forum/views.py", line 251, in search_posts
+    return render(request, 'forum/search_results.html', {'results': results, 'query': query, 'selected_tags': tag_ids})
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/shortcuts.py", line 24, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/loader.py", line 62, in render_to_string
+    return template.render(context, request)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/backends/django.py", line 61, in render
+    return self.template.render(context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 175, in render
+    return self._render(context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 167, in _render
+    return self.nodelist.render(context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 1005, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 1005, in <listcomp>
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 966, in render_annotated
+    return self.render(context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/loader_tags.py", line 132, in render
+    compiled_parent = self.get_parent(context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/loader_tags.py", line 129, in get_parent
+    return self.find_template(parent, context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/loader_tags.py", line 107, in find_template
+    template, origin = context.template.engine.find_template(
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/engine.py", line 157, in find_template
+    template = loader.get_template(name, skip=skip)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/loaders/cached.py", line 57, in get_template
+    template = super().get_template(template_name, skip)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/loaders/base.py", line 28, in get_template
+    return Template(
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 154, in __init__
+    self.nodelist = self.compile_nodelist()
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 200, in compile_nodelist
+    return parser.parse()
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 513, in parse
+    raise self.error(token, e)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 511, in parse
+    compiled_result = compile_func(self, token)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/loader_tags.py", line 226, in do_block
+    raise TemplateSyntaxError(
+django.template.exceptions.TemplateSyntaxError: 'block' tag with name 'extra_js' appears more than once
+Internal Server Error: /search/
+Traceback (most recent call last):
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/forum/views.py", line 251, in search_posts
+    return render(request, 'forum/search_results.html', {'results': results, 'query': query, 'selected_tags': tag_ids})
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/shortcuts.py", line 24, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/loader.py", line 62, in render_to_string
+    return template.render(context, request)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/backends/django.py", line 61, in render
+    return self.template.render(context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 175, in render
+    return self._render(context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 167, in _render
+    return self.nodelist.render(context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 1005, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 1005, in <listcomp>
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 966, in render_annotated
+    return self.render(context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/loader_tags.py", line 132, in render
+    compiled_parent = self.get_parent(context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/loader_tags.py", line 129, in get_parent
+    return self.find_template(parent, context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/loader_tags.py", line 107, in find_template
+    template, origin = context.template.engine.find_template(
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/engine.py", line 157, in find_template
+    template = loader.get_template(name, skip=skip)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/loaders/cached.py", line 57, in get_template
+    template = super().get_template(template_name, skip)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/loaders/base.py", line 28, in get_template
+    return Template(
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 154, in __init__
+    self.nodelist = self.compile_nodelist()
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 200, in compile_nodelist
+    return parser.parse()
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 513, in parse
+    raise self.error(token, e)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 511, in parse
+    compiled_result = compile_func(self, token)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/loader_tags.py", line 226, in do_block
+    raise TemplateSyntaxError(
+django.template.exceptions.TemplateSyntaxError: 'block' tag with name 'extra_js' appears more than once
+Watching for file changes with StatReloader
+Watching for file changes with StatReloader
+/Users/a0014208/Documents/GitHub/School-Forum/forum/views.py changed, reloading.
+Watching for file changes with StatReloader
+Internal Server Error: /search/
+Traceback (most recent call last):
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/forum/views.py", line 252, in search_posts
+    if request.is_ajax():
+AttributeError: 'WSGIRequest' object has no attribute 'is_ajax'
+/Users/a0014208/Documents/GitHub/School-Forum/forum/views.py changed, reloading.
+Watching for file changes with StatReloader
+/Users/a0014208/Documents/GitHub/School-Forum/forum/views.py changed, reloading.
+Watching for file changes with StatReloader
+Internal Server Error: /search/
+Traceback (most recent call last):
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/forum/views.py", line 252, in search_posts
+    if request.is_ajax():
+AttributeError: 'WSGIRequest' object has no attribute 'is_ajax'
+/Users/a0014208/Documents/GitHub/School-Forum/forum/views.py changed, reloading.
+Watching for file changes with StatReloader
+Not Found: /undefined
+Not Found: /undefined
+/Users/a0014208/Documents/GitHub/School-Forum/forum/views.py changed, reloading.
+Watching for file changes with StatReloader
+/Users/a0014208/Documents/GitHub/School-Forum/forum/views.py changed, reloading.
+Watching for file changes with StatReloader
+Not Found: /undefined
+Not Found: /undefined
+Not Found: /admin
+/Users/a0014208/Documents/GitHub/School-Forum/student_forum/urls.py changed, reloading.
+Watching for file changes with StatReloader
+/Users/a0014208/Documents/GitHub/School-Forum/student_forum/urls.py changed, reloading.
+Watching for file changes with StatReloader
+Not Found: /apple-touch-icon.png
+Not Found: /apple-touch-icon-precomposed.png
+Not Found: /favicon.ico
+/Users/a0014208/Documents/GitHub/School-Forum/forum/admin.py changed, reloading.
+Watching for file changes with StatReloader
+/Users/a0014208/Documents/GitHub/School-Forum/forum/views.py changed, reloading.
+Watching for file changes with StatReloader
+/Users/a0014208/Documents/GitHub/School-Forum/forum/views.py changed, reloading.
+Watching for file changes with StatReloader

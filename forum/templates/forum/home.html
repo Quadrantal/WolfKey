@@ -7,8 +7,13 @@
             <a href="{% url 'create_post' %}" class="btn btn-primary">Create Post</a>
         {% endif %}
     </div>
-    
-    <div class="row">
+
+
+
+    <!-- Search Results -->
+    <div id="search-results" class="row"></div>
+
+    <div class="row" id="post-list">
         {% for post in posts %}
             <div class="col-md-6 mb-4">
                 <div class="card">
@@ -24,7 +29,7 @@
             </div>
         {% empty %}
             <div class="col-12">
-                <p>No posts yet.</p>
+                <p>No posts found.</p>
             </div>
         {% endfor %}
     </div>
