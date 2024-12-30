@@ -52,6 +52,9 @@ This is a Django-based forum application where users can create posts, add solut
 
 The application uses PostgreSQL as the database. Ensure you have PostgreSQL installed and a database created for the application. Update the `DATABASES` setting in `student_forum/settings.py` with your database credentials.
 
+### Installating PostgreSQL
+
+
 ## User Authentication
 
 The application supports user registration, login, and logout functionalities. The following views handle user authentication:
