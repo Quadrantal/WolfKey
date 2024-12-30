@@ -9,7 +9,7 @@ This is a Django-based forum application where users can create posts, add solut
 1. **Clone the repository:**
 
     ```sh
-    git clone <https://github.com/HugoC1000/School-Forum>
+    git clone <repository-url>
     cd student_forum
     ```
 
@@ -26,34 +26,86 @@ This is a Django-based forum application where users can create posts, add solut
     pip install -r requirements.txt
     ```
 
-4. **Apply the migrations to set up the database:**
+4. **Install PostgreSQL:**
+
+    You can install PostgreSQL using Homebrew:
+
+    ```sh
+    brew install postgresql
+    ```
+
+    After installation, start the PostgreSQL service:
+
+    ```sh
+    brew services start postgresql
+    ```
+
+5. **Set up PostgreSQL:**
+
+    Initialize the database cluster (if not already initialized):
+
+    ```sh
+    initdb /usr/local/var/postgres
+    ```
+
+    Create a new PostgreSQL user and database: 
+    Note: database name and user should be all lowercase. 
+
+    ```sh
+    createuser --interactive
+    createdb student_forum
+    ```
+
+    You can also set a password for the PostgreSQL user:
+
+    ```sh
+    psql
+    \password <your-username>
+    \q
+    ```
+
+
+6. **Configure Django to use PostgreSQL:**
+
+    Update your `settings.py` file to configure the database settings:
+
+    ```python
+    # filepath: /Users/a0014208/Documents/GitHub/School-Forum/forum/settings.py
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': 'student_forum',
+            'USER': '<your-username>',
+            'PASSWORD': '<your-password>',
+            'HOST': 'localhost',
+            'PORT': '5432',
+        }
+    }
+    ```
+
+7. **Apply the migrations to set up the database:**
 
     ```sh
     python manage.py migrate
     ```
 
-5. **Create a superuser to access the admin interface:**
+8. **Create a superuser to access the admin interface:**
 
     ```sh
     python manage.py createsuperuser
     ```
 
-6. **Run the development server:**
+9. **Run the development server:**
 
     ```sh
     python manage.py runserver
     ```
 
-7. **Access the application:**
-
-    Open your web browser and go to [http://127.0.0.1:8000/](http://_vscodecontentref_/13).
+By following these steps, you will have PostgreSQL installed and configured for your Django application on a Mac.
 
 ## Database
 
 The application uses PostgreSQL as the database. Ensure you have PostgreSQL installed and a database created for the application. Update the `DATABASES` setting in `student_forum/settings.py` with your database credentials.
-
-### Installating PostgreSQL
-
 
 ## User Authentication
 
