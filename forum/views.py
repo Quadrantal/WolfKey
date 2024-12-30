@@ -231,25 +231,26 @@ def search_posts(request):
     tag_ids = [tag_id for tag_id in tag_ids if tag_id]  # Filter out empty strings
     posts = Post.objects.all().order_by('-created_at')
 
-    try:
-        if query:
-            search_query = SearchQuery(query)
-            posts = posts.annotate(
-                rank=SearchRank(F('search_vector'), search_query) + TrigramSimilarity('title', query)
-            ).filter(rank__gte=0.3).order_by('-rank')
+    if query:
+        search_query = SearchQuery(query)
+        posts = posts.annotate(
+            rank=SearchRank(F('search_vector'), search_query) + TrigramSimilarity('title', query)
+        ).filter(rank__gte=0.3).order_by('-rank')
 
-        if tag_ids:
-            posts = posts.filter(tags__id__in=tag_ids).distinct()
+    if tag_ids:
+        posts = posts.filter(tags__id__in=tag_ids).distinct()
 
-        results = []
-        for post in posts:
-            results.append({
-                'title': post.title,
-                'content': post.content[:100],  # Truncate content for preview
-                'url': post.get_absolute_url(),  # Ensure you have a get_absolute_url method in your Post model
-            })
+    results = []
+    for post in posts:
+        results.append({
+            'id': post.id,
+            'title': post.title,
+            'content': post.content[:100],  # Truncate content for preview
+            'url': post.get_absolute_url(),
+            'author': post.author.username,
+            'created_at': post.created_at,
+        })
 
-        return JsonResponse({'results': results})
-    except Exception as e:
-        logger.error(f"Error in search_posts: {e}")
-        return JsonResponse({'error': 'An error occurred while processing your request.'}, status=500)
+
+
+    return JsonResponse({'results': results, 'query': query, 'selected_tags': tag_ids});

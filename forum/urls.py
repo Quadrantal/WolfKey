@@ -1,5 +1,6 @@
 from django.urls import path
 from . import views
+from django.contrib import admin
 
 urlpatterns = [
     path('', views.home, name='home'),
@@ -14,4 +15,5 @@ urlpatterns = [
     path('solution/<int:solution_id>/upvote/', views.upvote_solution, name='upvote_solution'),
     path('comment/<int:comment_id>/upvote/', views.upvote_comment, name='upvote_comment'),
     path('search/', views.search_posts, name='search_posts'),
+    path('admin/', admin.site.urls),
 ]

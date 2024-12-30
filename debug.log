@@ -1214,3 +1214,739 @@ Not Found: /favicon.ico
 Watching for file changes with StatReloader
 /Users/a0014208/Documents/GitHub/School-Forum/forum/views.py changed, reloading.
 Watching for file changes with StatReloader
+/Users/a0014208/Documents/GitHub/School-Forum/forum/views.py changed, reloading.
+Watching for file changes with StatReloader
+Internal Server Error: /search/
+Traceback (most recent call last):
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/backends/django.py", line 61, in render
+    return self.template.render(context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 175, in render
+    return self._render(context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 167, in _render
+    return self.nodelist.render(context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 1005, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 1005, in <listcomp>
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 966, in render_annotated
+    return self.render(context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/loader_tags.py", line 132, in render
+    compiled_parent = self.get_parent(context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/loader_tags.py", line 129, in get_parent
+    return self.find_template(parent, context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/loader_tags.py", line 107, in find_template
+    template, origin = context.template.engine.find_template(
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/engine.py", line 161, in find_template
+    raise TemplateDoesNotExist(name, tried=tried)
+django.template.exceptions.TemplateDoesNotExist: base.html
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/forum/views.py", line 251, in search_posts
+    return render(request, 'forum/search_results.html', {'results': results, 'query': query, 'selected_tags': tag_ids})
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/shortcuts.py", line 24, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/loader.py", line 62, in render_to_string
+    return template.render(context, request)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/backends/django.py", line 63, in render
+    reraise(exc, self.backend)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/backends/django.py", line 84, in reraise
+    raise new from exc
+django.template.exceptions.TemplateDoesNotExist: base.html
+Internal Server Error: /search/
+Traceback (most recent call last):
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/backends/django.py", line 61, in render
+    return self.template.render(context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 175, in render
+    return self._render(context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 167, in _render
+    return self.nodelist.render(context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 1005, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 1005, in <listcomp>
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 966, in render_annotated
+    return self.render(context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/loader_tags.py", line 132, in render
+    compiled_parent = self.get_parent(context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/loader_tags.py", line 129, in get_parent
+    return self.find_template(parent, context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/loader_tags.py", line 107, in find_template
+    template, origin = context.template.engine.find_template(
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/engine.py", line 161, in find_template
+    raise TemplateDoesNotExist(name, tried=tried)
+django.template.exceptions.TemplateDoesNotExist: base.html
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/forum/views.py", line 251, in search_posts
+    return render(request, 'forum/search_results.html', {'results': results, 'query': query, 'selected_tags': tag_ids})
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/shortcuts.py", line 24, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/loader.py", line 62, in render_to_string
+    return template.render(context, request)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/backends/django.py", line 63, in render
+    reraise(exc, self.backend)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/backends/django.py", line 84, in reraise
+    raise new from exc
+django.template.exceptions.TemplateDoesNotExist: base.html
+/Users/a0014208/Documents/GitHub/School-Forum/student_forum/settings.py changed, reloading.
+Watching for file changes with StatReloader
+Internal Server Error: /search/
+Traceback (most recent call last):
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/backends/django.py", line 61, in render
+    return self.template.render(context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 175, in render
+    return self._render(context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 167, in _render
+    return self.nodelist.render(context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 1005, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 1005, in <listcomp>
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 966, in render_annotated
+    return self.render(context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/loader_tags.py", line 132, in render
+    compiled_parent = self.get_parent(context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/loader_tags.py", line 129, in get_parent
+    return self.find_template(parent, context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/loader_tags.py", line 107, in find_template
+    template, origin = context.template.engine.find_template(
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/engine.py", line 161, in find_template
+    raise TemplateDoesNotExist(name, tried=tried)
+django.template.exceptions.TemplateDoesNotExist: base.html
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/forum/views.py", line 251, in search_posts
+    return render(request, 'forum/search_results.html', {'results': results, 'query': query, 'selected_tags': tag_ids})
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/shortcuts.py", line 24, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/loader.py", line 62, in render_to_string
+    return template.render(context, request)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/backends/django.py", line 63, in render
+    reraise(exc, self.backend)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/backends/django.py", line 84, in reraise
+    raise new from exc
+django.template.exceptions.TemplateDoesNotExist: base.html
+Internal Server Error: /search/
+Traceback (most recent call last):
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/backends/django.py", line 61, in render
+    return self.template.render(context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 175, in render
+    return self._render(context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 167, in _render
+    return self.nodelist.render(context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 1005, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 1005, in <listcomp>
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 966, in render_annotated
+    return self.render(context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/loader_tags.py", line 132, in render
+    compiled_parent = self.get_parent(context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/loader_tags.py", line 129, in get_parent
+    return self.find_template(parent, context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/loader_tags.py", line 107, in find_template
+    template, origin = context.template.engine.find_template(
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/engine.py", line 161, in find_template
+    raise TemplateDoesNotExist(name, tried=tried)
+django.template.exceptions.TemplateDoesNotExist: base.html
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/forum/views.py", line 251, in search_posts
+    return render(request, 'forum/search_results.html', {'results': results, 'query': query, 'selected_tags': tag_ids})
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/shortcuts.py", line 24, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/loader.py", line 62, in render_to_string
+    return template.render(context, request)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/backends/django.py", line 63, in render
+    reraise(exc, self.backend)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/backends/django.py", line 84, in reraise
+    raise new from exc
+django.template.exceptions.TemplateDoesNotExist: base.html
+Internal Server Error: /search/
+Traceback (most recent call last):
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/backends/django.py", line 61, in render
+    return self.template.render(context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 175, in render
+    return self._render(context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 167, in _render
+    return self.nodelist.render(context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 1005, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 1005, in <listcomp>
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 966, in render_annotated
+    return self.render(context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/loader_tags.py", line 132, in render
+    compiled_parent = self.get_parent(context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/loader_tags.py", line 129, in get_parent
+    return self.find_template(parent, context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/loader_tags.py", line 107, in find_template
+    template, origin = context.template.engine.find_template(
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/engine.py", line 161, in find_template
+    raise TemplateDoesNotExist(name, tried=tried)
+django.template.exceptions.TemplateDoesNotExist: base.html
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/forum/views.py", line 251, in search_posts
+    return render(request, 'forum/search_results.html', {'results': results, 'query': query, 'selected_tags': tag_ids})
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/shortcuts.py", line 24, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/loader.py", line 62, in render_to_string
+    return template.render(context, request)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/backends/django.py", line 63, in render
+    reraise(exc, self.backend)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/backends/django.py", line 84, in reraise
+    raise new from exc
+django.template.exceptions.TemplateDoesNotExist: base.html
+Internal Server Error: /search/
+Traceback (most recent call last):
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/backends/django.py", line 61, in render
+    return self.template.render(context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 175, in render
+    return self._render(context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 167, in _render
+    return self.nodelist.render(context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 1005, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 1005, in <listcomp>
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 966, in render_annotated
+    return self.render(context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/loader_tags.py", line 132, in render
+    compiled_parent = self.get_parent(context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/loader_tags.py", line 129, in get_parent
+    return self.find_template(parent, context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/loader_tags.py", line 107, in find_template
+    template, origin = context.template.engine.find_template(
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/engine.py", line 161, in find_template
+    raise TemplateDoesNotExist(name, tried=tried)
+django.template.exceptions.TemplateDoesNotExist: base.html
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/forum/views.py", line 251, in search_posts
+    return render(request, 'forum/search_results.html', {'results': results, 'query': query, 'selected_tags': tag_ids})
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/shortcuts.py", line 24, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/loader.py", line 62, in render_to_string
+    return template.render(context, request)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/backends/django.py", line 63, in render
+    reraise(exc, self.backend)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/backends/django.py", line 84, in reraise
+    raise new from exc
+django.template.exceptions.TemplateDoesNotExist: base.html
+Internal Server Error: /search/
+Traceback (most recent call last):
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/backends/django.py", line 61, in render
+    return self.template.render(context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 175, in render
+    return self._render(context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 167, in _render
+    return self.nodelist.render(context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 1005, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 1005, in <listcomp>
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 966, in render_annotated
+    return self.render(context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/loader_tags.py", line 132, in render
+    compiled_parent = self.get_parent(context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/loader_tags.py", line 129, in get_parent
+    return self.find_template(parent, context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/loader_tags.py", line 107, in find_template
+    template, origin = context.template.engine.find_template(
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/engine.py", line 161, in find_template
+    raise TemplateDoesNotExist(name, tried=tried)
+django.template.exceptions.TemplateDoesNotExist: base.html
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/forum/views.py", line 251, in search_posts
+    return render(request, 'forum/search_results.html', {'results': results, 'query': query, 'selected_tags': tag_ids})
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/shortcuts.py", line 24, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/loader.py", line 62, in render_to_string
+    return template.render(context, request)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/backends/django.py", line 63, in render
+    reraise(exc, self.backend)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/backends/django.py", line 84, in reraise
+    raise new from exc
+django.template.exceptions.TemplateDoesNotExist: base.html
+Internal Server Error: /search/
+Traceback (most recent call last):
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/backends/django.py", line 61, in render
+    return self.template.render(context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 175, in render
+    return self._render(context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 167, in _render
+    return self.nodelist.render(context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 1005, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 1005, in <listcomp>
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 966, in render_annotated
+    return self.render(context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/loader_tags.py", line 132, in render
+    compiled_parent = self.get_parent(context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/loader_tags.py", line 129, in get_parent
+    return self.find_template(parent, context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/loader_tags.py", line 107, in find_template
+    template, origin = context.template.engine.find_template(
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/engine.py", line 161, in find_template
+    raise TemplateDoesNotExist(name, tried=tried)
+django.template.exceptions.TemplateDoesNotExist: base.html
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/forum/views.py", line 251, in search_posts
+    return render(request, 'forum/search_results.html', {'results': results, 'query': query, 'selected_tags': tag_ids})
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/shortcuts.py", line 24, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/loader.py", line 62, in render_to_string
+    return template.render(context, request)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/backends/django.py", line 63, in render
+    reraise(exc, self.backend)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/backends/django.py", line 84, in reraise
+    raise new from exc
+django.template.exceptions.TemplateDoesNotExist: base.html
+Internal Server Error: /search/
+Traceback (most recent call last):
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/backends/django.py", line 61, in render
+    return self.template.render(context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 175, in render
+    return self._render(context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 167, in _render
+    return self.nodelist.render(context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 1005, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 1005, in <listcomp>
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 966, in render_annotated
+    return self.render(context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/loader_tags.py", line 132, in render
+    compiled_parent = self.get_parent(context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/loader_tags.py", line 129, in get_parent
+    return self.find_template(parent, context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/loader_tags.py", line 107, in find_template
+    template, origin = context.template.engine.find_template(
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/engine.py", line 161, in find_template
+    raise TemplateDoesNotExist(name, tried=tried)
+django.template.exceptions.TemplateDoesNotExist: base.html
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/forum/views.py", line 251, in search_posts
+    return render(request, 'forum/search_results.html', {'results': results, 'query': query, 'selected_tags': tag_ids})
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/shortcuts.py", line 24, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/loader.py", line 62, in render_to_string
+    return template.render(context, request)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/backends/django.py", line 63, in render
+    reraise(exc, self.backend)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/backends/django.py", line 84, in reraise
+    raise new from exc
+django.template.exceptions.TemplateDoesNotExist: base.html
+Internal Server Error: /search/
+Traceback (most recent call last):
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/backends/django.py", line 61, in render
+    return self.template.render(context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 175, in render
+    return self._render(context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 167, in _render
+    return self.nodelist.render(context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 1005, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 1005, in <listcomp>
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 966, in render_annotated
+    return self.render(context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/loader_tags.py", line 132, in render
+    compiled_parent = self.get_parent(context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/loader_tags.py", line 129, in get_parent
+    return self.find_template(parent, context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/loader_tags.py", line 107, in find_template
+    template, origin = context.template.engine.find_template(
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/engine.py", line 161, in find_template
+    raise TemplateDoesNotExist(name, tried=tried)
+django.template.exceptions.TemplateDoesNotExist: base.html
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/forum/views.py", line 251, in search_posts
+    return render(request, 'forum/search_results.html', {'results': results, 'query': query, 'selected_tags': tag_ids})
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/shortcuts.py", line 24, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/loader.py", line 62, in render_to_string
+    return template.render(context, request)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/backends/django.py", line 63, in render
+    reraise(exc, self.backend)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/backends/django.py", line 84, in reraise
+    raise new from exc
+django.template.exceptions.TemplateDoesNotExist: base.html
+Internal Server Error: /search/
+Traceback (most recent call last):
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/backends/django.py", line 61, in render
+    return self.template.render(context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 175, in render
+    return self._render(context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 167, in _render
+    return self.nodelist.render(context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 1005, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 1005, in <listcomp>
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 966, in render_annotated
+    return self.render(context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/loader_tags.py", line 132, in render
+    compiled_parent = self.get_parent(context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/loader_tags.py", line 129, in get_parent
+    return self.find_template(parent, context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/loader_tags.py", line 107, in find_template
+    template, origin = context.template.engine.find_template(
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/engine.py", line 161, in find_template
+    raise TemplateDoesNotExist(name, tried=tried)
+django.template.exceptions.TemplateDoesNotExist: base.html
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/forum/views.py", line 251, in search_posts
+    return render(request, 'forum/search_results.html', {'results': results, 'query': query, 'selected_tags': tag_ids})
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/shortcuts.py", line 24, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/loader.py", line 62, in render_to_string
+    return template.render(context, request)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/backends/django.py", line 63, in render
+    reraise(exc, self.backend)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/backends/django.py", line 84, in reraise
+    raise new from exc
+django.template.exceptions.TemplateDoesNotExist: base.html
+Internal Server Error: /search/
+Traceback (most recent call last):
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/backends/django.py", line 61, in render
+    return self.template.render(context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 175, in render
+    return self._render(context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 167, in _render
+    return self.nodelist.render(context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 1005, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 1005, in <listcomp>
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 966, in render_annotated
+    return self.render(context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/loader_tags.py", line 132, in render
+    compiled_parent = self.get_parent(context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/loader_tags.py", line 129, in get_parent
+    return self.find_template(parent, context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/loader_tags.py", line 107, in find_template
+    template, origin = context.template.engine.find_template(
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/engine.py", line 161, in find_template
+    raise TemplateDoesNotExist(name, tried=tried)
+django.template.exceptions.TemplateDoesNotExist: base.html
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/forum/views.py", line 251, in search_posts
+    return render(request, 'forum/search_results.html', {'results': results, 'query': query, 'selected_tags': tag_ids})
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/shortcuts.py", line 24, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/loader.py", line 62, in render_to_string
+    return template.render(context, request)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/backends/django.py", line 63, in render
+    reraise(exc, self.backend)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/backends/django.py", line 84, in reraise
+    raise new from exc
+django.template.exceptions.TemplateDoesNotExist: base.html
+Internal Server Error: /search/
+Traceback (most recent call last):
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/backends/django.py", line 61, in render
+    return self.template.render(context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 175, in render
+    return self._render(context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 167, in _render
+    return self.nodelist.render(context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 1005, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 1005, in <listcomp>
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 966, in render_annotated
+    return self.render(context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/loader_tags.py", line 132, in render
+    compiled_parent = self.get_parent(context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/loader_tags.py", line 129, in get_parent
+    return self.find_template(parent, context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/loader_tags.py", line 107, in find_template
+    template, origin = context.template.engine.find_template(
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/engine.py", line 161, in find_template
+    raise TemplateDoesNotExist(name, tried=tried)
+django.template.exceptions.TemplateDoesNotExist: base.html
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/forum/views.py", line 251, in search_posts
+    return render(request, 'forum/search_results.html', {'results': results, 'query': query, 'selected_tags': tag_ids})
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/shortcuts.py", line 24, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/loader.py", line 62, in render_to_string
+    return template.render(context, request)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/backends/django.py", line 63, in render
+    reraise(exc, self.backend)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/backends/django.py", line 84, in reraise
+    raise new from exc
+django.template.exceptions.TemplateDoesNotExist: base.html
+Internal Server Error: /search/
+Traceback (most recent call last):
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/backends/django.py", line 61, in render
+    return self.template.render(context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 175, in render
+    return self._render(context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 167, in _render
+    return self.nodelist.render(context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 1005, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 1005, in <listcomp>
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 966, in render_annotated
+    return self.render(context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/loader_tags.py", line 132, in render
+    compiled_parent = self.get_parent(context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/loader_tags.py", line 129, in get_parent
+    return self.find_template(parent, context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/loader_tags.py", line 107, in find_template
+    template, origin = context.template.engine.find_template(
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/engine.py", line 161, in find_template
+    raise TemplateDoesNotExist(name, tried=tried)
+django.template.exceptions.TemplateDoesNotExist: base.html
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/forum/views.py", line 251, in search_posts
+    return render(request, 'forum/search_results.html', {'results': results, 'query': query, 'selected_tags': tag_ids})
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/shortcuts.py", line 24, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/loader.py", line 62, in render_to_string
+    return template.render(context, request)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/backends/django.py", line 63, in render
+    reraise(exc, self.backend)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/backends/django.py", line 84, in reraise
+    raise new from exc
+django.template.exceptions.TemplateDoesNotExist: base.html
+Internal Server Error: /search/
+Traceback (most recent call last):
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/forum/views.py", line 251, in search_posts
+    return render(request, 'forum/search_results.html', {'results': results, 'query': query, 'selected_tags': tag_ids})
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/shortcuts.py", line 24, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/loader.py", line 62, in render_to_string
+    return template.render(context, request)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/backends/django.py", line 61, in render
+    return self.template.render(context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 175, in render
+    return self._render(context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 167, in _render
+    return self.nodelist.render(context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 1005, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 1005, in <listcomp>
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 966, in render_annotated
+    return self.render(context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/loader_tags.py", line 132, in render
+    compiled_parent = self.get_parent(context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/loader_tags.py", line 129, in get_parent
+    return self.find_template(parent, context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/loader_tags.py", line 107, in find_template
+    template, origin = context.template.engine.find_template(
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/engine.py", line 157, in find_template
+    template = loader.get_template(name, skip=skip)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/loaders/cached.py", line 57, in get_template
+    template = super().get_template(template_name, skip)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/loaders/base.py", line 28, in get_template
+    return Template(
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 154, in __init__
+    self.nodelist = self.compile_nodelist()
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 200, in compile_nodelist
+    return parser.parse()
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 513, in parse
+    raise self.error(token, e)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 511, in parse
+    compiled_result = compile_func(self, token)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/loader_tags.py", line 226, in do_block
+    raise TemplateSyntaxError(
+django.template.exceptions.TemplateSyntaxError: 'block' tag with name 'extra_js' appears more than once
+Internal Server Error: /search/
+Traceback (most recent call last):
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/forum/views.py", line 251, in search_posts
+    return render(request, 'forum/search_results.html', {'results': results, 'query': query, 'selected_tags': tag_ids})
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/shortcuts.py", line 24, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/loader.py", line 62, in render_to_string
+    return template.render(context, request)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/backends/django.py", line 61, in render
+    return self.template.render(context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 175, in render
+    return self._render(context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 167, in _render
+    return self.nodelist.render(context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 1005, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 1005, in <listcomp>
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 966, in render_annotated
+    return self.render(context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/loader_tags.py", line 132, in render
+    compiled_parent = self.get_parent(context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/loader_tags.py", line 129, in get_parent
+    return self.find_template(parent, context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/loader_tags.py", line 107, in find_template
+    template, origin = context.template.engine.find_template(
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/engine.py", line 157, in find_template
+    template = loader.get_template(name, skip=skip)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/loaders/cached.py", line 57, in get_template
+    template = super().get_template(template_name, skip)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/loaders/base.py", line 28, in get_template
+    return Template(
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 154, in __init__
+    self.nodelist = self.compile_nodelist()
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 200, in compile_nodelist
+    return parser.parse()
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 513, in parse
+    raise self.error(token, e)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 511, in parse
+    compiled_result = compile_func(self, token)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/loader_tags.py", line 226, in do_block
+    raise TemplateSyntaxError(
+django.template.exceptions.TemplateSyntaxError: 'block' tag with name 'extra_js' appears more than once
+Watching for file changes with StatReloader
+Watching for file changes with StatReloader
+/Users/a0014208/Documents/GitHub/School-Forum/forum/views.py changed, reloading.
+Watching for file changes with StatReloader
+Internal Server Error: /search/
+Traceback (most recent call last):
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/forum/views.py", line 252, in search_posts
+    if request.is_ajax():
+AttributeError: 'WSGIRequest' object has no attribute 'is_ajax'
+/Users/a0014208/Documents/GitHub/School-Forum/forum/views.py changed, reloading.
+Watching for file changes with StatReloader
+/Users/a0014208/Documents/GitHub/School-Forum/forum/views.py changed, reloading.
+Watching for file changes with StatReloader
+Internal Server Error: /search/
+Traceback (most recent call last):
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/forum/views.py", line 252, in search_posts
+    if request.is_ajax():
+AttributeError: 'WSGIRequest' object has no attribute 'is_ajax'
+/Users/a0014208/Documents/GitHub/School-Forum/forum/views.py changed, reloading.
+Watching for file changes with StatReloader
+Not Found: /undefined
+Not Found: /undefined
+/Users/a0014208/Documents/GitHub/School-Forum/forum/views.py changed, reloading.
+Watching for file changes with StatReloader
+/Users/a0014208/Documents/GitHub/School-Forum/forum/views.py changed, reloading.
+Watching for file changes with StatReloader
+Not Found: /undefined
+Not Found: /undefined
+Not Found: /admin
+/Users/a0014208/Documents/GitHub/School-Forum/student_forum/urls.py changed, reloading.
+Watching for file changes with StatReloader
+/Users/a0014208/Documents/GitHub/School-Forum/student_forum/urls.py changed, reloading.
+Watching for file changes with StatReloader
+Not Found: /apple-touch-icon.png
+Not Found: /apple-touch-icon-precomposed.png
+Not Found: /favicon.ico
+/Users/a0014208/Documents/GitHub/School-Forum/forum/admin.py changed, reloading.
+Watching for file changes with StatReloader
+/Users/a0014208/Documents/GitHub/School-Forum/forum/views.py changed, reloading.
+Watching for file changes with StatReloader
+/Users/a0014208/Documents/GitHub/School-Forum/forum/views.py changed, reloading.
+Watching for file changes with StatReloader

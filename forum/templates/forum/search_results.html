@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+{% extends 'forum/base.html' %}
+
+
+{% block content %}
+<div class="container mt-4">
+    <h1>Search Results</h1>
+    <div class="search-results">
+        {% if results %}
+            <ul class="list-group">
+                {% for result in results %}
+                    <li class="list-group-item">
+                        <h5>{{ result.title }}</h5>
+                        <p class="card-text">{{ result.content }}</p>
+                        <a href="{% url 'post_detail' post.id %}" class="btn btn-primary">View Post</a>
+                    </li>   
+                {% endfor %}
+            </ul>
+        {% else %}
+            <p>No results found for your search.</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
