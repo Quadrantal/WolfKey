@@ -1,4 +1,15 @@
 {% extends 'forum/base.html' %}
+{% load custom_filters %}
+{% load static %}
+
+<head>
+
+    {% block head %}
+    {{ block.super }}
+    <link rel="stylesheet" href="{% static 'forum/css/carousel.css' %}">
+    <link href="https://vjs.zencdn.net/8.16.1/video-js.css" rel="stylesheet" />
+    {% endblock %}
+</head>
 
 {% block content %}
 <!-- Post Details Section -->
@@ -12,8 +23,53 @@
                 <span class="badge badge-primary">{{ tag.name }}</span>
             {% endfor %}
         </p>
+        <!-- Media Carousel Section -->
+        {% with media_files=post.files.all|media_files %}
+        {% if media_files %}
+            <div class="carousel-wrapper">
+                <div class="carousel-container">
+                    {% for file in media_files %}
+                        <div class="carousel-slide {% if forloop.first %}active{% endif %}">
+                            <div class="aspect-ratio-box">
+                                {% if file.file.url|lower|endswith:".jpg" or file.file.url|lower|endswith:".jpeg" or file.file.url|lower|endswith:".png" %}
+                                    <img src="{{ file.file.url }}" alt="Image {{ forloop.counter }}">
+                                {% elif file.file.url|lower|endswith:".mp4" or file.file.url|lower|endswith:".webm" or file.file.url|lower|endswith:".ogg" %}
+                                    <div class="video-player">
+                                        <video-js id="video-{{ forloop.counter }}" class="video-js vjs-default-skin" controls preload="auto" data-setup="{}">
+                                            <source src="{{ file.file.url }}" type="video/{{ file.file.url|slice:"-3:" }}">
+                                        </video-js>
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+                <button class="carousel-arrow prev">&#10094;</button>
+                <button class="carousel-arrow next">&#10095;</button>
+            </div>
+        {% endif %}
+        {% endwith %}
+
+        <!-- Non-Image Files Section -->
+        {% with non_media_files=post.files.all|exclude_media_files %}
+        {% if non_media_files %}
+            <div class="non-image-files">
+                <h3>Other Attached Files</h3>
+                <ul>
+                    {% for file in non_media_files %}
+                        <li>
+                            <a href="{{ file.file.url }}" download>{{ file.file.name }}</a>
+                        </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        {% endif %}
+        {% endwith %}
     </div>
 </div>
+
+
+
 
 <!-- Add Solution Section -->
 <h3>Add Solution</h3>
@@ -92,26 +148,8 @@
 {% endfor %}
 {% endblock %}
 
-{% block extra_js %}
-<script>
-// Show the edit solution form
-function showEditSolutionForm(solutionId) {
-    document.getElementById('edit-solution-form-' + solutionId).style.display = 'block';
-}
 
-// Hide the edit solution form
-function hideEditSolutionForm(solutionId) {
-    document.getElementById('edit-solution-form-' + solutionId).style.display = 'none';
-}
-
-// Show the edit comment form
-function showEditCommentForm(commentId) {
-    document.getElementById('edit-comment-form-' + commentId).style.display = 'block';
-}
-
-// Hide the edit comment form
-function hideEditCommentForm(commentId) {
-    document.getElementById('edit-comment-form-' + commentId).style.display = 'none';
-}
-</script>
+{% block scripts %}
+<script src="https://vjs.zencdn.net/8.16.1/video.min.js"></script>
+<script src="{% static 'forum/js/carousel.js' %}"></script>
 {% endblock %}

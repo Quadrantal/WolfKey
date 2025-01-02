@@ -4,11 +4,15 @@ from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from django.contrib import messages 
 from django.contrib.auth.decorators import login_required
 from django.contrib.postgres.search import SearchVector, SearchQuery, SearchRank, TrigramSimilarity
-from .models import Post, Solution, Comment, SolutionUpvote, CommentUpvote, Tag
+from .models import Post, Solution, Comment, SolutionUpvote, CommentUpvote, Tag, File
 from .forms import PostForm, CommentForm, SolutionForm, TagForm
 from django.http import HttpResponseForbidden, JsonResponse
 from django.db.models import F
+from django.views.decorators.csrf import csrf_exempt
+from django.core.files.storage import FileSystemStorage
 import logging
+from datetime import timezone
+from datetime import timedelta
 
 logger = logging.getLogger(__name__)
 
@@ -139,18 +143,45 @@ def logout_view(request):
 
 @login_required
 def create_post(request):
+    print("POST DATA: ", request.POST)
+    print("FILES: ", request.FILES)
     if request.method == 'POST':
         form = PostForm(request.POST)
-        if form.is_valid():
-            post = form.save(commit=False)
-            post.author = request.user
-            post.save()
-            form.save_m2m()  # Save the many-to-many data for the form
-            messages.success(request, 'Post created successfully!')
-            return redirect('post_detail', post_id=post.id)
+        try:
+            if form.is_valid():
+                print("Form is valid")
+                post = form.save(commit=False)
+                post.author = request.user
+                post.save()
+                
+                # Get all temporary files from this session
+                session_key = request.session.session_key or 'default'
+                print("Session key:", session_key)
+                
+                temp_files = File.objects.filter(
+                    temporary=True,
+                    upload_session=session_key
+                )
+                print("Found temp files:", temp_files.count())
+                
+                # Link files to post and mark as permanent
+                temp_files.update(post=post, temporary=False)
+                
+                messages.success(request, 'Post created successfully!')
+                return redirect('post_detail', post_id=post.id)
+            else:
+                print("Form errors:", form.errors)
+        except Exception as e:
+            print("Error creating post:", str(e))
+            messages.error(request, f'Error creating post: {str(e)}')
     else:
         form = PostForm()
-    return render(request, 'forum/post_form.html', {'form': form, 'action': 'Create'})
+    
+    return render(request, 'forum/post_form.html', {
+        'form': form,
+        'debug': True  # Add debug flag for template
+    })
+
 
 @login_required
 def edit_post(request, post_id):
@@ -254,3 +285,30 @@ def search_posts(request):
 
 
     return JsonResponse({'results': results, 'query': query, 'selected_tags': tag_ids});
+
+
+@csrf_exempt  # Only for testing - remove in production
+def handle_upload(request):
+    print("Upload request received")
+    print("Method:", request.method)
+    print("Files:", request.FILES)
+    
+    if request.method == 'POST':
+        file = request.FILES.get('files')
+        if file:
+            try:
+                temp_file = File.objects.create(
+                    file=file,
+                    temporary=True,
+                    upload_session=request.session.session_key or 'default'
+                )
+                print("File saved:", temp_file.id)
+                return JsonResponse({'id': temp_file.id})
+            except Exception as e:
+                print("Upload error:", str(e))
+                return JsonResponse({'error': str(e)}, status=500)
+        else:
+            print("No file in request")
+            return JsonResponse({'error': 'No file provided'}, status=400)
+    
+    return JsonResponse({'error': 'Invalid request method'}, status=400)

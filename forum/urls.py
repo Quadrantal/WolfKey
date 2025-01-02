@@ -1,7 +1,8 @@
 from django.urls import path
 from . import views
 from django.contrib import admin
-
+from django.conf import settings
+from django.conf.urls.static import static
 urlpatterns = [
     path('', views.home, name='home'),
     path('post/<int:post_id>/', views.post_detail, name='post_detail'),
@@ -16,4 +17,10 @@ urlpatterns = [
     path('comment/<int:comment_id>/upvote/', views.upvote_comment, name='upvote_comment'),
     path('search/', views.search_posts, name='search_posts'),
     path('admin/', admin.site.urls),
+    path('upload/', views.handle_upload, name='handle_file_upload'),
 ]
+
+
+
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

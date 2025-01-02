@@ -1,23 +1,31 @@
 {% extends 'forum/base.html' %}
 
 {% block content %}
+<!-- Add FilePond CSS -->
+<link href="https://unpkg.com/filepond/dist/filepond.css" rel="stylesheet">
+<link href="https://unpkg.com/filepond-plugin-image-preview/dist/filepond-plugin-image-preview.css" rel="stylesheet">
+
 <div class="row justify-content-center">
     <div class="col-md-8">
         <div class="card">
             <div class="card-body">
                 <h2 class="card-title">{{ action }} Post</h2>
-                <form method="post">
+                <form method="post" enctype="multipart/form-data">
                     {% csrf_token %}
-                    {% for field in form %}
-                        <div class="mb-3">
-                            {{ field.label_tag }}
-                            {{ field.errors }}
-                            {{ field }}
-                            {% if field.help_text %}
-                                <small class="form-text text-muted">{{ field.help_text }}</small>
-                            {% endif %}
-                        </div>
-                    {% endfor %}
+                    <h3> Title: </h3>
+                    <p>{{ form.title }}</p>
+                    <h3> Content: </h3>
+                    <p>{{ form.content }}</p>
+                    <h3> Tags: </h3>
+                    <p>{{ form.tags }}</p>
+                    
+                    <input type="file" 
+                        class="filepond"
+                        name="files" 
+                        multiple 
+                        data-allow-reorder="true"
+                        data-max-file-size="50MB"
+                        data-max-files="3">
                     <button type="submit" class="btn btn-primary">{{ action }} Post</button>
                     <a href="{% url 'home' %}" class="btn btn-secondary">Cancel</a>
                 </form>
@@ -25,4 +33,45 @@
         </div>
     </div>
 </div>
-{% endblock %} 
+
+<!-- Add FilePond JS and plugins -->
+<script src="https://unpkg.com/filepond/dist/filepond.js"></script>
+<script src="https://unpkg.com/filepond-plugin-image-preview/dist/filepond-plugin-image-preview.js"></script>
+<script src="https://unpkg.com/filepond-plugin-image-exif-orientation/dist/filepond-plugin-image-exif-orientation.js"></script>
+<script src="https://unpkg.com/filepond-plugin-file-validate-size/dist/filepond-plugin-file-validate-size.js"></script>
+
+<script>
+    // Register FilePond plugins if needed
+    const inputElement = document.querySelector('input[type="file"]');
+    FilePond.registerPlugin(
+        FilePondPluginImagePreview,
+        FilePondPluginImageExifOrientation,
+        FilePondPluginFileValidateSize,
+        FilePondPluginImageEdit
+    );
+
+    // Turn all file input elements into ponds
+    const pond = FilePond.create(inputElement, {
+        allowMultiple: true, 
+        server: {
+            url: 'http://127.0.0.1:8000/', 
+            process: {
+                url: './upload/',  
+                method: 'POST',
+                withCredentials: false,  // Adjust depending on your setup
+                headers: {
+                    'X-CSRFToken': document.querySelector('[name="csrfmiddlewaretoken"]').value // CSRF token for security
+                },
+                onload: (response) => { 
+                    console.log('Upload successful: ', response); 
+                },
+                onerror: (error) => {
+                    console.error('Upload error: ', error);
+                }
+            }
+        }
+    });
+
+    console.log(pond.name);
+</script>
+{% endblock %}

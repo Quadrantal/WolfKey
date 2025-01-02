@@ -14,9 +14,13 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
-from django.contrib import admin
-from django.urls import path, include
+
+from django.urls import path
 from forum import views
+from django.contrib import admin
+from django.conf import settings
+from django.conf.urls.static import static
+from django.urls import re_path, include
 urlpatterns = [
     path('', views.home, name='home'),
     path('post/<int:post_id>/', views.post_detail, name='post_detail'),
@@ -29,6 +33,13 @@ urlpatterns = [
     path('tag/create/', views.create_tag, name='create_tag'),
     path('solution/<int:solution_id>/upvote/', views.upvote_solution, name='upvote_solution'),
     path('comment/<int:comment_id>/upvote/', views.upvote_comment, name='upvote_comment'),
-    path('search/', views.search_posts, name='search_posts'), 
+    path('search/', views.search_posts, name='search_posts'),
     path('admin/', admin.site.urls),
+    path('upload/', views.handle_upload, name='handle_file_upload'),
+    re_path(r'^fp/', include('django_drf_filepond.urls')),
 ]
+
+
+
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
