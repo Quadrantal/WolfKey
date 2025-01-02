@@ -1,0 +1,98 @@
+.file-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 1rem;
+    padding: 1rem 0;
+}
+
+.file-card {
+    position: relative;
+    background: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    padding: 1rem;
+    text-align: center;
+    transition: all 0.3s ease;
+}
+
+.file-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.file-icon {
+    font-size: 2.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.file-icon i {
+    color: #6c757d;
+}
+
+.file-icon.pdf i {
+    color: #dc3545; /* Red for PDF files */
+}
+
+.file-icon.word i {
+    color: #007bff; /* Blue for Word files */
+}
+
+.file-icon.excel i {
+    color: #28a745; /* Green for Excel files */
+}
+
+.file-icon.python i {
+    color: #3776ab; /* Blue for Python files */
+}
+
+.file-icon.cpp i {
+    color: #00599c; /* Blue for C++ files */
+}
+
+.file-icon.html i {
+    color: #e34c26; /* Orange for HTML files */
+}
+
+.file-icon.css i {
+    color: #563d7c; /* Purple for CSS files */
+}
+
+.file-icon.java i {
+    color: #b07219; /* Brown for Java files */
+}
+
+.file-icon.javascript i {
+    color: #f7df1e; /* Yellow for JavaScript files */
+}
+
+.file-icon.default i {
+    color: #6c757d; /* Default color for other files */
+}
+
+.file-name {
+    font-size: 0.9rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    margin-bottom: 0.5rem;
+}
+
+.download-btn {
+    position: absolute;
+    bottom: 0.1rem;
+    left: 50%;
+    transform: translateX(-50%);
+    color: #007bff;
+    font-size: 1.2rem;
+    transition: color 0.3s ease;
+
+}
+
+.download-btn:hover {
+    color: #0056b3;
+}
+
+/* File type specific colors */
+.fa-file-pdf i { color: #dc3545; }
+.fa-file-word i { color: #007bff; }
+.fa-file-excel i { color: #28a745; }

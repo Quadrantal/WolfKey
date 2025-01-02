@@ -19,3 +19,7 @@ def media_files(files):
 @register.filter
 def exclude_media_files(files):
     return [file for file in files if not file.file.url.lower().endswith(('.jpg', '.jpeg', '.png', '.mp4', '.webm', '.ogg'))]
+
+@register.filter(name='remove_upload')
+def remove_upload(value):
+    return value.replace('uploads/', '')
