@@ -34,6 +34,7 @@ urlpatterns = [
     path('solution/<int:solution_id>/upvote/', views.upvote_solution, name='upvote_solution'),
     path('comment/<int:comment_id>/upvote/', views.upvote_comment, name='upvote_comment'),
     path('search/', views.search_posts, name='search_posts'),
+    path('search-results/', views.search_results_new_page, name='search_results_new_page'),
     path('admin/', admin.site.urls),
     path('upload/', views.handle_upload, name='handle_file_upload'),
     re_path(r'^fp/', include('django_drf_filepond.urls')),

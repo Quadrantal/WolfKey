@@ -282,9 +282,33 @@ def search_posts(request):
             'created_at': post.created_at,
         })
 
+    return JsonResponse({'results': results, 'query': query, 'selected_tags': tag_ids})
+
+def search_results_new_page(request):
+    print("Enters view")
+    query = request.GET.get('q', '')
+    tag_ids = request.GET.get('tags', '').split(',')
+    tag_ids = [tag_id for tag_id in tag_ids if tag_id]  # Filter out empty strings
+    posts = Post.objects.all().order_by('-created_at')
+
+    if query or tag_ids:
+        if query:
+            search_query = SearchQuery(query)
+            posts = posts.annotate(
+                rank=SearchRank(F('search_vector'), search_query) + TrigramSimilarity('title', query)
+            ).filter(rank__gte=0.3).order_by('-rank')
+
+        if tag_ids:
+            posts = posts.filter(tags__id__in=tag_ids).distinct()
 
 
-    return JsonResponse({'results': results, 'query': query, 'selected_tags': tag_ids});
+        return render(request, 'forum/search_results.html', {
+                'posts': posts,
+                'query': query,
+                'selected_tags': tag_ids
+            })
+
+    return redirect('home')
 
 
 @csrf_exempt  # Only for testing - remove in production

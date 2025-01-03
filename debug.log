@@ -5294,3 +5294,554 @@ Filepond app init: File store path already exists
 Watching for file changes with StatReloader
 Initialising storage backend with storage module name [None]
 Running _get_storage_backend with fq_classname [None]
+/Users/a0014208/Documents/GitHub/School-Forum/forum/views.py changed, reloading.
+Initialising storage backend with storage module name [None]
+Running _get_storage_backend with fq_classname [None]
+Upload temp directory from top level settings: </Users/a0014208/Documents/GitHub/School-Forum/filepond_uploads>
+Filepond app init: Temporary file upload directory already exists
+App init: no django-storages backend configured, using default (local) storage backend if set, otherwise you need to manage file storage independently of this app.
+Filepond app init: File store path already exists
+Watching for file changes with StatReloader
+Initialising storage backend with storage module name [None]
+Running _get_storage_backend with fq_classname [None]
+/Users/a0014208/Documents/GitHub/School-Forum/forum/views.py changed, reloading.
+Initialising storage backend with storage module name [None]
+Running _get_storage_backend with fq_classname [None]
+Upload temp directory from top level settings: </Users/a0014208/Documents/GitHub/School-Forum/filepond_uploads>
+Filepond app init: Temporary file upload directory already exists
+App init: no django-storages backend configured, using default (local) storage backend if set, otherwise you need to manage file storage independently of this app.
+Filepond app init: File store path already exists
+Watching for file changes with StatReloader
+Initialising storage backend with storage module name [None]
+Running _get_storage_backend with fq_classname [None]
+/Users/a0014208/Documents/GitHub/School-Forum/forum/views.py changed, reloading.
+Initialising storage backend with storage module name [None]
+Running _get_storage_backend with fq_classname [None]
+Upload temp directory from top level settings: </Users/a0014208/Documents/GitHub/School-Forum/filepond_uploads>
+Filepond app init: Temporary file upload directory already exists
+App init: no django-storages backend configured, using default (local) storage backend if set, otherwise you need to manage file storage independently of this app.
+Filepond app init: File store path already exists
+Watching for file changes with StatReloader
+Initialising storage backend with storage module name [None]
+Running _get_storage_backend with fq_classname [None]
+/Users/a0014208/Documents/GitHub/School-Forum/forum/views.py changed, reloading.
+Initialising storage backend with storage module name [None]
+Running _get_storage_backend with fq_classname [None]
+Upload temp directory from top level settings: </Users/a0014208/Documents/GitHub/School-Forum/filepond_uploads>
+Filepond app init: Temporary file upload directory already exists
+App init: no django-storages backend configured, using default (local) storage backend if set, otherwise you need to manage file storage independently of this app.
+Filepond app init: File store path already exists
+Watching for file changes with StatReloader
+Initialising storage backend with storage module name [None]
+Running _get_storage_backend with fq_classname [None]
+/Users/a0014208/Documents/GitHub/School-Forum/forum/views.py changed, reloading.
+Initialising storage backend with storage module name [None]
+Running _get_storage_backend with fq_classname [None]
+Upload temp directory from top level settings: </Users/a0014208/Documents/GitHub/School-Forum/filepond_uploads>
+Filepond app init: Temporary file upload directory already exists
+App init: no django-storages backend configured, using default (local) storage backend if set, otherwise you need to manage file storage independently of this app.
+Filepond app init: File store path already exists
+Watching for file changes with StatReloader
+Initialising storage backend with storage module name [None]
+Running _get_storage_backend with fq_classname [None]
+Internal Server Error: /
+Traceback (most recent call last):
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/forum/views.py", line 37, in home
+    return render(request, 'forum/home.html', {'posts': posts, 'tags': tags, 'query': query, 'selected_tags': tag_ids})
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/shortcuts.py", line 24, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/loader.py", line 62, in render_to_string
+    return template.render(context, request)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/backends/django.py", line 61, in render
+    return self.template.render(context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 175, in render
+    return self._render(context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 167, in _render
+    return self.nodelist.render(context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 1005, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 1005, in <listcomp>
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 966, in render_annotated
+    return self.render(context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/loader_tags.py", line 157, in render
+    return compiled_parent._render(context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 167, in _render
+    return self.nodelist.render(context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 1005, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 1005, in <listcomp>
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 966, in render_annotated
+    return self.render(context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/defaulttags.py", line 471, in render
+    url = reverse(view_name, args=args, kwargs=kwargs, current_app=current_app)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/urls/base.py", line 88, in reverse
+    return resolver._reverse_with_prefix(view, prefix, *args, **kwargs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/urls/resolvers.py", line 828, in _reverse_with_prefix
+    raise NoReverseMatch(msg)
+django.urls.exceptions.NoReverseMatch: Reverse for 'searc' not found. 'searc' is not a valid view function or pattern name.
+Internal Server Error: /
+Traceback (most recent call last):
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/forum/views.py", line 37, in home
+    return render(request, 'forum/home.html', {'posts': posts, 'tags': tags, 'query': query, 'selected_tags': tag_ids})
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/shortcuts.py", line 24, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/loader.py", line 62, in render_to_string
+    return template.render(context, request)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/backends/django.py", line 61, in render
+    return self.template.render(context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 175, in render
+    return self._render(context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 167, in _render
+    return self.nodelist.render(context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 1005, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 1005, in <listcomp>
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 966, in render_annotated
+    return self.render(context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/loader_tags.py", line 157, in render
+    return compiled_parent._render(context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 167, in _render
+    return self.nodelist.render(context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 1005, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 1005, in <listcomp>
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 966, in render_annotated
+    return self.render(context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/defaulttags.py", line 471, in render
+    url = reverse(view_name, args=args, kwargs=kwargs, current_app=current_app)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/urls/base.py", line 88, in reverse
+    return resolver._reverse_with_prefix(view, prefix, *args, **kwargs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/urls/resolvers.py", line 828, in _reverse_with_prefix
+    raise NoReverseMatch(msg)
+django.urls.exceptions.NoReverseMatch: Reverse for 'search_results_new_page' not found. 'search_results_new_page' is not a valid view function or pattern name.
+Internal Server Error: /
+Traceback (most recent call last):
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/forum/views.py", line 37, in home
+    return render(request, 'forum/home.html', {'posts': posts, 'tags': tags, 'query': query, 'selected_tags': tag_ids})
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/shortcuts.py", line 24, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/loader.py", line 62, in render_to_string
+    return template.render(context, request)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/backends/django.py", line 61, in render
+    return self.template.render(context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 175, in render
+    return self._render(context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 167, in _render
+    return self.nodelist.render(context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 1005, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 1005, in <listcomp>
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 966, in render_annotated
+    return self.render(context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/loader_tags.py", line 157, in render
+    return compiled_parent._render(context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 167, in _render
+    return self.nodelist.render(context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 1005, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 1005, in <listcomp>
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 966, in render_annotated
+    return self.render(context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/defaulttags.py", line 471, in render
+    url = reverse(view_name, args=args, kwargs=kwargs, current_app=current_app)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/urls/base.py", line 88, in reverse
+    return resolver._reverse_with_prefix(view, prefix, *args, **kwargs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/urls/resolvers.py", line 828, in _reverse_with_prefix
+    raise NoReverseMatch(msg)
+django.urls.exceptions.NoReverseMatch: Reverse for 'search_results_new_page' not found. 'search_results_new_page' is not a valid view function or pattern name.
+Internal Server Error: /
+Traceback (most recent call last):
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/forum/views.py", line 37, in home
+    return render(request, 'forum/home.html', {'posts': posts, 'tags': tags, 'query': query, 'selected_tags': tag_ids})
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/shortcuts.py", line 24, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/loader.py", line 62, in render_to_string
+    return template.render(context, request)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/backends/django.py", line 61, in render
+    return self.template.render(context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 175, in render
+    return self._render(context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 167, in _render
+    return self.nodelist.render(context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 1005, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 1005, in <listcomp>
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 966, in render_annotated
+    return self.render(context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/loader_tags.py", line 157, in render
+    return compiled_parent._render(context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 167, in _render
+    return self.nodelist.render(context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 1005, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 1005, in <listcomp>
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 966, in render_annotated
+    return self.render(context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/defaulttags.py", line 471, in render
+    url = reverse(view_name, args=args, kwargs=kwargs, current_app=current_app)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/urls/base.py", line 88, in reverse
+    return resolver._reverse_with_prefix(view, prefix, *args, **kwargs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/urls/resolvers.py", line 828, in _reverse_with_prefix
+    raise NoReverseMatch(msg)
+django.urls.exceptions.NoReverseMatch: Reverse for 'search_results_new_page' not found. 'search_results_new_page' is not a valid view function or pattern name.
+Internal Server Error: /
+Traceback (most recent call last):
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/forum/views.py", line 37, in home
+    return render(request, 'forum/home.html', {'posts': posts, 'tags': tags, 'query': query, 'selected_tags': tag_ids})
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/shortcuts.py", line 24, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/loader.py", line 62, in render_to_string
+    return template.render(context, request)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/backends/django.py", line 61, in render
+    return self.template.render(context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 175, in render
+    return self._render(context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 167, in _render
+    return self.nodelist.render(context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 1005, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 1005, in <listcomp>
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 966, in render_annotated
+    return self.render(context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/loader_tags.py", line 157, in render
+    return compiled_parent._render(context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 167, in _render
+    return self.nodelist.render(context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 1005, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 1005, in <listcomp>
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 966, in render_annotated
+    return self.render(context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/defaulttags.py", line 471, in render
+    url = reverse(view_name, args=args, kwargs=kwargs, current_app=current_app)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/urls/base.py", line 88, in reverse
+    return resolver._reverse_with_prefix(view, prefix, *args, **kwargs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/urls/resolvers.py", line 828, in _reverse_with_prefix
+    raise NoReverseMatch(msg)
+django.urls.exceptions.NoReverseMatch: Reverse for 'search_results_new_page' not found. 'search_results_new_page' is not a valid view function or pattern name.
+/Users/a0014208/Documents/GitHub/School-Forum/student_forum/urls.py changed, reloading.
+Initialising storage backend with storage module name [None]
+Running _get_storage_backend with fq_classname [None]
+Upload temp directory from top level settings: </Users/a0014208/Documents/GitHub/School-Forum/filepond_uploads>
+Filepond app init: Temporary file upload directory already exists
+App init: no django-storages backend configured, using default (local) storage backend if set, otherwise you need to manage file storage independently of this app.
+Filepond app init: File store path already exists
+Watching for file changes with StatReloader
+Initialising storage backend with storage module name [None]
+Running _get_storage_backend with fq_classname [None]
+Internal Server Error: /
+Traceback (most recent call last):
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/forum/views.py", line 37, in home
+    return render(request, 'forum/home.html', {'posts': posts, 'tags': tags, 'query': query, 'selected_tags': tag_ids})
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/shortcuts.py", line 24, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/loader.py", line 62, in render_to_string
+    return template.render(context, request)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/backends/django.py", line 61, in render
+    return self.template.render(context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 175, in render
+    return self._render(context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 167, in _render
+    return self.nodelist.render(context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 1005, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 1005, in <listcomp>
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 966, in render_annotated
+    return self.render(context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/loader_tags.py", line 157, in render
+    return compiled_parent._render(context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 167, in _render
+    return self.nodelist.render(context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 1005, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 1005, in <listcomp>
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 966, in render_annotated
+    return self.render(context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/defaulttags.py", line 471, in render
+    url = reverse(view_name, args=args, kwargs=kwargs, current_app=current_app)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/urls/base.py", line 88, in reverse
+    return resolver._reverse_with_prefix(view, prefix, *args, **kwargs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/urls/resolvers.py", line 828, in _reverse_with_prefix
+    raise NoReverseMatch(msg)
+django.urls.exceptions.NoReverseMatch: Reverse for 'search_results_new_page' not found. 'search_results_new_page' is not a valid view function or pattern name.
+Internal Server Error: /
+Traceback (most recent call last):
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/forum/views.py", line 37, in home
+    return render(request, 'forum/home.html', {'posts': posts, 'tags': tags, 'query': query, 'selected_tags': tag_ids})
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/shortcuts.py", line 24, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/loader.py", line 62, in render_to_string
+    return template.render(context, request)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/backends/django.py", line 61, in render
+    return self.template.render(context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 175, in render
+    return self._render(context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 167, in _render
+    return self.nodelist.render(context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 1005, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 1005, in <listcomp>
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 966, in render_annotated
+    return self.render(context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/loader_tags.py", line 157, in render
+    return compiled_parent._render(context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 167, in _render
+    return self.nodelist.render(context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 1005, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 1005, in <listcomp>
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 966, in render_annotated
+    return self.render(context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/defaulttags.py", line 471, in render
+    url = reverse(view_name, args=args, kwargs=kwargs, current_app=current_app)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/urls/base.py", line 88, in reverse
+    return resolver._reverse_with_prefix(view, prefix, *args, **kwargs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/urls/resolvers.py", line 828, in _reverse_with_prefix
+    raise NoReverseMatch(msg)
+django.urls.exceptions.NoReverseMatch: Reverse for 'search_results_new_page' not found. 'search_results_new_page' is not a valid view function or pattern name.
+Internal Server Error: /
+Traceback (most recent call last):
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/forum/views.py", line 37, in home
+    return render(request, 'forum/home.html', {'posts': posts, 'tags': tags, 'query': query, 'selected_tags': tag_ids})
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/shortcuts.py", line 24, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/loader.py", line 62, in render_to_string
+    return template.render(context, request)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/backends/django.py", line 61, in render
+    return self.template.render(context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 175, in render
+    return self._render(context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 167, in _render
+    return self.nodelist.render(context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 1005, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 1005, in <listcomp>
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 966, in render_annotated
+    return self.render(context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/loader_tags.py", line 157, in render
+    return compiled_parent._render(context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 167, in _render
+    return self.nodelist.render(context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 1005, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 1005, in <listcomp>
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 966, in render_annotated
+    return self.render(context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/defaulttags.py", line 471, in render
+    url = reverse(view_name, args=args, kwargs=kwargs, current_app=current_app)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/urls/base.py", line 88, in reverse
+    return resolver._reverse_with_prefix(view, prefix, *args, **kwargs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/urls/resolvers.py", line 828, in _reverse_with_prefix
+    raise NoReverseMatch(msg)
+django.urls.exceptions.NoReverseMatch: Reverse for 'search_results_new_page' not found. 'search_results_new_page' is not a valid view function or pattern name.
+Internal Server Error: /
+Traceback (most recent call last):
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/forum/views.py", line 37, in home
+    return render(request, 'forum/home.html', {'posts': posts, 'tags': tags, 'query': query, 'selected_tags': tag_ids})
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/shortcuts.py", line 24, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/loader.py", line 62, in render_to_string
+    return template.render(context, request)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/backends/django.py", line 61, in render
+    return self.template.render(context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 175, in render
+    return self._render(context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 167, in _render
+    return self.nodelist.render(context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 1005, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 1005, in <listcomp>
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 966, in render_annotated
+    return self.render(context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/loader_tags.py", line 157, in render
+    return compiled_parent._render(context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 167, in _render
+    return self.nodelist.render(context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 1005, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 1005, in <listcomp>
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 966, in render_annotated
+    return self.render(context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/defaulttags.py", line 471, in render
+    url = reverse(view_name, args=args, kwargs=kwargs, current_app=current_app)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/urls/base.py", line 88, in reverse
+    return resolver._reverse_with_prefix(view, prefix, *args, **kwargs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/urls/resolvers.py", line 828, in _reverse_with_prefix
+    raise NoReverseMatch(msg)
+django.urls.exceptions.NoReverseMatch: Reverse for 'search_results_new_page' not found. 'search_results_new_page' is not a valid view function or pattern name.
+Internal Server Error: /
+Traceback (most recent call last):
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/forum/views.py", line 37, in home
+    return render(request, 'forum/home.html', {'posts': posts, 'tags': tags, 'query': query, 'selected_tags': tag_ids})
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/shortcuts.py", line 24, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/loader.py", line 62, in render_to_string
+    return template.render(context, request)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/backends/django.py", line 61, in render
+    return self.template.render(context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 175, in render
+    return self._render(context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 167, in _render
+    return self.nodelist.render(context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 1005, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 1005, in <listcomp>
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 966, in render_annotated
+    return self.render(context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/loader_tags.py", line 157, in render
+    return compiled_parent._render(context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 167, in _render
+    return self.nodelist.render(context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 1005, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 1005, in <listcomp>
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 966, in render_annotated
+    return self.render(context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/defaulttags.py", line 471, in render
+    url = reverse(view_name, args=args, kwargs=kwargs, current_app=current_app)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/urls/base.py", line 88, in reverse
+    return resolver._reverse_with_prefix(view, prefix, *args, **kwargs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/urls/resolvers.py", line 828, in _reverse_with_prefix
+    raise NoReverseMatch(msg)
+django.urls.exceptions.NoReverseMatch: Reverse for 'search_results_new_page' not found. 'search_results_new_page' is not a valid view function or pattern name.
+Internal Server Error: /
+Traceback (most recent call last):
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/forum/views.py", line 37, in home
+    return render(request, 'forum/home.html', {'posts': posts, 'tags': tags, 'query': query, 'selected_tags': tag_ids})
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/shortcuts.py", line 24, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/loader.py", line 62, in render_to_string
+    return template.render(context, request)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/backends/django.py", line 61, in render
+    return self.template.render(context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 175, in render
+    return self._render(context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 167, in _render
+    return self.nodelist.render(context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 1005, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 1005, in <listcomp>
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 966, in render_annotated
+    return self.render(context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/loader_tags.py", line 157, in render
+    return compiled_parent._render(context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 167, in _render
+    return self.nodelist.render(context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 1005, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 1005, in <listcomp>
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/base.py", line 966, in render_annotated
+    return self.render(context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/template/defaulttags.py", line 471, in render
+    url = reverse(view_name, args=args, kwargs=kwargs, current_app=current_app)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/urls/base.py", line 88, in reverse
+    return resolver._reverse_with_prefix(view, prefix, *args, **kwargs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/urls/resolvers.py", line 828, in _reverse_with_prefix
+    raise NoReverseMatch(msg)
+django.urls.exceptions.NoReverseMatch: Reverse for 'search_results_new_page' not found. 'search_results_new_page' is not a valid view function or pattern name.
+/Users/a0014208/Documents/GitHub/School-Forum/student_forum/urls.py changed, reloading.
+Initialising storage backend with storage module name [None]
+Running _get_storage_backend with fq_classname [None]
+Upload temp directory from top level settings: </Users/a0014208/Documents/GitHub/School-Forum/filepond_uploads>
+Filepond app init: Temporary file upload directory already exists
+App init: no django-storages backend configured, using default (local) storage backend if set, otherwise you need to manage file storage independently of this app.
+Filepond app init: File store path already exists
+Watching for file changes with StatReloader
+Initialising storage backend with storage module name [None]
+Running _get_storage_backend with fq_classname [None]
+/Users/a0014208/Documents/GitHub/School-Forum/forum/views.py changed, reloading.
+Initialising storage backend with storage module name [None]
+Running _get_storage_backend with fq_classname [None]
+Upload temp directory from top level settings: </Users/a0014208/Documents/GitHub/School-Forum/filepond_uploads>
+Filepond app init: Temporary file upload directory already exists
+App init: no django-storages backend configured, using default (local) storage backend if set, otherwise you need to manage file storage independently of this app.
+Filepond app init: File store path already exists
+Watching for file changes with StatReloader
+Initialising storage backend with storage module name [None]
+Running _get_storage_backend with fq_classname [None]
+/Users/a0014208/Documents/GitHub/School-Forum/student_forum/urls.py changed, reloading.
+Initialising storage backend with storage module name [None]
+Running _get_storage_backend with fq_classname [None]
+Upload temp directory from top level settings: </Users/a0014208/Documents/GitHub/School-Forum/filepond_uploads>
+Filepond app init: Temporary file upload directory already exists
+App init: no django-storages backend configured, using default (local) storage backend if set, otherwise you need to manage file storage independently of this app.
+Filepond app init: File store path already exists
+Watching for file changes with StatReloader
+Initialising storage backend with storage module name [None]
+Running _get_storage_backend with fq_classname [None]
+/Users/a0014208/Documents/GitHub/School-Forum/forum/views.py changed, reloading.
+Initialising storage backend with storage module name [None]
+Running _get_storage_backend with fq_classname [None]
+Upload temp directory from top level settings: </Users/a0014208/Documents/GitHub/School-Forum/filepond_uploads>
+Filepond app init: Temporary file upload directory already exists
+App init: no django-storages backend configured, using default (local) storage backend if set, otherwise you need to manage file storage independently of this app.
+Filepond app init: File store path already exists
+Watching for file changes with StatReloader
+Initialising storage backend with storage module name [None]
+Running _get_storage_backend with fq_classname [None]

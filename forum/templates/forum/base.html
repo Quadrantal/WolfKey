@@ -114,11 +114,17 @@
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
                 <div class="search-container">
-                    <form method="get" action="{% url 'search_posts' %}" class="d-flex align-items-center" id="search-form">
+                    <form method="get" action="{% url 'search_results_new_page' %}" class="d-flex align-items-center" id="search-form">
                         <button class="btn btn-primary d-flex align-items-center me-2" type="submit" id="search-button">
                             <i class="bi bi-search"></i>
                         </button>
-                        <input type="text" name="q" class="form-control" placeholder="Search posts..." id="search-input" value="{{ query }}">
+                        <input type="text" 
+                               name="q" 
+                               class="form-control" 
+                               placeholder="Search posts..." 
+                               id="search-input" 
+                               value="{{ query }}"
+                               onkeypress="if(event.keyCode==13) { this.form.submit(); return false; }">
                         <input type="hidden" name="tags" id="selected-tags-input" value="{{ selected_tags|join:',' }}">
                         <button type="button" class="btn btn-outline-secondary" id="toggle-tags">+</button>
                     </form>
@@ -327,9 +333,13 @@
             }
         }
 
-        searchForm.addEventListener('submit', function(event) {
-            event.preventDefault(); // Prevent the form from submitting normally
-            updateSearch(); // Perform the search using JavaScript
+        document.getElementById('search-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const searchInput = document.getElementById('search-input');
+            console.log("Submitting…");
+            if (searchInput.value.trim()) {
+                this.submit();
+            }
         });
 
         searchInput.addEventListener('input', updateSearch);

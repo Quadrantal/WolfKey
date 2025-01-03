@@ -7,12 +7,12 @@
 <div class="container mt-4">
     <h1>Search Results</h1>
     <div class="search-results">
-        {% if results %}
+        {% if posts %}
             <ul class="list-group">
-                {% for result in results %}
+                {% for post in posts %}
                     <li class="list-group-item">
-                        <h5>{{ result.title }}</h5>
-                        <p class="card-text">{{ result.content }}</p>
+                        <h5>{{ post.title }}</h5>
+                        <p class="card-text">{{ post.content }}</p>
                         <a href="{% url 'post_detail' post.id %}" class="btn btn-primary">View Post</a>
                     </li>   
                 {% endfor %}
