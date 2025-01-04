@@ -1,5 +1,5 @@
 from django import forms
-from .models import Post, Comment, Solution, Tag, File
+from .models import Post, Comment, Solution, Tag, File, UserProfile
 from django.forms.widgets import ClearableFileInput
 from django.core.files.uploadedfile import UploadedFile
 
@@ -58,3 +58,12 @@ class TagForm(forms.ModelForm):
     class Meta:
         model = Tag
         fields = ['name']
+
+
+class UserProfileForm(forms.ModelForm):
+    class Meta:
+        model = UserProfile
+        fields = ['bio']
+        widgets = {
+            'bio': forms.Textarea(attrs={'rows': 4}),
+        }

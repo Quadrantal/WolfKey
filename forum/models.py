@@ -91,3 +91,14 @@ class CommentUpvote(models.Model):
 
     class Meta:
         unique_together = ('comment', 'user')
+
+class UserProfile(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    bio = models.TextField(max_length=500, blank=True)
+    points = models.IntegerField(default=0)
+    is_moderator = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"{self.user.username}'s profile"

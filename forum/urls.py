@@ -19,6 +19,9 @@ urlpatterns = [
     path('search-results/', views.search_results_new_page, name='search_results_new_page'),
     path('admin/', admin.site.urls),
     path('upload/', views.handle_upload, name='handle_file_upload'),
+    path('profile/<str:username>/', views.profile_view, name='profile'),
+    path('profile/edit/', views.edit_profile, name='edit_profile'),
+    path('profile/', views.my_profile, name='my_profile'),
 ]
 
 

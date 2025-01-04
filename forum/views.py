@@ -4,8 +4,8 @@ from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from django.contrib import messages 
 from django.contrib.auth.decorators import login_required
 from django.contrib.postgres.search import SearchVector, SearchQuery, SearchRank, TrigramSimilarity
-from .models import Post, Solution, Comment, SolutionUpvote, CommentUpvote, Tag, File
-from .forms import PostForm, CommentForm, SolutionForm, TagForm
+from .models import Post, Solution, Comment, SolutionUpvote, CommentUpvote, Tag, File, User
+from .forms import PostForm, CommentForm, SolutionForm, TagForm, UserProfileForm
 from django.http import HttpResponseForbidden, JsonResponse
 from django.db.models import F
 from django.views.decorators.csrf import csrf_exempt
@@ -13,6 +13,8 @@ from django.core.files.storage import FileSystemStorage
 import logging
 from datetime import timezone
 from datetime import timedelta
+from django.contrib.auth.decorators import permission_required
+from django.core.exceptions import PermissionDenied
 
 logger = logging.getLogger(__name__)
 
@@ -111,6 +113,18 @@ def post_detail(request, post_id):
         'solution_form': solution_form,
         'comment_form': comment_form,
     })
+
+
+
+@permission_required('forum.can_delete_posts', raise_exception=True)
+def delete_post(request, post_id):
+    # Only users with delete permission can access this view
+    pass
+
+def edit_post(request, post_id):
+    if not request.user.has_perm('forum.can_edit_posts'):
+        raise PermissionDenied
+    # Rest of the view logic
 
 def register(request):
     if request.method == 'POST':
@@ -336,3 +350,36 @@ def handle_upload(request):
             return JsonResponse({'error': 'No file provided'}, status=400)
     
     return JsonResponse({'error': 'Invalid request method'}, status=400)
+
+
+@login_required
+def profile_view(request, username):
+    profile_user = get_object_or_404(User, username=username)
+    recent_posts = Post.objects.filter(author=profile_user).order_by('-created_at')[:5]
+    posts_count = Post.objects.filter(author=profile_user).count()
+    solutions_count = Solution.objects.filter(author=profile_user).count()
+    
+    context = {
+        'profile_user': profile_user,
+        'recent_posts': recent_posts,
+        'posts_count': posts_count,
+        'solution_count': solutions_count,
+    }
+    return render(request, 'forum/profile.html', context)
+
+@login_required
+def edit_profile(request):
+    if request.method == 'POST':
+        form = UserProfileForm(request.POST, request.FILES, instance=request.user.userprofile)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Profile updated successfully!')
+            return redirect('profile', username=request.user.username)
+    else:
+        form = UserProfileForm(instance=request.user.userprofile)
+    
+    return render(request, 'forum/edit_profile.html', {'form': form})
+
+@login_required
+def my_profile(request):
+    return redirect('profile', username=request.user.username)
