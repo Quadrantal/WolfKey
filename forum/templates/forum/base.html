@@ -106,63 +106,114 @@
 
     {% block scripts %}{% endblock %}
 
-    <nav class="navbar navbar-expand-lg navbar-light bg-light">
-        <div class="container">
-            <a class="navbar-brand" href="{% url 'home' %}">Student Forum</a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <div class="search-container">
-                    <form method="get" action="{% url 'search_results_new_page' %}" class="d-flex align-items-center" id="search-form">
-                        <button class="btn btn-primary d-flex align-items-center me-2" type="submit" id="search-button">
-                            <i class="bi bi-search"></i>
-                        </button>
-                        <input type="text" 
-                               name="q" 
-                               class="form-control" 
-                               placeholder="Search posts..." 
-                               id="search-input" 
-                               value="{{ query }}"
-                               onkeypress="if(event.keyCode==13) { this.form.submit(); return false; }">
-                        <input type="hidden" name="tags" id="selected-tags-input" value="{{ selected_tags|join:',' }}">
-                        <button type="button" class="btn btn-outline-secondary" id="toggle-tags">+</button>
-                    </form>
-                    
-                    <div id="selected-tags" class="selected-tags-container">
-                        <!-- Selected tags will appear here -->
+        <nav class="navbar navbar-expand-lg navbar-light bg-light">
+            <div class="container">
+                <a class="navbar-brand" href="{% url 'home' %}">Student Forum</a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarNav">
+                    <div class="search-container">
+                        <form method="get" action="{% url 'search_results_new_page' %}" class="d-flex align-items-center" id="search-form">
+                            <button class="btn btn-primary d-flex align-items-center me-2" type="submit" id="search-button">
+                                <i class="bi bi-search"></i>
+                            </button>
+                            <input type="text" 
+                                name="q" 
+                                class="form-control" 
+                                placeholder="Search posts..." 
+                                id="search-input" 
+                                value="{{ query }}"
+                                onkeypress="if(event.keyCode==13) { this.form.submit(); return false; }">
+                            <input type="hidden" name="tags" id="selected-tags-input" value="{{ selected_tags|join:',' }}">
+                            <button type="button" class="btn btn-outline-secondary" id="toggle-tags">+</button>
+                        </form>
+                        
+                        <div id="selected-tags" class="selected-tags-container">
+                            <!-- Selected tags will appear here -->
+                        </div>
                     </div>
-                </div>
-                
-                <ul class="navbar-nav ms-auto">
-                    {% if user.is_authenticated %}
-                        <li class="nav-item">
-                            <a class="nav-link" href="{% url 'create_post' %}">Create Post</a>
-                        </li>
-                        {% if user.is_moderator or user.is_superuser %}
+                    
+                    <ul class="navbar-nav ms-auto">
+                        {% if user.is_authenticated %}
                             <li class="nav-item">
-                                <a href="{% url 'admin:index' %}">link to admin panel</a>
+                                <a class="nav-link" href="{% url 'create_post' %}">Create Post</a>
+                            </li>
+                            {% if user.is_moderator or user.is_superuser %}
+                                <li class="nav-item">
+                                    <a href="{% url 'admin:index' %}">link to admin panel</a>
+                                </li>
+                            {% endif %}
+                            <li class="nav-item">
+                                <a class="nav-link" href="{% url 'profile' user.username %}">Profile</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="{% url 'logout' %}">Logout</a>
+                            </li>
+                        {% else %}
+                            <li class="nav-item">
+                                <a class="nav-link" href="{% url 'login' %}">Login</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="{% url 'register' %}">Register</a>
                             </li>
                         {% endif %}
-                        <li class="nav-item">
-                            <a class="nav-link" href="{% url 'profile' user.username %}">Profile</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="{% url 'logout' %}">Logout</a>
-                        </li>
-                    {% else %}
-                        <li class="nav-item">
-                            <a class="nav-link" href="{% url 'login' %}">Login</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="{% url 'register' %}">Register</a>
-                        </li>
-                    {% endif %}
-                </ul>
+                    </ul>
+    
+                    </div>
+                    <!-- Floating Tag Selector -->
+                    <div id="tags-container" class="floating-tag-selector">
+                        <div class="input-group mb-3">
+                            <input type="text" class="form-control" placeholder="Search tags..." id="tag-search-input">
+                        </div>
+                        <div class="input-group mb-3 custom-select-container">
+                            <div class="custom-select" id="custom-tag-select">
+                                {% for tag in tags %}
+                                    <div class="custom-select-option" data-value="{{ tag.id }}">{{ tag.name }}</div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        <button class="btn btn-primary" id="add-tags">Add Tags</button>
+                    </div>
+                </div>
+            </div>
+        </nav>
 
+        <!-- Sidebar -->
+        <nav class="sidebar">
+            <ul class="list-unstyled">
+                <li><a href="{% url 'home' %}"><i class="bi bi-house"></i> Home</a></li>
+                {% if user.is_authenticated %}
+                    <li><a href="{% url 'profile' user.username %}"><i class="bi bi-person"></i> Profile</a></li>
+                    <li><a href="{% url 'create_post' %}"><i class="bi bi-plus-square"></i> Create Post</a></li>
+                    {% if user.is_moderator or user.is_superuser %}
+                        <li><a href="{% url 'admin:index' %}"><i class="bi bi-gear"></i> Admin Panel</a></li>
+                    {% endif %}
+                    <li><a href="{% url 'logout' %}"><i class="bi bi-box-arrow-right"></i> Logout</a></li>
+                {% else %}
+                    <li><a href="{% url 'login' %}"><i class="bi bi-box-arrow-in-right"></i> Login</a></li>
+                    <li><a href="{% url 'register' %}"><i class="bi bi-person-plus"></i> Register</a></li>
+                {% endif %}
+            </ul>
+        </nav>
+
+        <!-- Overlay -->
+        <div class="overlay" id="overlay"></div>
+
+        <div id="content">
+            <div class="main-content">
+                {% if messages %}
+                    {% for message in messages %}
+                        <div class="alert alert-{{ message.tags }}">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                {% endif %}
+                
+                {% block content %}
+                {% endblock %}
             </div>
         </div>
-    </nav>
 
     <!-- Floating Tag Selector -->
     <div id="tags-container" class="floating-tag-selector">
@@ -177,19 +228,6 @@
             </div>
         </div>
         <button class="btn btn-primary" id="add-tags">Add Tags</button>
-    </div>
-
-    <div class="container mt-4">
-        {% if messages %}
-            {% for message in messages %}
-                <div class="alert alert-{{ message.tags }}">
-                    {{ message }}
-                </div>
-            {% endfor %}
-        {% endif %}
-        
-        {% block content %}
-        {% endblock %}
     </div>
 
     <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqV</li>gRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" c""rossorigin="anonymous"></script>
@@ -351,6 +389,7 @@
         });
 
         searchInput.addEventListener('input', updateSearch);
+
     });
     </script>
     {% endblock %}
