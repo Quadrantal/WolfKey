@@ -149,3 +149,24 @@
 .sidebar ul li a:hover {
     background-color: #e9ecef;
 }
+
+.navbar-nav li a {
+    font-size: 1.2rem;
+    padding: 8px 15px;
+    color: #495057;
+    transition: color 0.3s ease;
+    display: flex;
+    align-items: center;
+}
+
+.navbar-nav li a:hover {
+    color: #007bff;
+}
+
+.navbar-nav li {
+    margin: 0 5px;
+}
+
+.navbar-nav .bi {
+    font-size: 1.4rem;
+}

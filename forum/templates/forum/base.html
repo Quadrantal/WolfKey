@@ -136,27 +136,15 @@
                     
                     <ul class="navbar-nav ms-auto">
                         {% if user.is_authenticated %}
-                            <li class="nav-item">
-                                <a class="nav-link" href="{% url 'create_post' %}">Create Post</a>
-                            </li>
+                            <li><a href="{% url 'create_post' %}"><i class="bi bi-plus-square"></i></a></li>
                             {% if user.is_moderator or user.is_superuser %}
-                                <li class="nav-item">
-                                    <a href="{% url 'admin:index' %}">link to admin panel</a>
-                                </li>
+                                <li><a href="{% url 'admin:index' %}"><i class="bi bi-gear"></i></a></li>
                             {% endif %}
-                            <li class="nav-item">
-                                <a class="nav-link" href="{% url 'profile' user.username %}">Profile</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" href="{% url 'logout' %}">Logout</a>
-                            </li>
+                            <li><a href="{% url 'profile' user.username %}"><i class="bi bi-person"></i> </a></li>
+                            <li><a href="{% url 'logout' %}"><i class="bi bi-box-arrow-right"></i> </a></li>
                         {% else %}
-                            <li class="nav-item">
-                                <a class="nav-link" href="{% url 'login' %}">Login</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" href="{% url 'register' %}">Register</a>
-                            </li>
+                            <li><a href="{% url 'login' %}"><i class="bi bi-box-arrow-in-right"></i> </a></li>
+                            <li><a href="{% url 'register' %}"><i class="bi bi-person-plus"></i> </a></li>
                         {% endif %}
                     </ul>
     
