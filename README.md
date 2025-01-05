@@ -10,7 +10,7 @@ This is a Django-based forum application where users can create posts, add solut
 
     ```sh
     git clone https://github.com/HugoC1000/School-Forum.git
-    cd student_forum
+    cd School-Forum/
     ```
 
 2. **Create and activate a virtual environment:**
@@ -32,6 +32,7 @@ This is a Django-based forum application where users can create posts, add solut
 
     ```sh
     brew install postgresql
+    #for Windows users, go to <https://www.postgresql.org/download/windows/> and download the official installer
     ```
 
     After installation, start the PostgreSQL service:
