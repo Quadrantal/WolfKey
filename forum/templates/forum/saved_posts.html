@@ -1,0 +1,10 @@
+{% extends 'forum/base.html' %}
+
+<h2>Saved Posts</h2>
+{% for post in posts %}
+    <div>
+        <h3>{{ post.title }}</h3>
+        <p>{{ post.content }}</p>
+        <a href="{% url 'unsave_post' post.id %}">Unsave</a>
+    </div>
+{% endfor %}

@@ -89,6 +89,19 @@
                 </div>
             {% endif %}
         {% endwith %}
+
+        <!-- Post Save/Unsave Button -->
+        <div class="post-actions">
+            <form method="POST" 
+                  action="{% if is_saved %}{% url 'unsave_post' post.id %}{% else %}{% url 'save_post' post.id %}{% endif %}">
+                {% csrf_token %}
+                <button type="submit" 
+                        class="btn {% if is_saved %}btn-warning{% else %}btn-success{% endif %}">
+                    {% if is_saved %}Unsave Post{% else %}Save Post{% endif %}
+                </button>
+            </form>
+        </div>
+
     </div>
 </div>
 

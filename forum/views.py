@@ -4,7 +4,7 @@ from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from django.contrib import messages 
 from django.contrib.auth.decorators import login_required
 from django.contrib.postgres.search import SearchVector, SearchQuery, SearchRank, TrigramSimilarity
-from .models import Post, Solution, Comment, SolutionUpvote, CommentUpvote, Tag, File, User
+from .models import Post, Solution, Comment, SolutionUpvote, CommentUpvote, Tag, File, User, SavedPost
 from .forms import PostForm, CommentForm, SolutionForm, TagForm, UserProfileForm
 from django.http import HttpResponseForbidden, JsonResponse
 from django.db.models import F
@@ -107,11 +107,13 @@ def post_detail(request, post_id):
 
         return redirect('post_detail', post_id=post.id)
 
+    is_saved = SavedPost.objects.filter(user=request.user, post=post).exists()
     return render(request, 'forum/post_detail.html', {
         'post': post,
         'solutions': solutions,
         'solution_form': solution_form,
         'comment_form': comment_form,
+        'is_saved': is_saved, 
     })
 
 
@@ -383,3 +385,20 @@ def edit_profile(request):
 @login_required
 def my_profile(request):
     return redirect('profile', username=request.user.username)
+
+@login_required
+def save_post(request, post_id):
+    post = get_object_or_404(Post, id=post_id)
+    SavedPost.objects.get_or_create(user=request.user, post=post)
+    return redirect('post_detail', post_id=post.id)
+
+@login_required
+def unsave_post(request, post_id):
+    post = get_object_or_404(Post, id=post_id)
+    SavedPost.objects.filter(user=request.user, post=post).delete()
+    return redirect('post_detail', post_id=post.id)
+
+@login_required
+def saved_posts(request):
+    posts = Post.objects.filter(saves__user=request.user)
+    return render(request, 'saved_posts.html', {'posts': posts})
