@@ -1,11 +1,12 @@
 from django.contrib import admin
 from django.contrib.auth.models import Group, Permission
-from .models import Post, Tag, File, UserProfile
+from .models import Post, Tag, File, UserProfile, SavedPost
 
 admin.site.register(Post)
 admin.site.register(Tag)
 admin.site.register(File)
 admin.site.register(UserProfile)
+admin.site.register(SavedPost)
 
 def create_moderator_group():
     moderator_group, created = Group.objects.get_or_create(name='Moderators')

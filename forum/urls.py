@@ -22,6 +22,10 @@ urlpatterns = [
     path('profile/<str:username>/', views.profile_view, name='profile'),
     path('profile/edit/', views.edit_profile, name='edit_profile'),
     path('profile/', views.my_profile, name='my_profile'),
+    path('save-post/<int:post_id>/', views.save_post, name='save_post'),
+    path('unsave-post/<int:post_id>/', views.unsave_post, name='unsave_post'),
+    path('saved_posts', views.saved_posts, name = "saved_posts"),
+    path('myposts/', views.my_posts, name = 'my_posts'),
 ]
 
 
