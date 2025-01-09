@@ -97,17 +97,8 @@
         <nav class="sidebar">
             <ul class="list-unstyled">
                 <li><a href="{% url 'home' %}"><i class="bi bi-house"></i> Home</a></li>
-                {% if user.is_authenticated %}
-                    <li><a href="{% url 'profile' user.username %}"><i class="bi bi-person"></i> Profile</a></li>
-                    <li><a href="{% url 'create_post' %}"><i class="bi bi-plus-square"></i> Create Post</a></li>
-                    {% if user.is_moderator or user.is_superuser %}
-                        <li><a href="{% url 'admin:index' %}"><i class="bi bi-gear"></i> Admin Panel</a></li>
-                    {% endif %}
-                    <li><a href="{% url 'logout' %}"><i class="bi bi-box-arrow-right"></i> Logout</a></li>
-                {% else %}
-                    <li><a href="{% url 'login' %}"><i class="bi bi-box-arrow-in-right"></i> Login</a></li>
-                    <li><a href="{% url 'register' %}"><i class="bi bi-person-plus"></i> Register</a></li>
-                {% endif %}
+                <li><a href="{% url 'saved_posts' %}"><i class="bi bi-bookmark"></i> Saved</a></li>
+                <li><a href="{% url 'my_posts'%}"><i class="bi bi-bookmark"></i> My Posts</a></li>
             </ul>
         </nav>
 

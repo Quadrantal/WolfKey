@@ -3,7 +3,7 @@
 
 {% block content %}
 <h1>
-    Saved Posts
+    My Posts
 </h1>
 {% if posts %}
 <div class="row" id="post-list">
@@ -15,12 +15,11 @@
                     <p class="card-text">{{ post.content|truncatewords:30 }}</p>
                     <div class="d-flex justify-content-between align-items-center">
                         <a href="{% url 'post_detail' post.id %}" class="btn btn-primary">Read More</a>
-                        <a href="{% url 'unsave_post' post.id %}" class="btn btn-danger btn-sm">Unsave</a>
                     </div>
 
                 </div>
                 <div class="card-footer text-muted">
-                    Posted by {{ post.author.username }} on {{ post.created_at|date:"F d, Y" }}
+                    {{ post.created_at|date:"F d, Y" }}
                     <span class="badge bg-info">{{ post.tags.all|join:", " }}</span>
                 </div>
             </div>

@@ -401,4 +401,9 @@ def unsave_post(request, post_id):
 @login_required
 def saved_posts(request):
     posts = Post.objects.filter(saves__user=request.user)
-    return render(request, 'saved_posts.html', {'posts': posts})
+    return render(request, 'forum/saved_posts.html', {'posts': posts})
+
+@login_required
+def my_posts(request):
+    posts = Post.objects.filter(author = request.user)
+    return render(request,'forum/my_posts.html', {'posts': posts})
