@@ -23,3 +23,7 @@ def exclude_media_files(files):
 @register.filter(name='remove_upload')
 def remove_upload(value):
     return value.replace('uploads/', '')
+
+@register.filter
+def vote_difference(solution):
+    return solution.upvotes - solution.downvotes
