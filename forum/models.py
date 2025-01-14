@@ -71,6 +71,7 @@ class Solution(models.Model):
     content = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
     upvotes = models.IntegerField(default=0)
+    downvotes = models.IntegerField(default=0)
 
     def __str__(self):
         return f'Solution by {self.author.username} for {self.post.title}'
@@ -89,6 +90,13 @@ class Comment(models.Model):
         return f'Comment by {self.author.username}'
 
 class SolutionUpvote(models.Model):
+    solution = models.ForeignKey(Solution, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+
+    class Meta:
+        unique_together = ('solution', 'user')
+
+class SolutionDownvote(models.Model):
     solution = models.ForeignKey(Solution, on_delete=models.CASCADE)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
 

@@ -107,7 +107,7 @@
 
 .main-content {
     flex: 1;
-    padding: 40px;
+    padding: 20px;
     margin: 0 auto;
     width: calc(100% - 150px);
     margin-left: 150px; /* Match sidebar width */
@@ -149,39 +149,6 @@
     background-color: #e9ecef;
 }
 
-.navbar-nav li a {
-    font-size: 1.2rem;
-    padding: 8px 15px;
-    color: #495057;
-    transition: color 0.3s ease;
-    display: flex;
-}
-
-.navbar-nav li a:hover {
-    color: #007bff;
-}
-
-.navbar-nav li {
-    margin: 0 5px;
-}
-
-.navbar-nav .bi {
-    font-size: 1.4rem;
-}
-
-.navbar-nav {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin: 0;
-    padding: 0;
-    list-style: none;
-}
-
-#nav-container {
-    max-width: 3000px;
-}
-
 .comment-edit-form textarea {
     min-height: 100px;
 }
@@ -190,72 +157,243 @@
     white-space: pre-wrap;
 }
 
-.search-container form {
-    display: flex;
-    align-items: center;
-    width: 100%;
-    justify-content: center;
-}
-
-.navbar-nav {
-    flex-grow: 1;
+h4{
+    font-family: 'Georgia' !important;
 }
 
 .nav-link {
     padding-left: 30px;
 }
 
-.search-container {
+.form-control:focus {
+    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.15);
+}
+
+.btn-primary {
+    background-color: #004080 !important;
+    border-color: #004080 !important;
+}
+
+.btn-primary:hover {
+    background-color: #1e3a8a;
+    border-color: #1e3a8a;
+}
+
+.text-primary {
+    color: #004080 !important;
+}
+
+h1 {
+    font-family: "IBM Plex Serif " !important;
+    font-size: 2.5rem !important;
+}
+
+p{
+    font-family: "Georgia" !important;
+}
+
+.dropdown .btn {
+    background-color: transparent;
+    border: none;
+    font-size: 1.2rem; /* Adjust the icon size */
+    cursor: pointer;
+}
+
+.dropdown .btn:hover {
+    color: #007bff; /* Change icon color on hover */
+}
+
+/* Dropdown menu styling */
+.dropdown-menu {
+    background-color: #ffffff; /* Background color */
+    border: 1px solid #eaeaea; /* Border color */
+    border-radius: 0.25rem; /* Rounded corners */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Slight shadow for depth */
+}
+
+/* Dropdown item styling */
+.dropdown-menu .dropdown-item {
+    font-size: 0.9rem; /* Font size */
+    color: #333333; /* Text color */
+    padding: 0.5rem 1rem; /* Spacing */
+    transition: background-color 0.2s, color 0.2s; /* Smooth hover effect */
+}
+
+.dropdown-menu .dropdown-item:hover {
+    background-color: #f8f9fa; /* Light hover background */
+    color: #007bff; /* Hover text color */
+}
+
+/* Divider style */
+.dropdown-menu .dropdown-divider {
+    border-top: 1px solid #eaeaea; /* Divider color */
+    margin: 0.5rem 0; /* Spacing above and below */
+}
+
+
+.nav-link:hover {
+    color: #004080 !important;
+}
+
+#main-section {
+    max-width: 900px;
+}
+.post-header {
+    padding: 20px;
+    border-bottom: 1px solid #e0e0e0;
+}
+.post-stats {
     display: flex;
-    flex-direction: row;
     align-items: center;
-    justify-content: center; /* Centers the children horizontally */
-    width: 100%;
-    position: relative;
-    max-width: 1500px;
-    margin: 0 auto;
+    gap: 15px;
+    color: #666;
+    font-size: 14px;
 }
-
-.selected-tags-container {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    margin-top: 8px;
-    max-width: 90%;
-    gap: 5px;
+.post-content {
+    padding: 10px;
+    font-size: 16px;
+    line-height: 1.6;
 }
-
-#search-form {
+.solution-card {
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    background: white;
+}
+.solution-header {
     display: flex;
     align-items: center;
+    padding: 15px 20px;
+    border-bottom: 1px solid #e0e0e0;
 }
-
-#search-button {
+.solution-stats {
+    margin-left: auto;
     display: flex;
-    justify-content: center;
     align-items: center;
-    width: 40px;
-    height: 40px;
-    padding: 0;
-    border-radius: 5px;
-    margin-right: 0px !important;
-    border-top-right-radius: 0px;
-    border-bottom-right-radius: 0px;
+    gap: 15px;
+}
+.vote-count {
+    font-size: 24px;
+    font-weight: 500;
+    color: #333;
+    text-align: center;
+}
+.author-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+.author-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background-color: #e0e0e0;
+}
+.tag {
+    background-color: #e1ecf4;
+    color: #39739d;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    margin-right: 5px;
+}
+.comment-section {
+    background-color: #f8f9fa;
+    padding: 15px;
+    margin-top: 10px;
+    border-top: 1px solid #e0e0e0;
 }
 
-#search-input {
-    height: 40px;
-    line-height: normal;
-    border-radius: 0px;
-    width: 700px;
+.vote-cell {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 40px;
+    padding: 20px;
 }
 
-#search-button i {
-    font-size: 1.2rem;
+.vote-count {
+    font-size: 20px;
+    font-weight: bold;
+    color: #333;
+    text-align: center;
+    margin: 10px 0;
 }
 
-#toggle-tags {
-    border-top-left-radius: 0px;
-    border-bottom-left-radius: 0px;
-    height: 40px;
+.vote-button {
+    background: none;
+    border: none;
+    color: #babfc4;
+    cursor: pointer;
+    padding: 5px;
+    left: 10;
+}
+
+.vote-button:hover {
+    color: #838c95;
+}
+
+.vote-button.active {
+    color: #f48024;
+}
+
+.post-content-cell {
+    flex-grow: 1;
+    padding: 10px 0;
+}
+
+.solution-container {
+    display: flex;
+    margin-bottom: 20px;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+}
+
+.question-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 10px;
+}
+
+.question-header h1 {
+    max-width: 80%;
+}
+
+.title {
+    font-size: 48px;
+    font-weight: bold;
+    color: #333;
+    margin: 0;
+    max-width: 70%;
+}
+
+.actions {
+    display: flex;
+    gap: 10px;
+}
+
+.button {
+    padding: 5px 10px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+}
+
+.follow-button {
+    background-color: #f0f0f0;
+    border: none;
+    color: #333;
+}
+
+.follow-count {
+    margin-left: 5px;
+    color: #666;
+}
+
+.add-answer-button {
+    background-color: white;
+    border: 1px solid #ddd;
+    color: #333;
 }

@@ -14,6 +14,7 @@ urlpatterns = [
     path('logout/', views.logout_view, name='logout'),
     path('tag/create/', views.create_tag, name='create_tag'),
     path('solution/<int:solution_id>/upvote/', views.upvote_solution, name='upvote_solution'),
+    path('solution/<int:solution_id>/downvote/', views.downvote_solution, name='downvote_solution'),
     path('comment/<int:comment_id>/upvote/', views.upvote_comment, name='upvote_comment'),
     path('search/', views.search_posts, name='search_posts'),
     path('search-results/', views.search_results_new_page, name='search_results_new_page'),

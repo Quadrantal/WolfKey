@@ -3,7 +3,6 @@
 {% load static %}
 
 <head>
-
     {% block head %}
     {{ block.super }}
     <link rel="stylesheet" href="{% static 'forum/css/carousel.css' %}">
@@ -13,178 +12,204 @@
 </head>
 
 {% block content %}
-<!-- Post Details Section -->
-<div class="card mb-4">
-    <div class="card-body">
-        <h1 class="card-title">{{ post.title }}</h1>
-        <p class="text-muted">Posted by {{ post.author.username }} on {{ post.created_at|date:"F d, Y" }}</p>
-        <p class="card-text">{{ post.content }}</p>
-        <p>Tags: 
-            {% for tag in post.tags.all %}
-                <span class="badge badge-primary">{{ tag.name }}</span>
-            {% endfor %}
-        </p>
-        <!-- Media Carousel Section -->
-        {% with media_files=post.files.all|media_files %}
-        {% if media_files %}
-            <div class="carousel-wrapper">
-                <div class="carousel-container">
-                    {% for file in media_files %}
-                        <div class="carousel-slide {% if forloop.first %}active{% endif %}">
-                            <div class="aspect-ratio-box">
-                                {% if file.file.url|lower|endswith:".jpg" or file.file.url|lower|endswith:".jpeg" or file.file.url|lower|endswith:".png" %}
-                                    <img src="{{ file.file.url }}" alt="Image {{ forloop.counter }}">
-                                {% elif file.file.url|lower|endswith:".mp4" or file.file.url|lower|endswith:".webm" or file.file.url|lower|endswith:".ogg" %}
-                                    <div class="video-player">
-                                        <video-js id="video-{{ forloop.counter }}" class="video-js vjs-default-skin" controls preload="auto" data-setup="{}">
-                                            <source src="{{ file.file.url }}" type="video/{{ file.file.url|slice:"-3:" }}">
-                                        </video-js>
-                                    </div>
-                                {% endif %}
-                            </div>
-                        </div>
-                    {% endfor %}
-                </div>
-                <button class="carousel-arrow prev">&#10094;</button>
-                <button class="carousel-arrow next">&#10095;</button>
+    <div class="container py-4" id = "main-section">
+        <!-- Question Header -->
+        <div class="question-header">
+            <h1>{{ post.title }}</h1>
+            <div class="actions">
+                <button class="button follow-button">
+                    Follow<span class="follow-count">90</span>
+                </button>
+                <button class="button add-answer-button">Add answer</button>
             </div>
-        {% endif %}
-        {% endwith %}
+        </div>
 
-        <!-- Non-Image Files Section -->
-        {% with non_media_files=post.files.all|exclude_media_files %}
-            {% if non_media_files %}
-                <div class="non-image-files mt-4">
-                    <h3>Other Attached Files</h3>
-                    <div class="file-grid">
-                        {% for file in non_media_files %}
-                            <div class="file-card">
-                                <div class="file-icon {% if file.file.url|lower|endswith:'.pdf' %}pdf
-                                    {% elif file.file.url|lower|endswith:'.doc' or file.file.url|lower|endswith:'.docx' %}word
-                                    {% elif file.file.url|lower|endswith:'.xls' or file.file.url|lower|endswith:'.xlsx' %}excel
-                                    {% elif file.file.url|lower|endswith:'.py' %}python
-                                    {% elif file.file.url|lower|endswith:'.cpp' or file.file.url|lower|endswith:'.cxx' or file.file.url|lower|endswith:'.cc' %}cpp
-                                    {% elif file.file.url|lower|endswith:'.html' %}html
-                                    {% elif file.file.url|lower|endswith:'.css' %}css
-                                    {% elif file.file.url|lower|endswith:'.java' %}java
-                                    {% elif file.file.url|lower|endswith:'.js' %}javascript
-                                    {% else %}default{% endif %}">
-                                    {% if file.file.url|lower|endswith:".pdf" %}
-                                        <i class="fas fa-file-pdf"></i>
-                                    {% elif file.file.url|lower|endswith:".doc" or file.file.url|lower|endswith:".docx" %}
-                                        <i class="fas fa-file-word"></i>
-                                    {% elif file.file.url|lower|endswith:".xls" or file.file.url|lower|endswith:".xlsx" %}
-                                        <i class="fas fa-file-excel"></i>
-                                    {% else %}
-                                        <i class="fas fa-file"></i>
+        <!-- Question Content with Voting -->
+        <div class="post-container">
+            <!-- Post Content -->
+            <div class="post-content-cell">
+                {{ post.content|linebreaks }}
+                
+                <!-- Tags -->
+                <div class="mt-4">
+                    {% for tag in post.tags.all %}
+                        <a href="#" class="tag">{{ tag.name }}</a>
+                    {% endfor %}
+            </div>
+
+            <!-- Media Carousel Section -->
+            {% with media_files=post.files.all|media_files %}
+            {% if media_files %}
+                <!-- Carousel Main Container -->
+                <div class="carousel-wrapper">
+                    <!-- Navigation Buttons -->
+                    <button class="carousel-arrow prev" aria-label="Previous slide">&lsaquo;</button>
+                    <button class="carousel-arrow next" aria-label="Next slide">&rsaquo;</button>
+                    
+                    <!-- Slides Container -->
+                    <div class="carousel-container">
+                        {% for file in media_files %}
+                            <div class="carousel-slide {% if forloop.first %}active{% endif %}">
+                                <div class="aspect-ratio-box">
+                                    {% if file.file.url|lower|endswith:".jpg" or file.file.url|lower|endswith:".jpeg" or file.file.url|lower|endswith:".png" %}
+                                        <img src="{{ file.file.url }}" alt="Image {{ forloop.counter }}">
+                                    {% elif file.file.url|lower|endswith:".mp4" or file.file.url|lower|endswith:".webm" or file.file.url|lower|endswith:".ogg" %}
+                                        <div class="video-player">
+                                            <video-js id="video-{{ forloop.counter }}" class="video-js vjs-default-skin" controls preload="auto" data-setup="{}">
+                                                <source src="{{ file.file.url }}" type="video/{{ file.file.url|slice:"-3:" }}">
+                                            </video-js>
+                                        </div>
                                     {% endif %}
                                 </div>
-                                <div class="file-name">{{ file.file.name|remove_upload}}</div>
-                                <a href="{{ file.file.url }}" class="download-btn" download>
-                                    <i class="fas fa-download"></i>
-                                </a>
                             </div>
                         {% endfor %}
                     </div>
                 </div>
             {% endif %}
-        {% endwith %}
+            {% endwith %}
 
-        <!-- Post Save/Unsave Button -->
-        <div class="post-actions">
-            <form method="POST" 
-                  action="{% if is_saved %}{% url 'unsave_post' post.id %}{% else %}{% url 'save_post' post.id %}{% endif %}">
-                {% csrf_token %}
-                <button type="submit" 
-                        class="btn {% if is_saved %}btn-warning{% else %}btn-success{% endif %}">
-                    {% if is_saved %}Unsave Post{% else %}Save Post{% endif %}
-                </button>
-            </form>
+            <!-- Non-Image Files Section -->
+            {% with non_media_files=post.files.all|exclude_media_files %}
+                {% if non_media_files %}
+                    <div class="non-image-files mt-4">
+                        <h3>Other Attached Files</h3>
+                        <div class="file-grid">
+                            {% for file in non_media_files %}
+                                <div class="file-card">
+                                    <div class="file-icon {% if file.file.url|lower|endswith:'.pdf' %}pdf
+                                        {% elif file.file.url|lower|endswith:'.doc' or file.file.url|lower|endswith:'.docx' %}word
+                                        {% elif file.file.url|lower|endswith:'.xls' or file.file.url|lower|endswith:'.xlsx' %}excel
+                                        {% elif file.file.url|lower|endswith:'.py' %}python
+                                        {% elif file.file.url|lower|endswith:'.cpp' or file.file.url|lower|endswith:'.cxx' or file.file.url|lower|endswith:'.cc' %}cpp
+                                        {% elif file.file.url|lower|endswith:'.html' %}html
+                                        {% elif file.file.url|lower|endswith:'.css' %}css
+                                        {% elif file.file.url|lower|endswith:'.java' %}java
+                                        {% elif file.file.url|lower|endswith:'.js' %}javascript
+                                        {% else %}default{% endif %}">
+                                        {% if file.file.url|lower|endswith:".pdf" %}
+                                            <i class="fas fa-file-pdf"></i>
+                                        {% elif file.file.url|lower|endswith:".doc" or file.file.url|lower|endswith:".docx" %}
+                                            <i class="fas fa-file-word"></i>
+                                        {% elif file.file.url|lower|endswith:".xls" or file.file.url|lower|endswith:".xlsx" %}
+                                            <i class="fas fa-file-excel"></i>
+                                        {% else %}
+                                            <i class="fas fa-file"></i>
+                                        {% endif %}
+                                    </div>
+                                    <div class="file-name">{{ file.file.name|remove_upload}}</div>
+                                    <a href="{{ file.file.url }}" class="download-btn" download>
+                                        <i class="fas fa-download"></i>
+                                    </a>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                {% endif %}
+            {% endwith %}
+                
+           <!-- Author Card -->
+            <div class="author-card">
+                <div class="author-info">
+                    <div class="author-avatar"></div>
+                    <div>
+                        <div class="text-muted">asked {{ post.created_at|date:"M d, Y" }}</div>
+                        <div class="fw-bold">{{ post.author.username }}</div>
+                    </div>
+                </div>
+            </div>
         </div>
-
     </div>
-</div>
+    <hr>
 
 
-
-
-<!-- Add Solution Section -->
-<h3>Add Solution</h3>
-<form method="post" action="{% url 'post_detail' post.id %}">
-    {% csrf_token %}
-    <input type="hidden" name="action" value="create_solution">
-    {{ solution_form.as_p }}
-    <button type="submit" class="btn btn-primary">Submit Solution</button>
-</form>
-
-<!-- Solutions Section -->
-<h3>Solutions</h3>
-{% for solution in solutions %}
-    <div class="card mb-2">
-        <div class="card-body">
-            <p>{{ solution.content }}</p>
-            <small class="text-muted">Solution by {{ solution.author.username }} on {{ solution.created_at|date:"F d, Y" }}</small>
-            <p>Upvotes: {{ solution.upvotes }}</p>
-            <a href="{% url 'upvote_solution' solution.id %}" class="btn btn-sm btn-success">Upvote</a>
-            {% if user.is_authenticated and user == solution.author %}
-                <!-- Edit Solution Button -->
-                <button class="btn btn-sm btn-warning" onclick="showEditSolutionForm('{{ solution.id }}');">Edit</button>
-                <!-- Delete Solution Form -->
-                <form method="post" action="{% url 'post_detail' post.id %}" style="display:inline;">
+    <!-- Solutions -->
+    <h3 class="mt-4 mb-3">{{ solutions.count }} Solutions</h3>
+    {% for solution in solutions %}
+        <div class="solution-container">
+            <!-- Solution Vote Cell -->
+            <div class="vote-cell">
+                <form method="post" action="{% url 'upvote_solution' solution.id %}" class="d-inline">
                     {% csrf_token %}
-                    <input type="hidden" name="action" value="delete_solution">
-                    <input type="hidden" name="solution_id" value="{{ solution.id }}">
-                    <button type="submit" class="btn btn-sm btn-danger">Delete</button>
+                    <button type="submit" class="vote-button {% if user in solution.upvoters.all %}active{% endif %}">
+                        <svg width="36" height="36" viewBox="0 0 36 36">
+                            <path d="M2 26h32L18 10 2 26z"></path>
+                        </svg>
+                    </button>
                 </form>
-                <!-- Edit Solution Form -->
-                <form method="post" action="{% url 'post_detail' post.id %}" class="edit-solution-form" id="edit-solution-form-{{ solution.id }}" style="display:none;">
+                
+                <div class="vote-count">{{ solution|vote_difference }}</div>
+                
+                <form method="post" action="{% url 'downvote_solution' solution.id %}" class="d-inline">
                     {% csrf_token %}
-                    <input type="hidden" name="action" value="edit_solution">
-                    <input type="hidden" name="solution_id" value="{{ solution.id }}">
-                    {{ solution_form.as_p }}
-                    <button type="submit" class="btn btn-sm btn-primary">Save</button>
-                    <button type="button" class="btn btn-sm btn-secondary" onclick="hideEditSolutionForm('{{ solution.id }}')">Cancel</button>
+                    <button type="submit" class="vote-button {% if user in solution.downvoters.all %}active{% endif %}">
+                        <svg width="36" height="36" viewBox="0 0 36 36">
+                            <path d="M2 10h32L18 26 2 10z"></path>
+                        </svg>
+                    </button>
                 </form>
-            {% endif %}
-            <!-- Comments Section for Each Solution -->
-            <h5>Comments:</h5>
-            {% for comment in solution.comments.all %}
-                <div class="comment" id="comment-{{ comment.id }}">
-                    <p>{{ comment.content }}</p>
-                    <small class="text-muted">Comment by {{ comment.author.username }} on {{ comment.created_at|date:"F d, Y" }}</small>
-                    <p>Upvotes: {{ comment.upvotes }}</p>
-                    <a href="{% url 'upvote_comment' comment.id %}" class="btn btn-sm btn-success">Upvote</a>
-                    {% if user.is_authenticated and user == comment.author %}
-                        <!-- Edit Comment Button -->
-                        <button class="btn btn-sm btn-warning" onclick="showEditCommentForm('{{ comment.id }}');">Edit</button>
-                        <!-- Delete Comment Form -->
-                        <form method="post" action="{% url 'post_detail' post.id %}" style="display:inline;">
+            </div>
+
+            <!-- Solution Content -->
+            <div class="post-content-cell">
+                {{ solution.content|linebreaks }}
+                
+                <!-- Solution Author -->
+                <div class="author-info mt-3">
+                    <div class="author-avatar"></div>
+                    <div>
+                        <div>{{ solution.author.username }}</div>
+                        <div class="text-muted">Answered {{ solution.created_at|date:"M d, Y" }}</div>
+                    </div>
+                </div>
+
+                <!-- Solution Actions -->
+                {% if user.is_authenticated %}
+                <div class="solution-actions mt-3">
+                    {% if user == solution.author %}
+                        <button class="btn btn-outline-secondary btn-sm" onclick="showEditSolutionForm('{{ solution.id }}')">Edit</button>
+                        <form method="post" action="{% url 'post_detail' post.id %}" class="d-inline">
                             {% csrf_token %}
-                            <input type="hidden" name="action" value="delete_comment">
-                            <input type="hidden" name="comment_id" value="{{ comment.id }}">
-                            <button type="submit" class="btn btn-sm btn-danger">Delete</button>
-                        </form>
-                        <!-- Edit Comment Form -->
-                        <form method="post" action="{% url 'post_detail' post.id %}" class="edit-comment-form" id="edit-comment-form-{{ comment.id }}" style="display:none;">
-                            {% csrf_token %}
-                            <input type="hidden" name="action" value="edit_comment">
-                            <input type="hidden" name="comment_id" value="{{ comment.id }}">
-                            {{ comment_form.as_p }}
-                            <button type="submit" class="btn btn-sm btn-primary">Save</button>
-                            <button type="button" class="btn btn-sm btn-secondary" onclick="hideEditCommentForm('{{ comment.id }}')">Cancel</button>
+                            <input type="hidden" name="action" value="delete_solution">
+                            <input type="hidden" name="solution_id" value="{{ solution.id }}">
+                            <button type="submit" class="btn btn-outline-danger btn-sm">Delete</button>
                         </form>
                     {% endif %}
                 </div>
-            {% empty %}
-                <p>No comments yet.</p>
-            {% endfor %}
-        </div>
-    </div>
-{% empty %}
-    <p>No solutions yet.</p>
-{% endfor %}
-{% endblock %}
+                {% endif %}
 
+                <!-- Comments -->
+                <div class="comment-section mt-3">
+                    {% for comment in solution.comments.all %}
+                        <div class="comment mb-2">
+                            <div class="comment-content">{{ comment.content }}</div>
+                            <div class="small text-muted">
+                                – {{ comment.author.username }} {{ comment.created_at|date:"M d, Y" }}
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    {% empty %}
+        <p>No solutions yet. Be the first to provide a solution!</p>
+    {% endfor %}
+
+        <!-- Add Solution Form -->
+        {% if user.is_authenticated %}
+        <div class="card mt-4">
+            <div class="card-body">
+                <h4>Your Solution</h4>
+                <form method="post" action="{% url 'post_detail' post.id %}">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="create_solution">
+                    {{ solution_form.as_p }}
+                    <button type="submit" class="btn btn-primary">Post Your Solution</button>
+                </form>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+    {% endblock %}
 
 {% block scripts %}
 <script src="https://vjs.zencdn.net/8.16.1/video.min.js"></script>

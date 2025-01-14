@@ -18,11 +18,16 @@
     <script src="https://unpkg.com/filepond-plugin-file-validate-size/dist/filepond-plugin-file-validate-size.js"></script>
     <script src="https://unpkg.com/filepond/dist/filepond.js"></script>
 
+    <!-- Bootstrap-->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"></script>
+
 
     {% block head %}
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
         {% load static %}
         <link rel="stylesheet" href="{% static 'forum/css/styles.css' %}">
+
+
     {% endblock %}
 
     
@@ -31,63 +36,77 @@
 
     {% block scripts %}{% endblock %}
 
-        <nav class="navbar navbar-expand-lg navbar-light bg-light">
-            <div class="container" id = "nav-container">
-                <a class="navbar-brand" href="{% url 'home' %}">Student Forum</a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-                <div class="collapse navbar-collapse justify-content-between" id="navbarNav">
-                    <div class="search-container">
-                        <form method="get" action="{% url 'search_results_new_page' %}" class="d-flex align-items-center" id="search-form">
-                            <button class="btn btn-primary d-flex align-items-center me-2" type="submit" id="search-button">
-                                <i class="bi bi-search"></i>
-                            </button>
+
+        <nav class="border-bottom bg-white py-2">
+            <div class="container-fluid px-4">
+                <div class="d-flex align-items-center justify-content-between" style="height: 3.5rem;">
+                    <!-- Left section with logo and main nav -->
+                    <div class="d-flex align-items-center gap-4">
+                        <!-- Logo -->
+                        <a href="{% url 'home' %}" class="text-decoration-none">
+                            <span class="fs-3 fw-bold text-primary">Q</span>
+                        </a>
+                        
+                        <!-- Main navigation -->
+                        <div class="d-none d-md-flex align-items-center gap-4">
+                            <a href="" class="d-flex align-items-center text-decoration-none {% if request.resolver_match.url_name == 'following' %}text-primary fw-medium{% else %}text-secondary{% endif %}">
+                                <i class="bi bi-bookmark me-2"></i>
+                                Following
+                            </a>
+                            <a href="" class="d-flex align-items-center text-decoration-none {% if request.resolver_match.url_name == 'answer' %}text-primary fw-medium{% else %}text-secondary{% endif %}">
+                                <i class="bi bi-pencil-square me-2"></i>
+                                Answer
+                            </a>
+                            <a href="" class="d-flex align-items-center text-decoration-none {% if request.resolver_match.url_name == 'subjects' %}text-primary fw-medium{% else %}text-secondary{% endif %}">
+                                <i class="bi bi-people me-2"></i>
+                                Subjects
+                            </a>
+                        </div>
+                    </div>
+        
+                    <!-- Center section with search -->
+                    <div class="flex-grow-1 mx-4" style="max-width: 36rem;">
+                        <form method="GET" action="" class="position-relative">
                             <input type="text" 
                                 name="q" 
                                 class="form-control" 
-                                placeholder="Search posts..." 
-                                id="search-input" 
+                                placeholder="Search questions..." 
                                 value="{{ query }}"
                                 onkeypress="if(event.keyCode==13) { this.form.submit(); return false; }">
-                            <input type="hidden" name="tags" id="selected-tags-input" value="{{ selected_tags|join:',' }}">
-                            <button type="button" class="btn btn-outline-secondary" id="toggle-tags">+</button>
+                            <button type="submit" class="btn position-absolute end-0 top-50 translate-middle-y pe-3 text-secondary">
+                                <i class="bi bi-search"></i>
+                            </button>
                         </form>
-                        
-                        <div id="selected-tags" class="selected-tags-container">
-                            <!-- Selected tags will appear here -->
-                        </div>
                     </div>
-                    
-
-                    <ul class="navbar-nav">
+        
+                    <!-- Right section with actions -->
+                    <div class="d-flex align-items-center gap-3">
                         {% if user.is_authenticated %}
-                            <li class="nav-item"><a href="{% url 'create_post' %}" class="nav-link px-2" title="Create Post"><i class="bi bi-plus-square"></i></a></li>
+                            <a href="{% url 'create_post' %}" class="btn btn-primary d-flex align-items-center gap-2 rounded-3">
+                                <i class="bi bi-plus-square"></i>
+                                Add question
+                            </a>
                             {% if user.is_moderator or user.is_superuser %}
-                                <li class="nav-item"><a href="{% url 'admin:index' %}" class="nav-link px-2" title="Admin Panel"><i class="bi bi-gear"></i></a></li>
+                                <li class="nav-item"><a href="{% url 'admin:index' %}" class="btn btn-link text-secondary p-2" title="Admin Panel"><i class="bi bi-gear"></i></a></li>
                             {% endif %}
-                            <li class="nav-item"><a href="{% url 'profile' user.username %}" class="nav-link px-2" title="Profile"><i class="bi bi-person"></i></a></li>
-                            <li class="nav-item"><a href="{% url 'logout' %}" class="nav-link px-2" title="Logout"><i class="bi bi-box-arrow-right"></i></a></li>
-                        {% else %}
-                            <li class="nav-item"><a href="{% url 'login' %}" class="nav-link px-2" title="Login"><i class="bi bi-box-arrow-in-right"></i></a></li>
-                            <li class="nav-item"><a href="{% url 'register' %}" class="nav-link px-2" title="Register"><i class="bi bi-person-plus"></i></a></li>
-                        {% endif %}
-                    </ul>
-    
-                    </div>
-                    <!-- Floating Tag Selector -->
-                    <div id="tags-container" class="floating-tag-selector">
-                        <div class="input-group mb-3">
-                            <input type="text" class="form-control" placeholder="Search tags..." id="tag-search-input">
-                        </div>
-                        <div class="input-group mb-3 custom-select-container">
-                            <div class="custom-select" id="custom-tag-select">
-                                {% for tag in tags %}
-                                    <div class="custom-select-option" data-value="{{ tag.id }}">{{ tag.name }}</div>
-                                {% endfor %}
+                            <a href="" class="btn btn-link text-secondary p-2">
+                                <i class="bi bi-bell fs-5"></i>
+                            </a>
+                            <div class="dropdown">
+                                <button class="btn btn-link text-secondary p-2" type="button" data-bs-toggle="dropdown">
+                                    <i class="bi bi-person-circle fs-5"></i>
+                                </button>
+                                <ul class="dropdown-menu dropdown-menu-end">
+                                    <li><a class="dropdown-item" href="{% url 'profile' user.username%}">Profile</a></li>
+                                    <!-- <li><a class="dropdown-item" href="">Settings</a></li> -->
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li><a class="dropdown-item" href="{% url 'logout' %}">Logout</a></li>
+                                </ul>
                             </div>
-                        </div>
-                        <button class="btn btn-primary" id="add-tags">Add Tags</button>
+                        {% else %}
+                            <a href="{% url 'login' %}" class="btn btn-outline-primary me-2">Login</a>
+                            <a href="{% url 'register' %}" class="btn btn-primary">Sign up</a>
+                        {% endif %}
                     </div>
                 </div>
             </div>
