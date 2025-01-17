@@ -104,6 +104,11 @@ This is a Django-based forum application where users can create posts, add solut
 
 By following these steps, you will have PostgreSQL installed and configured for your Django application on a Mac.
 
+**Common Issues**
+- Sometimes python3 is required to correctly execute some commands. E.g. python3 -m venv venv, or python3 manage.py migrate
+- Sometimes the libraries don't install correctly from requirements.txt. You'd need to do `pip install` to install the libraries if that happens until you no longer have errors. 
+
+
 ## Database
 
 The application uses PostgreSQL as the database. Ensure you have PostgreSQL installed and a database created for the application. Update the `DATABASES` setting in `student_forum/settings.py` with your database credentials.
