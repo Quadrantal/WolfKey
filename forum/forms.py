@@ -21,7 +21,6 @@ class MultipleFileField(forms.FileField):
         return result
 
         
-
 class PostForm(forms.ModelForm):
     tags = forms.ModelMultipleChoiceField(
         queryset=Tag.objects.all(),
@@ -30,13 +29,13 @@ class PostForm(forms.ModelForm):
     )
     files = MultipleFileField(widget=MultipleFileInput, required=False)
 
-
     class Meta:
         model = Post
         fields = ['title', 'content', 'tags']
         widgets = {
             'content': forms.Textarea(attrs={'rows': 5}),
         }
+
 
 class SolutionForm(forms.ModelForm):
     class Meta:

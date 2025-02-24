@@ -1,13 +1,18 @@
 {% extends 'forum/base.html' %}
 
+{% block head %}
+    <!-- Editor.js CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/@editorjs/editorjs@2.22.0/dist/editor.css" rel="stylesheet"></link>
+
+    <link rel="stylesheet" href="https://unpkg.com/mathlive/dist/mathlive-static.css" />
+
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'forum/css/editorjs.css' %}">
+
+
+{% endblock %}
+
 {% block content %}
-<!-- Add FilePond CSS -->
-<link href="https://unpkg.com/filepond/dist/filepond.css" rel="stylesheet">
-<link href="https://unpkg.com/filepond-plugin-image-preview/dist/filepond-plugin-image-preview.css" rel="stylesheet">
-
-<!-- KaTeX CSS -->
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/katex/0.15.1/katex.min.css">
-
 <div class="row justify-content-center">
     <div class="col-md-8">
         <div class="card">
@@ -19,20 +24,13 @@
                     <p>{{ form.title }}</p>
 
                     <h3> Content: </h3>
-                    <textarea id = "content-input" name = content placeholder= "Enter content here ">{{ form.content.value|safe }}</textarea>
-                    <!-- LaTeX input area -->
-                    <div id="latex-output"></div>
+                    <!-- Editor.js Container -->
+                    <div id="editorjs"></div>
+                    <input type="hidden" id="editorjs-content" name="content">
 
                     <h3> Tags: </h3>
                     <p>{{ form.tags }}</p>
 
-                    <input type="file" 
-                        class="filepond"
-                        name="files" 
-                        multiple 
-                        data-allow-reorder="true"
-                        data-max-file-size="50MB"
-                        data-max-files="3">
                     <button type="submit" class="btn btn-primary">{{ action }} Post</button>
                     <a href="{% url 'home' %}" class="btn btn-secondary">Cancel</a>
                 </form>
@@ -41,52 +39,120 @@
     </div>
 </div>
 
-<!-- Add FilePond JS and plugins -->
-<script src="https://unpkg.com/filepond/dist/filepond.js"></script>
-<script src="https://unpkg.com/filepond-plugin-image-preview/dist/filepond-plugin-image-preview.js"></script>
-<script src="https://unpkg.com/filepond-plugin-image-exif-orientation/dist/filepond-plugin-image-exif-orientation.js"></script>
-<script src="https://unpkg.com/filepond-plugin-file-validate-size/dist/filepond-plugin-file-validate-size.js"></script>
 
-<!-- KaTeX JS -->
-<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.19/dist/katex.min.js" integrity="sha384-RdymN7NRJ+XoyeRY4185zXaxq9QWOOx3O7beyyrRK4KQZrPlCDQQpCu95FoCGPAE" crossorigin="anonymous"></script>
-<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.19/dist/contrib/auto-render.min.js" integrity="sha384-hCXGrW6PitJEwbkoStFjeJxv+fSOOQKOPbJxSfM6G5sWZjAyWhXiTIIAmQqnlLlh" crossorigin="anonymous"></script>
+<!-- Initialize Editor.js -->
+<script src="https://cdn.jsdelivr.net/npm/@editorjs/editorjs@latest"></script>
+<script src="https://cdn.jsdelivr.net/npm/@editorjs/image@latest"></script>
+<script src="https://cdn.jsdelivr.net/npm/@editorjs/header@latest"></script>
+<script src="https://cdn.jsdelivr.net/npm/@editorjs/quote@2.7.6/dist/quote.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@blade47/editorjs-delimiter@1.4.3/dist/delimiter.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@editorjs/list@2"></script>
+<script src="https://cdn.jsdelivr.net/gh/mdgaziur/EditorJS-LaTeX@latest/dist/editorjs-latex.bundle-min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@editorjs/inline-code@latest"></script>
+<script src="https://cdn.jsdelivr.net/npm/@calumk/editorjs-codecup@latest"></script>
+<script src="https://unpkg.com/mathlive/dist/mathlive.min.js"></script>
+
+{% load static %}
+<script src="{% static 'forum/js/inline-math.js' %}"></script>
 
 <script>
-    // Initialize FilePond
-    const inputElement = document.querySelector('input[type="file"]');
-    FilePond.registerPlugin(
-        FilePondPluginImagePreview,
-        FilePondPluginImageExifOrientation,
-        FilePondPluginFileValidateSize
-    );
-    const pond = FilePond.create(inputElement, {
-        allowMultiple: true, 
-        server: {
-            url: 'http://127.0.0.1:8000/', 
-            process: {
-                url: './upload/',  
-                method: 'POST',
-                withCredentials: false,
-                headers: {
-                    'X-CSRFToken': document.querySelector('[name="csrfmiddlewaretoken"]').value
-                }
+    document.addEventListener("DOMContentLoaded", function () {
+        const form = document.querySelector('form');
+        const submitButton = form.querySelector('button[type="submit"]');
+    
+        form.addEventListener('keydown', function(e) {
+            if(e.key === 'Enter' && e.target.tagName !== 'TEXTAREA') {
+                e.preventDefault();
             }
-        }
-    });
-
-    // Function to render LaTeX live
-    document.addEventListener("DOMContentLoaded", function() {
-        renderMathInElement(document.body, {
-            delimiters: [
-                {left: '$$', right: '$$', display: true},
-                {left: '$', right: '$', display: false},
-                {left: '\\(', right: '\\)', display: false},
-                {left: '\\[', right: '\\]', display: true}
-            ],
-            ignoredTags: ["script", "noscript", "style", "textarea", "pre", "code", "option"],
-            throwOnError: false // Prevent errors from stopping the rendering process,
         });
-        console.log("Checking LaTeX");
+
+
+
+        // Handle submit button click
+        submitButton.addEventListener('click', async function(e) {
+            e.preventDefault();
+            const content = await editor.save();
+            document.querySelector('#editorjs-content').value = JSON.stringify(content);
+            form.submit();
+        });
+
+        form.addEventListener('submit', function(e) {
+            if (e.submitter !== submitButton) {
+                e.preventDefault();
+            }
+        });
+
+        const editor = new EditorJS({
+            holder: 'editorjs',  // The container where Editor.js will be initialized
+            tools: {
+                image: {
+                    class: ImageTool,
+                    config: {
+                        endpoints: {
+                            byFile: '/upload-image/', // URL to upload files
+                        },
+                        field: 'image', // The name of the field expected by the backend
+                        additionalRequestHeaders: {
+                            'X-CSRFToken': document.querySelector('[name="csrfmiddlewaretoken"]').value
+                        }
+                    }
+                },
+                header: {
+                    class: Header,
+                    shortcut: 'CMD+SHIFT+H',
+                    levels: [1,2, 3, 4],
+                    defaultLevel: 2
+                },
+                quote: {
+                    class: Quote,
+                    inlineToolbar: true,
+                    shortcut: 'CMD+SHIFT+O',
+                    config: {
+                        quotePlaceholder: 'Enter a quote',
+                        captionPlaceholder: 'Quote\'s author',
+                    },
+                },
+                delimiter: {
+                    class: Delimiter,
+                    config: {
+                        styleOptions: ['star', 'dash', 'line'],
+                        defaultStyle: 'line',
+                        lineWidthOptions: [8, 15, 25, 35, 50, 60, 100],
+                        defaultLineWidth: 25,
+                        lineThicknessOptions: [1, 2, 3, 4, 5, 6],
+                        defaultLineThickness: 2,
+                    }
+                },
+                list: {
+                    class: EditorjsList,
+                    inlineToolbar: true,
+                    config: {
+                        defaultStyle: 'unordered'
+                    },
+                },
+                Math: {
+                    class: EJLaTeX,
+                },
+                code: editorJsCodeCup,
+                inlineCode: {
+                    class: InlineCode,
+                },
+                inlineMath: InlineMath,
+            },
+            onReady: () => {
+                console.log('Editor.js is ready!');
+            },
+            onChange: () => {
+                editor.save().then((outputData) => {
+                    document.getElementById('editorjs-content').value = JSON.stringify(outputData);
+                }).catch((error) => {
+                    console.error('Saving failed: ', error);
+                });
+
+                console.log('Content has changed!');
+            },
+            minHeight: 75,
+        });
     });
 </script>
 {% endblock %}

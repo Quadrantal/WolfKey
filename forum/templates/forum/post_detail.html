@@ -7,7 +7,10 @@
     {{ block.super }}
     <link rel="stylesheet" href="{% static 'forum/css/carousel.css' %}">
     <link rel="stylesheet" href="{% static 'forum/css/files-display.css' %}">
+    <link rel="stylesheet" href="{% static 'forum/css/editorjs.css' %}">
     <link href="https://vjs.zencdn.net/8.16.1/video-js.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.19/dist/katex.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/default.min.css">
     {% endblock %}
 </head>
 
@@ -27,46 +30,18 @@
         <!-- Question Content with Voting -->
         <div class="post-container">
             <!-- Post Content -->
-            <div class="post-content-cell">
-                {{ post.content|linebreaks }}
-                
-                <!-- Tags -->
-                <div class="mt-4">
-                    {% for tag in post.tags.all %}
-                        <a href="#" class="tag">{{ tag.name }}</a>
-                    {% endfor %}
+            <div class="post-content-cell" id = "post-content-cell">
+                {% autoescape off %}
+                {{ editorjs_html }} 
+                {% endautoescape %}
             </div>
 
-            <!-- Media Carousel Section -->
-            {% with media_files=post.files.all|media_files %}
-            {% if media_files %}
-                <!-- Carousel Main Container -->
-                <div class="carousel-wrapper">
-                    <!-- Navigation Buttons -->
-                    <button class="carousel-arrow prev" aria-label="Previous slide">&lsaquo;</button>
-                    <button class="carousel-arrow next" aria-label="Next slide">&rsaquo;</button>
-                    
-                    <!-- Slides Container -->
-                    <div class="carousel-container">
-                        {% for file in media_files %}
-                            <div class="carousel-slide {% if forloop.first %}active{% endif %}">
-                                <div class="aspect-ratio-box">
-                                    {% if file.file.url|lower|endswith:".jpg" or file.file.url|lower|endswith:".jpeg" or file.file.url|lower|endswith:".png" %}
-                                        <img src="{{ file.file.url }}" alt="Image {{ forloop.counter }}">
-                                    {% elif file.file.url|lower|endswith:".mp4" or file.file.url|lower|endswith:".webm" or file.file.url|lower|endswith:".ogg" %}
-                                        <div class="video-player">
-                                            <video-js id="video-{{ forloop.counter }}" class="video-js vjs-default-skin" controls preload="auto" data-setup="{}">
-                                                <source src="{{ file.file.url }}" type="video/{{ file.file.url|slice:"-3:" }}">
-                                            </video-js>
-                                        </div>
-                                    {% endif %}
-                                </div>
-                            </div>
-                        {% endfor %}
-                    </div>
-                </div>
-            {% endif %}
-            {% endwith %}
+            <!-- Tags -->
+            <div class="mt-4">
+                {% for tag in post.tags.all %}
+                    <a href="#" class="tag">{{ tag.name }}</a>
+                {% endfor %}
+            </div>
 
             <!-- Non-Image Files Section -->
             {% with non_media_files=post.files.all|exclude_media_files %}
@@ -214,4 +189,152 @@
 {% block scripts %}
 <script src="https://vjs.zencdn.net/8.16.1/video.min.js"></script>
 <script src="{% static 'forum/js/carousel.js' %}"></script>
+
+<script src = "https://cdn.jsdelivr.net/npm/editorjs-html@4.0.0/.build/edjsHTML.browser.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+
+<script defer src="//unpkg.com/mathlive"></script>
+<link rel="stylesheet" href="https://unpkg.com/mathlive/dist/mathlive-static.css">
+
+<script>hljs.highlightAll();</script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        try {
+            console.log("Script started");
+            
+            const content = JSON.parse('{{ content_json|escapejs }}');
+
+            // Initialize parser
+            const edjsParser = edjsHTML({
+                paragraph: block => {
+                    const content = block.data.text;
+                    
+                    // Create a temporary container
+                    const tempDiv = document.createElement('div');
+                    
+                    // First, create the basic HTML structure
+                    const paragraph = document.createElement('p');
+                    
+                    // If the content contains math, process it
+                    if (content.includes('span class="inline-math"')) {
+                        const parser = new DOMParser();
+                        const doc = parser.parseFromString(content, 'text/html');
+                        
+                        // Process each math span
+                        doc.querySelectorAll('span.inline-math').forEach(span => {
+                            const tex = span.getAttribute('data-tex');
+                            
+                            // Create the math field
+                            const mathField = new MathfieldElement();
+                            mathField.style.display = 'inline-block';
+                            mathField.style.minWidth = '1em';
+                            mathField.style.margin = '0 2px';
+                            mathField.style.padding = '0 2px';
+                            mathField.style.border = 'none';
+                            mathField.style.background = 'transparent';
+                            mathField.setAttribute('read-only', '');
+                            
+                            // Important: Set the value before adding to DOM
+                            mathField.value = tex;
+                            
+                            // Replace the original span with our new math field
+                            const wrapper = document.createElement('span');
+                            wrapper.classList.add('inline-math');
+                            wrapper.setAttribute('data-tex', tex);
+                            wrapper.appendChild(mathField);
+                            
+                            // Replace the original span in the content
+                            span.parentNode.replaceChild(wrapper, span);
+                        });
+                        
+                        paragraph.innerHTML = doc.body.innerHTML;
+                    } else {
+                        // If no math content, just set the text
+                        paragraph.innerHTML = content;
+                    }
+                    
+                    return paragraph.outerHTML;
+                },
+                image: block => {
+                    const { file, caption, withBorder, withBackground, stretched } = block.data;
+
+                    // Default styles
+                    const borderClass = withBorder ? "image-border" : "";
+                    const backgroundClass = withBackground ? "image-background" : "";
+                    const stretchedClass = stretched ? "image-stretched" : "";
+
+                    // Combine styles
+                    const classList = [borderClass, backgroundClass, stretchedClass].join(" ").trim();
+
+                    // Generate HTML
+                    return `
+                        <div class="editor-image ${classList}">
+                            <img src="${file.url}" alt="${caption || ''}">
+                            ${caption ? `<p class="image-caption">${caption}</p>` : ""}
+                        </div>
+                    `;
+                },code : block => {
+                    const {code, language} = block.data;
+
+                    return `
+                        <pre> <code>
+                            ${code}
+                        </code> </pre>
+                    `;
+                }
+            });
+
+            const cleanData = {
+                "time": 1737931247556,
+                "blocks": [
+                    {
+                    "id": "IgnzU9ka5q",
+                    "type": "paragraph",
+                    "data": {
+                        "text": "e=mc^2",
+                    }
+                    },
+                    {
+                    "id": "iePwSDAmea",
+                    "type": "header",
+                    "data": {
+                        "text": "Heading 1",
+                        "level": 2
+                    }
+                    }
+                ],
+                "version": "2.30.7"
+            };
+
+            console.log("Content: ", content);
+            
+            // Parse content
+            const editorjs_html = edjsParser.parse(content);
+            console.log("Parsed HTML:", editorjs_html);
+            
+            // Update DOM
+            const contentCell = document.getElementById("post-content-cell");
+            if (contentCell) {
+                contentCell.innerHTML = editorjs_html;
+                
+                // Initialize all math fields after content is inserted
+                const mathFields = contentCell.querySelectorAll('math-field');
+                mathFields.forEach(field => {
+                    field.mathVirtualKeyboardPolicy = 'manual';
+                    // Ensure the value is set after insertion
+                    const tex = field.closest('.inline-math').getAttribute('data-tex');
+                    if (tex) {
+                        field.value = tex;
+                    }
+                });
+            } else {
+                console.error("Content cell not found");
+            }
+        } catch (error) {
+            console.error("Error processing content:", error);
+        }
+    });
+</script>
+
 {% endblock %}
