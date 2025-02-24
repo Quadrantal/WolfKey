@@ -11,10 +11,13 @@ from django.db.models import F
 from django.views.decorators.csrf import csrf_exempt
 from django.core.files.storage import FileSystemStorage
 import logging
+import json
 from datetime import timezone
 from datetime import timedelta
 from django.contrib.auth.decorators import permission_required
 from django.core.exceptions import PermissionDenied
+from django.core.files.storage import default_storage
+from django.core.files.base import ContentFile
 
 logger = logging.getLogger(__name__)
 
@@ -37,7 +40,6 @@ def home(request):
     tags = Tag.objects.all().order_by('name')  # Sort tags alphabetically
 
     return render(request, 'forum/home.html', {'posts': posts, 'tags': tags, 'query': query, 'selected_tags': tag_ids})
-
 @login_required
 def post_detail(request, post_id):
     post = get_object_or_404(Post, id=post_id)
@@ -107,6 +109,9 @@ def post_detail(request, post_id):
 
         return redirect('post_detail', post_id=post.id)
 
+    # Serialize Editor.js content and mark as safe
+    content_json = json.dumps(post.content) if post.content else '{}'
+
     is_saved = SavedPost.objects.filter(user=request.user, post=post).exists()
     return render(request, 'forum/post_detail.html', {
         'post': post,
@@ -114,6 +119,7 @@ def post_detail(request, post_id):
         'solution_form': solution_form,
         'comment_form': comment_form,
         'is_saved': is_saved, 
+        'content_json': content_json,  # Pass Editor.js content as JSON
     })
 
 
@@ -159,46 +165,45 @@ def logout_view(request):
 
 @login_required
 def create_post(request):
-    print("POST DATA: ", request.POST)
-    print("FILES: ", request.FILES)
     if request.method == 'POST':
         form = PostForm(request.POST)
-        try:
-            if form.is_valid():
-                print("Form is valid")
-                post = form.save(commit=False)
-                post.author = request.user
-                post.save()
-                
-                # Get all temporary files from this session
-                session_key = request.session.session_key or 'default'
-                print("Session key:", session_key)
-                
-                temp_files = File.objects.filter(
-                    temporary=True,
-                    upload_session=session_key
-                )
-                print("Found temp files:", temp_files.count())
-                
-                # Link files to post and mark as permanent
-                temp_files.update(post=post, temporary=False)
-                
-                messages.success(request, 'Post created successfully!')
-                return redirect('post_detail', post_id=post.id)
-            else:
-                print("Form errors:", form.errors)
-        except Exception as e:
-            print("Error creating post:", str(e))
-            messages.error(request, f'Error creating post: {str(e)}')
+        if form.is_valid():
+            # Get the content from the Editor.js and save it as JSON
+            content_json = request.POST.get('content')
+            content_data = json.loads(content_json) if content_json else {}
+
+            # Create the post
+            post = form.save(commit=False)
+            post.content = content_data
+            post.author = request.user  # Assuming the user is logged in
+            post.save()
+
+            # Handle file uploads
+            files = request.FILES.getlist('files')
+            for file in files:
+                File.objects.create(post=post, file=file)
+
+            return redirect(post.get_absolute_url())  # Redirect to the post detail page
     else:
         form = PostForm()
+
+    return render(request, 'forum/post_form.html', {'form': form, 'action': 'Create'})
+
+def upload_image(request):
+    if request.method == 'POST' and request.FILES.get('image'):
+        image = request.FILES['image']
+        # Optionally, process the image before saving (e.g., resize, convert formats)
+        
+        # Save the image in your static or media directory
+        filename = default_storage.save('uploads/' + image.name, ContentFile(image.read()))
+        
+        # Return the URL of the uploaded image
+        image_url = default_storage.url(filename)
+        
+        return JsonResponse({'success': 1, 'file': {'url': image_url}})
+    else:
+        return JsonResponse({'error': 'No image uploaded'}, status=400)
     
-    return render(request, 'forum/post_form.html', {
-        'form': form,
-        'debug': True  # Add debug flag for template
-    })
-
-
 @login_required
 def edit_post(request, post_id):
     post = get_object_or_404(Post, id=post_id)
@@ -347,32 +352,6 @@ def search_results_new_page(request):
 
     return redirect('home')
 
-
-@csrf_exempt  # Only for testing - remove in production
-def handle_upload(request):
-    print("Upload request received")
-    print("Method:", request.method)
-    print("Files:", request.FILES)
-    
-    if request.method == 'POST':
-        file = request.FILES.get('files')
-        if file:
-            try:
-                temp_file = File.objects.create(
-                    file=file,
-                    temporary=True,
-                    upload_session=request.session.session_key or 'default'
-                )
-                print("File saved:", temp_file.id)
-                return JsonResponse({'id': temp_file.id})
-            except Exception as e:
-                print("Upload error:", str(e))
-                return JsonResponse({'error': str(e)}, status=500)
-        else:
-            print("No file in request")
-            return JsonResponse({'error': 'No file provided'}, status=400)
-    
-    return JsonResponse({'error': 'Invalid request method'}, status=400)
 
 
 @login_required

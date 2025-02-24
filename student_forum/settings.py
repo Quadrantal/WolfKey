@@ -42,7 +42,8 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'forum',
-    'django_drf_filepond'
+    'django_drf_filepond',
+    'django_editorjs_fields',
 ]
 
 MIDDLEWARE = [
