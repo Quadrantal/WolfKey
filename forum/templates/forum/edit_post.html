@@ -1,0 +1,212 @@
+{% extends 'forum/base.html' %}
+
+{% block head %}
+    <!-- Editor.js CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/@editorjs/editorjs@2.22.0/dist/editor.css" rel="stylesheet"></link>
+
+    <link rel="stylesheet" href="https://unpkg.com/mathlive/dist/mathlive-static.css" />
+
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'forum/css/editorjs.css' %}">
+
+
+{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-body">
+                <h2 class="card-title">{{ action }} Post</h2>
+                <form method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <h3> Title: </h3>
+                    <p>{{ post.title }}</p>
+
+                    <h3> Content: </h3>
+                    <!-- Editor.js Container -->
+                    <div id="editorjs"></div>
+                    <input type="hidden" id="editorjs-content" name="content">
+
+                    <h3> Tags: </h3>
+                    <p>{{ post.tags }}</p>
+
+                    <button type="submit" class="btn btn-primary">{{ action }} Finish</button>
+                    <a href="{% url 'home' %}" class="btn btn-secondary">Cancel</a>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<!-- Initialize Editor.js -->
+<script src="https://cdn.jsdelivr.net/npm/@editorjs/editorjs@latest"></script>
+<script src="https://cdn.jsdelivr.net/npm/@editorjs/image@latest"></script>
+<script src="https://cdn.jsdelivr.net/npm/@editorjs/header@latest"></script>
+<script src="https://cdn.jsdelivr.net/npm/@editorjs/quote@2.7.6/dist/quote.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@blade47/editorjs-delimiter@1.4.3/dist/delimiter.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@editorjs/list@2"></script>
+<script src="https://cdn.jsdelivr.net/gh/mdgaziur/EditorJS-LaTeX@latest/dist/editorjs-latex.bundle-min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@editorjs/inline-code@latest"></script>
+<script src="https://cdn.jsdelivr.net/npm/@calumk/editorjs-codecup@latest"></script>
+<script src="https://unpkg.com/mathlive/dist/mathlive.min.js"></script>
+
+{% load static %}
+<script src="{% static 'forum/js/inline-math.js' %}"></script>
+
+
+<script>
+    console.log("Script Starting");
+    console.log('{{post_content}}');
+
+    document.addEventListener("DOMContentLoaded", function () {
+        const form = document.querySelector('form');
+        const submitButton = form.querySelector('button[type="submit"]');
+
+        console.log("TEST");
+        
+    
+        form.addEventListener('keydown', function(e) {
+            if(e.key === 'Enter' && e.target.tagName !== 'TEXTAREA') {
+                e.preventDefault();
+            }
+        });
+
+        // Handle submit button click
+        submitButton.addEventListener('click', async function(e) {
+            e.preventDefault();
+            const content = await editor.save();
+            document.querySelector('#editorjs-content').value = JSON.stringify(content);
+            form.submit();
+        });
+
+        form.addEventListener('submit', function(e) {
+            if (e.submitter !== submitButton) {
+                e.preventDefault();
+            }
+        });
+
+        let initialData = {};
+
+        try {
+            // Use JSON.parse with the |escapejs filter
+            const contentString = '{{ post_content|escapejs }}';
+            console.log("Raw content string:", contentString);
+            
+            initialData = JSON.parse(contentString);
+            if (!initialData || !initialData.blocks) {
+                throw new Error('Invalid content structure');
+            }
+            
+            // Unescape HTML entities in text content
+            initialData.blocks = initialData.blocks.map(block => {
+                if (block.type === 'paragraph' && block.data && block.data.text) {
+                    const textarea = document.createElement('textarea');
+                    textarea.innerHTML = block.data.text;
+                    block.data.text = textarea.value;
+                }
+                return block;
+            });
+            
+            console.log("Processed content:", initialData);
+        } catch (e) {
+            console.error('Failed to parse initial content:', e);
+            initialData = {
+                blocks: [
+                    {
+                        type: 'paragraph',
+                        data: {
+                            text: ''
+                        }
+                    }
+                ]
+            };
+        }
+        
+        console.log("I: ", initialData);
+
+        const editor = new EditorJS({
+            holder: 'editorjs',  // The container where Editor.js will be initialized
+            data: initialData,
+            tools: {
+                image: {
+                    class: ImageTool,
+                    config: {
+                        endpoints: {
+                            byFile: '/upload-image/', // URL to upload files
+                        },
+                        field: 'image', // The name of the field expected by the backend
+                        additionalRequestHeaders: {
+                            'X-CSRFToken': document.querySelector('[name="csrfmiddlewaretoken"]').value
+                        }
+                    }
+                },
+                header: {
+                    class: Header,
+                    shortcut: 'CMD+SHIFT+H',
+                    levels: [1,2, 3, 4],
+                    defaultLevel: 2
+                },
+                quote: {
+                    class: Quote,
+                    inlineToolbar: true,
+                    shortcut: 'CMD+SHIFT+O',
+                    config: {
+                        quotePlaceholder: 'Enter a quote',
+                        captionPlaceholder: 'Quote\'s author',
+                    },
+                },
+                delimiter: {
+                    class: Delimiter,
+                    config: {
+                        styleOptions: ['star', 'dash', 'line'],
+                        defaultStyle: 'line',
+                        lineWidthOptions: [8, 15, 25, 35, 50, 60, 100],
+                        defaultLineWidth: 25,
+                        lineThicknessOptions: [1, 2, 3, 4, 5, 6],
+                        defaultLineThickness: 2,
+                    }
+                },
+                list: {
+                    class: EditorjsList,
+                    inlineToolbar: true,
+                    config: {
+                        defaultStyle: 'unordered'
+                    },
+                },
+                Math: {
+                    class: EJLaTeX,
+                },
+                code: editorJsCodeCup,
+                inlineCode: {
+                    class: InlineCode,
+                },
+                inlineMath: InlineMath,
+            },
+            onReady: () => {
+                console.log('Editor.js is ready!');
+                document.querySelectorAll('.inline-math').forEach(elem => {
+                const tex = elem.getAttribute('data-tex');
+                if (tex) {
+                    const mathField = new MathfieldElement();
+                    mathField.value = tex;
+                    elem.appendChild(mathField);
+                }
+            });
+            },
+            onChange: () => {
+                editor.save().then((outputData) => {
+                    document.getElementById('editorjs-content').value = JSON.stringify(outputData);
+                }).catch((error) => {
+                    console.error('Saving failed: ', error);
+                });
+
+                console.log('Content has changed!');
+            },
+            minHeight: 75,
+        });
+    });
+</script>
+{% endblock %}

@@ -18,6 +18,8 @@ from django.contrib.auth.decorators import permission_required
 from django.core.exceptions import PermissionDenied
 from django.core.files.storage import default_storage
 from django.core.files.base import ContentFile
+from django.core.serializers.json import DjangoJSONEncoder
+from django.utils.html import escape
 
 logger = logging.getLogger(__name__)
 
@@ -130,9 +132,63 @@ def delete_post(request, post_id):
     pass
 
 def edit_post(request, post_id):
-    if not request.user.has_perm('forum.can_edit_posts'):
-        raise PermissionDenied
-    # Rest of the view logic
+    post = get_object_or_404(Post, id=post_id)
+
+
+    if request.method == 'POST':
+        try:
+            # Get the content from the form
+            content = request.POST.get('content')
+            if content:
+                content = json.loads(content)
+            
+            # Update post
+            post.content = content
+            
+            # Handle tags
+            tags = request.POST.get('tags', '').split(',')
+            post.tags.clear()
+            for tag_name in tags:
+                tag_name = tag_name.strip()
+                if tag_name:
+                    tag, _ = Tag.objects.get_or_create(name=tag_name)
+                    post.tags.add(tag)
+            
+            post.save()
+            messages.success(request, 'Post updated successfully!')
+            return redirect('post_detail', post_id=post.id)
+            
+        except json.JSONDecodeError as e:
+            messages.error(request, 'Invalid content format')
+            logger.error(f"JSON decode error: {e}")
+        except Exception as e:
+            messages.error(request, 'Error updating post')
+            logger.error(f"Error updating post: {e}")
+        
+        return redirect('edit_post', post_id=post.id)
+    
+    try:
+        content = post.content
+        if isinstance(content, str):
+            content = json.loads(content)
+            
+        # Escape HTML in text content
+        for block in content.get('blocks', []):
+            if block.get('type') == 'paragraph':
+                block['data']['text'] = escape(block['data']['text'])
+        
+        post_content = json.dumps(content)
+    except Exception as e:
+        post_content = json.dumps({
+            "blocks": [{"type": "paragraph", "data": {"text": ""}}]
+        })
+
+    context = {
+        'post': post,
+        'action': 'Edit',
+        'post_content': post_content
+    }
+    return render(request, 'forum/edit_post.html', context)
 
 def register(request):
     if request.method == 'POST':
@@ -204,26 +260,6 @@ def upload_image(request):
     else:
         return JsonResponse({'error': 'No image uploaded'}, status=400)
     
-@login_required
-def edit_post(request, post_id):
-    post = get_object_or_404(Post, id=post_id)
-    
-    if post.author != request.user:
-        return HttpResponseForbidden("You cannot edit this post")
-        
-    if request.method == 'POST':
-        form = PostForm(request.POST, instance=post)
-        if form.is_valid():
-            form.save()
-            messages.success(request, 'Post updated successfully!')
-            return redirect('post_detail', post_id=post.id)
-    else:
-        form = PostForm(instance=post)
-    
-    return render(request, 'forum/post_form.html', {
-        'form': form,
-        'action': 'Edit'
-    })
 
 @login_required
 def delete_post(request, post_id):

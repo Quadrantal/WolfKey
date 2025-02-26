@@ -92,6 +92,13 @@
                     </div>
                 </div>
             </div>
+            <div class="post-actions">
+                {% if user.is_authenticated and post.author == user %}
+                    <a href="{% url 'edit_post' post.id %}" class="btn btn-secondary">
+                        <i class="fas fa-edit"></i> Edit
+                    </a>
+                {% endif %}
+            </div>
         </div>
     </div>
     <hr>
@@ -335,6 +342,7 @@
             console.error("Error processing content:", error);
         }
     });
+
 </script>
 
 {% endblock %}
