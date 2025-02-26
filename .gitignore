@@ -1,0 +1,5 @@
+debug.log
+logs
+.cache
+.pyc
+.cache/
