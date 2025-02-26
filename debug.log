@@ -2399,3 +2399,268 @@ Filepond app init: File store path already exists
 Watching for file changes with StatReloader
 Initialising storage backend with storage module name [None]
 Running _get_storage_backend with fq_classname [None]
+Initialising storage backend with storage module name [None]
+Running _get_storage_backend with fq_classname [None]
+Upload temp directory from top level settings: </Users/a0014208/Documents/GitHub/School-Forum/filepond_uploads>
+Filepond app init: Creating temporary file upload directory </Users/a0014208/Documents/GitHub/School-Forum/filepond_uploads>
+App init: no django-storages backend configured, using default (local) storage backend if set, otherwise you need to manage file storage independently of this app.
+Filepond app init: Creating file store directory </Users/a0014208/Documents/GitHub/School-Forum/filepond-temp-uploads>...
+Initialising storage backend with storage module name [None]
+Running _get_storage_backend with fq_classname [None]
+Upload temp directory from top level settings: </Users/a0014208/Documents/GitHub/School-Forum/filepond_uploads>
+Filepond app init: Temporary file upload directory already exists
+App init: no django-storages backend configured, using default (local) storage backend if set, otherwise you need to manage file storage independently of this app.
+Filepond app init: File store path already exists
+Watching for file changes with StatReloader
+Initialising storage backend with storage module name [None]
+Running _get_storage_backend with fq_classname [None]
+Not Found: /favicon.ico
+Not Found: /favicon.ico
+Not Found: /favicon.ico
+Internal Server Error: /post/74/edit/
+Traceback (most recent call last):
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/backends/utils.py", line 89, in _execute
+    return self.cursor.execute(sql, params)
+psycopg2.errors.NotNullViolation: null value in column "title" of relation "forum_post" violates not-null constraint
+DETAIL:  Failing row contains (74, null, "{\"time\":1740434595392,\"blocks\":[],\"version\":\"2.31.0-rc.7..., 2025-02-24 18:01:43.052665+00, 1, '-4':37B '0ij4itxx5':16B '1':12B,14B '1740420101035':3B '2':36B ...).
+
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/contrib/auth/decorators.py", line 23, in _wrapper_view
+    return view_func(request, *args, **kwargs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/forum/views.py", line 230, in edit_post
+    post.save()
+  File "/Users/a0014208/Documents/GitHub/School-Forum/forum/models.py", line 26, in save
+    super().save(*args, **kwargs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/base.py", line 814, in save
+    self.save_base(
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/base.py", line 877, in save_base
+    updated = self._save_table(
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/base.py", line 990, in _save_table
+    updated = self._do_update(
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/base.py", line 1054, in _do_update
+    return filtered._update(values) > 0
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/query.py", line 1231, in _update
+    return query.get_compiler(self.db).execute_sql(CURSOR)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/sql/compiler.py", line 1984, in execute_sql
+    cursor = super().execute_sql(result_type)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/models/sql/compiler.py", line 1562, in execute_sql
+    cursor.execute(sql, params)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/backends/utils.py", line 102, in execute
+    return super().execute(sql, params)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/backends/utils.py", line 67, in execute
+    return self._execute_with_wrappers(
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/backends/utils.py", line 80, in _execute_with_wrappers
+    return executor(sql, params, many, context)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/backends/utils.py", line 89, in _execute
+    return self.cursor.execute(sql, params)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/utils.py", line 91, in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/db/backends/utils.py", line 89, in _execute
+    return self.cursor.execute(sql, params)
+django.db.utils.IntegrityError: null value in column "title" of relation "forum_post" violates not-null constraint
+DETAIL:  Failing row contains (74, null, "{\"time\":1740434595392,\"blocks\":[],\"version\":\"2.31.0-rc.7..., 2025-02-24 18:01:43.052665+00, 1, '-4':37B '0ij4itxx5':16B '1':12B,14B '1740420101035':3B '2':36B ...).
+
+Not Found: /favicon.ico
+/Users/a0014208/Documents/GitHub/School-Forum/forum/views.py changed, reloading.
+Initialising storage backend with storage module name [None]
+Running _get_storage_backend with fq_classname [None]
+Upload temp directory from top level settings: </Users/a0014208/Documents/GitHub/School-Forum/filepond_uploads>
+Filepond app init: Temporary file upload directory already exists
+App init: no django-storages backend configured, using default (local) storage backend if set, otherwise you need to manage file storage independently of this app.
+Filepond app init: File store path already exists
+Watching for file changes with StatReloader
+/Users/a0014208/Documents/GitHub/School-Forum/forum/views.py changed, reloading.
+Initialising storage backend with storage module name [None]
+Running _get_storage_backend with fq_classname [None]
+Upload temp directory from top level settings: </Users/a0014208/Documents/GitHub/School-Forum/filepond_uploads>
+Filepond app init: Temporary file upload directory already exists
+App init: no django-storages backend configured, using default (local) storage backend if set, otherwise you need to manage file storage independently of this app.
+Filepond app init: File store path already exists
+Watching for file changes with StatReloader
+Initialising storage backend with storage module name [None]
+Running _get_storage_backend with fq_classname [None]
+/Users/a0014208/Documents/GitHub/School-Forum/forum/views.py changed, reloading.
+Initialising storage backend with storage module name [None]
+Running _get_storage_backend with fq_classname [None]
+Upload temp directory from top level settings: </Users/a0014208/Documents/GitHub/School-Forum/filepond_uploads>
+Filepond app init: Temporary file upload directory already exists
+App init: no django-storages backend configured, using default (local) storage backend if set, otherwise you need to manage file storage independently of this app.
+Filepond app init: File store path already exists
+Watching for file changes with StatReloader
+Initialising storage backend with storage module name [None]
+Running _get_storage_backend with fq_classname [None]
+/Users/a0014208/Documents/GitHub/School-Forum/forum/views.py changed, reloading.
+Initialising storage backend with storage module name [None]
+Running _get_storage_backend with fq_classname [None]
+Upload temp directory from top level settings: </Users/a0014208/Documents/GitHub/School-Forum/filepond_uploads>
+Filepond app init: Temporary file upload directory already exists
+App init: no django-storages backend configured, using default (local) storage backend if set, otherwise you need to manage file storage independently of this app.
+Filepond app init: File store path already exists
+Watching for file changes with StatReloader
+Initialising storage backend with storage module name [None]
+Running _get_storage_backend with fq_classname [None]
+Internal Server Error: /post/75/edit/
+Traceback (most recent call last):
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/venv/lib/python3.9/site-packages/django/contrib/auth/decorators.py", line 23, in _wrapper_view
+    return view_func(request, *args, **kwargs)
+  File "/Users/a0014208/Documents/GitHub/School-Forum/forum/views.py", line 238, in edit_post
+    'post_content': post.data  # This will be parsed as JSON in the template
+AttributeError: 'Post' object has no attribute 'data'
+Not Found: /favicon.ico
+/Users/a0014208/Documents/GitHub/School-Forum/forum/views.py changed, reloading.
+Initialising storage backend with storage module name [None]
+Running _get_storage_backend with fq_classname [None]
+Upload temp directory from top level settings: </Users/a0014208/Documents/GitHub/School-Forum/filepond_uploads>
+Filepond app init: Temporary file upload directory already exists
+App init: no django-storages backend configured, using default (local) storage backend if set, otherwise you need to manage file storage independently of this app.
+Filepond app init: File store path already exists
+Watching for file changes with StatReloader
+Initialising storage backend with storage module name [None]
+Running _get_storage_backend with fq_classname [None]
+Not Found: /favicon.ico
+Not Found: /favicon.ico
+Not Found: /favicon.ico
+Not Found: /favicon.ico
+Not Found: /favicon.ico
+Not Found: /favicon.ico
+/Users/a0014208/Documents/GitHub/School-Forum/forum/views.py changed, reloading.
+Initialising storage backend with storage module name [None]
+Running _get_storage_backend with fq_classname [None]
+Upload temp directory from top level settings: </Users/a0014208/Documents/GitHub/School-Forum/filepond_uploads>
+Filepond app init: Temporary file upload directory already exists
+App init: no django-storages backend configured, using default (local) storage backend if set, otherwise you need to manage file storage independently of this app.
+Filepond app init: File store path already exists
+Watching for file changes with StatReloader
+Initialising storage backend with storage module name [None]
+Running _get_storage_backend with fq_classname [None]
+Not Found: /favicon.ico
+Not Found: /favicon.ico
+Initialising storage backend with storage module name [None]
+Running _get_storage_backend with fq_classname [None]
+Upload temp directory from top level settings: </Users/a0014208/Documents/GitHub/School-Forum/filepond_uploads>
+Filepond app init: Temporary file upload directory already exists
+App init: no django-storages backend configured, using default (local) storage backend if set, otherwise you need to manage file storage independently of this app.
+Filepond app init: File store path already exists
+Initialising storage backend with storage module name [None]
+Running _get_storage_backend with fq_classname [None]
+Upload temp directory from top level settings: </Users/a0014208/Documents/GitHub/School-Forum/filepond_uploads>
+Filepond app init: Temporary file upload directory already exists
+App init: no django-storages backend configured, using default (local) storage backend if set, otherwise you need to manage file storage independently of this app.
+Filepond app init: File store path already exists
+Watching for file changes with StatReloader
+Initialising storage backend with storage module name [None]
+Running _get_storage_backend with fq_classname [None]
+Not Found: /favicon.ico
+Not Found: /favicon.ico
+Not Found: /favicon.ico
+Not Found: /favicon.ico
+Not Found: /favicon.ico
+Not Found: /favicon.ico
+Not Found: /favicon.ico
+Initialising storage backend with storage module name [None]
+Running _get_storage_backend with fq_classname [None]
+Upload temp directory from top level settings: </Users/a0014208/Documents/GitHub/School-Forum/filepond_uploads>
+Filepond app init: Temporary file upload directory already exists
+App init: no django-storages backend configured, using default (local) storage backend if set, otherwise you need to manage file storage independently of this app.
+Filepond app init: File store path already exists
+Initialising storage backend with storage module name [None]
+Running _get_storage_backend with fq_classname [None]
+Upload temp directory from top level settings: </Users/a0014208/Documents/GitHub/School-Forum/filepond_uploads>
+Filepond app init: Temporary file upload directory already exists
+App init: no django-storages backend configured, using default (local) storage backend if set, otherwise you need to manage file storage independently of this app.
+Filepond app init: File store path already exists
+Watching for file changes with StatReloader
+Initialising storage backend with storage module name [None]
+Running _get_storage_backend with fq_classname [None]
+Not Found: /favicon.ico
+Not Found: /favicon.ico
+Not Found: /favicon.ico
+Not Found: /favicon.ico
+/Users/a0014208/Documents/GitHub/School-Forum/forum/views.py changed, reloading.
+Initialising storage backend with storage module name [None]
+Running _get_storage_backend with fq_classname [None]
+Upload temp directory from top level settings: </Users/a0014208/Documents/GitHub/School-Forum/filepond_uploads>
+Filepond app init: Temporary file upload directory already exists
+App init: no django-storages backend configured, using default (local) storage backend if set, otherwise you need to manage file storage independently of this app.
+Filepond app init: File store path already exists
+Watching for file changes with StatReloader
+Initialising storage backend with storage module name [None]
+Running _get_storage_backend with fq_classname [None]
+Not Found: /favicon.ico
+/Users/a0014208/Documents/GitHub/School-Forum/forum/views.py changed, reloading.
+Initialising storage backend with storage module name [None]
+Running _get_storage_backend with fq_classname [None]
+Upload temp directory from top level settings: </Users/a0014208/Documents/GitHub/School-Forum/filepond_uploads>
+Filepond app init: Temporary file upload directory already exists
+App init: no django-storages backend configured, using default (local) storage backend if set, otherwise you need to manage file storage independently of this app.
+Filepond app init: File store path already exists
+Watching for file changes with StatReloader
+Initialising storage backend with storage module name [None]
+Running _get_storage_backend with fq_classname [None]
+Not Found: /favicon.ico
+Not Found: /favicon.ico
+Not Found: /favicon.ico
+Not Found: /favicon.ico
+Not Found: /favicon.ico
+Not Found: /favicon.ico
+Not Found: /favicon.ico
+Not Found: /favicon.ico
+/Users/a0014208/Documents/GitHub/School-Forum/forum/views.py changed, reloading.
+Initialising storage backend with storage module name [None]
+Running _get_storage_backend with fq_classname [None]
+Upload temp directory from top level settings: </Users/a0014208/Documents/GitHub/School-Forum/filepond_uploads>
+Filepond app init: Temporary file upload directory already exists
+App init: no django-storages backend configured, using default (local) storage backend if set, otherwise you need to manage file storage independently of this app.
+Filepond app init: File store path already exists
+Watching for file changes with StatReloader
+Initialising storage backend with storage module name [None]
+Running _get_storage_backend with fq_classname [None]
+/Users/a0014208/Documents/GitHub/School-Forum/forum/views.py changed, reloading.
+Initialising storage backend with storage module name [None]
+Running _get_storage_backend with fq_classname [None]
+Upload temp directory from top level settings: </Users/a0014208/Documents/GitHub/School-Forum/filepond_uploads>
+Filepond app init: Temporary file upload directory already exists
+App init: no django-storages backend configured, using default (local) storage backend if set, otherwise you need to manage file storage independently of this app.
+Filepond app init: File store path already exists
+Watching for file changes with StatReloader
+Initialising storage backend with storage module name [None]
+Running _get_storage_backend with fq_classname [None]
+Initialising storage backend with storage module name [None]
+Running _get_storage_backend with fq_classname [None]
+Upload temp directory from top level settings: </Users/a0014208/Documents/GitHub/School-Forum/filepond_uploads>
+Filepond app init: Temporary file upload directory already exists
+App init: no django-storages backend configured, using default (local) storage backend if set, otherwise you need to manage file storage independently of this app.
+Filepond app init: File store path already exists
+Initialising storage backend with storage module name [None]
+Running _get_storage_backend with fq_classname [None]
+Upload temp directory from top level settings: </Users/a0014208/Documents/GitHub/School-Forum/filepond_uploads>
+Filepond app init: Temporary file upload directory already exists
+App init: no django-storages backend configured, using default (local) storage backend if set, otherwise you need to manage file storage independently of this app.
+Filepond app init: File store path already exists
+Watching for file changes with StatReloader
+Initialising storage backend with storage module name [None]
+Running _get_storage_backend with fq_classname [None]
+Not Found: /favicon.ico
+Not Found: /favicon.ico
+/Users/a0014208/Documents/GitHub/School-Forum/forum/views.py changed, reloading.
+Initialising storage backend with storage module name [None]
+Running _get_storage_backend with fq_classname [None]
+Upload temp directory from top level settings: </Users/a0014208/Documents/GitHub/School-Forum/filepond_uploads>
+Filepond app init: Temporary file upload directory already exists
+App init: no django-storages backend configured, using default (local) storage backend if set, otherwise you need to manage file storage independently of this app.
+Filepond app init: File store path already exists
+Watching for file changes with StatReloader
+Initialising storage backend with storage module name [None]
+Running _get_storage_backend with fq_classname [None]
+Not Found: /favicon.ico

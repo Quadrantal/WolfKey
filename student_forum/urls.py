@@ -46,6 +46,7 @@ urlpatterns = [
     re_path(r'^fp/', include('django_drf_filepond.urls')),
     path('saved_posts', views.saved_posts, name = "saved_posts"),
     path('myposts/', views.my_posts, name = 'my_posts'),
+    path('post/<int:post_id>/edit/', views.edit_post, name='edit_post'),
 ]
 
 
