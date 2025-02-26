@@ -2384,3 +2384,18 @@ Initialising storage backend with storage module name [None]
 Running _get_storage_backend with fq_classname [None]
 Not Found: /favicon.ico
 Not Found: /favicon.ico
+Initialising storage backend with storage module name [None]
+Running _get_storage_backend with fq_classname [None]
+Upload temp directory from top level settings: </Users/a0014208/Documents/GitHub/School-Forum/filepond_uploads>
+Filepond app init: Temporary file upload directory already exists
+App init: no django-storages backend configured, using default (local) storage backend if set, otherwise you need to manage file storage independently of this app.
+Filepond app init: File store path already exists
+Initialising storage backend with storage module name [None]
+Running _get_storage_backend with fq_classname [None]
+Upload temp directory from top level settings: </Users/a0014208/Documents/GitHub/School-Forum/filepond_uploads>
+Filepond app init: Temporary file upload directory already exists
+App init: no django-storages backend configured, using default (local) storage backend if set, otherwise you need to manage file storage independently of this app.
+Filepond app init: File store path already exists
+Watching for file changes with StatReloader
+Initialising storage backend with storage module name [None]
+Running _get_storage_backend with fq_classname [None]
