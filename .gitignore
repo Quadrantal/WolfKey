@@ -1,6 +1,9 @@
 debug.log
-logs
+*.log
+logs/
 .cache
 .pyc
 .cache/
-debug.log
+__pycache__/
+.DS_Store
+.vscode/
