@@ -30,10 +30,8 @@
         <!-- Question Content with Voting -->
         <div class="post-container">
             <!-- Post Content -->
-            <div class="post-content-cell" id = "post-content-cell">
-                {% autoescape off %}
-                {{ editorjs_html }} 
-                {% endautoescape %}
+            <div class="post-content-cell">
+                <div id="editorjs"></div>
             </div>
 
             <!-- Tags -->
@@ -164,143 +162,49 @@
 <script defer src="//unpkg.com/mathlive"></script>
 <link rel="stylesheet" href="https://unpkg.com/mathlive/dist/mathlive-static.css">
 
+
+
+<!-- Initialize Editor.js -->
+<script src="https://cdn.jsdelivr.net/npm/@editorjs/editorjs@latest"></script>
+<script src="https://cdn.jsdelivr.net/npm/@editorjs/image@latest"></script>
+<script src="https://cdn.jsdelivr.net/npm/@editorjs/header@latest"></script>
+<script src="https://cdn.jsdelivr.net/npm/@editorjs/quote@2.7.6/dist/quote.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@blade47/editorjs-delimiter@1.4.3/dist/delimiter.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@editorjs/list@2"></script>
+<script src="https://cdn.jsdelivr.net/gh/mdgaziur/EditorJS-LaTeX@latest/dist/editorjs-latex.bundle-min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@editorjs/inline-code@latest"></script>
+<script src="https://cdn.jsdelivr.net/npm/@calumk/editorjs-codecup@latest"></script>
+<script src="https://unpkg.com/mathlive/dist/mathlive.min.js"></script>
+
+{% load static %}
+<script src="{% static 'forum/js/inline-math.js' %}"></script>
+<script src="{% static 'forum/js/editor-config.js' %}"></script>
+
+
 <script>hljs.highlightAll();</script>
 
 <script>
     document.addEventListener('DOMContentLoaded', function () {
         try {
-            console.log("Script started");
-            
             const content = JSON.parse('{{ content_json|escapejs }}');
-
-            // Initialize parser
-            const edjsParser = edjsHTML({
-                paragraph: block => {
-                    const content = block.data.text;
-                    
-                    // Create a temporary container
-                    const tempDiv = document.createElement('div');
-                    
-                    // First, create the basic HTML structure
-                    const paragraph = document.createElement('p');
-                    
-                    // If the content contains math, process it
-                    if (content.includes('span class="inline-math"')) {
-                        const parser = new DOMParser();
-                        const doc = parser.parseFromString(content, 'text/html');
-                        
-                        // Process each math span
-                        doc.querySelectorAll('span.inline-math').forEach(span => {
-                            const tex = span.getAttribute('data-tex');
-                            
-                            // Create the math field
-                            const mathField = new MathfieldElement();
-                            mathField.style.display = 'inline-block';
-                            mathField.style.minWidth = '1em';
-                            mathField.style.margin = '0 2px';
-                            mathField.style.padding = '0 2px';
-                            mathField.style.border = 'none';
-                            mathField.style.background = 'transparent';
-                            mathField.setAttribute('read-only', '');
-                            
-                            // Important: Set the value before adding to DOM
-                            mathField.value = tex;
-                            
-                            // Replace the original span with our new math field
-                            const wrapper = document.createElement('span');
-                            wrapper.classList.add('inline-math');
-                            wrapper.setAttribute('data-tex', tex);
-                            wrapper.appendChild(mathField);
-                            
-                            // Replace the original span in the content
-                            span.parentNode.replaceChild(wrapper, span);
-                        });
-                        
-                        paragraph.innerHTML = doc.body.innerHTML;
-                    } else {
-                        // If no math content, just set the text
-                        paragraph.innerHTML = content;
-                    }
-                    
-                    return paragraph.outerHTML;
-                },
-                image: block => {
-                    const { file, caption, withBorder, withBackground, stretched } = block.data;
-
-                    // Default styles
-                    const borderClass = withBorder ? "image-border" : "";
-                    const backgroundClass = withBackground ? "image-background" : "";
-                    const stretchedClass = stretched ? "image-stretched" : "";
-
-                    // Combine styles
-                    const classList = [borderClass, backgroundClass, stretchedClass].join(" ").trim();
-
-                    // Generate HTML
-                    return `
-                        <div class="editor-image ${classList}">
-                            <img src="${file.url}" alt="${caption || ''}">
-                            ${caption ? `<p class="image-caption">${caption}</p>` : ""}
-                        </div>
-                    `;
-                },code : block => {
-                    const {code, language} = block.data;
-
-                    return `
-                        <pre> <code>
-                            ${code}
-                        </code> </pre>
-                    `;
-                }
+            console.log(content);
+            const editor = createEditor(
+                'editorjs',
+                content,
+                '{{ csrf_token }}',
+                true,
+            );
+            console.log("Editor, ", editor);
+            editor.isReady.then(() => {
+                // Access the ReadOnly API through the editor instance
+                editor.readOnly.toggle(true);
+                console.log('Editor set to read-only mode');
+            }).catch((error) => {
+                console.error('Failed to set read-only mode:', error);
             });
-
-            const cleanData = {
-                "time": 1737931247556,
-                "blocks": [
-                    {
-                    "id": "IgnzU9ka5q",
-                    "type": "paragraph",
-                    "data": {
-                        "text": "e=mc^2",
-                    }
-                    },
-                    {
-                    "id": "iePwSDAmea",
-                    "type": "header",
-                    "data": {
-                        "text": "Heading 1",
-                        "level": 2
-                    }
-                    }
-                ],
-                "version": "2.30.7"
-            };
-
-            console.log("Content: ", content);
-            
-            // Parse content
-            const editorjs_html = edjsParser.parse(content);
-            console.log("Parsed HTML:", editorjs_html);
-            
-            // Update DOM
-            const contentCell = document.getElementById("post-content-cell");
-            if (contentCell) {
-                contentCell.innerHTML = editorjs_html;
-                
-                // Initialize all math fields after content is inserted
-                const mathFields = contentCell.querySelectorAll('math-field');
-                mathFields.forEach(field => {
-                    field.mathVirtualKeyboardPolicy = 'manual';
-                    // Ensure the value is set after insertion
-                    const tex = field.closest('.inline-math').getAttribute('data-tex');
-                    if (tex) {
-                        field.value = tex;
-                    }
-                });
-            } else {
-                console.error("Content cell not found");
-            }
+            console.log('Editor initialized with content:', content);
         } catch (error) {
-            console.error("Error processing content:", error);
+            console.error('Error initializing editor:', error);
         }
     });
 

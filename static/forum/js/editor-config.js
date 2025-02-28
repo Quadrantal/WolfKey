@@ -1,7 +1,8 @@
-const createEditor = (holder,initialData, csrfToken) => {
+const createEditor = (holder,initialData, csrfToken, isReadOnly = false) => {
     return new EditorJS({
         holder: 'editorjs',  // The container where Editor.js will be initialized
         data: initialData,
+        readOnly: isReadOnly,
         tools: {
             image: {
                 class: ImageTool,
@@ -64,11 +65,14 @@ const createEditor = (holder,initialData, csrfToken) => {
             if (tex) {
                 const mathField = new MathfieldElement();
                 mathField.value = tex;
+                if (isReadOnly) {
+                    mathField.setAttribute('read-only', '');
+                }
                 elem.appendChild(mathField);
             }
         });
         },
-        onChange: (api) => {
+        onChange: !isReadOnly ? (api) => {
             api.saver.save()
                 .then((outputData) => {
                     document.getElementById('editorjs-content').value = JSON.stringify(outputData);
@@ -77,7 +81,7 @@ const createEditor = (holder,initialData, csrfToken) => {
                 .catch((error) => {
                     console.error('Saving failed: ', error);
                 });
-        },
+        } : undefined,
         minHeight: 75,
     })
 }
