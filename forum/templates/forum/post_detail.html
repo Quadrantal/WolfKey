@@ -153,11 +153,6 @@
     {% endblock %}
 
 {% block scripts %}
-<script src="https://vjs.zencdn.net/8.16.1/video.min.js"></script>
-<script src="{% static 'forum/js/carousel.js' %}"></script>
-
-<script src = "https://cdn.jsdelivr.net/npm/editorjs-html@4.0.0/.build/edjsHTML.browser.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
 
 <script defer src="//unpkg.com/mathlive"></script>
 <link rel="stylesheet" href="https://unpkg.com/mathlive/dist/mathlive-static.css">
@@ -179,9 +174,6 @@
 {% load static %}
 <script src="{% static 'forum/js/inline-math.js' %}"></script>
 <script src="{% static 'forum/js/editor-config.js' %}"></script>
-
-
-<script>hljs.highlightAll();</script>
 
 <script>
     document.addEventListener('DOMContentLoaded', function () {
