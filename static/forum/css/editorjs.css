@@ -6,6 +6,13 @@
     margin: 0 auto;  /* Center image if it has extra space */
 }
 
+.image-tool__image-picture {
+    max-width: 500px; /* Adjust to desired size */
+    height: auto;
+    display: block;
+    margin: 0 auto; /* Center the image */
+}
+
 /* If stretched is true, still maintain max-width and height auto */
 .image-stretched img {
     width: 100%;
