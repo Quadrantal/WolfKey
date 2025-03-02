@@ -106,7 +106,13 @@ def post_detail(request, post_id):
             solution = get_object_or_404(Solution, id=solution_id, author=request.user)
             solution_form = SolutionForm(request.POST, instance=solution)
             if solution_form.is_valid():
-                solution_form.save()
+                solution_json = request.POST.get('content')
+                solution_data = json.loads(solution_json) if solution_json else {}
+                solution = solution_form.save(commit=False)
+                solution.content = solution_data
+                solution.post = post
+                solution.author = request.user
+                solution.save()
                 messages.success(request, 'Solution updated successfully!')
 
         # Handle solution deletion

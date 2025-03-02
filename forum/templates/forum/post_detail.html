@@ -105,15 +105,21 @@
 
                 <!-- Solution Actions -->
                 {% if user.is_authenticated %}
-                <div class="solution-actions mt-3">
+                <div class="solution-actions mt-3" data-solution-id="{{ solution.id }}">
                     {% if user == solution.author %}
-                        <button class="btn btn-outline-secondary btn-sm" onclick="showEditSolutionForm('{{ solution.id }}')">Edit</button>
-                        <form method="post" action="{% url 'post_detail' post.id %}" class="d-inline">
-                            {% csrf_token %}
-                            <input type="hidden" name="action" value="delete_solution">
-                            <input type="hidden" name="solution_id" value="{{ solution.id }}">
-                            <button type="submit" class="btn btn-outline-danger btn-sm">Delete</button>
-                        </form>
+                        <div class="default-actions">
+                            <button class="btn btn-outline-secondary btn-sm" onclick="showEditSolutionForm('{{ solution.id }}')">Edit</button>
+                            <form method="post" action="{% url 'post_detail' post.id %}" class="d-inline">
+                                {% csrf_token %}
+                                <input type="hidden" name="action" value="delete_solution">
+                                <input type="hidden" name="solution_id" value="{{ solution.id }}">
+                                <button type="submit" class="btn btn-outline-danger btn-sm">Delete</button>
+                            </form>
+                        </div>
+                        <div class="edit-actions" style="display: none;">
+                            <button class="btn btn-primary btn-sm" onclick="saveSolutionEdit('{{ solution.id }}')">Save</button>
+                            <button class="btn btn-secondary btn-sm" onclick="cancelSolutionEdit('{{ solution.id }}')">Cancel</button>
+                        </div>
                     {% endif %}
                 </div>
                 {% endif %}
@@ -178,6 +184,8 @@
 
 <script>
     document.addEventListener('DOMContentLoaded', function () {
+        const solutionEditors = new Map();
+        
         try {
             console.log("processed", '{{processed_solutions}}');
             // Initialize main post editor
@@ -194,12 +202,13 @@
             processedSolutions.forEach(solution => {
                 try {
                     console.log(solution.content);
-                    createEditor(
+                    const editor = createEditor(
                         `editorjs-solution-${solution.id}`,
                         solution.content,
                         '{{ csrf_token }}',
                         true
                     );
+                    solutionEditors.set(solution.id, editor);
                 } catch (solutionError) {
                     console.error(`Error initializing solution ${solution.id}:`, solutionError);
                 }
@@ -226,6 +235,114 @@
                     }
                 });
             }
+
+            // Add edit solution functionality
+            window.showEditSolutionForm = async function(solutionId) {
+                const editor = solutionEditors.get(parseInt(solutionId));
+                if (!editor) return;
+                
+                try {
+                    await editor.readOnly.toggle();
+                    
+                    // Get solution container and update UI
+                    const container = document.querySelector(`#editorjs-solution-${solutionId}`);
+                    const solutionContainer = container.closest('.solution-container');
+                    const actionsDiv = solutionContainer.querySelector('.solution-actions');
+                    
+                    // Store original actions
+                    const defaultActions = actionsDiv.querySelector('.default-actions');
+                    const editActions = actionsDiv.querySelector('.edit-actions');
+                    
+                    // Toggle visibility
+                    defaultActions.style.display = 'none';
+                    editActions.style.display = 'block';
+                    
+                    // Handle math fields after editor is ready
+                    setTimeout(() => {
+                        container.querySelectorAll('.inline-math').forEach(elem => {
+                            const existingMathField = elem.querySelector('math-field');
+                            if (existingMathField) {
+                                existingMathField.remove();
+                            }
+                            
+                            const tex = elem.getAttribute('data-tex');
+                            if (tex) {
+                                const mathField = new MathfieldElement();
+                                mathField.value = tex;
+                                if (editor.readOnly.isEnabled) {
+                                    mathField.setAttribute('read-only', '');
+                                }
+                                elem.appendChild(mathField);
+                            }
+                        });
+                    }, 100);
+                    
+                } catch (error) {
+                    console.error('Error enabling edit mode:', error);
+                }
+            };
+
+            window.saveSolutionEdit = async function(solutionId) {
+                const editor = solutionEditors.get(parseInt(solutionId));
+                if (!editor) return;
+                
+                try {
+                    const outputData = await editor.save();
+                    const form = document.createElement('form');
+                    form.method = 'POST';
+                    
+                    // Create form content safely
+                    const csrf = document.querySelector('[name=csrfmiddlewaretoken]').value;
+                    const formContent = `
+                        <input type="hidden" name="csrfmiddlewaretoken" value="${csrf}">
+                        <input type="hidden" name="action" value="edit_solution">
+                        <input type="hidden" name="solution_id" value="${solutionId}">
+                        <input type="hidden" name="content" value='${JSON.stringify(outputData).replace(/'/g, "&#39;")}'>
+                    `;
+                    
+                    form.innerHTML = formContent;
+                    document.body.appendChild(form);
+                    form.submit();
+                } catch (error) {
+                    console.error('Failed to save edited solution:', error);
+                }
+            };
+
+            window.cancelSolutionEdit = function(solutionId) {
+                const editor = solutionEditors.get(parseInt(solutionId));
+                if (!editor) return;
+                
+                // Toggle back to read-only
+                editor.readOnly.toggle();
+                
+                // Restore button visibility
+                const container = document.querySelector(`#editorjs-solution-${solutionId}`);
+                const solutionContainer = container.closest('.solution-container');
+                const defaultActions = solutionContainer.querySelector('.default-actions');
+                const editActions = solutionContainer.querySelector('.edit-actions');
+                
+                defaultActions.style.display = 'block';
+                editActions.style.display = 'none';
+                
+                // Reinitialize math fields
+                setTimeout(() => {
+                    container.querySelectorAll('.inline-math').forEach(elem => {
+                        const existingMathField = elem.querySelector('math-field');
+                        if (existingMathField) {
+                            existingMathField.remove();
+                        }
+                        
+                        const tex = elem.getAttribute('data-tex');
+                        if (tex) {
+                            const mathField = new MathfieldElement();
+                            mathField.value = tex;
+                            mathField.setAttribute('read-only', '');
+                            elem.appendChild(mathField);
+                        }
+                    });
+                }, 100);
+            };
+
         } catch (error) {
             console.error('Error initializing editors:', error);
         }
