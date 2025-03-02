@@ -1,6 +1,7 @@
-const createEditor = (holder,initialData, csrfToken, isReadOnly = false) => {
+const createEditor = (holder,initialData, csrfToken, isReadOnly = false, contentElementId = 'editorjs-content') => {
+    console.log("DATA: ", initialData);
     return new EditorJS({
-        holder: 'editorjs',  // The container where Editor.js will be initialized
+        holder: holder,  // The container where Editor.js will be initialized
         data: initialData,
         readOnly: isReadOnly,
         tools: {
@@ -61,25 +62,32 @@ const createEditor = (holder,initialData, csrfToken, isReadOnly = false) => {
         onReady: () => {
             console.log('Editor.js is ready!');
             document.querySelectorAll('.inline-math').forEach(elem => {
-            const tex = elem.getAttribute('data-tex');
-            if (tex) {
-                const mathField = new MathfieldElement();
-                mathField.value = tex;
-                if (isReadOnly) {
-                    mathField.setAttribute('read-only', '');
+                if (!elem.querySelector('math-field')) {
+                    const tex = elem.getAttribute('data-tex');
+                    if (tex) {
+                        const mathField = new MathfieldElement();
+                        mathField.value = tex;
+                        if (isReadOnly) {
+                            mathField.setAttribute('read-only', '');
+                        }
+                        elem.appendChild(mathField);
+                    }
                 }
-                elem.appendChild(mathField);
-            }
-        });
+            });
         },
         onChange: !isReadOnly ? (api) => {
             api.saver.save()
                 .then((outputData) => {
-                    document.getElementById('editorjs-content').value = JSON.stringify(outputData);
-                    console.log("Editor.js content saved");
+                    const contentElement = document.getElementById(contentElementId);
+                    if (contentElement) {
+                        contentElement.value = JSON.stringify(outputData);
+                        console.log("Editor.js content saved");
+                    } else {
+                        console.warn(`Content element with ID '${contentElementId}' not found`);
+                    }
                 })
                 .catch((error) => {
-                    console.error('Saving failed: ', error);
+                    console.error('Saving failed:', error);
                 });
         } : undefined,
         minHeight: 75,

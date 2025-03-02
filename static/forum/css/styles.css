@@ -397,3 +397,18 @@ p{
     border: 1px solid #ddd;
     color: #333;
 }
+
+.solution-container {
+    max-width: 900px;
+    margin: 10px auto;
+}
+
+.codex-editor__redactor {
+    padding-bottom: 20px !important;
+}
+
+
+#solution-form-container {
+    max-width: 900px;
+    margin: 10px auto;
+}

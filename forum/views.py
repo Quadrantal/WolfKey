@@ -42,6 +42,38 @@ def home(request):
     tags = Tag.objects.all().order_by('name')  # Sort tags alphabetically
 
     return render(request, 'forum/home.html', {'posts': posts, 'tags': tags, 'query': query, 'selected_tags': tag_ids})
+
+def selective_quote_replace(content):
+    """Helper function to selectively replace quotes while preserving inlineMath"""
+    # First, preserve inlineMath quotes
+    content = content.replace('"inline-math"', "__INLINEMATH__")
+    
+    # Do the regular quote replacements
+    content = (content
+        .replace("'", '"')        # Replace single quotes with double quotes
+        .replace('data-tex="', 'data-tex=\\"')
+        .replace('" style=', '\\" style=')
+        .replace('style="', 'style=\\"')
+        .replace('class="', 'class=\\"')
+        .replace('" class=', '\\" class=')
+        .replace('id="', 'id=\\"')
+        .replace('" id=', '\\" id=')
+        .replace(';">', ';\\">')
+        .replace('" >', '\\">')
+        .replace('"/>', '\\"/>')
+        .replace('True', 'true')     # JavaScript booleans
+        .replace('False', 'false')
+        .replace('None', 'null')
+        .replace('\n', '\\n')
+        .replace('\r', '\\r')
+        .replace('\t', '\\t')
+        .strip())
+
+    # Restore inlineMath quotes
+    content = content.replace("__INLINEMATH__", "'inline-math'")
+
+    return content
+
 @login_required
 def post_detail(request, post_id):
     post = get_object_or_404(Post, id=post_id)
@@ -59,7 +91,10 @@ def post_detail(request, post_id):
         if action == 'create_solution':
             solution_form = SolutionForm(request.POST)
             if solution_form.is_valid():
+                solution_json = request.POST.get('content')
+                solution_data = json.loads(solution_json) if solution_json else {}
                 solution = solution_form.save(commit=False)
+                solution.content = solution_data
                 solution.post = post
                 solution.author = request.user
                 solution.save()
@@ -71,7 +106,13 @@ def post_detail(request, post_id):
             solution = get_object_or_404(Solution, id=solution_id, author=request.user)
             solution_form = SolutionForm(request.POST, instance=solution)
             if solution_form.is_valid():
-                solution_form.save()
+                solution_json = request.POST.get('content')
+                solution_data = json.loads(solution_json) if solution_json else {}
+                solution = solution_form.save(commit=False)
+                solution.content = solution_data
+                solution.post = post
+                solution.author = request.user
+                solution.save()
                 messages.success(request, 'Solution updated successfully!')
 
         # Handle solution deletion
@@ -111,18 +152,48 @@ def post_detail(request, post_id):
 
         return redirect('post_detail', post_id=post.id)
 
-    # Serialize Editor.js content and mark as safe
-    content_json = json.dumps(post.content) if post.content else '{}'
-
-    is_saved = SavedPost.objects.filter(user=request.user, post=post).exists()
-    return render(request, 'forum/post_detail.html', {
+    # Process post content
+    content_json = json.dumps(post.content, cls=DjangoJSONEncoder)
+    
+    processed_solutions = []
+    for solution in solutions:
+        try:
+            solution_content = solution.content
+            # If content is a string, convert to object
+            print(type(solution_content))
+            if isinstance(solution_content, str):
+                solution_content = selective_quote_replace(solution_content)
+                print(f"Solution Content: f{solution_content}")
+                solution_content = json.loads(solution_content)
+                
+            processed_solutions.append({
+                'id': solution.id,
+                'content': solution_content,  
+                'author': solution.author.username,
+                'created_at': solution.created_at.strftime("%Y-%m-%d %H:%M:%S"),
+                'upvotes': solution.upvotes,
+                'downvotes': solution.downvotes,
+            })
+        except Exception as e:
+            logger.error(f"Error processing solution {solution.id}: {e}")
+            processed_solutions.append({
+                'id': solution.id,
+                'content': {
+                    "blocks": [{"type": "paragraph", "data": {"text": "Error loading solution content"}}]
+                },
+                'author': solution.author.username,
+                'created_at': solution.created_at.strftime("%Y-%m-%d %H:%M:%S"),
+                'upvotes': solution.upvotes,
+                'downvotes': solution.downvotes,
+            })
+    
+    context = {
         'post': post,
         'solutions': solutions,
-        'solution_form': solution_form,
-        'comment_form': comment_form,
-        'is_saved': is_saved, 
-        'content_json': content_json,  # Pass Editor.js content as JSON
-    })
+        'content_json': content_json,
+        'processed_solutions_json': json.dumps(processed_solutions),
+    }
+    return render(request, 'forum/post_detail.html', context)
 
 
 
@@ -133,7 +204,6 @@ def delete_post(request, post_id):
 
 def edit_post(request, post_id):
     post = get_object_or_404(Post, id=post_id)
-
 
     if request.method == 'POST':
         try:
