@@ -24,8 +24,17 @@
                     Follow<span class="follow-count">90</span>
                 </button>
                 <button class="button add-answer-button">Add answer</button>
+                {% if user.is_authenticated and post.author == user %}
+                <a href="{% url 'edit_post' post.id %}" class="btn btn-primary btn-sm rounded-pill shadow-sm px-3">
+                    <i class="fas fa-edit"></i> Edit
+                </a>
+            {% endif %}
             </div>
+
         </div>
+
+
+        
 
         <!-- Question Content with Voting -->
         <div class="post-container">
@@ -50,13 +59,6 @@
                         <div class="fw-bold">{{ post.author.username }}</div>
                     </div>
                 </div>
-            </div>
-            <div class="post-actions">
-                {% if user.is_authenticated and post.author == user %}
-                    <a href="{% url 'edit_post' post.id %}" class="btn btn-secondary">
-                        <i class="fas fa-edit"></i> Edit
-                    </a>
-                {% endif %}
             </div>
         </div>
     </div>
