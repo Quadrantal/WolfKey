@@ -1,5 +1,5 @@
 from django import forms
-from .models import Post, Comment, Solution, Tag, File, UserProfile
+from .models import Post, Comment, Solution, Tag, File, UserProfile, UserCourseExperience, UserCourseHelp, Course
 from django.forms.widgets import ClearableFileInput
 from django.core.files.uploadedfile import UploadedFile
 
@@ -66,3 +66,48 @@ class UserProfileForm(forms.ModelForm):
         widgets = {
             'bio': forms.Textarea(attrs={'rows': 4}),
         }
+
+class UserCourseExperienceForm(forms.ModelForm):
+    class Meta:
+        model = UserCourseExperience
+        fields = ['course']
+        widgets = {
+            'course': forms.Select(attrs={
+                'class': 'form-select',
+                'placeholder': 'Select a course'
+            })
+        }
+
+    def __init__(self, *args, user=None, **kwargs):
+        super().__init__(*args, **kwargs)
+        if user:
+            existing_courses = UserCourseExperience.objects.filter(
+                user=user
+            ).values_list('course', flat=True)
+            self.fields['course'].queryset = Course.objects.exclude(
+                id__in=existing_courses
+            )
+
+class UserCourseHelpForm(forms.ModelForm):
+    class Meta:
+        model = UserCourseHelp
+        fields = ['course']
+        widgets = {
+            'course': forms.Select(attrs={
+                'class': 'form-select',
+                'placeholder': 'Select a course'
+            })
+        }
+
+    def __init__(self, *args, user=None, **kwargs):
+        super().__init__(*args, **kwargs)
+        if user:
+            existing_help = UserCourseHelp.objects.filter(
+                user=user, 
+                active=True
+            ).values_list('course', flat=True)
+            self.fields['course'].queryset = Course.objects.exclude(
+                id__in=existing_help
+            )
+
+            

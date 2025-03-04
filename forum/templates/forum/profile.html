@@ -66,6 +66,60 @@
                 </div>
             </div>
 
+            <!-- Course Experience Section -->
+            <div class="card mb-4">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Experienced In</h5>
+                    <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#addExperienceModal">
+                        <i class="bi bi-plus"></i> Add Course
+                    </button>
+                </div>
+                <div class="card-body">
+                    <div class="course-list">
+                        {% for course in experienced_courses %}
+                        <div class="course-item d-flex justify-content-between align-items-center mb-2">
+                            <span>{{ course.course.code }} - {{ course.course.name }}</span>
+                            <form method="post" action="{% url 'remove_experience' course.id %}" class="d-inline">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-sm btn-outline-danger">
+                                    <i class="bi bi-x"></i>
+                                </button>
+                            </form>
+                        </div>
+                        {% empty %}
+                        <p class="text-muted">No courses added yet.</p>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Help Needed Section -->
+            <div class="card mb-4">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Need Help In</h5>
+                    <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#addHelpModal">
+                        <i class="bi bi-plus"></i> Add Course
+                    </button>
+                </div>
+                <div class="card-body">
+                    <div class="course-list">
+                        {% for course in help_needed_courses %}
+                        <div class="course-item d-flex justify-content-between align-items-center mb-2">
+                            <span>{{ course.course.code }} - {{ course.course.name }}</span>
+                            <form method="post" action="{% url 'remove_help_request' course.id %}" class="d-inline">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-sm btn-outline-danger">
+                                    <i class="bi bi-x"></i>
+                                </button>
+                            </form>
+                        </div>
+                        {% empty %}
+                        <p class="text-muted">No courses added yet.</p>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+
             {% if user == profile_user %}
             <!-- Edit Profile Button -->
             <div class="text-end">
@@ -74,6 +128,50 @@
                 </a>
             </div>
             {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Add Experience Modal -->
+<div class="modal fade" id="addExperienceModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Add Course Experience</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="post" action="{% url 'add_experience' %}">
+                <div class="modal-body">
+                    {% csrf_token %}
+                    {{ experience_form.as_p }}
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Add Course</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Add Help Modal -->
+<div class="modal fade" id="addHelpModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Add Help Request</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="post" action="{% url 'add_help_request' %}">
+                <div class="modal-body">
+                    {% csrf_token %}
+                    {{ help_form.as_p }}
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Add Course</button>
+                </div>
+            </form>
         </div>
     </div>
 </div>

@@ -21,6 +21,7 @@ from django.contrib import admin
 from django.conf import settings
 from django.conf.urls.static import static
 from django.urls import re_path, include
+
 urlpatterns = [
     path('', views.home, name='home'),
     path('post/<int:post_id>/', views.post_detail, name='post_detail'),
@@ -38,17 +39,26 @@ urlpatterns = [
     path('search-results/', views.search_results_new_page, name='search_results_new_page'),
     path('admin/', admin.site.urls),
     path('upload-image/', views.upload_image, name='upload_image'),
-    path('profile/<str:username>/', views.profile_view, name='profile'),
+    
+    # Profile URLs
     path('profile/edit/', views.edit_profile, name='edit_profile'),
-    path('profile/', views.my_profile, name='my_profile'),
+    path('my-profile/', views.my_profile, name='my_profile'),
+    path('profile/<str:username>/', views.profile_view, name='profile'),
+    
+    # Course management URLs
+    path('courses/experience/add/', views.add_experience, name='add_experience'),
+    path('courses/experience/remove/<int:experience_id>/', views.remove_experience, name='remove_experience'),
+    path('courses/help/add/', views.add_help_request, name='add_help_request'),
+    path('courses/help/remove/<int:help_id>/', views.remove_help_request, name='remove_help_request'),
+    
+    # Other profile-related URLs
+    path('saved-posts/', views.saved_posts, name='saved_posts'),
+    path('my-posts/', views.my_posts, name='my_posts'),
     path('save-post/<int:post_id>/', views.save_post, name='save_post'),
     path('unsave-post/<int:post_id>/', views.unsave_post, name='unsave_post'),
-    path('saved_posts', views.saved_posts, name = "saved_posts"),
-    path('myposts/', views.my_posts, name = 'my_posts'),
-    path('post/<int:post_id>/edit/', views.edit_post, name='edit_post'),
+
+    path('api/courses/', views.course_search, name='course-search'),
 ]
-
-
 
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

@@ -1,0 +1,96 @@
+/* Search box styling */
+.search-box {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 16px;
+    outline: none;
+    margin-bottom: 10px;
+}
+
+/* Dropdown container */
+.dropdown {
+    width: 100%;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    background: white;
+    display: none;
+    max-height: 200px;
+    overflow-y: auto;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    position: absolute;
+    z-index: 10;
+}
+
+/* Dropdown item */
+.dropdown div {
+    padding: 10px;
+    cursor: pointer;
+    border-bottom: 1px solid #f0f0f0;
+    transition: background 0.2s ease-in-out;
+}
+
+/* Last item should not have a bottom border */
+.dropdown div:last-child {
+    border-bottom: none;
+}
+
+/* Hover effect */
+.dropdown div:hover {
+    background-color: #f9f9f9;
+}
+
+/* Course name */
+.dropdown strong {
+    display: block;
+    font-size: 14px;
+    color: #333;
+}
+
+/* Course category and level */
+.dropdown span {
+    font-size: 12px;
+    color: gray;
+}
+ /* Container for selected courses */
+.selected-courses {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 10px;
+}
+
+/* Individual course tag */
+.course-tag {
+    background: #8bb5e7;
+    color: #333;
+    font-size: 14px;
+    padding: 6px 10px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 10px;    
+}
+
+/* Remove button (×) */
+.course-tag .remove-btn {
+    background: #ff6b6b;
+    color: white;
+    border-radius: 5px;
+    width: 16px;
+    height: 16px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 12px;
+}
+/* Dropdown item */
+.dropdown-item {
+    padding: 10px;
+    cursor: pointer;
+    transition: background 0.2s;
+}

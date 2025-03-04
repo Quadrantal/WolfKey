@@ -4,8 +4,8 @@ from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from django.contrib import messages 
 from django.contrib.auth.decorators import login_required
 from django.contrib.postgres.search import SearchVector, SearchQuery, SearchRank, TrigramSimilarity
-from .models import Post, Solution, Comment, SolutionUpvote, SolutionDownvote, CommentUpvote, Tag, File, User, SavedPost
-from .forms import PostForm, CommentForm, SolutionForm, TagForm, UserProfileForm
+from .models import Post, Solution, Comment, SolutionUpvote, SolutionDownvote, CommentUpvote, Tag, File, User, SavedPost, UserCourseHelp, UserCourseExperience, UserProfile, Course
+from .forms import PostForm, CommentForm, SolutionForm, TagForm, UserProfileForm, UserCourseExperienceForm, UserCourseHelpForm
 from django.http import HttpResponseForbidden, JsonResponse
 from django.db.models import F
 from django.views.decorators.csrf import csrf_exempt
@@ -15,7 +15,7 @@ import json
 from datetime import timezone
 from datetime import timedelta
 from django.contrib.auth.decorators import permission_required
-from django.core.exceptions import PermissionDenied
+from django.core.exceptions import PermissionDenied, ObjectDoesNotExist
 from django.core.files.storage import default_storage
 from django.core.files.base import ContentFile
 from django.core.serializers.json import DjangoJSONEncoder
@@ -471,20 +471,29 @@ def profile_view(request, username):
         'profile_user': profile_user,
         'recent_posts': recent_posts,
         'posts_count': posts_count,
-        'solution_count': solutions_count,
+        'solutions_count': solutions_count,
+        'experience_form': UserCourseExperienceForm(user=profile_user),
+        'help_form': UserCourseHelpForm(user=profile_user),
+        'experienced_courses': UserCourseExperience.objects.filter(user=profile_user),
+        'help_needed_courses': UserCourseHelp.objects.filter(user=profile_user, active=True),
     }
     return render(request, 'forum/profile.html', context)
 
 @login_required
 def edit_profile(request):
+    try:
+        profile = request.user.userprofile
+    except ObjectDoesNotExist:
+        profile = UserProfile.objects.create(user=request.user)
+
     if request.method == 'POST':
-        form = UserProfileForm(request.POST, request.FILES, instance=request.user.userprofile)
+        form = UserProfileForm(request.POST, request.FILES, instance=profile)
         if form.is_valid():
             form.save()
             messages.success(request, 'Profile updated successfully!')
             return redirect('profile', username=request.user.username)
     else:
-        form = UserProfileForm(instance=request.user.userprofile)
+        form = UserProfileForm(instance=profile)
     
     return render(request, 'forum/edit_profile.html', {'form': form})
 
@@ -513,3 +522,64 @@ def saved_posts(request):
 def my_posts(request):
     posts = Post.objects.filter(author = request.user)
     return render(request,'forum/my_posts.html', {'posts': posts})
+
+@login_required
+def add_experience(request):
+    if request.method == 'POST':
+        form = UserCourseExperienceForm(request.POST, user=request.user) 
+        if form.is_valid():
+            experience = form.save(commit=False)
+            experience.user = request.user
+            experience.save()
+            messages.success(request, 'Course experience added successfully!')
+    return redirect('profile', username=request.user.username) 
+
+@login_required
+def add_help_request(request):
+    if request.method == 'POST':
+        form = UserCourseHelpForm(request.POST, user=request.user)  
+        if form.is_valid():
+            help_request = form.save(commit=False)
+            help_request.user = request.user
+            help_request.save()
+            messages.success(request, 'Help request added successfully!')
+    return redirect('profile', username=request.user.username) 
+
+@login_required
+def remove_experience(request, experience_id):
+    try:
+        experience = get_object_or_404(UserCourseExperience, 
+                                     id=experience_id, 
+                                     user=request.user)
+        if request.method == 'POST':
+            experience.delete()
+            messages.success(request, 'Course experience removed successfully!')
+    except UserCourseExperience.DoesNotExist:
+        messages.error(request, 'Course experience not found.')
+    except Exception as e:
+        messages.error(request, f'Error removing course experience: {str(e)}')
+    
+    return redirect('profile', username=request.user.username)
+
+@login_required
+def remove_help_request(request, help_id):
+    help_request = get_object_or_404(UserCourseHelp, id=help_id, user=request.user)
+    if request.method == 'POST':
+        help_request.delete()
+        messages.success(request, 'Help request removed successfully!')
+    return redirect('profile', username=request.user.username)
+
+def course_search(request):
+    query = request.GET.get('q', '')
+    courses = Course.objects.filter(
+        name__icontains=query
+    ) if query else Course.objects.all()
+    
+    data = [{
+        "id": course.id,
+        "name": course.name,
+        "code": course.code,
+        "category": course.category
+    } for course in courses[:10]] 
+    
+    return JsonResponse(data, safe=False)
