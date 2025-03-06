@@ -192,7 +192,10 @@ def post_detail(request, post_id):
         'solutions': solutions,
         'content_json': content_json,
         'processed_solutions_json': json.dumps(processed_solutions),
+        'courses': post.courses.all(),
     }
+
+    print(post.courses.all())
     return render(request, 'forum/post_detail.html', context)
 
 
@@ -292,24 +295,48 @@ def logout_view(request):
 @login_required
 def create_post(request):
     if request.method == 'POST':
+        print("Enter 1")
+        print(f"POST data: {request.POST}")
+        print(f"FILES: {request.FILES}")
+        
         form = PostForm(request.POST)
+        print(f"Form data: {form.data}")
+        print(f"Form is valid: {form.is_valid()}")
+        if not form.is_valid():
+            print(f"Form errors: {form.errors}")
+        
         if form.is_valid():
-            # Get the content from the Editor.js and save it as JSON
-            content_json = request.POST.get('content')
-            content_data = json.loads(content_json) if content_json else {}
-
-            # Create the post
-            post = form.save(commit=False)
-            post.content = content_data
-            post.author = request.user  # Assuming the user is logged in
-            post.save()
-
-            # Handle file uploads
-            files = request.FILES.getlist('files')
-            for file in files:
-                File.objects.create(post=post, file=file)
-
-            return redirect(post.get_absolute_url())  # Redirect to the post detail page
+            print("Enter 2")
+            try:
+                # Create and save the post first
+                post = form.save(commit=False)
+                post.author = request.user
+                
+                # Handle content
+                content_json = request.POST.get('content')
+                print(f"Content JSON: {content_json}")
+                content_data = json.loads(content_json) if content_json else {}
+                post.content = content_data
+                
+                # Save post to generate ID
+                post.save()
+                
+                # Handle courses from the form
+                course_ids = request.POST.getlist('courses')
+                print(f"Course IDs: {course_ids}")
+                if course_ids:
+                    courses = Course.objects.filter(id__in=course_ids)
+                    post.courses.set(courses)
+                    print(f"Added courses: {list(courses.values_list('id', 'name'))}")
+                
+                return redirect(post.get_absolute_url())
+                
+            except Exception as e:
+                print(f"Error creating post: {str(e)}")
+                messages.error(request, f"Error creating post: {str(e)}")
+                return redirect('create_post')
+        else:
+            messages.error(request, f"Form validation failed: {form.errors}")
     else:
         form = PostForm()
 

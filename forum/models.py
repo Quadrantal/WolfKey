@@ -6,6 +6,16 @@ import os
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 
+class Course(models.Model):
+    code = models.CharField(max_length=10, unique=True)
+    name = models.CharField(max_length=100)
+    category = models.CharField(max_length=100, default = "Misc")
+    description = models.TextField(blank=True)
+    
+    
+    def __str__(self):
+        return f"{self.code} - {self.name}"
+
 
 class Tag(models.Model):
     name = models.CharField(max_length=50, unique=True)
@@ -20,6 +30,7 @@ class Post(models.Model):
     author = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
     tags = models.ManyToManyField(Tag, related_name='posts', blank=True)
     search_vector = SearchVectorField(null=True, blank=True)
+    courses = models.ManyToManyField(Course, related_name='posts', blank=True)
 
     def __str__(self):
         return self.title
@@ -125,14 +136,7 @@ class UserProfile(models.Model):
         return f"{self.user.username}'s profile"
     
 
-class Course(models.Model):
-    code = models.CharField(max_length=10, unique=True)
-    name = models.CharField(max_length=100)
-    category = models.CharField(max_length=100, default = "Misc")
-    description = models.TextField(blank=True)
-    
-    def __str__(self):
-        return f"{self.code} - {self.name}"
+
 
 class UserCourseExperience(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='experienced_courses')

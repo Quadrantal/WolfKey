@@ -27,15 +27,24 @@ class PostForm(forms.ModelForm):
         widget=forms.CheckboxSelectMultiple,
         required=False
     )
+    courses = forms.ModelMultipleChoiceField(
+        queryset=Course.objects.all(),
+        required=False
+    )
     files = MultipleFileField(widget=MultipleFileInput, required=False)
 
     class Meta:
         model = Post
-        fields = ['title', 'content', 'tags']
+        fields = ['title', 'content', 'tags', 'courses']
         widgets = {
-            'content': forms.Textarea(attrs={'rows': 5}),
+            'title': forms.TextInput(attrs={'class': 'form-control'}),
         }
 
+    def clean(self):
+        cleaned_data = super().clean()
+        if 'content' not in self.data:
+            raise forms.ValidationError("Content is required")
+        return cleaned_data
 
 class SolutionForm(forms.ModelForm):
     class Meta:

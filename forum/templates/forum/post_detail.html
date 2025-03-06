@@ -33,9 +33,6 @@
 
         </div>
 
-
-        
-
         <!-- Question Content with Voting -->
         <div class="post-container">
             <!-- Post Content -->
@@ -49,6 +46,20 @@
                     <a href="#" class="tag">{{ tag.name }}</a>
                 {% endfor %}
             </div>
+                
+            <!-- Courses -->
+            {% if post.courses.all %}
+                <div class="courses-section">
+                    <h6 class="text-muted mb-2">Related Courses:</h6>
+                    <div class="d-flex flex-wrap gap-2">
+                        {% for course in post.courses.all %}
+                            <span class="badge bg-light text-dark border">
+                                {{ course.code }} - {{ course.name }}
+                            </span>
+                        {% endfor %}
+                    </div>
+                </div>
+            {% endif %}
                 
            <!-- Author Card -->
             <div class="author-card">

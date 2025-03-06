@@ -34,7 +34,7 @@
                         <div id="dropdown" class="dropdown"></div>
                     </div>
 
-                    <button type="submit" class="btn btn-primary">{{ action }} Post</button>
+                    <button id = "submitPostButton" type="submit" class="btn btn-primary">{{ action }} Post</button>
                     <a href="{% url 'home' %}" class="btn btn-secondary">Cancel</a>
                 </form>
             </div>
@@ -60,39 +60,72 @@
 <script src="{% static 'forum/js/editor-config.js' %}"></script>
 
 <script>
-    document.addEventListener("DOMContentLoaded", function () {
-        const form = document.querySelector('form');
-        const submitButton = form.querySelector('button[type="submit"]');
+document.addEventListener("DOMContentLoaded", function () {
+    const form = document.querySelector('form');
+    const submitButton = document.getElementById('submitPostButton');
+    console.log(submitButton);
+    let selectedCourses = []; // Move this here to share between all functions
     
-        form.addEventListener('keydown', function(e) {
-            if(e.key === 'Enter' && e.target.tagName !== 'TEXTAREA') {
-                e.preventDefault();
-            }
-        });
-
-        form.addEventListener('submit', function(e) {
-            if (e.submitter !== submitButton) {
-                e.preventDefault();
-            }
-        });
-
-        const editor = createEditor(
-                'editorjs', 
-                {},
-                document.querySelector('[name="csrfmiddlewaretoken"]').value
-        );
-
-        // Handle submit button click
-        submitButton.addEventListener('click', async function(e) {
+    // Prevent enter key from submitting form
+    form.addEventListener('keydown', function(e) {
+        if(e.key === 'Enter' && e.target.tagName !== 'TEXTAREA') {
             e.preventDefault();
-            const content = await editor.save();
-            document.querySelector('#editorjs-content').value = JSON.stringify(content);
-            form.submit();
-        });
+        }
     });
 
-    document.addEventListener("DOMContentLoaded", function () {
-    let selectedCourses = []; // Store selected courses
+    // Single form submit handler
+    submitButton.addEventListener('click', async function(e) {
+        e.preventDefault();
+        
+        try {
+            // Get Editor.js content
+            const content = await editor.save();
+            
+            // Create FormData object
+            const formData = new FormData(form);
+            formData.set('content', JSON.stringify(content));
+            formData.set('title', document.querySelector('#id_title').value);
+            
+            // Add selected courses
+            selectedCourses.forEach(course => {
+                formData.append('courses', course.id);
+            });
+
+            // Debug log
+            console.log('Submitting form data:');
+            for (let pair of formData.entries()) {
+                console.log(pair[0] + ': ' + pair[1]);
+            }
+
+            // Send form data using fetch
+            const response = await fetch(form.action, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                }
+            });
+
+            if (response.ok) {
+                window.location.href = response.url;
+            } else {
+                const errorData = await response.text();
+                console.error('Server error:', errorData);
+                throw new Error('Form submission failed');
+            }
+
+        } catch (error) {
+            console.error('Error submitting form:', error);
+        }
+    });
+
+    // Initialize editor
+    const editor = createEditor(
+        'editorjs', 
+        {},
+        document.querySelector('[name="csrfmiddlewaretoken"]').value
+    );
+
     const inputField = document.getElementById("courseInput");
     const dropdown = document.getElementById("dropdown");
     const selectedContainer = document.createElement("div"); 
@@ -159,7 +192,8 @@
         });
     }
 
-    window.fetchCourses = fetchCourses; 
+    // Make functions available globally
+    window.fetchCourses = fetchCourses;
     window.removeCourse = removeCourse;
 });
 </script>
