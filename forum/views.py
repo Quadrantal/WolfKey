@@ -20,6 +20,9 @@ from django.core.files.storage import default_storage
 from django.core.files.base import ContentFile
 from django.core.serializers.json import DjangoJSONEncoder
 from django.utils.html import escape
+from django.core.mail import send_mail
+from django.conf import settings
+from django.db.models import Q
 
 logger = logging.getLogger(__name__)
 
@@ -328,6 +331,8 @@ def create_post(request):
                     courses = Course.objects.filter(id__in=course_ids)
                     post.courses.set(courses)
                     print(f"Added courses: {list(courses.values_list('id', 'name'))}")
+
+                    send_course_notifications(post, courses)
                 
                 return redirect(post.get_absolute_url())
                 
@@ -610,3 +615,46 @@ def course_search(request):
     } for course in courses[:10]] 
     
     return JsonResponse(data, safe=False)
+
+def send_course_notifications(post, courses):
+    """
+    Send email notifications to users who have experience in the courses
+    associated with a new post
+    """
+    # Get unique users who have experience in any of the post's courses
+    experienced_users = UserCourseExperience.objects.filter(
+        course__in=courses
+    ).select_related('user').distinct('user')
+    
+    # Don't notify the post author
+    # experienced_users = experienced_users.exclude(user=post.author)
+    
+    for exp_user in experienced_users:
+        subject = f'New post in your experienced course: {post.title}'
+        message = f"""
+        Hello {exp_user.user.username},
+        
+        A new post has been created in a course you have experience in:
+        
+        Title: {post.title}
+        Course(s): {', '.join(c.name for c in courses)}
+        
+        You can view the post here:
+        {settings.SITE_URL}{post.get_absolute_url()}
+        
+        Best regards,
+        School Forum Team
+        """
+        
+        try:
+            send_mail(
+                subject,
+                message,
+                settings.DEFAULT_FROM_EMAIL,
+                [exp_user.user.email],
+                fail_silently=False,
+            )
+        except Exception as e:
+            logger.error(f"Failed to send notification email to {exp_user.user.email}: {e}")
+
+        print("Entered")
