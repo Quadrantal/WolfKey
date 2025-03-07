@@ -58,6 +58,9 @@ urlpatterns = [
     path('unsave-post/<int:post_id>/', views.unsave_post, name='unsave_post'),
 
     path('api/courses/', views.course_search, name='course-search'),
+
+    path('notifications/', views.all_notifications, name='all_notifications'),
+    path('notifications/<int:notification_id>/read/', views.mark_notification_read, name='mark_notification_read'),
 ]
 
 if settings.DEBUG:

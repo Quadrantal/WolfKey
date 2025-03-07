@@ -4,7 +4,7 @@ from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from django.contrib import messages 
 from django.contrib.auth.decorators import login_required
 from django.contrib.postgres.search import SearchVector, SearchQuery, SearchRank, TrigramSimilarity
-from .models import Post, Solution, Comment, SolutionUpvote, SolutionDownvote, CommentUpvote, Tag, File, User, SavedPost, UserCourseHelp, UserCourseExperience, UserProfile, Course
+from .models import Post, Solution, Comment, SolutionUpvote, SolutionDownvote, CommentUpvote, Tag, File, User, SavedPost, UserCourseHelp, UserCourseExperience, UserProfile, Course, Notification
 from .forms import PostForm, CommentForm, SolutionForm, TagForm, UserProfileForm, UserCourseExperienceForm, UserCourseHelpForm
 from django.http import HttpResponseForbidden, JsonResponse
 from django.db.models import F
@@ -620,19 +620,23 @@ def course_search(request):
     return JsonResponse(data, safe=False)
 
 def send_course_notifications(post, courses):
-    """
-    Send email notifications to users who have experience in the courses
-    associated with a new post
-    """
-    # Get unique users who have experience in any of the post's courses
     experienced_users = UserCourseExperience.objects.filter(
         course__in=courses
     ).select_related('user').distinct('user')
     
-    # Don't notify the post author
-    # experienced_users = experienced_users.exclude(user=post.author)
+    # experienced_users = experienced_users.exclude(user=post.author) 
     
     for exp_user in experienced_users:
+        # Create in-site notification
+        Notification.objects.create(
+            recipient=exp_user.user,
+            sender=post.author,
+            notification_type='post',
+            post=post,
+            message=f'New post in {", ".join(c.name for c in courses)}: {post.title}'
+        )
+        
+        # Send email notification
         subject = f'New post in your experienced course: {post.title}'
         message = f"""
         Hello {exp_user.user.username},
@@ -658,17 +662,23 @@ def send_course_notifications(post, courses):
                 fail_silently=False,
             )
         except Exception as e:
-            logger.error(f"Failed to send notification email to {exp_user.user.email}: {e}")
-
-        print("Entered")
+            print(f"Failed to send notification email to {exp_user.user.email}: {e}")
 
 def send_solution_notification(solution):
-    """
-    Send email notification to post author when a new solution is created
-    """
     post = solution.post
     author = post.author
     
+    # Create in-site notification
+    Notification.objects.create(
+        recipient=author,
+        sender=solution.author,
+        notification_type='solution',
+        post=post,
+        solution=solution,
+        message=f'New solution to your post: {post.title}'
+    )
+    
+    # Send email notification
     subject = f'New solution to your post: {post.title}'
     message = f"""
     Hello {author.username},
@@ -695,3 +705,18 @@ def send_solution_notification(solution):
         )
     except Exception as e:
         logger.error(f"Failed to send solution notification email to {author.email}: {e}")
+
+@login_required
+def all_notifications(request):
+    notifications = request.user.notifications.all()
+    return render(request, 'forum/notifications.html', {'notifications': notifications})
+
+@login_required
+def mark_notification_read(request, notification_id):
+    notification = get_object_or_404(Notification, id=notification_id, recipient=request.user)
+    notification.is_read = True
+    notification.save()
+    
+    if notification.post:
+        return redirect('post_detail', post_id=notification.post.id)
+    return redirect('all_notifications')
