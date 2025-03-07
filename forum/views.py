@@ -103,6 +103,9 @@ def post_detail(request, post_id):
                 solution.save()
                 messages.success(request, 'Solution added successfully!')
 
+            # if solution.author != post.author:
+            send_solution_notification(solution)
+
         # Handle solution editing
         elif action == 'edit_solution':
             solution_id = request.POST.get('solution_id')
@@ -658,3 +661,37 @@ def send_course_notifications(post, courses):
             logger.error(f"Failed to send notification email to {exp_user.user.email}: {e}")
 
         print("Entered")
+
+def send_solution_notification(solution):
+    """
+    Send email notification to post author when a new solution is created
+    """
+    post = solution.post
+    author = post.author
+    
+    subject = f'New solution to your post: {post.title}'
+    message = f"""
+    Hello {author.username},
+    
+    A new solution has been posted to your question:
+    
+    Post: {post.title}
+    Solution by: {solution.author.username}
+    
+    You can view the solution here:
+    {settings.SITE_URL}{post.get_absolute_url()}
+    
+    Best regards,
+    School Forum Team
+    """
+    
+    try:
+        send_mail(
+            subject,
+            message,
+            settings.DEFAULT_FROM_EMAIL,
+            [author.email],
+            fail_silently=False,
+        )
+    except Exception as e:
+        logger.error(f"Failed to send solution notification email to {author.email}: {e}")
