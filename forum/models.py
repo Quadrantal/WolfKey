@@ -8,6 +8,19 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 
 class User(AbstractUser):
+
+    first_name = models.CharField(
+        max_length=150,
+        blank=False,
+        null=False,
+        help_text="Required. Enter your first name."
+    )
+    last_name = models.CharField(
+        max_length=150,
+        blank=False,
+        null=False,
+        help_text="Required. Enter your last name."
+    )
     groups = models.ManyToManyField(
         'auth.Group',
         related_name='forum_users',

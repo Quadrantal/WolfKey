@@ -3,6 +3,7 @@ from .models import Post, Comment, Solution, Tag, File, UserProfile, UserCourseE
 from django.forms.widgets import ClearableFileInput
 from django.core.files.uploadedfile import UploadedFile
 from django.contrib.auth.forms import UserCreationForm
+import re
 
 
 class MultipleFileInput(forms.ClearableFileInput):
@@ -122,6 +123,24 @@ class UserCourseHelpForm(forms.ModelForm):
 
 
 class CustomUserCreationForm(UserCreationForm):
+    first_name = forms.CharField(
+        required=True,
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'First Name'
+        }),
+        help_text="Required. Enter your first name."
+    )
+    
+    last_name = forms.CharField(
+        required=True,
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Last Name'
+        }),
+        help_text="Required. Enter your last name."
+    )
+
     school_email = forms.EmailField(
         required=True,
         widget=forms.EmailInput(attrs={
@@ -149,7 +168,7 @@ class CustomUserCreationForm(UserCreationForm):
 
     class Meta:
         model = User
-        fields = ('username', 'school_email', 'personal_email', 'phone_number', 'password1', 'password2')
+        fields = ('username', 'first_name', 'last_name', 'school_email', 'personal_email', 'phone_number', 'password1', 'password2')
         widgets = {
             'username': forms.TextInput(attrs={'class': 'form-control'}),
         }
