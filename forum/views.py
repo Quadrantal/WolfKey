@@ -5,7 +5,7 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.postgres.search import SearchVector, SearchQuery, SearchRank, TrigramSimilarity
 from .models import Post, Solution, Comment, SolutionUpvote, SolutionDownvote, CommentUpvote, Tag, File, User, SavedPost, UserCourseHelp, UserCourseExperience, UserProfile, Course, Notification
-from .forms import PostForm, CommentForm, SolutionForm, TagForm, UserProfileForm, UserCourseExperienceForm, UserCourseHelpForm
+from .forms import PostForm, CommentForm, SolutionForm, TagForm, UserProfileForm, UserCourseExperienceForm, UserCourseHelpForm, CustomUserCreationForm
 from django.http import HttpResponseForbidden, JsonResponse
 from django.db.models import F
 from django.views.decorators.csrf import csrf_exempt
@@ -274,15 +274,47 @@ def edit_post(request, post_id):
 
 def register(request):
     if request.method == 'POST':
-        form = UserCreationForm(request.POST)
+        form = CustomUserCreationForm(request.POST)
         if form.is_valid():
-            user = form.save()
-            login(request, user)
-            messages.success(request, 'Registration successful!')
-            return redirect('home')
+            user = form.save(commit=False)
+            user.email = user.school_email  # Set primary email to school email
+            user.save()
+            
+            # Create user profile
+            UserProfile.objects.create(user=user)
+            
+            messages.success(request, 'Registration successful! Please check your school email for verification.')
+            
+            # Send welcome email
+            try:
+                send_mail(
+                    'Welcome to School Forum',
+                    f'Hi {user.username},\n\nWelcome to School Forum! Your account has been created successfully.\n\nBest regards,\nSchool Forum Team',
+                    settings.DEFAULT_FROM_EMAIL,
+                    [user.school_email],
+                    fail_silently=True,
+                )
+                
+                # If personal email is provided, send a copy there too
+                if user.personal_email:
+                    send_mail(
+                        'Welcome to School Forum',
+                        f'Hi {user.username},\n\nThis is a copy of your welcome message sent to your school email.\n\nBest regards,\nSchool Forum Team',
+                        settings.DEFAULT_FROM_EMAIL,
+                        [user.personal_email],
+                        fail_silently=True,
+                    )
+            except Exception as e:
+                logger.error(f"Failed to send welcome email: {e}")
+            
+            return redirect('login')
     else:
-        form = UserCreationForm()
-    return render(request, 'forum/register.html', {'form': form})
+        form = CustomUserCreationForm()
+    
+    return render(request, 'forum/register.html', {
+        'form': form,
+        'title': 'Register'
+    })
 
 def login_view(request):
     if request.method == 'POST':
