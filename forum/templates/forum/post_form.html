@@ -126,6 +126,8 @@ document.addEventListener("DOMContentLoaded", function () {
         document.querySelector('[name="csrfmiddlewaretoken"]').value
     );
 
+    updateSelectedCourses();
+
     const inputField = document.getElementById("courseInput");
     const dropdown = document.getElementById("dropdown");
     const selectedContainer = document.createElement("div"); 
@@ -182,6 +184,7 @@ document.addEventListener("DOMContentLoaded", function () {
         selectedContainer.innerHTML = ""; // Clear previous selection
 
         selectedCourses.forEach(course => {
+            console.log("AWEFAWEF");
             let courseTag = document.createElement("div");
             courseTag.classList.add("course-tag");
             courseTag.innerHTML = `
@@ -191,6 +194,7 @@ document.addEventListener("DOMContentLoaded", function () {
             selectedContainer.appendChild(courseTag);
         });
     }
+
 
     // Make functions available globally
     window.fetchCourses = fetchCourses;

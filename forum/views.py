@@ -224,14 +224,10 @@ def edit_post(request, post_id):
             # Update post
             post.content = content
             
-            # Handle tags
-            tags = request.POST.get('tags', '').split(',')
-            post.tags.clear()
-            for tag_name in tags:
-                tag_name = tag_name.strip()
-                if tag_name:
-                    tag, _ = Tag.objects.get_or_create(name=tag_name)
-                    post.tags.add(tag)
+            # Handle courses
+            course_ids = request.POST.getlist('courses')
+            if course_ids:
+                post.courses.set(course_ids)
             
             post.save()
             messages.success(request, 'Post updated successfully!')
@@ -257,16 +253,23 @@ def edit_post(request, post_id):
                 block['data']['text'] = escape(block['data']['text'])
         
         post_content = json.dumps(content)
+
+        selected_courses = list(post.courses.values('id', 'name', 'code', 'category'))
+        selected_courses_json = json.dumps(selected_courses)
     except Exception as e:
         post_content = json.dumps({
             "blocks": [{"type": "paragraph", "data": {"text": ""}}]
         })
+        selected_courses_json = '[]'
 
     context = {
         'post': post,
         'action': 'Edit',
-        'post_content': post_content
+        'post_content': post_content,
+        'selected_courses_json': selected_courses_json
     }
+
+    print(selected_courses_json)
     return render(request, 'forum/edit_post.html', context)
 
 def register(request):
