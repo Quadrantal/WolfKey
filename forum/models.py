@@ -3,6 +3,18 @@ from django.contrib.auth.models import User
 from django.contrib.postgres.search import SearchVectorField, SearchVector
 from django.urls import reverse
 import os
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+
+class Course(models.Model):
+    code = models.CharField(max_length=10, unique=True)
+    name = models.CharField(max_length=100)
+    category = models.CharField(max_length=100, default = "Misc")
+    description = models.TextField(blank=True)
+    
+    
+    def __str__(self):
+        return f"{self.code} - {self.name}"
 
 
 class Tag(models.Model):
@@ -18,6 +30,7 @@ class Post(models.Model):
     author = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
     tags = models.ManyToManyField(Tag, related_name='posts', blank=True)
     search_vector = SearchVectorField(null=True, blank=True)
+    courses = models.ManyToManyField(Course, related_name='posts', blank=True)
 
     def __str__(self):
         return self.title
@@ -122,3 +135,55 @@ class UserProfile(models.Model):
     def __str__(self):
         return f"{self.user.username}'s profile"
     
+
+
+
+class UserCourseExperience(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='experienced_courses')
+    course = models.ForeignKey(Course, on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    class Meta:
+        unique_together = ['user', 'course']
+
+class UserCourseHelp(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='help_needed_courses')
+    course = models.ForeignKey(Course, on_delete=models.CASCADE)
+    active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    class Meta:
+        unique_together = ['user', 'course']
+
+
+@receiver(post_save, sender=User)
+def create_user_profile(sender, instance, created, **kwargs):
+    """Create a UserProfile when a new User is created"""
+    if created:
+        UserProfile.objects.create(user=instance)
+
+@receiver(post_save, sender=User)
+def save_user_profile(sender, instance, **kwargs):
+    """Save the UserProfile when the User is saved"""
+    try:
+        instance.userprofile.save()
+    except UserProfile.DoesNotExist:
+        UserProfile.objects.create(user=instance)
+
+class Notification(models.Model):
+    NOTIFICATION_TYPES = (
+        ('post', 'New Post'),
+        ('solution', 'New Solution'),
+    )
+    
+    recipient = models.ForeignKey(User, on_delete=models.CASCADE, related_name='notifications')
+    sender = models.ForeignKey(User, on_delete=models.CASCADE, related_name='sent_notifications')
+    notification_type = models.CharField(max_length=20, choices=NOTIFICATION_TYPES)
+    post = models.ForeignKey(Post, on_delete=models.CASCADE, null=True, blank=True)
+    solution = models.ForeignKey(Solution, on_delete=models.CASCADE, null=True, blank=True)
+    message = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    is_read = models.BooleanField(default=False)
+
+    class Meta:
+        ordering = ['-created_at']

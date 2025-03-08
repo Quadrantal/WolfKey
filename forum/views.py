@@ -4,8 +4,8 @@ from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from django.contrib import messages 
 from django.contrib.auth.decorators import login_required
 from django.contrib.postgres.search import SearchVector, SearchQuery, SearchRank, TrigramSimilarity
-from .models import Post, Solution, Comment, SolutionUpvote, SolutionDownvote, CommentUpvote, Tag, File, User, SavedPost
-from .forms import PostForm, CommentForm, SolutionForm, TagForm, UserProfileForm
+from .models import Post, Solution, Comment, SolutionUpvote, SolutionDownvote, CommentUpvote, Tag, File, User, SavedPost, UserCourseHelp, UserCourseExperience, UserProfile, Course, Notification
+from .forms import PostForm, CommentForm, SolutionForm, TagForm, UserProfileForm, UserCourseExperienceForm, UserCourseHelpForm
 from django.http import HttpResponseForbidden, JsonResponse
 from django.db.models import F
 from django.views.decorators.csrf import csrf_exempt
@@ -15,11 +15,14 @@ import json
 from datetime import timezone
 from datetime import timedelta
 from django.contrib.auth.decorators import permission_required
-from django.core.exceptions import PermissionDenied
+from django.core.exceptions import PermissionDenied, ObjectDoesNotExist
 from django.core.files.storage import default_storage
 from django.core.files.base import ContentFile
 from django.core.serializers.json import DjangoJSONEncoder
 from django.utils.html import escape
+from django.core.mail import send_mail
+from django.conf import settings
+from django.db.models import Q
 
 logger = logging.getLogger(__name__)
 
@@ -99,6 +102,9 @@ def post_detail(request, post_id):
                 solution.author = request.user
                 solution.save()
                 messages.success(request, 'Solution added successfully!')
+
+            # if solution.author != post.author:
+            send_solution_notification(solution)
 
         # Handle solution editing
         elif action == 'edit_solution':
@@ -192,7 +198,10 @@ def post_detail(request, post_id):
         'solutions': solutions,
         'content_json': content_json,
         'processed_solutions_json': json.dumps(processed_solutions),
+        'courses': post.courses.all(),
     }
+
+    print(post.courses.all())
     return render(request, 'forum/post_detail.html', context)
 
 
@@ -292,24 +301,50 @@ def logout_view(request):
 @login_required
 def create_post(request):
     if request.method == 'POST':
+        print("Enter 1")
+        print(f"POST data: {request.POST}")
+        print(f"FILES: {request.FILES}")
+        
         form = PostForm(request.POST)
+        print(f"Form data: {form.data}")
+        print(f"Form is valid: {form.is_valid()}")
+        if not form.is_valid():
+            print(f"Form errors: {form.errors}")
+        
         if form.is_valid():
-            # Get the content from the Editor.js and save it as JSON
-            content_json = request.POST.get('content')
-            content_data = json.loads(content_json) if content_json else {}
+            print("Enter 2")
+            try:
+                # Create and save the post first
+                post = form.save(commit=False)
+                post.author = request.user
+                
+                # Handle content
+                content_json = request.POST.get('content')
+                print(f"Content JSON: {content_json}")
+                content_data = json.loads(content_json) if content_json else {}
+                post.content = content_data
+                
+                # Save post to generate ID
+                post.save()
+                
+                # Handle courses from the form
+                course_ids = request.POST.getlist('courses')
+                print(f"Course IDs: {course_ids}")
+                if course_ids:
+                    courses = Course.objects.filter(id__in=course_ids)
+                    post.courses.set(courses)
+                    print(f"Added courses: {list(courses.values_list('id', 'name'))}")
 
-            # Create the post
-            post = form.save(commit=False)
-            post.content = content_data
-            post.author = request.user  # Assuming the user is logged in
-            post.save()
-
-            # Handle file uploads
-            files = request.FILES.getlist('files')
-            for file in files:
-                File.objects.create(post=post, file=file)
-
-            return redirect(post.get_absolute_url())  # Redirect to the post detail page
+                    send_course_notifications(post, courses)
+                
+                return redirect(post.get_absolute_url())
+                
+            except Exception as e:
+                print(f"Error creating post: {str(e)}")
+                messages.error(request, f"Error creating post: {str(e)}")
+                return redirect('create_post')
+        else:
+            messages.error(request, f"Form validation failed: {form.errors}")
     else:
         form = PostForm()
 
@@ -471,20 +506,29 @@ def profile_view(request, username):
         'profile_user': profile_user,
         'recent_posts': recent_posts,
         'posts_count': posts_count,
-        'solution_count': solutions_count,
+        'solutions_count': solutions_count,
+        'experience_form': UserCourseExperienceForm(user=profile_user),
+        'help_form': UserCourseHelpForm(user=profile_user),
+        'experienced_courses': UserCourseExperience.objects.filter(user=profile_user),
+        'help_needed_courses': UserCourseHelp.objects.filter(user=profile_user, active=True),
     }
     return render(request, 'forum/profile.html', context)
 
 @login_required
 def edit_profile(request):
+    try:
+        profile = request.user.userprofile
+    except ObjectDoesNotExist:
+        profile = UserProfile.objects.create(user=request.user)
+
     if request.method == 'POST':
-        form = UserProfileForm(request.POST, request.FILES, instance=request.user.userprofile)
+        form = UserProfileForm(request.POST, request.FILES, instance=profile)
         if form.is_valid():
             form.save()
             messages.success(request, 'Profile updated successfully!')
             return redirect('profile', username=request.user.username)
     else:
-        form = UserProfileForm(instance=request.user.userprofile)
+        form = UserProfileForm(instance=profile)
     
     return render(request, 'forum/edit_profile.html', {'form': form})
 
@@ -513,3 +557,166 @@ def saved_posts(request):
 def my_posts(request):
     posts = Post.objects.filter(author = request.user)
     return render(request,'forum/my_posts.html', {'posts': posts})
+
+@login_required
+def add_experience(request):
+    if request.method == 'POST':
+        form = UserCourseExperienceForm(request.POST, user=request.user) 
+        if form.is_valid():
+            experience = form.save(commit=False)
+            experience.user = request.user
+            experience.save()
+            messages.success(request, 'Course experience added successfully!')
+    return redirect('profile', username=request.user.username) 
+
+@login_required
+def add_help_request(request):
+    if request.method == 'POST':
+        form = UserCourseHelpForm(request.POST, user=request.user)  
+        if form.is_valid():
+            help_request = form.save(commit=False)
+            help_request.user = request.user
+            help_request.save()
+            messages.success(request, 'Help request added successfully!')
+    return redirect('profile', username=request.user.username) 
+
+@login_required
+def remove_experience(request, experience_id):
+    try:
+        experience = get_object_or_404(UserCourseExperience, 
+                                     id=experience_id, 
+                                     user=request.user)
+        if request.method == 'POST':
+            experience.delete()
+            messages.success(request, 'Course experience removed successfully!')
+    except UserCourseExperience.DoesNotExist:
+        messages.error(request, 'Course experience not found.')
+    except Exception as e:
+        messages.error(request, f'Error removing course experience: {str(e)}')
+    
+    return redirect('profile', username=request.user.username)
+
+@login_required
+def remove_help_request(request, help_id):
+    help_request = get_object_or_404(UserCourseHelp, id=help_id, user=request.user)
+    if request.method == 'POST':
+        help_request.delete()
+        messages.success(request, 'Help request removed successfully!')
+    return redirect('profile', username=request.user.username)
+
+def course_search(request):
+    query = request.GET.get('q', '')
+    courses = Course.objects.filter(
+        name__icontains=query
+    ) if query else Course.objects.all()
+    
+    data = [{
+        "id": course.id,
+        "name": course.name,
+        "code": course.code,
+        "category": course.category
+    } for course in courses[:10]] 
+    
+    return JsonResponse(data, safe=False)
+
+def send_course_notifications(post, courses):
+    experienced_users = UserCourseExperience.objects.filter(
+        course__in=courses
+    ).select_related('user').distinct('user')
+    
+    # experienced_users = experienced_users.exclude(user=post.author) 
+    
+    for exp_user in experienced_users:
+        # Create in-site notification
+        Notification.objects.create(
+            recipient=exp_user.user,
+            sender=post.author,
+            notification_type='post',
+            post=post,
+            message=f'New post in {", ".join(c.name for c in courses)}: {post.title}'
+        )
+        
+        # Send email notification
+        subject = f'New post in your experienced course: {post.title}'
+        message = f"""
+        Hello {exp_user.user.username},
+        
+        A new post has been created in a course you have experience in:
+        
+        Title: {post.title}
+        Course(s): {', '.join(c.name for c in courses)}
+        
+        You can view the post here:
+        {settings.SITE_URL}{post.get_absolute_url()}
+        
+        Best regards,
+        School Forum Team
+        """
+        
+        try:
+            send_mail(
+                subject,
+                message,
+                settings.DEFAULT_FROM_EMAIL,
+                [exp_user.user.email],
+                fail_silently=False,
+            )
+        except Exception as e:
+            print(f"Failed to send notification email to {exp_user.user.email}: {e}")
+
+def send_solution_notification(solution):
+    post = solution.post
+    author = post.author
+    
+    # Create in-site notification
+    Notification.objects.create(
+        recipient=author,
+        sender=solution.author,
+        notification_type='solution',
+        post=post,
+        solution=solution,
+        message=f'New solution to your post: {post.title}'
+    )
+    
+    # Send email notification
+    subject = f'New solution to your post: {post.title}'
+    message = f"""
+    Hello {author.username},
+    
+    A new solution has been posted to your question:
+    
+    Post: {post.title}
+    Solution by: {solution.author.username}
+    
+    You can view the solution here:
+    {settings.SITE_URL}{post.get_absolute_url()}
+    
+    Best regards,
+    School Forum Team
+    """
+    
+    try:
+        send_mail(
+            subject,
+            message,
+            settings.DEFAULT_FROM_EMAIL,
+            [author.email],
+            fail_silently=False,
+        )
+    except Exception as e:
+        logger.error(f"Failed to send solution notification email to {author.email}: {e}")
+
+@login_required
+def all_notifications(request):
+    notifications = request.user.notifications.all()
+    return render(request, 'forum/notifications.html', {'notifications': notifications})
+
+@login_required
+def mark_notification_read(request, notification_id):
+    notification = get_object_or_404(Notification, id=notification_id, recipient=request.user)
+    notification.is_read = True
+    notification.save()
+    
+    if notification.post:
+        return redirect('post_detail', post_id=notification.post.id)
+    return redirect('all_notifications')
