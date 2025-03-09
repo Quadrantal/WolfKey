@@ -166,10 +166,10 @@ def post_detail(request, post_id):
         try:
             solution_content = solution.content
             # If content is a string, convert to object
-            print(type(solution_content))
+            # print(type(solution_content))
             if isinstance(solution_content, str):
                 solution_content = selective_quote_replace(solution_content)
-                print(f"Solution Content: f{solution_content}")
+                # print(f"Solution Content: f{solution_content}")
                 solution_content = json.loads(solution_content)
                 
             processed_solutions.append({
@@ -192,7 +192,7 @@ def post_detail(request, post_id):
                 'upvotes': solution.upvotes,
                 'downvotes': solution.downvotes,
             })
-    print("Author", post.author.get_full_name())
+    # print("Author", post.author.get_full_name())
     context = {
         'post': post,
         'solutions': solutions,
@@ -269,7 +269,7 @@ def edit_post(request, post_id):
         'selected_courses_json': selected_courses_json
     }
 
-    print(selected_courses_json)
+    # print(selected_courses_json)
     return render(request, 'forum/edit_post.html', context)
 
 def register(request):
@@ -335,18 +335,18 @@ def logout_view(request):
 @login_required
 def create_post(request):
     if request.method == 'POST':
-        print("Enter 1")
+        # print("Enter 1")
         print(f"POST data: {request.POST}")
         print(f"FILES: {request.FILES}")
         
         form = PostForm(request.POST)
-        print(f"Form data: {form.data}")
+        # print(f"Form data: {form.data}")
         print(f"Form is valid: {form.is_valid()}")
         if not form.is_valid():
             print(f"Form errors: {form.errors}")
         
         if form.is_valid():
-            print("Enter 2")
+            # print("Enter 2")
             try:
                 # Create and save the post first
                 post = form.save(commit=False)
@@ -502,7 +502,7 @@ def search_posts(request):
     return JsonResponse({'results': results, 'query': query, 'selected_tags': tag_ids})
 
 def search_results_new_page(request):
-    print("Enters view")
+    # print("Enters view")
     query = request.GET.get('q', '')
     tag_ids = request.GET.get('tags', '').split(',')
     tag_ids = [tag_id for tag_id in tag_ids if tag_id]  # Filter out empty strings
