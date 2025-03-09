@@ -1,10 +1,79 @@
 from django.db import models
-from django.contrib.auth.models import User
+from django.contrib.auth.models import AbstractUser
+from django.core.validators import RegexValidator
 from django.contrib.postgres.search import SearchVectorField, SearchVector
 from django.urls import reverse
 import os
 from django.db.models.signals import post_save
 from django.dispatch import receiver
+
+class User(AbstractUser):
+    username = models.CharField(
+        max_length=150,
+        unique=True,
+        blank=True,
+        null=True
+    )
+
+    first_name = models.CharField(
+        max_length=150,
+        blank=False,
+        null=False,
+        help_text="Required. Enter your first name."
+    )
+    last_name = models.CharField(
+        max_length=150,
+        blank=False,
+        null=False,
+        help_text="Required. Enter your last name."
+    )
+    groups = models.ManyToManyField(
+        'auth.Group',
+        related_name='forum_users',
+        blank=True,
+        help_text='The groups this user belongs to.',
+        verbose_name='groups',
+    )
+    user_permissions = models.ManyToManyField(
+        'auth.Permission',
+        related_name='forum_users',
+        blank=True,
+        help_text='Specific permissions for this user.',
+        verbose_name='user permissions',
+    )
+    school_email = models.EmailField(
+        unique=True,
+        help_text="Must be a valid @wpga.ca email address",
+        validators=[
+            RegexValidator(
+                regex=r'^[a-zA-Z0-9._%+-]+@wpga\.ca$',
+                message="Email must be a valid @wpga.ca address"
+            )
+        ]
+    )
+    personal_email = models.EmailField(
+        blank=True,
+        null=True,
+        help_text="Optional personal email address"
+    )
+    phone_number = models.CharField(
+        max_length=15,
+        blank=True,
+        null=True,
+        validators=[
+            RegexValidator(
+                regex=r'^\+?1?\d{9,15}$',
+                message="Phone number must be entered in the format: '+999999999'. Up to 15 digits allowed."
+            )
+        ],
+        help_text="Optional phone number in international format (e.g., +12345678900)"
+    )
+
+    USERNAME_FIELD = 'school_email'
+    REQUIRED_FIELDS = ['first_name', 'last_name']
+
+    def get_full_name(self):
+        return f"{self.first_name} {self.last_name}"
 
 class Course(models.Model):
     code = models.CharField(max_length=10, unique=True)

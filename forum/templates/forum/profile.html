@@ -12,7 +12,7 @@
                          alt="Profile Picture" 
                          style="width: 100px; height: 100px; object-fit: cover;">
                     <div>
-                        <h2 class="mb-0">{{ profile_user.username }}</h2>
+                        <h2 class="mb-0">{{ profile_user.get_full_name }}</h2>
                         <span class="text-muted">Joined: {{ profile_user.date_joined|date:"F Y" }}</span>
                         {% if profile_user.userprofile.is_moderator %}
                             <span class="badge bg-primary ms-2">Moderator</span>

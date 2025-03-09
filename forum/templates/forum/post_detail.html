@@ -67,7 +67,7 @@
                     <div class="author-avatar"></div>
                     <div>
                         <div class="text-muted">asked {{ post.created_at|date:"M d, Y" }}</div>
-                        <div class="fw-bold">{{ post.author.username }}</div>
+                        <div class="fw-bold">{{ post.author.get_full_name }}</div>
                     </div>
                 </div>
             </div>
@@ -111,7 +111,7 @@
                 <div class="author-info mt-3">
                     <div class="author-avatar"></div>
                     <div>
-                        <div>{{ solution.author.username }}</div>
+                        <div>{{ solution.author.get_full_name }}</div>
                         <div class="text-muted">Answered {{ solution.created_at|date:"M d, Y" }}</div>
                     </div>
                 </div>
@@ -143,7 +143,7 @@
                         <div class="comment mb-2">
                             <div class="comment-content">{{ comment.content }}</div>
                             <div class="small text-muted">
-                                – {{ comment.author.username }} {{ comment.created_at|date:"M d, Y" }}
+                                – {{ comment.author.first_name }} {{comment.author.last_name}} {{ comment.created_at|date:"M d, Y" }}
                             </div>
                         </div>
                     {% endfor %}
