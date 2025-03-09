@@ -4,6 +4,8 @@ from django.forms.widgets import ClearableFileInput
 from django.core.files.uploadedfile import UploadedFile
 from django.contrib.auth.forms import UserCreationForm
 import re
+import json
+import uuid
 
 
 class MultipleFileInput(forms.ClearableFileInput):
@@ -24,23 +26,34 @@ class MultipleFileField(forms.FileField):
 
         
 class PostForm(forms.ModelForm):
-    tags = forms.ModelMultipleChoiceField(
-        queryset=Tag.objects.all(),
-        widget=forms.CheckboxSelectMultiple,
-        required=False
-    )
-    courses = forms.ModelMultipleChoiceField(
-        queryset=Course.objects.all(),
-        required=False
-    )
-    files = MultipleFileField(widget=MultipleFileInput, required=False)
-
     class Meta:
         model = Post
         fields = ['title', 'content', 'tags', 'courses']
         widgets = {
             'title': forms.TextInput(attrs={'class': 'form-control'}),
         }
+
+    def clean_courses(self):
+        courses = self.cleaned_data.get('courses')
+        if not courses:
+            return []
+
+        course_ids = []
+        for course in courses:
+            try:
+                if isinstance(course, str):
+                    if course.startswith('[') and course.endswith(']'):
+                        parsed_ids = json.loads(course)
+                        course_ids.extend(parsed_ids)
+                    else:
+                        course_ids.append(int(course))
+                else:
+                    course_ids.append(course.id if hasattr(course, 'id') else int(course))
+            except (ValueError, json.JSONDecodeError):
+                continue
+
+        course_ids = list(set(course_ids))
+        return Course.objects.filter(id__in=course_ids)
 
     def clean(self):
         cleaned_data = super().clean()
@@ -168,10 +181,7 @@ class CustomUserCreationForm(UserCreationForm):
 
     class Meta:
         model = User
-        fields = ('username', 'first_name', 'last_name', 'school_email', 'personal_email', 'phone_number', 'password1', 'password2')
-        widgets = {
-            'username': forms.TextInput(attrs={'class': 'form-control'}),
-        }
+        fields = ('first_name', 'last_name', 'school_email', 'personal_email', 'phone_number', 'password1', 'password2')
 
     def clean_school_email(self):
         email = self.cleaned_data.get('school_email')
@@ -190,3 +200,11 @@ class CustomUserCreationForm(UserCreationForm):
             if not re.match(r'^\+?1?\d{9,15}$', phone):
                 raise forms.ValidationError("Please enter a valid phone number in international format")
         return phone
+    
+    def save(self, commit=True):
+        user = super().save(commit=False)
+        # Generate a random username that won't be displayed
+        user.username = str(uuid.uuid4())[:30]
+        if commit:
+            user.save()
+        return user

@@ -103,8 +103,8 @@ def post_detail(request, post_id):
                 solution.save()
                 messages.success(request, 'Solution added successfully!')
 
-            # if solution.author != post.author:
-            send_solution_notification(solution)
+            if solution.author != post.author:
+                send_solution_notification(solution)
 
         # Handle solution editing
         elif action == 'edit_solution':
@@ -175,7 +175,7 @@ def post_detail(request, post_id):
             processed_solutions.append({
                 'id': solution.id,
                 'content': solution_content,  
-                'author': solution.author.username,
+                'author': f"{solution.author.first_name} {solution.author.last_name}",
                 'created_at': solution.created_at.strftime("%Y-%m-%d %H:%M:%S"),
                 'upvotes': solution.upvotes,
                 'downvotes': solution.downvotes,
@@ -187,12 +187,12 @@ def post_detail(request, post_id):
                 'content': {
                     "blocks": [{"type": "paragraph", "data": {"text": "Error loading solution content"}}]
                 },
-                'author': solution.author.username,
+                'author': f"{solution.author.first_name} {solution.author.last_name}",
                 'created_at': solution.created_at.strftime("%Y-%m-%d %H:%M:%S"),
                 'upvotes': solution.upvotes,
                 'downvotes': solution.downvotes,
             })
-    
+    print("Author", post.author.get_full_name())
     context = {
         'post': post,
         'solutions': solutions,
@@ -201,7 +201,7 @@ def post_detail(request, post_id):
         'courses': post.courses.all(),
     }
 
-    print(post.courses.all())
+    # print(post.courses.all())
     return render(request, 'forum/post_detail.html', context)
 
 
@@ -276,44 +276,43 @@ def register(request):
     if request.method == 'POST':
         form = CustomUserCreationForm(request.POST)
         if form.is_valid():
-            user = form.save(commit=False)
-            user.email = user.school_email  # Set primary email to school email
-            user.save()
+            user = form.save()
             
-            # Create user profile
-            UserProfile.objects.create(user=user)
             
-            messages.success(request, 'Registration successful! Please check your school email for verification.')
-            
-            # Send welcome email
-            try:
-                send_mail(
-                    'Welcome to School Forum',
-                    f'Hi {user.username},\n\nWelcome to School Forum! Your account has been created successfully.\n\nBest regards,\nSchool Forum Team',
-                    settings.DEFAULT_FROM_EMAIL,
-                    [user.school_email],
-                    fail_silently=True,
+            # Add current courses as help needed
+            current_courses = request.POST.getlist('current_courses')
+            for course_id in current_courses:
+                UserCourseHelp.objects.create(
+                    user=user,
+                    course_id=course_id,
+                    active=True
                 )
                 
-                # If personal email is provided, send a copy there too
-                if user.personal_email:
-                    send_mail(
-                        'Welcome to School Forum',
-                        f'Hi {user.username},\n\nThis is a copy of your welcome message sent to your school email.\n\nBest regards,\nSchool Forum Team',
-                        settings.DEFAULT_FROM_EMAIL,
-                        [user.personal_email],
-                        fail_silently=True,
-                    )
-            except Exception as e:
-                logger.error(f"Failed to send welcome email: {e}")
+            # Add experienced courses
+            experienced_courses = request.POST.getlist('experienced_courses')
+            for course_id in experienced_courses:
+                UserCourseExperience.objects.create(
+                    user=user,
+                    course_id=course_id
+                )
             
-            return redirect('login')
+            login(request, user)
+            messages.success(request, 'Welcome to Student Forum!')
+            return redirect('home')
+        else:
+            print(form.errors)
+            return render(request, 'forum/register.html', {
+                'form': form,
+                'courses': Course.objects.all().order_by('name'),
+                'form_errors': form.errors.as_json()  
+            })
     else:
         form = CustomUserCreationForm()
     
+    courses = Course.objects.all().order_by('name')
     return render(request, 'forum/register.html', {
         'form': form,
-        'title': 'Register'
+        'courses': courses
     })
 
 def login_view(request):

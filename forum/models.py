@@ -8,6 +8,12 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 
 class User(AbstractUser):
+    username = models.CharField(
+        max_length=150,
+        unique=True,
+        blank=True,
+        null=True
+    )
 
     first_name = models.CharField(
         max_length=150,
@@ -62,6 +68,12 @@ class User(AbstractUser):
         ],
         help_text="Optional phone number in international format (e.g., +12345678900)"
     )
+
+    USERNAME_FIELD = 'school_email'
+    REQUIRED_FIELDS = ['first_name', 'last_name']
+
+    def get_full_name(self):
+        return f"{self.first_name} {self.last_name}"
 
 class Course(models.Model):
     code = models.CharField(max_length=10, unique=True)

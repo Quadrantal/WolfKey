@@ -29,10 +29,7 @@
 
                     <!-- Course Selector -->
                     <h3>Select a Course:</h3>
-                    <div style="position: relative;">
-                        <input type="text" id="courseInput" class="search-box" placeholder="Add more courses..." oninput="fetchCourses()">
-                        <div id="dropdown" class="dropdown"></div>
-                    </div>
+                    <div id="postCoursesSelector"></div>
 
                     <button id = "submitPostButton" type="submit" class="btn btn-primary">{{ action }} Post</button>
                     <a href="{% url 'home' %}" class="btn btn-secondary">Cancel</a>
@@ -58,6 +55,8 @@
 {% load static %}
 <script src="{% static 'forum/js/inline-math.js' %}"></script>
 <script src="{% static 'forum/js/editor-config.js' %}"></script>
+<script src="{% static 'forum/js/course-selector.js' %}"></script>
+
 
 <script>
 document.addEventListener("DOMContentLoaded", function () {
@@ -126,79 +125,11 @@ document.addEventListener("DOMContentLoaded", function () {
         document.querySelector('[name="csrfmiddlewaretoken"]').value
     );
 
-    updateSelectedCourses();
-
-    const inputField = document.getElementById("courseInput");
-    const dropdown = document.getElementById("dropdown");
-    const selectedContainer = document.createElement("div"); 
-    selectedContainer.classList.add("selected-courses");
-    inputField.parentNode.insertBefore(selectedContainer, inputField);
-
-    function fetchCourses() {
-        let query = inputField.value.trim();
-
-        if (query.length === 0) {
-            dropdown.style.display = "none";
-            return;
-        }
-
-        fetch(`/api/courses/?q=${query}`)
-            .then(response => response.json())
-            .then(data => {
-                dropdown.innerHTML = "";
-                if (data.length > 0) {
-                    dropdown.style.display = "block";
-
-                    data.forEach(course => {
-                        let div = document.createElement("div");
-                        div.classList.add("dropdown-item");
-                        div.innerHTML = `<strong>${course.name}</strong><br><span>${course.category} • ${course.level}</span>`;
-                        div.onclick = () => addCourse(course);
-                        dropdown.appendChild(div);
-                    });
-                } else {
-                    dropdown.style.display = "none";
-                }
-            })
-            .catch(error => console.error("Error fetching courses:", error));
-    }
-
-    function addCourse(course) {
-        if (selectedCourses.length >= 5) return; // Prevent selecting more than 5 courses
-
-        if (!selectedCourses.some(c => c.id === course.id)) {
-            selectedCourses.push(course);
-            updateSelectedCourses();
-        }
-        
-        inputField.value = "";
-        dropdown.style.display = "none";
-    }
-
-    function removeCourse(courseId) {
-        selectedCourses = selectedCourses.filter(course => course.id !== courseId);
-        updateSelectedCourses();
-    }
-
-    function updateSelectedCourses() {
-        selectedContainer.innerHTML = ""; // Clear previous selection
-
-        selectedCourses.forEach(course => {
-            console.log("AWEFAWEF");
-            let courseTag = document.createElement("div");
-            courseTag.classList.add("course-tag");
-            courseTag.innerHTML = `
-                ${course.name} 
-                <span class="remove-btn" onclick="removeCourse(${course.id})">&times;</span>
-            `;
-            selectedContainer.appendChild(courseTag);
-        });
-    }
-
-
-    // Make functions available globally
-    window.fetchCourses = fetchCourses;
-    window.removeCourse = removeCourse;
+    const courseSelector = new CourseSelector({
+        containerId: 'postCoursesSelector',
+        maxCourses: 5,
+        initialSelection: {% if selected_courses_json %}{{ selected_courses_json|safe }}{% else %}[]{% endif %}
+    });
 });
 </script>
 {% endblock %}
