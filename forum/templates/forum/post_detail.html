@@ -200,7 +200,7 @@
         const solutionEditors = new Map();
         
         try {
-            console.log("processed", '{{processed_solutions}}');
+            // console.log("processed", '{{processed_solutions}}');
             // Initialize main post editor
             const content = JSON.parse('{{ content_json|escapejs }}');
             const editor = createEditor(
@@ -214,7 +214,7 @@
             const processedSolutions = JSON.parse('{{ processed_solutions_json|escapejs }}');
             processedSolutions.forEach(solution => {
                 try {
-                    console.log(solution.content);
+                    // console.log(solution.content);
                     const editor = createEditor(
                         `editorjs-solution-${solution.id}`,
                         solution.content,
