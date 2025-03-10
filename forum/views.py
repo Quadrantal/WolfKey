@@ -163,14 +163,17 @@ def post_detail(request, post_id):
     
     processed_solutions = []
     for solution in solutions:
+        print("Solution: ", solution.content)
         try:
             solution_content = solution.content
             # If content is a string, convert to object
-            # print(type(solution_content))
+            print(type(solution_content))
             if isinstance(solution_content, str):
                 solution_content = selective_quote_replace(solution_content)
                 # print(f"Solution Content: f{solution_content}")
                 solution_content = json.loads(solution_content)
+
+            print("Solution: ", solution_content)
                 
             processed_solutions.append({
                 'id': solution.id,
