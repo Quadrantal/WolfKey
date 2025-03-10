@@ -3,6 +3,7 @@ certifi==2024.12.14
 charset-normalizer==3.4.1
 dj-database-url==2.3.0
 Django==4.2.16
+django-cors-headers==4.7.0
 django-drf-filepond==0.5.0
 django-editorjs-fields==0.2.7
 django-storages==1.14.4
