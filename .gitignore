@@ -10,5 +10,3 @@ __pycache__/
 .env
 venv/
 backup.sql
-*/migrations/*
-!*/migrations/__init__.py
