@@ -170,7 +170,7 @@ def post_detail(request, post_id):
             print(type(solution_content))
             if isinstance(solution_content, str):
                 solution_content = selective_quote_replace(solution_content)
-                # print(f"Solution Content: f{solution_content}")
+                print(f"Solution Content: f{solution_content}")
                 solution_content = json.loads(solution_content)
 
             print("Solution: ", solution_content)
