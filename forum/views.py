@@ -323,6 +323,14 @@ def login_view(request):
             login(request, user)
             messages.success(request, 'You are now logged in!')
             return redirect('home')
+        else:
+            school_email = request.POST.get('username')  # AuthenticationForm uses 'username' field
+            try:
+                user = User.objects.get(school_email=school_email)
+                # print(f"User exists: {user.school_email}, is_active: {user.is_active}")
+            except User.DoesNotExist:
+                # print(f"No user with email: {school_email}")
+                pass
     else:
         form = AuthenticationForm()
     return render(request, 'forum/login.html', {'form': form})
