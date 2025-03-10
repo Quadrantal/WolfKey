@@ -31,7 +31,7 @@ SECRET_KEY = os.getenv('SECRET_KEY', 'your-default-secret-key')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv('DEBUG', 'False') == 'True'
 
-ALLOWED_HOSTS = ['wolfkey-de5aac68fc04.herokuapp.com', '127.0.0.1']
+ALLOWED_HOSTS = ['wolfkey-de5aac68fc04.herokuapp.com', '127.0.0.1', 'wolfkey.net', 'www.wolfkey.net']
 
 # Application definition
 
@@ -183,7 +183,7 @@ LOGGING = {
 }
 
 from dotenv import load_dotenv
-
+\q
 load_dotenv()
 
 # Email settings
