@@ -183,7 +183,7 @@ LOGGING = {
 }
 
 from dotenv import load_dotenv
-\q
+
 load_dotenv()
 
 # Email settings
