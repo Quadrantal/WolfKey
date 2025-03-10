@@ -352,7 +352,7 @@ p{
 
 .solution-container {
     display: flex;
-    margin-bottom: 20px;
+    margin-bottom: 20px !important;
     border-radius: 12px;
     max-width: 920px;
     background-color: white;
