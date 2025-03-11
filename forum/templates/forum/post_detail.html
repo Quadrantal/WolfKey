@@ -77,7 +77,9 @@
 
 
     <!-- Solutions -->
-    <h3 class="mt-4 mb-3">{{ solutions.count }} Solutions</h3>
+    <h3 class="mt-4 mb-3">
+        {{ solutions.count }} Solution{% if solutions.count != 1 %}s{% endif %}
+    </h3>
     {% for solution in solutions %}
         <div class="solution-container">
             <!-- Solution Vote Cell -->
