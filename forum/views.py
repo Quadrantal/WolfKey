@@ -723,6 +723,10 @@ def send_course_notifications(post, courses):
                 fail_silently=False,
             )
             print("Sent mail")
+            print(subject)
+            print(message)
+            print(settings.DEFAULT_FROM_EMAIL)
+            print([exp_user.user.email])
         except Exception as e:
             print(f"Failed to send notification email to {exp_user.user.email}: {e}")
 
