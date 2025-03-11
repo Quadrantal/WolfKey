@@ -23,6 +23,7 @@ from django.utils.html import escape
 from django.core.mail import send_mail
 from django.conf import settings
 from django.db.models import Q
+from django.utils.html import strip_tags
 import re
 
 logger = logging.getLogger(__name__)
@@ -42,6 +43,32 @@ def home(request):
 
     if tag_ids:
         posts = posts.filter(tags__id__in=tag_ids).distinct()
+        
+    for post in posts:
+        if isinstance(post.content, dict) and 'blocks' in post.content:
+            # Combine text from paragraph blocks
+            paragraphs = []
+            for block in post.content['blocks']:
+                if block.get('type') == 'paragraph':
+                    text = block.get('data', {}).get('text', '')
+                    # Replace <br> tags with spaces
+                    text = re.sub(r'<br\s*/?>', ' ', text)
+                    text = re.sub(r'<i\s*/?>', ' ', text)
+                    text = re.sub(r'<em\s*/?>', ' ', text)
+                    # Strip remaining HTML tags
+                    text = strip_tags(text)
+                    # Remove extra whitespace
+                    text = ' '.join(text.split())
+                    if text:
+                        paragraphs.append(text)
+            post.preview_text = ' '.join(paragraphs)
+        else:
+            # Fallback for non-JSON content
+            text = str(post.content)
+            text = re.sub(r'<br\s*/?>', ' ', text)
+            text = strip_tags(text)
+            text = ' '.join(text.split())
+            post.preview_text = text
 
     tags = Tag.objects.all().order_by('name')  # Sort tags alphabetically
 
