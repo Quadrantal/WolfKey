@@ -102,14 +102,17 @@ else:
     print("Local database")
     DATABASES = {
         'default': {
-            'ENGINE': 'django.db.backends.sqlite3',
-            'NAME': BASE_DIR / 'db.sqlite3',
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': 'schoolforumdb',
+            'USER': 'superuser',
+            'PASSWORD': '1234',
+            'HOST': 'localhost',
+            'PORT': '5432',
         }
     }
     
 print(f"\nUsing database: {DATABASES['default']['NAME']}")
-if 'HOST' in DATABASES['default']:
-    print(f"Database host: {DATABASES['default']['HOST']}")
+print(f"Database host: {DATABASES['default']['HOST']}")
 print(f"Running from: {sys.argv[0]}")
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
