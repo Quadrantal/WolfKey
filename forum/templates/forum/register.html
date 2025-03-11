@@ -371,10 +371,12 @@ body {
                 <p class="text-muted">Select the courses you might have trouble in</p>
                 <div id="currentCoursesSelector"></div>
                 <div id="currentCoursesError" style="color: red;"></div>
+                <input type="hidden" name="current_courses" id="current_courses_input">
                 <h3 class="mb-4 mt-4">Past Experience</h3>
                 <p class="text-muted">Select courses you're confident in</p>
                 <div id="experiencedCoursesSelector"></div>
                 <div id="experiencedCoursesError" style="color: red;"></div>
+                <input type="hidden" name="experienced_courses" id="experienced_courses_input">
 
 
                 <div class="d-flex justify-content-between mt-4">
@@ -497,20 +499,27 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function validateCurrentCourses(courses) {
         const errorDiv = document.getElementById('currentCoursesError');
+        const currentCourses = currentCoursesSelector.getSelectedCourses();
+        // console.log(currentCourses)
         if (courses.length < 3) {
             errorDiv.textContent = 'You must select at least 3 courses you need help with.';
         } else {
             errorDiv.textContent = '';
         }
+        document.getElementById('current_courses_input').value = currentCourses.map(course => course.id).join(',');
     }
 
     function validateExperiencedCourses(courses) {
+        const experiencedCourses = experiencedCoursesSelector.getSelectedCourses();
+
         const errorDiv = document.getElementById('experiencedCoursesError');
         if (courses.length < 5) {
             errorDiv.textContent = 'You must select at least 5 experienced courses.';
         } else {
             errorDiv.textContent = '';
         }
+        document.getElementById('experienced_courses_input').value = experiencedCourses.map(course => course.id).join(',');
+
     }
 
     // Show all steps before form submission
@@ -519,6 +528,7 @@ document.addEventListener('DOMContentLoaded', function() {
         showAllSteps();
         setTimeout(() => {
             if (!form.checkValidity()) {
+                console.log('Selected Courses:', selectedCourses);
                 e.preventDefault();
                 hideAllStepsExceptCurrent();
             }

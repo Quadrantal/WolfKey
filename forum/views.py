@@ -279,13 +279,14 @@ def edit_post(request, post_id):
 def register(request):
     if request.method == 'POST':
         form = CustomUserCreationForm(request.POST)
+        # print(form)
         if form.is_valid():
             user = form.save()
-            current_courses = request.POST.getlist('current_courses')
-            experienced_courses = request.POST.getlist('experienced_courses')
+            current_courses = request.POST.get('current_courses', '').split(',')
+            experienced_courses = request.POST.get('experienced_courses', '').split(',')
             
-            print(current_courses)
-            print(experienced_courses)
+            # print(current_courses)
+            # print(experienced_courses)
             
             
             if len(experienced_courses) < 5:
