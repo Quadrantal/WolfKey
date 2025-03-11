@@ -281,10 +281,26 @@ def register(request):
         form = CustomUserCreationForm(request.POST)
         if form.is_valid():
             user = form.save()
+            current_courses = request.POST.getlist('current_courses')
+            experienced_courses = request.POST.getlist('experienced_courses')
             
+            
+            if len(experienced_courses) < 5:
+                messages.error(request, 'You must select at least 5 experienced courses.')
+                return render(request, 'forum/register.html', {
+                    'form': form,
+                    'courses': Course.objects.all().order_by('name'),
+                    'form_errors': form.errors.as_json()  
+                })
+            if len(current_courses) < 3:
+                messages.error(request, 'You must select at least 3 courses you need help with.')
+                return render(request, 'forum/register.html', {
+                    'form': form,
+                    'courses': Course.objects.all().order_by('name'),
+                    'form_errors': form.errors.as_json()  
+            })
             
             # Add current courses as help needed
-            current_courses = request.POST.getlist('current_courses')
             for course_id in current_courses:
                 UserCourseHelp.objects.create(
                     user=user,
@@ -293,7 +309,6 @@ def register(request):
                 )
                 
             # Add experienced courses
-            experienced_courses = request.POST.getlist('experienced_courses')
             for course_id in experienced_courses:
                 UserCourseExperience.objects.create(
                     user=user,

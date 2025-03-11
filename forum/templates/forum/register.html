@@ -370,9 +370,11 @@ body {
                 <h3 class="mb-4">Hard Courses</h3>
                 <p class="text-muted">Select the courses you might have trouble in</p>
                 <div id="currentCoursesSelector"></div>
+                <div id="currentCoursesError" style="color: red;"></div>
                 <h3 class="mb-4 mt-4">Past Experience</h3>
                 <p class="text-muted">Select courses you're confident in</p>
                 <div id="experiencedCoursesSelector"></div>
+                <div id="experiencedCoursesError" style="color: red;"></div>
 
 
                 <div class="d-flex justify-content-between mt-4">
@@ -474,7 +476,8 @@ document.addEventListener('DOMContentLoaded', function() {
         maxCourses: 5,
         onSelectionChange: (courses) => {
             // Handle current courses selection
-            console.log('Current courses:', courses);
+            // console.log('Current courses:', courses);
+            validateCurrentCourses(courses);
         },
         initialSelection: [] // Add any initial courses here
     });
@@ -485,10 +488,30 @@ document.addEventListener('DOMContentLoaded', function() {
         maxCourses: 5,
         onSelectionChange: (courses) => {
             // Handle experienced courses selection
-            console.log('Experienced courses:', courses);
+            // console.log('Experienced courses:', courses);
+            validateExperiencedCourses(courses);
         },
         initialSelection: [] // Add any initial courses here
     });
+
+
+    function validateCurrentCourses(courses) {
+        const errorDiv = document.getElementById('currentCoursesError');
+        if (courses.length < 3) {
+            errorDiv.textContent = 'You must select at least 3 courses you need help with.';
+        } else {
+            errorDiv.textContent = '';
+        }
+    }
+
+    function validateExperiencedCourses(courses) {
+        const errorDiv = document.getElementById('experiencedCoursesError');
+        if (courses.length < 5) {
+            errorDiv.textContent = 'You must select at least 5 experienced courses.';
+        } else {
+            errorDiv.textContent = '';
+        }
+    }
 
     // Show all steps before form submission
     form.addEventListener('submit', (e) => {
@@ -548,6 +571,8 @@ document.addEventListener('DOMContentLoaded', function() {
             console.error("Error parsing form errors:", e);
         }
     }
+    validateCurrentCourses(currentCoursesSelector.getSelectedCourses());
+    validateExperiencedCourses(experiencedCoursesSelector.getSelectedCourses());
 });
 </script>
 {% endblock %}
