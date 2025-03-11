@@ -722,6 +722,7 @@ def send_course_notifications(post, courses):
                 [exp_user.user.email],
                 fail_silently=False,
             )
+            print("Sent mail")
         except Exception as e:
             print(f"Failed to send notification email to {exp_user.user.email}: {e}")
 
@@ -764,6 +765,7 @@ def send_solution_notification(solution):
             [author.email],
             fail_silently=False,
         )
+        print("Sent mail")
     except Exception as e:
         logger.error(f"Failed to send solution notification email to {author.email}: {e}")
 
