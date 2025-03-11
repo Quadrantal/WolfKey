@@ -207,4 +207,7 @@ class CustomUserCreationForm(UserCreationForm):
         user.username = str(uuid.uuid4())[:30]
         if commit:
             user.save()
+            
+        if not user.personal_email:
+            user.personal_email = user.school_email
         return user
