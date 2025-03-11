@@ -726,9 +726,9 @@ def send_course_notifications(post, courses):
             print(subject)
             print(message)
             print(settings.DEFAULT_FROM_EMAIL)
-            print([exp_user.user.email])
+            print([exp_user.user.personal_email])
         except Exception as e:
-            print(f"Failed to send notification email to {exp_user.user.email}: {e}")
+            print(f"Failed to send notification email to {exp_user.user.personal_email}: {e}")
 
 def send_solution_notification(solution):
     post = solution.post
@@ -771,7 +771,7 @@ def send_solution_notification(solution):
         )
         print("Sent mail")
     except Exception as e:
-        logger.error(f"Failed to send solution notification email to {author.email}: {e}")
+        logger.error(f"Failed to send solution notification email to {author.personal_email}: {e}")
 
 @login_required
 def all_notifications(request):
