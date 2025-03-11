@@ -284,6 +284,9 @@ def register(request):
             current_courses = request.POST.getlist('current_courses')
             experienced_courses = request.POST.getlist('experienced_courses')
             
+            print(current_courses)
+            print(experienced_courses)
+            
             
             if len(experienced_courses) < 5:
                 messages.error(request, 'You must select at least 5 experienced courses.')
