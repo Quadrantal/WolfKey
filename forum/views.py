@@ -23,6 +23,7 @@ from django.utils.html import escape
 from django.core.mail import send_mail
 from django.conf import settings
 from django.db.models import Q
+import re
 
 logger = logging.getLogger(__name__)
 
@@ -49,7 +50,7 @@ def home(request):
 def selective_quote_replace(content):
     """Helper function to selectively replace quotes while preserving inlineMath"""
     # First, preserve inlineMath quotes
-    content = content.replace('"inline-math"', "__INLINEMATH__")
+    content = re.sub(r'data-tex="(.*?)"', r'data-tex=__INLINEMATH__\1__INLINEMATH__', content)
     
     # Do the regular quote replacements
     content = (content
