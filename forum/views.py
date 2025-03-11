@@ -719,7 +719,7 @@ def send_course_notifications(post, courses):
                 subject,
                 message,
                 settings.DEFAULT_FROM_EMAIL,
-                [exp_user.user.email],
+                [exp_user.user.personal_email],
                 fail_silently=False,
             )
             print("Sent mail")
@@ -766,7 +766,7 @@ def send_solution_notification(solution):
             subject,
             message,
             settings.DEFAULT_FROM_EMAIL,
-            [author.email],
+            [author.personal_email],
             fail_silently=False,
         )
         print("Sent mail")
