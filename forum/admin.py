@@ -9,7 +9,7 @@ admin.site.register(Solution)
 admin.site.register(SavedPost)
 admin.site.register(Course)
 admin.site.register(User)
-admin.site.register(UserCourseExpierence)
+admin.site.register(UserCourseExperience)
 admin.site.register(UserCourseHelp)
 
 
