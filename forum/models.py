@@ -7,6 +7,7 @@ import os
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.contrib.auth.models import BaseUserManager
+from django.utils import timezone
 
 class UserManager(BaseUserManager):
     def create_user(self, school_email, first_name, last_name, password=None, **extra_fields):
@@ -137,6 +138,15 @@ class Post(models.Model):
     tags = models.ManyToManyField(Tag, related_name='posts', blank=True)
     search_vector = SearchVectorField(null=True, blank=True)
     courses = models.ManyToManyField(Course, related_name='posts', blank=True)
+    solved = models.BooleanField(default = False)
+    
+    accepted_solution = models.OneToOneField(
+        'Solution',
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name='accepted_for'
+    )
 
     def __str__(self):
         return self.title
@@ -293,3 +303,21 @@ class Notification(models.Model):
 
     class Meta:
         ordering = ['-created_at']
+        
+class UpdateAnnouncement(models.Model):
+    title = models.CharField(max_length=200)
+    content = models.TextField()
+    version = models.CharField(max_length=20)  # e.g., "1.2.0"
+    release_date = models.DateTimeField(default=timezone.now)
+    is_active = models.BooleanField(default=True)
+
+    class Meta:
+        ordering = ['-release_date']
+
+class UserUpdateView(models.Model):
+    user = models.ForeignKey('User', on_delete=models.CASCADE)
+    update = models.ForeignKey(UpdateAnnouncement, on_delete=models.CASCADE)
+    viewed_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ['user', 'update']

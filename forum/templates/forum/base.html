@@ -12,12 +12,37 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     {% load static %}
     <link rel="stylesheet" href="{% static 'forum/css/styles.css' %}">
+    <link rel="stylesheet" href="{% static 'forum/css/whats-new.css' %}">
+
     {% block head %}
     {% endblock %}
 
     
 </head>
 <body>
+
+    {% if latest_update %}
+    <div id="updateOverlay" class="update-overlay">
+        <div class="update-modal">
+            <div class="update-header">
+                <div>
+                    <h2 class="update-title">What's New</h2>
+                    <span class="update-version">Version {{ latest_update.version }}</span>
+                </div>
+                <span class="update-date">{{ latest_update.release_date|date:"F d, Y" }}</span>
+            </div>
+            <div class="update-content">
+                {{ latest_update.content|safe }}
+            </div>
+            <div class="update-actions">
+                <button class="btn btn-primary" onclick="acknowledgeUpdate('{{ latest_update.id }}')">
+                    Got it!
+                </button>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
 
     {% block scripts %}{% endblock %}
 
@@ -163,8 +188,6 @@
 
         let selectedTags = [];
 
-
-
         function updateSearch() {
             const query = searchInput.value;
             const tags = selectedTags.join(',');
@@ -225,9 +248,28 @@
             }
         }
 
+    const overlay = document.getElementById('updateOverlay');
+    if (overlay) {
+        overlay.style.display = 'block';
+    }
+});
 
-    });
-    </script>
+function acknowledgeUpdate(updateId) {
+        fetch('/api/acknowledge-update/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}'
+            },
+            body: JSON.stringify({ update_id: updateId })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                document.getElementById('updateOverlay').style.display = 'none';
+            }
+        });
+    }
+</script>
     {% endblock %}
 </body>
-</html>

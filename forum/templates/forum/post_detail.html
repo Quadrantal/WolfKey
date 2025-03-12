@@ -8,6 +8,7 @@
     <link rel="stylesheet" href="{% static 'forum/css/carousel.css' %}">
     <link rel="stylesheet" href="{% static 'forum/css/files-display.css' %}">
     <link rel="stylesheet" href="{% static 'forum/css/editorjs.css' %}">
+    <link rel="stylesheet" href="{% static 'forum/css/post-detail.css' %}">
     <link href="https://vjs.zencdn.net/8.16.1/video-js.css" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.19/dist/katex.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/default.min.css">
@@ -78,81 +79,166 @@
 
     <!-- Solutions -->
     <h3 class="mt-4 mb-3">{{ solutions.count }} Solutions</h3>
-    {% for solution in solutions %}
-        <div class="solution-container">
-            <!-- Solution Vote Cell -->
-            <div class="vote-cell">
-                <form method="post" action="{% url 'upvote_solution' solution.id %}" class="d-inline">
-                    {% csrf_token %}
-                    <button type="submit" class="vote-button {% if user in solution.upvoters.all %}active{% endif %}">
-                        <svg width="36" height="36" viewBox="0 0 36 36">
-                            <path d="M2 26h32L18 10 2 26z"></path>
-                        </svg>
-                    </button>
-                </form>
-                
-                <div class="vote-count">{{ solution|vote_difference }}</div>
-                
-                <form method="post" action="{% url 'downvote_solution' solution.id %}" class="d-inline">
-                    {% csrf_token %}
-                    <button type="submit" class="vote-button {% if user in solution.downvoters.all %}active{% endif %}">
-                        <svg width="36" height="36" viewBox="0 0 36 36">
-                            <path d="M2 10h32L18 26 2 10z"></path>
-                        </svg>
-                    </button>
-                </form>
-            </div>
+    {% with accepted=post.accepted_solution %}
+        {% if accepted %}
+            <!-- Show accepted solution first -->
+            <div class="solution-container accepted-solution">
+                <!-- Add accepted solution badge -->
+                <div class="vote-cell">
+                    <form method="post" action="{% url 'upvote_solution' accepted.id %}" class="d-inline">
+                        {% csrf_token %}
+                        <button type="submit" class="vote-button {% if user in accepted.upvoters.all %}active{% endif %}">
+                            <svg width="36" height="36" viewBox="0 0 36 36">
+                                <path d="M2 26h32L18 10 2 26z"></path>
+                            </svg>
+                        </button>
+                    </form>
+                    
+                    <div class="vote-count">{{ accepted|vote_difference }}</div>
+                    
+                    <form method="post" action="{% url 'downvote_solution' accepted.id %}" class="d-inline">
+                        {% csrf_token %}
+                        <button type="submit" class="vote-button {% if user in accepted.downvoters.all %}active{% endif %}">
+                            <svg width="36" height="36" viewBox="0 0 36 36">
+                                <path d="M2 10h32L18 26 2 10z"></path>
+                            </svg>
+                        </button>
+                    </form>
 
-            <!-- Solution Content -->
-            <div class="post-content-cell">
-                <div id="editorjs-solution-{{ solution.id }}"></div>
-                
-                <!-- Solution Author -->
-                <div class="author-info mt-3">
-                    <div class="author-avatar"></div>
-                    <div>
-                        <div>{{ solution.author.get_full_name }}</div>
-                        <div class="text-muted">Answered {{ solution.created_at|date:"M d, Y" }}</div>
-                    </div>
+                    {% if user == post.author %}
+                        <form method="post" action="{% url 'accept_solution' accepted.id %}" class="d-inline">
+                            {% csrf_token %}
+                            <button type="submit" class="accept-button-accepted" 
+                                title="Unaccept this answer">
+                                <svg aria-hidden="true" class="m0 svg-icon iconCheckmarkLg" width="36" height="36" viewBox="0 0 36 36"><path d="m6 14 8 8L30 6v8L14 30l-8-8z"></path></svg>
+                            </button>
+                        </form>
+                    {% endif %}
                 </div>
 
-                <!-- Solution Actions -->
-                {% if user.is_authenticated %}
-                <div class="solution-actions mt-3" data-solution-id="{{ solution.id }}">
-                    {% if user == solution.author %}
-                        <div class="default-actions">
-                            <button class="btn btn-outline-secondary btn-sm" onclick="showEditSolutionForm('{{ solution.id }}')">Edit</button>
-                            <form method="post" action="{% url 'post_detail' post.id %}" class="d-inline">
-                                {% csrf_token %}
-                                <input type="hidden" name="action" value="delete_solution">
-                                <input type="hidden" name="solution_id" value="{{ solution.id }}">
-                                <button type="submit" class="btn btn-outline-danger btn-sm">Delete</button>
-                            </form>
+                <div class="post-content-cell">
+                    <div id="editorjs-solution-{{ accepted.id }}"></div>
+                    
+                    <!-- Solution Author -->
+                    <div class="author-info mt-3">
+                        <div class="author-avatar"></div>
+                        <div>
+                            <div>{{ accepted.author.get_full_name }}</div>
+                            <div class="text-muted">Answered {{ accepted.created_at|date:"M d, Y" }}</div>
                         </div>
-                        <div class="edit-actions" style="display: none;">
-                            <button class="btn btn-primary btn-sm" onclick="saveSolutionEdit('{{ solution.id }}')">Save</button>
-                            <button class="btn btn-secondary btn-sm" onclick="cancelSolutionEdit('{{ solution.id }}')">Cancel</button>
+                    </div>
+
+                    <!-- Solution Actions -->
+                    {% if user.is_authenticated %}
+                        <div class="solution-actions mt-3" data-solution-id="{{ accepted.id }}">
+                            {% if user == accepted.author %}
+                                <div class="default-actions">
+                                    <button class="btn btn-outline-secondary btn-sm" onclick="showEditSolutionForm('{{ accepted.id }}')">Edit</button>
+                                    <form method="post" action="{% url 'post_detail' post.id %}" class="d-inline">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="action" value="delete_solution">
+                                        <input type="hidden" name="solution_id" value="{{ accepted.id }}">
+                                        <button type="submit" class="btn btn-outline-danger btn-sm">Delete</button>
+                                    </form>
+                                </div>
+                                <div class="edit-actions" style="display: none;">
+                                    <button class="btn btn-primary btn-sm" onclick="saveSolutionEdit('{{ accepted.id }}')">Save</button>
+                                    <button class="btn btn-secondary btn-sm" onclick="cancelSolutionEdit('{{ accepted.id }}')">Cancel</button>
+                                </div>
+                            {% endif %}
                         </div>
                     {% endif %}
                 </div>
-                {% endif %}
+            </div>
+        {% endif %}
 
-                <!-- Comments -->
-                <div class="comment-section mt-3">
-                    {% for comment in solution.comments.all %}
-                        <div class="comment mb-2">
-                            <div class="comment-content">{{ comment.content }}</div>
-                            <div class="small text-muted">
-                                – {{ comment.author.first_name }} {{comment.author.last_name}} {{ comment.created_at|date:"M d, Y" }}
+        <!-- Show other solutions -->
+        {% for solution in solutions %}
+            {% if solution != accepted %}
+                <div class="solution-container">
+                    <!-- Solution Vote Cell -->
+                    <div class="vote-cell">
+                        <form method="post" action="{% url 'upvote_solution' solution.id %}" class="d-inline">
+                            {% csrf_token %}
+                            <button type="submit" class="vote-button {% if user in solution.upvoters.all %}active{% endif %}">
+                                <svg width="36" height="36" viewBox="0 0 36 36">
+                                    <path d="M2 26h32L18 10 2 26z"></path>
+                                </svg>
+                            </button>
+                        </form>
+                        
+                        <div class="vote-count">{{ solution|vote_difference }}</div>
+                        
+                        <form method="post" action="{% url 'downvote_solution' solution.id %}" class="d-inline">
+                            {% csrf_token %}
+                            <button type="submit" class="vote-button {% if user in solution.downvoters.all %}active{% endif %}">
+                                <svg width="36" height="36" viewBox="0 0 36 36">
+                                    <path d="M2 10h32L18 26 2 10z"></path>
+                                </svg>
+                            </button>
+                        </form>
+
+                        {% if user == post.author %}
+                        <form method="post" action="{% url 'accept_solution' solution.id %}" class="d-inline">
+                            {% csrf_token %}
+                            <button type="submit" class="accept-button-unaccepted" 
+                                title="Accept this answer">
+                                <svg aria-hidden="true" class="m0 svg-icon iconCheckmarkLg" width="36" height="36" viewBox="0 0 36 36"><path d="m6 14 8 8L30 6v8L14 30l-8-8z"></path></svg>
+                            </button>
+                        </form>
+                    {% endif %}
+                    </div>
+
+                    <!-- Solution Content -->
+                    <div class="post-content-cell">
+                        <div id="editorjs-solution-{{ solution.id }}"></div>
+                        
+                        <!-- Solution Author -->
+                        <div class="author-info mt-3">
+                            <div class="author-avatar"></div>
+                            <div>
+                                <div>{{ solution.author.get_full_name }}</div>
+                                <div class="text-muted">Answered {{ solution.created_at|date:"M d, Y" }}</div>
                             </div>
                         </div>
-                    {% endfor %}
+
+                        <!-- Solution Actions -->
+                        {% if user.is_authenticated %}
+                        <div class="solution-actions mt-3" data-solution-id="{{ solution.id }}">
+                            {% if user == solution.author %}
+                                <div class="default-actions">
+                                    <button class="btn btn-outline-secondary btn-sm" onclick="showEditSolutionForm('{{ solution.id }}')">Edit</button>
+                                    <form method="post" action="{% url 'post_detail' post.id %}" class="d-inline">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="action" value="delete_solution">
+                                        <input type="hidden" name="solution_id" value="{{ solution.id }}">
+                                        <button type="submit" class="btn btn-outline-danger btn-sm">Delete</button>
+                                    </form>
+                                </div>
+                                <div class="edit-actions" style="display: none;">
+                                    <button class="btn btn-primary btn-sm" onclick="saveSolutionEdit('{{ solution.id }}')">Save</button>
+                                    <button class="btn btn-secondary btn-sm" onclick="cancelSolutionEdit('{{ solution.id }}')">Cancel</button>
+                                </div>
+                            {% endif %}
+                        </div>
+                        {% endif %}
+
+                        <!-- Comments -->
+                        <div class="comment-section mt-3">
+                            {% for comment in solution.comments.all %}
+                                <div class="comment mb-2">
+                                    <div class="comment-content">{{ comment.content }}</div>
+                                    <div class="small text-muted">
+                                        – {{ comment.author.first_name }} {{comment.author.last_name}} {{ comment.created_at|date:"M d, Y" }}
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
                 </div>
-            </div>
-        </div>
-    {% empty %}
-        <p>No solutions yet. Be the first to provide a solution!</p>
-    {% endfor %}
+            {% endif %}
+        {% endfor %}
+    {% endwith %}
 
         <!-- Add Solution Form -->
         {% if user.is_authenticated %}
@@ -169,7 +255,6 @@
             </div>
         </div>
         {% endif %}
-    </div>
     {% endblock %}
 
 {% block scripts %}

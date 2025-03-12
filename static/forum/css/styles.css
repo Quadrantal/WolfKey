@@ -106,7 +106,7 @@ body {
     padding: 20px;
     position: fixed;
     height: calc(100vh - 56px);
-    z-index: 1000;
+    z-index: 100;
 }
 
 .main-content {
@@ -434,4 +434,19 @@ p{
 
 .card-body{
     padding: 0.5rem;
+}
+
+.banner {
+    position: absolute;
+    top: 2px;
+    left: -20px;
+    background-color: #5cb85c;
+    color: white;
+    padding: 5px 0;
+    width: 80px;
+    text-align: center;
+    font-weight: bold;
+    transform: rotate(-45deg);
+    transform-origin: center;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
 }

@@ -4,10 +4,10 @@ from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from django.contrib import messages 
 from django.contrib.auth.decorators import login_required
 from django.contrib.postgres.search import SearchVector, SearchQuery, SearchRank, TrigramSimilarity
-from .models import Post, Solution, Comment, SolutionUpvote, SolutionDownvote, CommentUpvote, Tag, File, User, SavedPost, UserCourseHelp, UserCourseExperience, UserProfile, Course, Notification
+from .models import Post, Solution, Comment, SolutionUpvote, SolutionDownvote, CommentUpvote, Tag, File, User, SavedPost, UserCourseHelp, UserCourseExperience, UserProfile, Course, Notification, UpdateAnnouncement, UserUpdateView
 from .forms import PostForm, CommentForm, SolutionForm, TagForm, UserProfileForm, UserCourseExperienceForm, UserCourseHelpForm, CustomUserCreationForm
 from django.http import HttpResponseForbidden, JsonResponse
-from django.db.models import F
+from django.db.models import F, Case, When, IntegerField 
 from django.views.decorators.csrf import csrf_exempt
 from django.core.files.storage import FileSystemStorage
 import logging
@@ -23,10 +23,26 @@ from django.utils.html import escape
 from django.core.mail import send_mail
 from django.conf import settings
 from django.db.models import Q
+from django.utils.html import strip_tags
+from django.views.decorators.http import require_POST
 import re
 
 logger = logging.getLogger(__name__)
 
+def acknowledge_update(request):
+    try:
+        data = json.loads(request.body)
+        update_id = data.get('update_id')
+        update = UpdateAnnouncement.objects.get(id=update_id)
+        UserUpdateView.objects.get_or_create(
+            user=request.user,
+            update=update
+        )
+        return JsonResponse({'success': True})
+    except UpdateAnnouncement.DoesNotExist:
+        return JsonResponse({'success': False, 'error': 'Update not found'}, status=404)
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)}, status=500)
 
 def home(request):
     query = request.GET.get('q', '')
@@ -42,6 +58,32 @@ def home(request):
 
     if tag_ids:
         posts = posts.filter(tags__id__in=tag_ids).distinct()
+        
+    for post in posts:
+        if isinstance(post.content, dict) and 'blocks' in post.content:
+            # Combine text from paragraph blocks
+            paragraphs = []
+            for block in post.content['blocks']:
+                if block.get('type') == 'paragraph':
+                    text = block.get('data', {}).get('text', '')
+                    # Replace <br> tags with spaces
+                    text = re.sub(r'<br\s*/?>', ' ', text)
+                    text = re.sub(r'<i\s*/?>', ' ', text)
+                    text = re.sub(r'<em\s*/?>', ' ', text)
+                    # Strip remaining HTML tags
+                    text = strip_tags(text)
+                    # Remove extra whitespace
+                    text = ' '.join(text.split())
+                    if text:
+                        paragraphs.append(text)
+            post.preview_text = ' '.join(paragraphs)
+        else:
+            # Fallback for non-JSON content
+            text = str(post.content)
+            text = re.sub(r'<br\s*/?>', ' ', text)
+            text = strip_tags(text)
+            text = ' '.join(text.split())
+            post.preview_text = text
 
     tags = Tag.objects.all().order_by('name')  # Sort tags alphabetically
 
@@ -82,7 +124,17 @@ def selective_quote_replace(content):
 @login_required
 def post_detail(request, post_id):
     post = get_object_or_404(Post, id=post_id)
-    solutions = post.solutions.all()
+    solutions = post.solutions.annotate(
+        vote_score=F('upvotes') - F('downvotes')
+    ).order_by(
+        Case(
+            When(id=post.accepted_solution_id, then=0),
+            default=1,
+            output_field=IntegerField(),
+        ),
+        '-vote_score',
+        '-created_at'
+    )
     solution_form = SolutionForm()
     comment_form = CommentForm()
 
@@ -792,3 +844,30 @@ def mark_notification_read(request, notification_id):
     if notification.post:
         return redirect('post_detail', post_id=notification.post.id)
     return redirect('all_notifications')
+
+@login_required
+def accept_solution(request, solution_id):
+    solution = get_object_or_404(Solution, id=solution_id)
+    post = solution.post
+    
+    # Only post author can accept solutions
+    if request.user != post.author:
+        return HttpResponseForbidden("Only the post author can accept solutions")
+    
+    if post.accepted_solution == solution:
+        # Unaccept the solution
+        post.accepted_solution = None
+        post.save()
+        messages.success(request, 'Solution unmarked as accepted.')
+    else:
+        if post.accepted_solution:
+            # Unaccept the previous solution
+            post.accepted_solution = None
+            post.save()
+            messages.info(request, 'Previous accepted solution has been unmarked.')
+        # Accept the solution
+        post.accepted_solution = solution
+        post.save()
+        messages.success(request, 'Solution marked as accepted!')
+        
+    return redirect('post_detail', post_id=post.id)

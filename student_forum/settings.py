@@ -76,7 +76,8 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
-                'forum.context_processors.notifications'
+                'forum.context_processors.notifications',
+                'forum.context_processors.latest_update'
             ],
         },
     },

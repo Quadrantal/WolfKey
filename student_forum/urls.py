@@ -61,6 +61,10 @@ urlpatterns = [
 
     path('notifications/', views.all_notifications, name='all_notifications'),
     path('notifications/<int:notification_id>/read/', views.mark_notification_read, name='mark_notification_read'),
+    
+    path('api/acknowledge-update/', views.acknowledge_update, name='acknowledge_update'),
+    
+    path('solution/<int:solution_id>/accept/', views.accept_solution, name='accept_solution'),
 ]
 
 if settings.DEBUG:
