@@ -4,7 +4,7 @@ from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from django.contrib import messages 
 from django.contrib.auth.decorators import login_required
 from django.contrib.postgres.search import SearchVector, SearchQuery, SearchRank, TrigramSimilarity
-from .models import Post, Solution, Comment, SolutionUpvote, SolutionDownvote, CommentUpvote, Tag, File, User, SavedPost, UserCourseHelp, UserCourseExperience, UserProfile, Course, Notification
+from .models import Post, Solution, Comment, SolutionUpvote, SolutionDownvote, CommentUpvote, Tag, File, User, SavedPost, UserCourseHelp, UserCourseExperience, UserProfile, Course, Notification, UpdateAnnouncement, UserUpdateView
 from .forms import PostForm, CommentForm, SolutionForm, TagForm, UserProfileForm, UserCourseExperienceForm, UserCourseHelpForm, CustomUserCreationForm
 from django.http import HttpResponseForbidden, JsonResponse
 from django.db.models import F
@@ -24,10 +24,25 @@ from django.core.mail import send_mail
 from django.conf import settings
 from django.db.models import Q
 from django.utils.html import strip_tags
+from django.views.decorators.http import require_POST
 import re
 
 logger = logging.getLogger(__name__)
 
+def acknowledge_update(request):
+    try:
+        data = json.loads(request.body)
+        update_id = data.get('update_id')
+        update = UpdateAnnouncement.objects.get(id=update_id)
+        UserUpdateView.objects.get_or_create(
+            user=request.user,
+            update=update
+        )
+        return JsonResponse({'success': True})
+    except UpdateAnnouncement.DoesNotExist:
+        return JsonResponse({'success': False, 'error': 'Update not found'}, status=404)
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)}, status=500)
 
 def home(request):
     query = request.GET.get('q', '')
