@@ -1,7 +1,7 @@
 class CourseSelector {
     constructor(options) {
         this.containerId = options.containerId;
-        this.maxCourses = options.maxCourses || 5;
+        this.maxCourses = options.maxCourses;
         this.onSelectionChange = options.onSelectionChange;
         this.selectedCourses = options.initialSelection || [];
         this.form = document.querySelector('form');
