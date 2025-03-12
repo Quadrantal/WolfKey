@@ -757,7 +757,7 @@ def send_course_notifications(post, courses):
         # Send email notification
         subject = f'New post in your experienced course: {post.title}'
         message = f"""
-        Hello {exp_user.user.username},
+        Hello {exp_user.user.get_full_name()},
         
         A new post has been created in a course you have experience in:
         
@@ -798,18 +798,18 @@ def send_solution_notification(solution):
         notification_type='solution',
         post=post,
         solution=solution,
-        message=f'New solution to your post: {post.title}'
+        message=f'New solution to your question: {post.title}'
     )
     
     # Send email notification
-    subject = f'New solution to your post: {post.title}'
+    subject = f'New solution to your question: {post.title}'
     message = f"""
-    Hello {author.username},
+    Hello {author.get_full_name()},
     
     A new solution has been posted to your question:
     
     Post: {post.title}
-    Solution by: {solution.author.username}
+    Solution by: {solution.author.get_full_name()}
     
     You can view the solution here:
     {settings.SITE_URL}{post.get_absolute_url()}
