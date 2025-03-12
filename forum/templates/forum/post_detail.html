@@ -242,6 +242,7 @@
 
         <!-- Add Solution Form -->
         {% if user.is_authenticated %}
+        {% if not has_solution %}
         <div id = "solution-form-container" class="card mt-4">
             <div class="card-body">
                 <h4>Your Solution</h4>
@@ -254,6 +255,11 @@
                 </form>
             </div>
         </div>
+        {% else %}
+        <div class="alert alert-info mt-4">
+            <i class="fas fa-info-circle"></i> You have already provided a solution for this question. You can edit your existing solution if needed.
+        </div>
+        {% endif %}
         {% endif %}
     {% endblock %}
 

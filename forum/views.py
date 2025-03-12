@@ -137,13 +137,20 @@ def post_detail(request, post_id):
     )
     solution_form = SolutionForm()
     comment_form = CommentForm()
+    
+    has_solution = Solution.objects.filter(post=post, author=request.user).exists()
 
     if request.method == 'POST':
+        # print("check 1")
         if not request.user.is_authenticated: 
             return redirect('login')
 
         action = request.POST.get('action')
-
+        
+        if has_solution and action != 'delete_solution':
+            return redirect('post_detail', post_id=post.id)
+        
+        # print(action)
         # Handle solution creation
         if action == 'create_solution':
             solution_form = SolutionForm(request.POST)
@@ -177,10 +184,14 @@ def post_detail(request, post_id):
 
         # Handle solution deletion
         elif action == 'delete_solution':
-            solution_id = request.POST.get('solution_id')
-            solution = get_object_or_404(Solution, id=solution_id, author=request.user)
-            solution.delete()
-            messages.success(request, 'Solution deleted successfully!')
+            try:
+                # print("hi")
+                solution_id = request.POST.get('solution_id')
+                solution = get_object_or_404(Solution, id=solution_id, author=request.user)
+                solution.delete()
+                messages.success(request, 'Solution deleted successfully!')
+            except Exception as e:
+                print(e)
 
         # Handle comment creation or editing
         elif action in ['create_comment', 'edit_comment']:
@@ -256,6 +267,7 @@ def post_detail(request, post_id):
         'content_json': content_json,
         'processed_solutions_json': json.dumps(processed_solutions),
         'courses': post.courses.all(),
+        'has_solution': has_solution, 
     }
 
     # print(post.courses.all())
