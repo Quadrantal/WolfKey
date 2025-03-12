@@ -138,6 +138,15 @@ class Post(models.Model):
     tags = models.ManyToManyField(Tag, related_name='posts', blank=True)
     search_vector = SearchVectorField(null=True, blank=True)
     courses = models.ManyToManyField(Course, related_name='posts', blank=True)
+    solved = models.BooleanField(default = False)
+    
+    accepted_solution = models.OneToOneField(
+        'Solution',
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name='accepted_for'
+    )
 
     def __str__(self):
         return self.title

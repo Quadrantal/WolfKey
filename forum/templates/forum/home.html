@@ -20,6 +20,9 @@
         {% for post in posts %}
             <div class="col-md-6 mb-4">
                 <div class="card">
+                    {% if post.accepted_solution %}
+                        <div class="banner">Solved</div>    
+                    {% endif%}
                     <div class="card-body">
                         <h4 class="card-title">{{ post.title }}</h4>
                         <p class="card-text">{{ post.preview_text|truncatewords:30 }}</p>

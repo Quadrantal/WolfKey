@@ -1,0 +1,40 @@
+.accept-button-accepted {
+    background: transparent !important;
+    border: none;
+    border-color: transparent !important;
+    cursor: pointer;
+    padding: 5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.2s ease;
+}
+
+.accepted-solution {
+    padding-top: 12px;
+    border: 1px solid #45cb7d;
+    background: linear-gradient(to bottom, #aae6a3 -5%, #fff 6%, #fff 85%,#aae6a3 120%);
+}
+
+.accept-button-accepted path{
+    fill: green;
+}
+
+.accept-button-unaccepted {
+    background: transparent !important;
+    border: none;
+    border-color: transparent !important;
+    cursor: pointer;
+    padding: 5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.2s ease;
+}
+.accept-button-unaccepted path{
+    fill: grey;
+}
+
+.accept-button:hover {
+    transform: scale(1.1);
+}

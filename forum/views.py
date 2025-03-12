@@ -7,7 +7,7 @@ from django.contrib.postgres.search import SearchVector, SearchQuery, SearchRank
 from .models import Post, Solution, Comment, SolutionUpvote, SolutionDownvote, CommentUpvote, Tag, File, User, SavedPost, UserCourseHelp, UserCourseExperience, UserProfile, Course, Notification, UpdateAnnouncement, UserUpdateView
 from .forms import PostForm, CommentForm, SolutionForm, TagForm, UserProfileForm, UserCourseExperienceForm, UserCourseHelpForm, CustomUserCreationForm
 from django.http import HttpResponseForbidden, JsonResponse
-from django.db.models import F
+from django.db.models import F, Case, When, IntegerField 
 from django.views.decorators.csrf import csrf_exempt
 from django.core.files.storage import FileSystemStorage
 import logging
@@ -124,7 +124,17 @@ def selective_quote_replace(content):
 @login_required
 def post_detail(request, post_id):
     post = get_object_or_404(Post, id=post_id)
-    solutions = post.solutions.all()
+    solutions = post.solutions.annotate(
+        vote_score=F('upvotes') - F('downvotes')
+    ).order_by(
+        Case(
+            When(id=post.accepted_solution_id, then=0),
+            default=1,
+            output_field=IntegerField(),
+        ),
+        '-vote_score',
+        '-created_at'
+    )
     solution_form = SolutionForm()
     comment_form = CommentForm()
 
@@ -834,3 +844,30 @@ def mark_notification_read(request, notification_id):
     if notification.post:
         return redirect('post_detail', post_id=notification.post.id)
     return redirect('all_notifications')
+
+@login_required
+def accept_solution(request, solution_id):
+    solution = get_object_or_404(Solution, id=solution_id)
+    post = solution.post
+    
+    # Only post author can accept solutions
+    if request.user != post.author:
+        return HttpResponseForbidden("Only the post author can accept solutions")
+    
+    if post.accepted_solution == solution:
+        # Unaccept the solution
+        post.accepted_solution = None
+        post.save()
+        messages.success(request, 'Solution unmarked as accepted.')
+    else:
+        if post.accepted_solution:
+            # Unaccept the previous solution
+            post.accepted_solution = None
+            post.save()
+            messages.info(request, 'Previous accepted solution has been unmarked.')
+        # Accept the solution
+        post.accepted_solution = solution
+        post.save()
+        messages.success(request, 'Solution marked as accepted!')
+        
+    return redirect('post_detail', post_id=post.id)
