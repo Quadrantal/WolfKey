@@ -137,13 +137,20 @@ def post_detail(request, post_id):
     )
     solution_form = SolutionForm()
     comment_form = CommentForm()
+    
+    has_solution = Solution.objects.filter(post=post, author=request.user).exists()
 
     if request.method == 'POST':
+        # print("check 1")
         if not request.user.is_authenticated: 
             return redirect('login')
 
         action = request.POST.get('action')
-
+        
+        if has_solution and action != 'delete_solution':
+            return redirect('post_detail', post_id=post.id)
+        
+        # print(action)
         # Handle solution creation
         if action == 'create_solution':
             solution_form = SolutionForm(request.POST)
@@ -177,10 +184,14 @@ def post_detail(request, post_id):
 
         # Handle solution deletion
         elif action == 'delete_solution':
-            solution_id = request.POST.get('solution_id')
-            solution = get_object_or_404(Solution, id=solution_id, author=request.user)
-            solution.delete()
-            messages.success(request, 'Solution deleted successfully!')
+            try:
+                # print("hi")
+                solution_id = request.POST.get('solution_id')
+                solution = get_object_or_404(Solution, id=solution_id, author=request.user)
+                solution.delete()
+                messages.success(request, 'Solution deleted successfully!')
+            except Exception as e:
+                print(e)
 
         # Handle comment creation or editing
         elif action in ['create_comment', 'edit_comment']:
@@ -256,6 +267,7 @@ def post_detail(request, post_id):
         'content_json': content_json,
         'processed_solutions_json': json.dumps(processed_solutions),
         'courses': post.courses.all(),
+        'has_solution': has_solution, 
     }
 
     # print(post.courses.all())
@@ -501,35 +513,33 @@ def delete_post(request, post_id):
 @login_required
 def upvote_solution(request, solution_id):
     solution = get_object_or_404(Solution, id=solution_id)
-    if SolutionDownvote.objects.filter(solution = solution, user = request.user).exists():
-        SolutionDownvote.objects.filter(solution = solution, user = request.user).delete()
+    if SolutionDownvote.objects.filter(solution=solution, user=request.user).exists():
+        SolutionDownvote.objects.filter(solution=solution, user=request.user).delete()
         solution.downvotes -= 1
-        solution.save()
-    if not SolutionUpvote.objects.filter(solution=solution, user=request.user).exists():
+    elif not SolutionUpvote.objects.filter(solution=solution, user=request.user).exists():
         SolutionUpvote.objects.create(solution=solution, user=request.user)
         solution.upvotes += 1
-        solution.save()
-        messages.success(request, 'Solution upvoted successfully!')
     else:
-        messages.warning(request, 'You have already upvoted this solution.')
-    return redirect('post_detail', post_id=solution.post.id)
+        return JsonResponse({'success': False, 'message': 'You have already upvoted this solution.'}, status=400)
+    
+    solution.save()
+    return JsonResponse({'success': True, 'upvotes': solution.upvotes, 'downvotes': solution.downvotes, 'vote_state': 'upvoted' if SolutionUpvote.objects.filter(solution=solution, user=request.user).exists() else 'downvoted' if SolutionDownvote.objects.filter(solution=solution, user=request.user).exists() else 'none'})
 
 
 @login_required
 def downvote_solution(request, solution_id):
     solution = get_object_or_404(Solution, id=solution_id)
-    if SolutionUpvote.objects.filter(solution = solution, user = request.user).exists():
-        SolutionUpvote.objects.filter(solution = solution, user = request.user).delete()
+    if SolutionUpvote.objects.filter(solution=solution, user=request.user).exists():
+        SolutionUpvote.objects.filter(solution=solution, user=request.user).delete()
         solution.upvotes -= 1
-        solution.save()
-    if not SolutionDownvote.objects.filter(solution=solution, user=request.user).exists():
+    elif not SolutionDownvote.objects.filter(solution=solution, user=request.user).exists():
         SolutionDownvote.objects.create(solution=solution, user=request.user)
         solution.downvotes += 1
-        solution.save()
-        messages.success(request, 'Solution downvoted successfully!')
     else:
-        messages.warning(request, 'You have already downvoted this solution.')
-    return redirect('post_detail', post_id=solution.post.id)
+        return JsonResponse({'success': False, 'message': 'You have already downvoted this solution.'}, status=400)
+    
+    solution.save()
+    return JsonResponse({'success': True, 'upvotes': solution.upvotes, 'downvotes': solution.downvotes, 'vote_state': 'upvoted' if SolutionUpvote.objects.filter(solution=solution, user=request.user).exists() else 'downvoted' if SolutionDownvote.objects.filter(solution=solution, user=request.user).exists() else 'none'})
 
 @login_required
 def upvote_comment(request, comment_id):
@@ -757,7 +767,7 @@ def send_course_notifications(post, courses):
         # Send email notification
         subject = f'New post in your experienced course: {post.title}'
         message = f"""
-        Hello {exp_user.user.username},
+        Hello {exp_user.user.get_full_name()},
         
         A new post has been created in a course you have experience in:
         
@@ -798,18 +808,18 @@ def send_solution_notification(solution):
         notification_type='solution',
         post=post,
         solution=solution,
-        message=f'New solution to your post: {post.title}'
+        message=f'New solution to your question: {post.title}'
     )
     
     # Send email notification
-    subject = f'New solution to your post: {post.title}'
+    subject = f'New solution to your question: {post.title}'
     message = f"""
-    Hello {author.username},
+    Hello {author.get_full_name()},
     
     A new solution has been posted to your question:
     
     Post: {post.title}
-    Solution by: {solution.author.username}
+    Solution by: {solution.author.get_full_name()}
     
     You can view the solution here:
     {settings.SITE_URL}{post.get_absolute_url()}

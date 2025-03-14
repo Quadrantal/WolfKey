@@ -38,3 +38,134 @@
 .accept-button:hover {
     transform: scale(1.1);
 }
+
+/* Solution Sorting Dropdown */
+.solutions-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: auto;
+    max-width: 920px;
+  }
+  
+  .sort-dropdown {
+    position: relative;
+    display: inline-block;
+  }
+  
+  .sort-dropdown-button {
+    background-color: #f8f9fa;
+    color: #2c5282;
+    border: 1px solid #cbd5e0;
+    border-radius: 4px;
+    padding: 6px 12px;
+    font-size: 14px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    transition: all 0.2s ease;
+  }
+  
+  .sort-dropdown-button:hover {
+    background-color: #edf2f7;
+    border-color: #4299e1;
+  }
+  
+  .sort-dropdown-button:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(66, 153, 225, 0.5);
+  }
+  
+  .sort-dropdown-button::after {
+    content: "";
+    border-left: 5px solid transparent;
+    border-right: 5px solid transparent;
+    border-top: 5px solid #2c5282;
+    margin-left: 8px;
+  }
+  
+  .sort-dropdown-menu {
+    position: absolute;
+    right: 0;
+    top: 100%;
+    background-color: white;
+    min-width: 120px;
+    border-radius: 4px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    z-index: 1000;
+    border: 1px solid #e2e8f0;
+    display: none;
+    margin-top: 4px;
+    padding: 6px 0;
+    overflow: hidden;
+  }
+  
+  .sort-dropdown-menu.show {
+    display: block;
+    animation: fadeIn 0.2s ease;
+  }
+  
+  .sort-option {
+    padding: 8px 16px;
+    cursor: pointer;
+    color: #4a5568;
+    font-size: 14px;
+    display: block;
+    text-decoration: none;
+    transition: background-color 0.2s ease;
+  }
+  
+  .sort-option:hover {
+    background-color: #ebf8ff;
+    color: #3182ce;
+  }
+  
+  .sort-option.active {
+    background-color: #bee3f8;
+    color: #2b6cb0;
+    font-weight: 500;
+  }
+  
+  #currentSort {
+    font-weight: 500;
+    margin-left: 4px;
+  }
+  
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(-10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+    .vote-button svg path {
+        fill: #bbb;  /* Default color */
+        transition: fill 0.2s ease;
+    }
+    
+    .vote-button:hover svg path {
+        fill: #000000;  /* Hover color */
+    }
+    
+    .vote-button.voted-up svg path {
+        fill: #2ecc71;  /* Green color for upvotes */
+    }
+    
+    .vote-button.voted-down svg path {
+        fill: #e74c3c;  /* Red color for downvotes */
+    }
+    
+    .vote-button {
+        background: none;
+        border: none;
+        padding: 0;
+        cursor: pointer;
+    }
+    
+    .vote-button:focus {
+        outline: none;
+    }
