@@ -1,279 +1,298 @@
-{% extends 'forum/base.html' %} 
-{% load custom_filters %} 
+{% extends 'forum/base.html' %}
+{% load custom_filters %}
 {% load static %}
-
+{% load custom_filters %}
 <head>
-  {% block head %} 
-  {{ block.super }}
-  <link rel="stylesheet" href="{% static 'forum/css/carousel.css' %}">
-  <link rel="stylesheet" href="{% static 'forum/css/files-display.css' %}">
-  <link rel="stylesheet" href="{% static 'forum/css/editorjs.css' %}">
-  <link rel="stylesheet" href="{% static 'forum/css/post-detail.css' %}">
-  <link href="https://vjs.zencdn.net/8.16.1/video-js.css" rel="stylesheet" />
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.19/dist/katex.min.css">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/default.min.css">
-  {% endblock %}
+    {% block head %}
+    {{ block.super }}
+    <link rel="stylesheet" href="{% static 'forum/css/carousel.css' %}">
+    <link rel="stylesheet" href="{% static 'forum/css/files-display.css' %}">
+    <link rel="stylesheet" href="{% static 'forum/css/editorjs.css' %}">
+    <link rel="stylesheet" href="{% static 'forum/css/post-detail.css' %}">
+    <link href="https://vjs.zencdn.net/8.16.1/video-js.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.19/dist/katex.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/default.min.css">
+    {% endblock %}
 </head>
 {% block content %}
-    <div class="container py-4" id = "main-section">
-        <!-- Question Header -->
-        <div class="question-header">
-            <h1>{{ post.title }}</h1>
-            <div class="actions">
-                <button class="button follow-button">
-                    Follow<span class="follow-count">90</span>
-                </button>
-                <button class="button add-answer-button">Add answer</button>
-                {% if user.is_authenticated and post.author == user %}
-                <a href="{% url 'edit_post' post.id %}" class="btn btn-primary btn-sm rounded-pill shadow-sm px-3">
-                    <i class="fas fa-edit"></i> Edit
-                </a>
+<div class="container py-4" id="main-section">
+    <!-- Question Header -->
+    <div class="question-header">
+        <h1>{{ post.title }}</h1>
+        <div class="actions">
+            <button class="button follow-button">
+                Follow<span class="follow-count">90</span>
+            </button>
+            <button class="button add-answer-button">Add answer</button>
+            {% if user.is_authenticated and post.author == user %}
+            <a href="{% url 'edit_post' post.id %}" class="btn btn-primary btn-sm rounded-pill shadow-sm px-3">
+                <i class="fas fa-edit"></i> Edit
+            </a>
             {% endif %}
-            </div>
-
         </div>
 
-        <!-- Question Content with Voting -->
-        <div class="post-container">
-            <!-- Post Content -->
-            <div class="post-content-cell">
-                <div id="editorjs"></div>
-            </div>
+    </div>
 
-            <!-- Tags -->
-            <div class="mt-4">
-                {% for tag in post.tags.all %}
-                    <a href="#" class="tag">{{ tag.name }}</a>
+    <!-- Question Content with Voting -->
+    <div class="post-container">
+        <!-- Post Content -->
+        <div class="post-content-cell">
+            <div id="editorjs"></div>
+        </div>
+
+        <!-- Tags -->
+        <div class="mt-4">
+            {% for tag in post.tags.all %}
+            <a href="#" class="tag">{{ tag.name }}</a>
+            {% endfor %}
+        </div>
+
+        <!-- Courses -->
+        {% if post.courses.all %}
+        <div class="courses-section">
+            <h6 class="text-muted mb-2">Related Courses:</h6>
+            <div class="d-flex flex-wrap gap-2">
+                {% for course in post.courses.all %}
+                <span class="badge bg-light text-dark border">
+                    {{ course.code }} - {{ course.name }}
+                </span>
                 {% endfor %}
             </div>
-                
-            <!-- Courses -->
-            {% if post.courses.all %}
-                <div class="courses-section">
-                    <h6 class="text-muted mb-2">Related Courses:</h6>
-                    <div class="d-flex flex-wrap gap-2">
-                        {% for course in post.courses.all %}
-                            <span class="badge bg-light text-dark border">
-                                {{ course.code }} - {{ course.name }}
-                            </span>
-                        {% endfor %}
-                    </div>
-                </div>
-            {% endif %}
-                
-           <!-- Author Card -->
-            <div class="author-card">
-                <div class="author-info">
-                    <div class="author-avatar"></div>
-                    <div>
-                        <div class="text-muted">asked {{ post.created_at|date:"M d, Y" }}</div>
-                        <div class="fw-bold">{{ post.author.get_full_name }}</div>
-                    </div>
+        </div>
+        {% endif %}
+
+        <!-- Author Card -->
+        <div class="author-card">
+            <div class="author-info">
+                <div class="author-avatar"></div>
+                <div>
+                    <div class="text-muted">asked {{ post.created_at|date:"M d, Y" }}</div>
+                    <div class="fw-bold">{{ post.author.get_full_name }}</div>
                 </div>
             </div>
         </div>
     </div>
-    <hr>
+</div>
+<hr>
 
 
-    <!-- Solutions -->
-    <div class="solutions-header">
-        <h3 class="mt-4 mb-3">{{ solutions.count }} Solutions</h3>
-        <div class="sort-dropdown">
-            <button class="sort-dropdown-button" type="button" id="sortDropdown">
-                Sort by: <span id="currentSort">Votes</span>
-            </button>
-            <div class="sort-dropdown-menu" id="sortDropdownMenu">
-                <a class="sort-option active" href="#" data-sort="votes">Votes</a>
-                <a class="sort-option" href="#" data-sort="recency">Recency</a>
-            </div>
+<!-- Solutions -->
+<div class="solutions-header">
+    <h3 class="mt-4 mb-3">{{ solutions.count }} Solutions</h3>
+    <div class="sort-dropdown">
+        <button class="sort-dropdown-button" type="button" id="sortDropdown">
+            Sort by: <span id="currentSort">Votes</span>
+        </button>
+        <div class="sort-dropdown-menu" id="sortDropdownMenu">
+            <a class="sort-option active" href="#" data-sort="votes">Votes</a>
+            <a class="sort-option" href="#" data-sort="recency">Recency</a>
         </div>
     </div>
-    <div id="solutions-container">
+</div>
+<div id="solutions-container">
     {% with accepted=post.accepted_solution %}
-        {% if accepted %}
-            <!-- Show accepted solution first -->
-            <div class="solution-container accepted-solution">
-                <!-- Add accepted solution badge -->
-                <div class="vote-cell">
-                    <form method="post" action="{% url 'upvote_solution' accepted.id %}" class="d-inline">
-                        {% csrf_token %}
-                        <button type="submit" class="vote-button {% if user in accepted.upvoters.all %}active{% endif %}">
-                            <svg width="36" height="36" viewBox="0 0 36 36">
-                                <path d="M2 26h32L18 10 2 26z"></path>
-                            </svg>
-                        </button>
-                    </form>
-                    
-                    <div class="vote-count">{{ accepted|vote_difference }}</div>
-                    
-                    <form method="post" action="{% url 'downvote_solution' accepted.id %}" class="d-inline">
-                        {% csrf_token %}
-                        <button type="submit" class="vote-button {% if user in accepted.downvoters.all %}active{% endif %}">
-                            <svg width="36" height="36" viewBox="0 0 36 36">
-                                <path d="M2 10h32L18 26 2 10z"></path>
-                            </svg>
-                        </button>
-                    </form>
+    {% if accepted %}
+    <!-- Show accepted solution first -->
+    <div class="solution-container accepted-solution">
+        <!-- Add accepted solution badge -->
+        <div class="vote-cell">
+            <form method="post" action="{% url 'upvote_solution' accepted.id %}" class="d-inline">
+                {% csrf_token %}
+                <button type="submit" class="vote-button {% if accepted|has_upvoted:user %}voted-up{% endif %}">
+                    <svg width="36" height="36" viewBox="0 0 36 36">
+                        <path d="M2 26h32L18 10 2 26z"></path>
+                    </svg>
+                </button>
+                <input type="hidden" name="solution_id" value="{{ accepted.id }}">
+                <input type="hidden" name="action" value="upvote">
+            </form>
+    
+            <div class="vote-count">{{ accepted|vote_difference }}</div>
+    
+            <form method="post" action="{% url 'downvote_solution' accepted.id %}" class="d-inline">
+                {% csrf_token %}
+                <button type="submit" class="vote-button {% if accepted|has_downvoted:user %}voted-down{% endif %}">
+                    <svg width="36" height="36" viewBox="0 0 36 36">
+                        <path d="M2 10h32L18 26 2 10z"></path>
+                    </svg>
+                </button>
+                <input type="hidden" name="solution_id" value="{{ accepted.id }}">
+                <input type="hidden" name="action" value="downvote">
+            </form>
 
-                    {% if user == post.author %}
-                        <form method="post" action="{% url 'accept_solution' accepted.id %}" class="d-inline">
-                            {% csrf_token %}
-                            <button type="submit" class="accept-button-accepted" 
-                                title="Unaccept this answer">
-                                <svg aria-hidden="true" class="m0 svg-icon iconCheckmarkLg" width="36" height="36" viewBox="0 0 36 36"><path d="m6 14 8 8L30 6v8L14 30l-8-8z"></path></svg>
-                            </button>
-                        </form>
-                    {% endif %}
-                </div>
-
-                <div class="post-content-cell">
-                    <div id="editorjs-solution-{{ accepted.id }}"></div>
-                    
-                    <!-- Solution Author -->
-                    <div class="author-info mt-3">
-                        <div class="author-avatar"></div>
-                        <div>
-                            <div>{{ accepted.author.get_full_name }}</div>
-                            <div class="text-muted">Answered {{ accepted.created_at|date:"M d, Y" }}</div>
-                        </div>
-                    </div>
-
-                    <!-- Solution Actions -->
-                    {% if user.is_authenticated %}
-                        <div class="solution-actions mt-3" data-solution-id="{{ accepted.id }}">
-                            {% if user == accepted.author %}
-                                <div class="default-actions">
-                                    <button class="btn btn-outline-secondary btn-sm" onclick="showEditSolutionForm('{{ accepted.id }}')">Edit</button>
-                                    <form method="post" action="{% url 'post_detail' post.id %}" class="d-inline">
-                                        {% csrf_token %}
-                                        <input type="hidden" name="action" value="delete_solution">
-                                        <input type="hidden" name="solution_id" value="{{ accepted.id }}">
-                                        <button type="submit" class="btn btn-outline-danger btn-sm">Delete</button>
-                                    </form>
-                                </div>
-                                <div class="edit-actions" style="display: none;">
-                                    <button class="btn btn-primary btn-sm" onclick="saveSolutionEdit('{{ accepted.id }}')">Save</button>
-                                    <button class="btn btn-secondary btn-sm" onclick="cancelSolutionEdit('{{ accepted.id }}')">Cancel</button>
-                                </div>
-                            {% endif %}
-                        </div>
-                    {% endif %}
-                </div>
-            </div>
-        {% endif %}
-
-        <!-- Show other solutions -->
-        {% for solution in solutions %}
-            {% if solution != accepted %}
-                <div class="solution-container">
-                    <!-- Solution Vote Cell -->
-                    <div class="vote-cell">
-                        <form method="post" action="{% url 'upvote_solution' solution.id %}" class="d-inline">
-                            {% csrf_token %}
-                            <button type="submit" class="vote-button {% if user in solution.upvoters.all %}active{% endif %}">
-                                <svg width="36" height="36" viewBox="0 0 36 36">
-                                    <path d="M2 26h32L18 10 2 26z"></path>
-                                </svg>
-                            </button>
-                        </form>
-                        
-                        <div class="vote-count">{{ solution|vote_difference }}</div>
-                        
-                        <form method="post" action="{% url 'downvote_solution' solution.id %}" class="d-inline">
-                            {% csrf_token %}
-                            <button type="submit" class="vote-button {% if user in solution.downvoters.all %}active{% endif %}">
-                                <svg width="36" height="36" viewBox="0 0 36 36">
-                                    <path d="M2 10h32L18 26 2 10z"></path>
-                                </svg>
-                            </button>
-                        </form>
-
-                        {% if user == post.author %}
-                        <form method="post" action="{% url 'accept_solution' solution.id %}" class="d-inline">
-                            {% csrf_token %}
-                            <button type="submit" class="accept-button-unaccepted" 
-                                title="Accept this answer">
-                                <svg aria-hidden="true" class="m0 svg-icon iconCheckmarkLg" width="36" height="36" viewBox="0 0 36 36"><path d="m6 14 8 8L30 6v8L14 30l-8-8z"></path></svg>
-                            </button>
-                        </form>
-                    {% endif %}
-                    </div>
-
-                    <!-- Solution Content -->
-                    <div class="post-content-cell">
-                        <div id="editorjs-solution-{{ solution.id }}"></div>
-                        
-                        <!-- Solution Author -->
-                        <div class="author-info mt-3">
-                            <div class="author-avatar"></div>
-                            <div>
-                                <div>{{ solution.author.get_full_name }}</div>
-                                <div class="text-muted">Answered {{ solution.created_at|date:"M d, Y" }}</div>
-                            </div>
-                        </div>
-
-                        <!-- Solution Actions -->
-                        {% if user.is_authenticated %}
-                        <div class="solution-actions mt-3" data-solution-id="{{ solution.id }}">
-                            {% if user == solution.author %}
-                                <div class="default-actions">
-                                    <button class="btn btn-outline-secondary btn-sm" onclick="showEditSolutionForm('{{ solution.id }}')">Edit</button>
-                                    <form method="post" action="{% url 'post_detail' post.id %}" class="d-inline">
-                                        {% csrf_token %}
-                                        <input type="hidden" name="action" value="delete_solution">
-                                        <input type="hidden" name="solution_id" value="{{ solution.id }}">
-                                        <button type="submit" class="btn btn-outline-danger btn-sm">Delete</button>
-                                    </form>
-                                </div>
-                                <div class="edit-actions" style="display: none;">
-                                    <button class="btn btn-primary btn-sm" onclick="saveSolutionEdit('{{ solution.id }}')">Save</button>
-                                    <button class="btn btn-secondary btn-sm" onclick="cancelSolutionEdit('{{ solution.id }}')">Cancel</button>
-                                </div>
-                            {% endif %}
-                        </div>
-                        {% endif %}
-
-                        <!-- Comments -->
-                        <div class="comment-section mt-3">
-                            {% for comment in solution.comments.all %}
-                                <div class="comment mb-2">
-                                    <div class="comment-content">{{ comment.content }}</div>
-                                    <div class="small text-muted">
-                                        – {{ comment.author.first_name }} {{comment.author.last_name}} {{ comment.created_at|date:"M d, Y" }}
-                                    </div>
-                                </div>
-                            {% endfor %}
-                        </div>
-                    </div>
-                </div>
+            {% if user == post.author %}
+            <form method="post" action="{% url 'accept_solution' accepted.id %}" class="d-inline">
+                {% csrf_token %}
+                <button type="submit" class="accept-button-accepted" title="Unaccept this answer">
+                    <svg aria-hidden="true" class="m0 svg-icon iconCheckmarkLg" width="36" height="36"
+                        viewBox="0 0 36 36">
+                        <path d="m6 14 8 8L30 6v8L14 30l-8-8z"></path>
+                    </svg>
+                </button>
+            </form>
             {% endif %}
-        {% endfor %}
-    {% endwith %}
-    </div>
+        </div>
 
-        <!-- Add Solution Form -->
-        {% if user.is_authenticated %}
-        {% if not has_solution %}
-        <div id = "solution-form-container" class="card mt-4">
-            <div class="card-body">
-                <h4>Your Solution</h4>
-                <form method="post" action="{% url 'post_detail' post.id %}" id="solutionForm">
-                    {% csrf_token %}
-                    <input type="hidden" name="action" value="create_solution">
-                    <input type="hidden" id="solution-content" name="content">
-                    <div id="editorjs-solution-form"></div>
-                    <button type="submit" class="btn btn-primary mt-3">Post Your Solution</button>
-                </form>
+        <div class="post-content-cell">
+            <div id="editorjs-solution-{{ accepted.id }}"></div>
+
+            <!-- Solution Author -->
+            <div class="author-info mt-3">
+                <div class="author-avatar"></div>
+                <div>
+                    <div>{{ accepted.author.get_full_name }}</div>
+                    <div class="text-muted">Answered {{ accepted.created_at|date:"M d, Y" }}</div>
+                </div>
+            </div>
+
+            <!-- Solution Actions -->
+            {% if user.is_authenticated %}
+            <div class="solution-actions mt-3" data-solution-id="{{ accepted.id }}">
+                {% if user == accepted.author %}
+                <div class="default-actions">
+                    <button class="btn btn-outline-secondary btn-sm"
+                        onclick="showEditSolutionForm('{{ accepted.id }}')">Edit</button>
+                    <form method="post" action="{% url 'post_detail' post.id %}" class="d-inline">
+                        {% csrf_token %}
+                        <input type="hidden" name="action" value="delete_solution">
+                        <input type="hidden" name="solution_id" value="{{ accepted.id }}">
+                        <button type="submit" class="btn btn-outline-danger btn-sm">Delete</button>
+                    </form>
+                </div>
+                <div class="edit-actions" style="display: none;">
+                    <button class="btn btn-primary btn-sm" onclick="saveSolutionEdit('{{ accepted.id }}')">Save</button>
+                    <button class="btn btn-secondary btn-sm"
+                        onclick="cancelSolutionEdit('{{ accepted.id }}')">Cancel</button>
+                </div>
+                {% endif %}
+            </div>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Show other solutions -->
+    {% for solution in solutions %}
+    {% if solution != accepted %}
+    <div class="solution-container">
+        <!-- Solution Vote Cell -->
+        <div class="vote-cell">
+            <form method="post" action="{% url 'upvote_solution' solution.id %}" class="d-inline">
+                {% csrf_token %}
+                <button type="submit" class="vote-button {% if solution|has_upvoted:user %}voted-up{% endif %}">
+                    <svg width="36" height="36" viewBox="0 0 36 36">
+                        <path d="M2 26h32L18 10 2 26z"></path>
+                    </svg>
+                </button>
+                <input type="hidden" name="solution_id" value="{{ solution.id }}">
+                <input type="hidden" name="action" value="upvote">
+            </form>
+            
+            <div class="vote-count">{{ solution|vote_difference }}</div>
+            
+            <form method="post" action="{% url 'downvote_solution' solution.id %}" class="d-inline">
+                {% csrf_token %}
+                <button type="submit" class="vote-button {% if solution|has_downvoted:user %}voted-down{% endif %}">
+                    <svg width="36" height="36" viewBox="0 0 36 36">
+                        <path d="M2 10h32L18 26 2 10z"></path>
+                    </svg>
+                </button>
+                <input type="hidden" name="solution_id" value="{{ solution.id }}">
+                <input type="hidden" name="action" value="downvote">
+            </form>
+
+            {% if user == post.author %}
+            <form method="post" action="{% url 'accept_solution' solution.id %}" class="d-inline">
+                {% csrf_token %}
+
+                <button type="submit" class="accept-button-unaccepted" title="Accept this answer">
+                    <svg aria-hidden="true" class="m0 svg-icon iconCheckmarkLg" width="36" height="36"
+                        viewBox="0 0 36 36">
+                        <path d="m6 14 8 8L30 6v8L14 30l-8-8z"></path>
+                    </svg>
+                </button>
+            </form>
+            {% endif %}
+        </div>
+
+        <!-- Solution Content -->
+        <div class="post-content-cell">
+            <div id="editorjs-solution-{{ solution.id }}"></div>
+
+            <!-- Solution Author -->
+            <div class="author-info mt-3">
+                <div class="author-avatar"></div>
+                <div>
+                    <div>{{ solution.author.get_full_name }}</div>
+                    <div class="text-muted">Answered {{ solution.created_at|date:"M d, Y" }}</div>
+                </div>
+            </div>
+
+            <!-- Solution Actions -->
+            {% if user.is_authenticated %}
+            <div class="solution-actions mt-3" data-solution-id="{{ solution.id }}">
+                {% if user == solution.author %}
+                <div class="default-actions">
+                    <button class="btn btn-outline-secondary btn-sm"
+                        onclick="showEditSolutionForm('{{ solution.id }}')">Edit</button>
+                    <form method="post" action="{% url 'post_detail' post.id %}" class="d-inline">
+                        {% csrf_token %}
+                        <input type="hidden" name="action" value="delete_solution">
+                        <input type="hidden" name="solution_id" value="{{ solution.id }}">
+                        <button type="submit" class="btn btn-outline-danger btn-sm">Delete</button>
+                    </form>
+                </div>
+                <div class="edit-actions" style="display: none;">
+                    <button class="btn btn-primary btn-sm" onclick="saveSolutionEdit('{{ solution.id }}')">Save</button>
+                    <button class="btn btn-secondary btn-sm"
+                        onclick="cancelSolutionEdit('{{ solution.id }}')">Cancel</button>
+                </div>
+                {% endif %}
+            </div>
+            {% endif %}
+
+            <!-- Comments -->
+            <div class="comment-section mt-3">
+                {% for comment in solution.comments.all %}
+                <div class="comment mb-2">
+                    <div class="comment-content">{{ comment.content }}</div>
+                    <div class="small text-muted">
+                        – {{ comment.author.first_name }} {{comment.author.last_name}} {{ comment.created_at|date:"M d,
+                        Y" }}
+                    </div>
+                </div>
+                {% endfor %}
             </div>
         </div>
-        {% else %}
-        <div class="alert alert-info mt-4">
-            <i class="fas fa-info-circle"></i> You have already provided a solution for this question. You can edit your existing solution if needed.
-        </div>
-        {% endif %}
-        {% endif %}
-    {% endblock %}
+    </div>
+    {% endif %}
+    {% endfor %}
+    {% endwith %}
+</div>
+
+<!-- Add Solution Form -->
+{% if user.is_authenticated %}
+{% if not has_solution %}
+<div id="solution-form-container" class="card mt-4">
+    <div class="card-body">
+        <h4>Your Solution</h4>
+        <form method="post" action="{% url 'post_detail' post.id %}" id="solutionForm">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="create_solution">
+            <input type="hidden" id="solution-content" name="content">
+            <div id="editorjs-solution-form"></div>
+            <button type="submit" class="btn btn-primary mt-3">Post Your Solution</button>
+        </form>
+    </div>
+</div>
+{% else %}
+<div class="alert alert-info mt-4">
+    <i class="fas fa-info-circle"></i> You have already provided a solution for this question. You can edit your
+    existing solution if needed.
+</div>
+{% endif %}
+{% endif %}
+{% endblock %}
 
 {% block scripts %}
 
@@ -292,146 +311,149 @@
 <script src="https://cdn.jsdelivr.net/gh/mdgaziur/EditorJS-LaTeX@latest/dist/editorjs-latex.bundle-min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@editorjs/inline-code@latest"></script>
 <script src="https://cdn.jsdelivr.net/npm/@calumk/editorjs-codecup@latest"></script>
-<script src="https://unpkg.com/mathlive/dist/mathlive.min.js"></script>
 
 {% load static %}
 <script src="{% static 'forum/js/inline-math.js' %}" defer></script>
 <script src="{% static 'forum/js/editor-config.js' %}" defer></script>
 
+<script src="https://unpkg.com/mathlive/dist/mathlive.min.js" defer></script>
 <script>
-  document.addEventListener("DOMContentLoaded", function () {
-    const solutionEditors = new Map();
+    document.addEventListener("DOMContentLoaded", function () {
+        const solutionEditors = new Map();
 
-    try {
-      // console.log("processed", '{{processed_solutions}}');
-      // Initialize main post editor
+        try {
+            // console.log("processed", '{{processed_solutions}}');
+            // Initialize main post editor
             const content = JSON.parse('{{ content_json|escapejs }}');
-      const editor = createEditor(
+            const editor = createEditor(
                 'editorjs',
-        content,
+                content,
                 '{{ csrf_token }}',
-        true
-      );
+                true
+            );
 
-      // Initialize solution editors
+            // Initialize solution editors
             const processedSolutions = JSON.parse('{{ processed_solutions_json|escapejs }}');
             processedSolutions.forEach(solution => {
-        try {
-          // console.log(solution.content);
-          const editor = createEditor(
-            `editorjs-solution-${solution.id}`,
-            solution.content,
+                try {
+                    // console.log(solution.content);
+                    const editor = createEditor(
+                        `editorjs-solution-${solution.id}`,
+                        solution.content,
                         '{{ csrf_token }}',
-            true
-          );
-          solutionEditors.set(solution.id, editor);
-        } catch (solutionError) {
+                        true
+                    );
+                    solutionEditors.set(solution.id, editor);
+                } catch (solutionError) {
                     console.error(`Error initializing solution ${solution.id}:`, solutionError);
-        }
-      });
+                }
+            });
+            var has_solution = '{{has_solution}}';
+            if (!has_solution){
+                const solutionFormEditor = createEditor(
+                    'editorjs-solution-form',
+                    {},
+                    '{{ csrf_token }}',
+                    false,
+                    'solution-content'
+                );  
+                const solutionForm = document.getElementById('solutionForm');
+                if (solutionForm) {
+                    solutionForm.addEventListener('submit', async function (e) {
+                        e.preventDefault();
+                        try {
+                            const outputData = await solutionFormEditor.save();
+                            document.getElementById('solution-content').value = JSON.stringify(outputData);
+                            this.submit();
+                        } catch (error) {
+                            console.error('Failed to save solution content:', error);
+                        }
+                    });
+                }
+            }
 
-      const solutionFormEditor = createEditor(
-                'editorjs-solution-form',
-        {},
-                '{{ csrf_token }}',
-        false,
-                'solution-content'
-      );
+            
 
-        const solutionForm = document.getElementById('solutionForm');
-      if (solutionForm) {
-                solutionForm.addEventListener('submit', async function(e) {
-          e.preventDefault();
-          try {
-            const outputData = await solutionFormEditor.save();
-                        document.getElementById('solution-content').value = JSON.stringify(outputData);
-            this.submit();
-          } catch (error) {
-                        console.error('Failed to save solution content:', error);
-          }
-        });
-      }
+            // Add edit solution functionality
+            window.showEditSolutionForm = async function (solutionId) {
+                const editor = solutionEditors.get(parseInt(solutionId));
+                if (!editor) return;
 
-      // Add edit solution functionality
-            window.showEditSolutionForm = async function(solutionId) {
-        const editor = solutionEditors.get(parseInt(solutionId));
-        if (!editor) return;
+                try {
+                    await editor.readOnly.toggle();
 
-        try {
-          await editor.readOnly.toggle();
+                    // Get solution container and update UI
+                    const container = document.querySelector(`#editorjs-solution-${solutionId}`);
+                    const solutionContainer = container.closest('.solution-container');
+                    const actionsDiv = solutionContainer.querySelector('.solution-actions');
 
-          // Get solution container and update UI
-            const container = document.querySelector(`#editorjs-solution-${solutionId}`);
-            const solutionContainer = container.closest('.solution-container');
-            const actionsDiv = solutionContainer.querySelector('.solution-actions');
+                    // Store original actions
+                    const defaultActions = actionsDiv.querySelector('.default-actions');
+                    const editActions = actionsDiv.querySelector('.edit-actions');
 
-          // Store original actions
-            const defaultActions = actionsDiv.querySelector('.default-actions');
-            const editActions = actionsDiv.querySelector('.edit-actions');
+                    // Toggle visibility
+                    defaultActions.style.display = 'none';
+                    editActions.style.display = 'block';
 
-          // Toggle visibility
-            defaultActions.style.display = 'none';
-            editActions.style.display = 'block';
-
-          // Handle math fields after editor is ready
-          setTimeout(() => {
-            container.querySelectorAll('.inline-math').forEach(elem => {
-                const existingMathField = elem.querySelector('math-field');
-              if (existingMathField) {
-                existingMathField.remove();
-              }
+                    // Handle math fields after editor is ready
+                    setTimeout(() => {
+                        container.querySelectorAll('.inline-math').forEach(elem => {
+                            const existingMathField = elem.querySelector('math-field');
+                            if (existingMathField) {
+                                existingMathField.remove();
+                            }
 
                             const tex = elem.getAttribute('data-tex');
-              if (tex) {
-                const mathField = new MathfieldElement();
-                mathField.value = tex;
-                if (editor.readOnly.isEnabled) {
+                            if (tex) {
+                                const mathField = new MathfieldElement();
+                                mathField.value = tex;
+                                if (editor.readOnly.isEnabled) {
                                     mathField.setAttribute('read-only', '');
-                }
-                elem.appendChild(mathField);
-              }
-            });
-          }, 100);
-                    
-        } catch (error) {
+                                }
+                                elem.appendChild(mathField);
+                            }
+                        });
+                    }, 100);
+
+                } catch (error) {
                     console.error('Error enabling edit mode:', error);
-        }
-      };
+                }
+            };
 
-            window.saveSolutionEdit = async function(solutionId) {
-        const editor = solutionEditors.get(parseInt(solutionId));
-        if (!editor) return;
+            window.saveSolutionEdit = async function (solutionId) {
+                const editor = solutionEditors.get(parseInt(solutionId));
+                if (!editor) return;
 
-        try {
-          const outputData = await editor.save();
+                try {
+                    const outputData = await editor.save();
                     const form = document.createElement('form');
                     form.method = 'POST';
 
-          // Create form content safely
+                    // Create form content safely
                     const csrf = document.querySelector('[name=csrfmiddlewaretoken]').value;
-          const formContent = `
+                    const formContent = `
                     <input type="hidden" name="csrfmiddlewaretoken" value="${csrf}">
                     <input type="hidden" name="action" value="edit_solution">
                     <input type="hidden" name="solution_id" value="${solutionId}">
                         <input type="hidden" name="content" value='${JSON.stringify(outputData).replace(/'/g, "&#39;")}'>
                 `;
 
-          form.innerHTML = formContent;
-          document.body.appendChild(form);
-          form.submit();
-        } catch (error) {
-            console.error('Failed to save edited solution:', error);
-        }
-      };
+                    form.innerHTML = formContent;
+                    document.body.appendChild(form);
+                    form.submit();
+                } catch (error) {
+                    console.error('Failed to save edited solution:', error);
+                }
+            };
 
-        window.cancelSolutionEdit = function(solutionId) {
-        const editor = solutionEditors.get(parseInt(solutionId));
-        if (!editor) return;
+            window.cancelSolutionEdit = function (solutionId) {
+                const editor = solutionEditors.get(parseInt(solutionId));
+                if (!editor) return;
 
-        // Toggle back to read-only
-        editor.readOnly.toggle();
+                // Toggle back to read-only
+                editor.readOnly.toggle();
 
-        // Restore button visibility
+                // Restore button visibility
                 const container = document.querySelector(`#editorjs-solution-${solutionId}`);
                 const solutionContainer = container.closest('.solution-container');
                 const defaultActions = solutionContainer.querySelector('.default-actions');
@@ -440,129 +462,207 @@
                 defaultActions.style.display = 'block';
                 editActions.style.display = 'none';
 
-        // Reinitialize math fields
-        setTimeout(() => {
+                // Reinitialize math fields
+                setTimeout(() => {
                     container.querySelectorAll('.inline-math').forEach(elem => {
                         const existingMathField = elem.querySelector('math-field');
-            if (existingMathField) {
-              existingMathField.remove();
-            }
+                        if (existingMathField) {
+                            existingMathField.remove();
+                        }
 
                         const tex = elem.getAttribute('data-tex');
-            if (tex) {
-              const mathField = new MathfieldElement();
-              mathField.value = tex;
-                mathField.setAttribute('read-only', '');
-              elem.appendChild(mathField);
-            }
-          });
-        }, 100);
-      };
+                        if (tex) {
+                            const mathField = new MathfieldElement();
+                            mathField.value = tex;
+                            mathField.setAttribute('read-only', '');
+                            elem.appendChild(mathField);
+                        }
+                    });
+                }, 100);
+            };
 
-      // Initialize solution sorting functionality
-      initSolutionSorting();
-    } catch (error) {
-      console.error("Error initializing editors:", error);
-    }
-  });
+            // Initialize solution sorting functionality
+            initSolutionSorting();
+        } catch (error) {
+            console.error("Error initializing editors:", error);
+        }
 
-  // Solution sorting functions
-  function initSolutionSorting() {
-    const sortDropdown = document.getElementById('sortDropdown');
-    const sortDropdownMenu = document.getElementById('sortDropdownMenu');
-    const sortOptions = document.querySelectorAll('.sort-option');
-    const currentSortText = document.getElementById('currentSort');
+        document.querySelectorAll('.vote-button').forEach(button => {
+            button.addEventListener('click', function (e) {
+                e.preventDefault();
+                const form = this.closest('form');
+                if (!form) {
+                    console.error("Form not found for the vote button");
+                    return;
+                }
 
-    if (!sortOptions.length || !currentSortText) {
-      console.error("Sort elements not found in the DOM");
-      return;
-    }
+                const url = form.getAttribute('action');
+                const solutionIdInput = form.querySelector('input[name="solution_id"]');
+                const voteTypeInput = form.querySelector('input[name="action"]');
 
-    sortDropdown.addEventListener('click', function() {
-        sortDropdownMenu.classList.toggle('show'); // Use toggle to show/hide
-    });
-    
+                if (!solutionIdInput || !voteTypeInput) {
+                    console.error("Solution ID or action input not found in the form");
+                    return;
+                }
 
-    // Add click event to all sort options
-    sortOptions.forEach((option) => {
-        option.addEventListener("click", function (e) {
-            const innerSortOptions = document.querySelectorAll('.sort-option');
-            innerSortOptions.forEach((option) => {
-                option.classList.remove('active');
-            })
-            e.preventDefault();
-            const sortBy = this.getAttribute("data-sort");
-            currentSortText.textContent = sortBy.charAt(0).toUpperCase() + sortBy.slice(1);
-            sortSolutions(sortBy);
-            option.classList.add('active');
-            sortDropdownMenu.classList.remove('show'); // Close the dropdown after selection
+                fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        solution_id: solutionIdInput.value,
+                        action: voteTypeInput.value
+                    })
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        return response.json().then(data => {
+                            if (data && data.message) {
+                                alert(data.message);
+                            } else {
+                                alert('An unexpected error occurred.');
+                            }
+                            throw new Error(data.message || `HTTP error! status: ${response.status}`);
+                        });
+                    }
+                    return response.json(); // Return the parsed JSON for the next then block
+                })
+                .then(data => {
+                    if (data.success) {
+                        // Reset both vote buttons
+                        const voteCell = form.closest('.vote-cell');
+                        const voteCount = voteCell.querySelector('.vote-count');
+                        if (voteCount) {
+                            voteCount.textContent = data.upvotes - data.downvotes;
+                        }
+                        const upvoteButton = voteCell.querySelector('form[action*="upvote"] button');
+                        const downvoteButton = voteCell.querySelector('form[action*="downvote"] button');
+
+                        // console.log(upvoteButton);
+                        // console.log(downvoteButton);
+                        
+                        upvoteButton.classList.remove('voted-up');
+                        downvoteButton.classList.remove('voted-down');
+                        // console.log("Removed classes");
+
+                        console.log(data.vote_state);
+                        // Add appropriate class based on vote state
+                        if (data.vote_state === 'upvoted') {
+                            // console.log("Voted up");
+                            upvoteButton.classList.add('voted-up');
+                        } else if (data.vote_state === 'downvoted') {
+                            // console.log("Voted down");
+                            downvoteButton.classList.add('voted-down');
+                        }
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                });
+            });
         });
     });
 
-    // Default sort by votes
-    sortSolutions("votes");
-  }
+    // Solution sorting functions
+    function initSolutionSorting() {
+        const sortDropdown = document.getElementById('sortDropdown');
+        const sortDropdownMenu = document.getElementById('sortDropdownMenu');
+        const sortOptions = document.querySelectorAll('.sort-option');
+        const currentSortText = document.getElementById('currentSort');
 
-  function sortSolutions(sortBy) {
-    const solutionsContainer = document.getElementById("solutions-container");
-    if (!solutionsContainer) {
-      console.error("Solutions container not found");
-      return;
-    }
-
-    const acceptedSolution = document.querySelector(".accepted-solution");
-    const regularSolutions = Array.from(
-      document.querySelectorAll(".solution-container:not(.accepted-solution)")
-    );
-
-    // Sort regular solutions
-    if (sortBy === "votes") {
-      regularSolutions.sort((a, b) => {
-        const votesAElement = a.querySelector(".vote-count");
-        const votesBElement = b.querySelector(".vote-count");
-        if (!votesAElement || !votesBElement) {
-          console.error(
-            "Vote count element not found for one of the solutions"
-          );
-          return 0; // Skip sorting for this pair
+        if (!sortOptions.length || !currentSortText) {
+            console.error("Sort elements not found in the DOM");
+            return;
         }
-        const votesA = parseInt(votesAElement.textContent) || 0;
-        const votesB = parseInt(votesBElement.textContent) || 0;
-        return votesB - votesA; // Descending order
-      });
-    } else if (sortBy === "recency") {
-      regularSolutions.sort((a, b) => {
-        const dateTextA = a.querySelector(".author-info .text-muted");
-        const dateTextB = b.querySelector(".author-info .text-muted");
-        if (!dateTextA || !dateTextB) {
-          console.error("Date text element not found for one of the solutions");
-          return 0; // Skip sorting for this pair
+
+        sortDropdown.addEventListener('click', function () {
+            sortDropdownMenu.classList.toggle('show'); // Use toggle to show/hide
+        });
+
+
+        // Add click event to all sort options
+        sortOptions.forEach((option) => {
+            option.addEventListener("click", function (e) {
+                const innerSortOptions = document.querySelectorAll('.sort-option');
+                innerSortOptions.forEach((option) => {
+                    option.classList.remove('active');
+                })
+                e.preventDefault();
+                const sortBy = this.getAttribute("data-sort");
+                currentSortText.textContent = sortBy.charAt(0).toUpperCase() + sortBy.slice(1);
+                sortSolutions(sortBy);
+                option.classList.add('active');
+                sortDropdownMenu.classList.remove('show'); // Close the dropdown after selection
+            });
+        });
+
+        // Default sort by votes
+        sortSolutions("votes");
+    }
+
+    function sortSolutions(sortBy) {
+        const solutionsContainer = document.getElementById("solutions-container");
+        if (!solutionsContainer) {
+            console.error("Solutions container not found");
+            return;
         }
-        const dateStrA = dateTextA.textContent.replace("Answered ", "");
-        const dateStrB = dateTextB.textContent.replace("Answered ", "");
-        const dateA = new Date(dateStrA);
-        const dateB = new Date(dateStrB);
-        return dateB - dateA; // Newest first
-      });
+
+        const acceptedSolution = document.querySelector(".accepted-solution");
+        const regularSolutions = Array.from(
+            document.querySelectorAll(".solution-container:not(.accepted-solution)")
+        );
+
+        // Sort regular solutions
+        if (sortBy === "votes") {
+            regularSolutions.sort((a, b) => {
+                const votesAElement = a.querySelector(".vote-count");
+                const votesBElement = b.querySelector(".vote-count");
+                if (!votesAElement || !votesBElement) {
+                    console.error(
+                        "Vote count element not found for one of the solutions"
+                    );
+                    return 0; // Skip sorting for this pair
+                }
+                const votesA = parseInt(votesAElement.textContent) || 0;
+                const votesB = parseInt(votesBElement.textContent) || 0;
+                return votesB - votesA; // Descending order
+            });
+        } else if (sortBy === "recency") {
+            regularSolutions.sort((a, b) => {
+                const dateTextA = a.querySelector(".author-info .text-muted");
+                const dateTextB = b.querySelector(".author-info .text-muted");
+                if (!dateTextA || !dateTextB) {
+                    console.error("Date text element not found for one of the solutions");
+                    return 0; // Skip sorting for this pair
+                }
+                const dateStrA = dateTextA.textContent.replace("Answered ", "");
+                const dateStrB = dateTextB.textContent.replace("Answered ", "");
+                const dateA = new Date(dateStrA);
+                const dateB = new Date(dateStrB);
+                return dateB - dateA; // Newest first
+            });
+        }
+
+        // Clear the container but preserve any content that should remain
+        while (solutionsContainer.firstChild) {
+            solutionsContainer.removeChild(solutionsContainer.firstChild);
+        }
+
+        // Always add accepted solution first if it exists
+        if (acceptedSolution) {
+            solutionsContainer.appendChild(acceptedSolution);
+        }
+
+        // Add sorted regular solutions
+        regularSolutions.forEach((solution) => {
+            solutionsContainer.appendChild(solution);
+        });
+
+
     }
-
-    // Clear the container but preserve any content that should remain
-    while (solutionsContainer.firstChild) {
-      solutionsContainer.removeChild(solutionsContainer.firstChild);
-    }
-
-    // Always add accepted solution first if it exists
-    if (acceptedSolution) {
-      solutionsContainer.appendChild(acceptedSolution);
-    }
-
-    // Add sorted regular solutions
-    regularSolutions.forEach((solution) => {
-      solutionsContainer.appendChild(solution);
-    });
-
-
-  }
 
 </script>
 

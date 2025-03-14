@@ -513,35 +513,33 @@ def delete_post(request, post_id):
 @login_required
 def upvote_solution(request, solution_id):
     solution = get_object_or_404(Solution, id=solution_id)
-    if SolutionDownvote.objects.filter(solution = solution, user = request.user).exists():
-        SolutionDownvote.objects.filter(solution = solution, user = request.user).delete()
+    if SolutionDownvote.objects.filter(solution=solution, user=request.user).exists():
+        SolutionDownvote.objects.filter(solution=solution, user=request.user).delete()
         solution.downvotes -= 1
-        solution.save()
-    if not SolutionUpvote.objects.filter(solution=solution, user=request.user).exists():
+    elif not SolutionUpvote.objects.filter(solution=solution, user=request.user).exists():
         SolutionUpvote.objects.create(solution=solution, user=request.user)
         solution.upvotes += 1
-        solution.save()
-        messages.success(request, 'Solution upvoted successfully!')
     else:
-        messages.warning(request, 'You have already upvoted this solution.')
-    return redirect('post_detail', post_id=solution.post.id)
+        return JsonResponse({'success': False, 'message': 'You have already upvoted this solution.'}, status=400)
+    
+    solution.save()
+    return JsonResponse({'success': True, 'upvotes': solution.upvotes, 'downvotes': solution.downvotes, 'vote_state': 'upvoted' if SolutionUpvote.objects.filter(solution=solution, user=request.user).exists() else 'downvoted' if SolutionDownvote.objects.filter(solution=solution, user=request.user).exists() else 'none'})
 
 
 @login_required
 def downvote_solution(request, solution_id):
     solution = get_object_or_404(Solution, id=solution_id)
-    if SolutionUpvote.objects.filter(solution = solution, user = request.user).exists():
-        SolutionUpvote.objects.filter(solution = solution, user = request.user).delete()
+    if SolutionUpvote.objects.filter(solution=solution, user=request.user).exists():
+        SolutionUpvote.objects.filter(solution=solution, user=request.user).delete()
         solution.upvotes -= 1
-        solution.save()
-    if not SolutionDownvote.objects.filter(solution=solution, user=request.user).exists():
+    elif not SolutionDownvote.objects.filter(solution=solution, user=request.user).exists():
         SolutionDownvote.objects.create(solution=solution, user=request.user)
         solution.downvotes += 1
-        solution.save()
-        messages.success(request, 'Solution downvoted successfully!')
     else:
-        messages.warning(request, 'You have already downvoted this solution.')
-    return redirect('post_detail', post_id=solution.post.id)
+        return JsonResponse({'success': False, 'message': 'You have already downvoted this solution.'}, status=400)
+    
+    solution.save()
+    return JsonResponse({'success': True, 'upvotes': solution.upvotes, 'downvotes': solution.downvotes, 'vote_state': 'upvoted' if SolutionUpvote.objects.filter(solution=solution, user=request.user).exists() else 'downvoted' if SolutionDownvote.objects.filter(solution=solution, user=request.user).exists() else 'none'})
 
 @login_required
 def upvote_comment(request, comment_id):

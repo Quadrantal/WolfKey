@@ -141,3 +141,31 @@
       transform: translateY(0);
     }
   }
+
+    .vote-button svg path {
+        fill: #bbb;  /* Default color */
+        transition: fill 0.2s ease;
+    }
+    
+    .vote-button:hover svg path {
+        fill: #000000;  /* Hover color */
+    }
+    
+    .vote-button.voted-up svg path {
+        fill: #2ecc71;  /* Green color for upvotes */
+    }
+    
+    .vote-button.voted-down svg path {
+        fill: #e74c3c;  /* Red color for downvotes */
+    }
+    
+    .vote-button {
+        background: none;
+        border: none;
+        padding: 0;
+        cursor: pointer;
+    }
+    
+    .vote-button:focus {
+        outline: none;
+    }
