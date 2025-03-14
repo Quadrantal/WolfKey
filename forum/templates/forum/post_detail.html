@@ -1,20 +1,19 @@
-{% extends 'forum/base.html' %}
-{% load custom_filters %}
+{% extends 'forum/base.html' %} 
+{% load custom_filters %} 
 {% load static %}
 
 <head>
-    {% block head %}
-    {{ block.super }}
-    <link rel="stylesheet" href="{% static 'forum/css/carousel.css' %}">
-    <link rel="stylesheet" href="{% static 'forum/css/files-display.css' %}">
-    <link rel="stylesheet" href="{% static 'forum/css/editorjs.css' %}">
-    <link rel="stylesheet" href="{% static 'forum/css/post-detail.css' %}">
-    <link href="https://vjs.zencdn.net/8.16.1/video-js.css" rel="stylesheet" />
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.19/dist/katex.min.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/default.min.css">
-    {% endblock %}
+  {% block head %} 
+  {{ block.super }}
+  <link rel="stylesheet" href="{% static 'forum/css/carousel.css' %}">
+  <link rel="stylesheet" href="{% static 'forum/css/files-display.css' %}">
+  <link rel="stylesheet" href="{% static 'forum/css/editorjs.css' %}">
+  <link rel="stylesheet" href="{% static 'forum/css/post-detail.css' %}">
+  <link href="https://vjs.zencdn.net/8.16.1/video-js.css" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.19/dist/katex.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/default.min.css">
+  {% endblock %}
 </head>
-
 {% block content %}
     <div class="container py-4" id = "main-section">
         <!-- Question Header -->
@@ -78,7 +77,19 @@
 
 
     <!-- Solutions -->
-    <h3 class="mt-4 mb-3" style="margin:  auto;max-width: 920px;">{{ solutions.count }} Solutions<</h3>
+    <div class="solutions-header">
+        <h3 class="mt-4 mb-3">{{ solutions.count }} Solutions</h3>
+        <div class="sort-dropdown">
+            <button class="sort-dropdown-button" type="button" id="sortDropdown">
+                Sort by: <span id="currentSort">Votes</span>
+            </button>
+            <div class="sort-dropdown-menu" id="sortDropdownMenu">
+                <a class="sort-option active" href="#" data-sort="votes">Votes</a>
+                <a class="sort-option" href="#" data-sort="recency">Recency</a>
+            </div>
+        </div>
+    </div>
+    <div id="solutions-container">
     {% with accepted=post.accepted_solution %}
         {% if accepted %}
             <!-- Show accepted solution first -->
@@ -239,6 +250,7 @@
             {% endif %}
         {% endfor %}
     {% endwith %}
+    </div>
 
         <!-- Add Solution Form -->
         {% if user.is_authenticated %}
@@ -283,174 +295,275 @@
 <script src="https://unpkg.com/mathlive/dist/mathlive.min.js"></script>
 
 {% load static %}
-<script src="{% static 'forum/js/inline-math.js' %}"></script>
-<script src="{% static 'forum/js/editor-config.js' %}"></script>
+<script src="{% static 'forum/js/inline-math.js' %}" defer></script>
+<script src="{% static 'forum/js/editor-config.js' %}" defer></script>
 
 <script>
-    document.addEventListener('DOMContentLoaded', function () {
-        const solutionEditors = new Map();
-        
-        try {
-            // console.log("processed", '{{processed_solutions}}');
-            // Initialize main post editor
-            const content = JSON.parse('{{ content_json|escapejs }}');
-            const editor = createEditor(
-                'editorjs',
-                content,
-                '{{ csrf_token }}',
-                true
-            );
+  document.addEventListener("DOMContentLoaded", function () {
+    const solutionEditors = new Map();
 
-            // Initialize solution editors
+    try {
+      // console.log("processed", '{{processed_solutions}}');
+      // Initialize main post editor
+            const content = JSON.parse('{{ content_json|escapejs }}');
+      const editor = createEditor(
+                'editorjs',
+        content,
+                '{{ csrf_token }}',
+        true
+      );
+
+      // Initialize solution editors
             const processedSolutions = JSON.parse('{{ processed_solutions_json|escapejs }}');
             processedSolutions.forEach(solution => {
-                try {
-                    // console.log(solution.content);
-                    const editor = createEditor(
-                        `editorjs-solution-${solution.id}`,
-                        solution.content,
+        try {
+          // console.log(solution.content);
+          const editor = createEditor(
+            `editorjs-solution-${solution.id}`,
+            solution.content,
                         '{{ csrf_token }}',
-                        true
-                    );
-                    solutionEditors.set(solution.id, editor);
-                } catch (solutionError) {
+            true
+          );
+          solutionEditors.set(solution.id, editor);
+        } catch (solutionError) {
                     console.error(`Error initializing solution ${solution.id}:`, solutionError);
-                }
-            });
+        }
+      });
 
-            const solutionFormEditor = createEditor(
+      const solutionFormEditor = createEditor(
                 'editorjs-solution-form',
-                {},
+        {},
                 '{{ csrf_token }}',
-                false,
+        false,
                 'solution-content'
-            );
+      );
 
-            const solutionForm = document.getElementById('solutionForm');
-            if (solutionForm) {
+        const solutionForm = document.getElementById('solutionForm');
+      if (solutionForm) {
                 solutionForm.addEventListener('submit', async function(e) {
-                    e.preventDefault();
-                    try {
-                        const outputData = await solutionFormEditor.save();
+          e.preventDefault();
+          try {
+            const outputData = await solutionFormEditor.save();
                         document.getElementById('solution-content').value = JSON.stringify(outputData);
-                        this.submit();
-                    } catch (error) {
+            this.submit();
+          } catch (error) {
                         console.error('Failed to save solution content:', error);
-                    }
-                });
-            }
+          }
+        });
+      }
 
-            // Add edit solution functionality
+      // Add edit solution functionality
             window.showEditSolutionForm = async function(solutionId) {
-                const editor = solutionEditors.get(parseInt(solutionId));
-                if (!editor) return;
-                
-                try {
-                    await editor.readOnly.toggle();
-                    
-                    // Get solution container and update UI
-                    const container = document.querySelector(`#editorjs-solution-${solutionId}`);
-                    const solutionContainer = container.closest('.solution-container');
-                    const actionsDiv = solutionContainer.querySelector('.solution-actions');
-                    
-                    // Store original actions
-                    const defaultActions = actionsDiv.querySelector('.default-actions');
-                    const editActions = actionsDiv.querySelector('.edit-actions');
-                    
-                    // Toggle visibility
-                    defaultActions.style.display = 'none';
-                    editActions.style.display = 'block';
-                    
-                    // Handle math fields after editor is ready
-                    setTimeout(() => {
-                        container.querySelectorAll('.inline-math').forEach(elem => {
-                            const existingMathField = elem.querySelector('math-field');
-                            if (existingMathField) {
-                                existingMathField.remove();
-                            }
-                            
+        const editor = solutionEditors.get(parseInt(solutionId));
+        if (!editor) return;
+
+        try {
+          await editor.readOnly.toggle();
+
+          // Get solution container and update UI
+            const container = document.querySelector(`#editorjs-solution-${solutionId}`);
+            const solutionContainer = container.closest('.solution-container');
+            const actionsDiv = solutionContainer.querySelector('.solution-actions');
+
+          // Store original actions
+            const defaultActions = actionsDiv.querySelector('.default-actions');
+            const editActions = actionsDiv.querySelector('.edit-actions');
+
+          // Toggle visibility
+            defaultActions.style.display = 'none';
+            editActions.style.display = 'block';
+
+          // Handle math fields after editor is ready
+          setTimeout(() => {
+            container.querySelectorAll('.inline-math').forEach(elem => {
+                const existingMathField = elem.querySelector('math-field');
+              if (existingMathField) {
+                existingMathField.remove();
+              }
+
                             const tex = elem.getAttribute('data-tex');
-                            if (tex) {
-                                const mathField = new MathfieldElement();
-                                mathField.value = tex;
-                                if (editor.readOnly.isEnabled) {
+              if (tex) {
+                const mathField = new MathfieldElement();
+                mathField.value = tex;
+                if (editor.readOnly.isEnabled) {
                                     mathField.setAttribute('read-only', '');
-                                }
-                                elem.appendChild(mathField);
-                            }
-                        });
-                    }, 100);
-                    
-                } catch (error) {
-                    console.error('Error enabling edit mode:', error);
                 }
-            };
+                elem.appendChild(mathField);
+              }
+            });
+          }, 100);
+                    
+        } catch (error) {
+                    console.error('Error enabling edit mode:', error);
+        }
+      };
 
             window.saveSolutionEdit = async function(solutionId) {
-                const editor = solutionEditors.get(parseInt(solutionId));
-                if (!editor) return;
-                
-                try {
-                    const outputData = await editor.save();
+        const editor = solutionEditors.get(parseInt(solutionId));
+        if (!editor) return;
+
+        try {
+          const outputData = await editor.save();
                     const form = document.createElement('form');
                     form.method = 'POST';
-                    
-                    // Create form content safely
-                    const csrf = document.querySelector('[name=csrfmiddlewaretoken]').value;
-                    const formContent = `
-                        <input type="hidden" name="csrfmiddlewaretoken" value="${csrf}">
-                        <input type="hidden" name="action" value="edit_solution">
-                        <input type="hidden" name="solution_id" value="${solutionId}">
-                        <input type="hidden" name="content" value='${JSON.stringify(outputData).replace(/'/g, "&#39;")}'>
-                    `;
-                    
-                    form.innerHTML = formContent;
-                    document.body.appendChild(form);
-                    form.submit();
-                } catch (error) {
-                    console.error('Failed to save edited solution:', error);
-                }
-            };
 
-            window.cancelSolutionEdit = function(solutionId) {
-                const editor = solutionEditors.get(parseInt(solutionId));
-                if (!editor) return;
-                
-                // Toggle back to read-only
-                editor.readOnly.toggle();
-                
-                // Restore button visibility
+          // Create form content safely
+                    const csrf = document.querySelector('[name=csrfmiddlewaretoken]').value;
+          const formContent = `
+                    <input type="hidden" name="csrfmiddlewaretoken" value="${csrf}">
+                    <input type="hidden" name="action" value="edit_solution">
+                    <input type="hidden" name="solution_id" value="${solutionId}">
+                        <input type="hidden" name="content" value='${JSON.stringify(outputData).replace(/'/g, "&#39;")}'>
+                `;
+
+          form.innerHTML = formContent;
+          document.body.appendChild(form);
+          form.submit();
+        } catch (error) {
+            console.error('Failed to save edited solution:', error);
+        }
+      };
+
+        window.cancelSolutionEdit = function(solutionId) {
+        const editor = solutionEditors.get(parseInt(solutionId));
+        if (!editor) return;
+
+        // Toggle back to read-only
+        editor.readOnly.toggle();
+
+        // Restore button visibility
                 const container = document.querySelector(`#editorjs-solution-${solutionId}`);
                 const solutionContainer = container.closest('.solution-container');
                 const defaultActions = solutionContainer.querySelector('.default-actions');
                 const editActions = solutionContainer.querySelector('.edit-actions');
-                
+
                 defaultActions.style.display = 'block';
                 editActions.style.display = 'none';
-                
-                // Reinitialize math fields
-                setTimeout(() => {
+
+        // Reinitialize math fields
+        setTimeout(() => {
                     container.querySelectorAll('.inline-math').forEach(elem => {
                         const existingMathField = elem.querySelector('math-field');
-                        if (existingMathField) {
-                            existingMathField.remove();
-                        }
-                        
-                        const tex = elem.getAttribute('data-tex');
-                        if (tex) {
-                            const mathField = new MathfieldElement();
-                            mathField.value = tex;
-                            mathField.setAttribute('read-only', '');
-                            elem.appendChild(mathField);
-                        }
-                    });
-                }, 100);
-            };
+            if (existingMathField) {
+              existingMathField.remove();
+            }
 
-        } catch (error) {
-            console.error('Error initializing editors:', error);
-        }
+                        const tex = elem.getAttribute('data-tex');
+            if (tex) {
+              const mathField = new MathfieldElement();
+              mathField.value = tex;
+                mathField.setAttribute('read-only', '');
+              elem.appendChild(mathField);
+            }
+          });
+        }, 100);
+      };
+
+      // Initialize solution sorting functionality
+      initSolutionSorting();
+    } catch (error) {
+      console.error("Error initializing editors:", error);
+    }
+  });
+
+  // Solution sorting functions
+  function initSolutionSorting() {
+    const sortDropdown = document.getElementById('sortDropdown');
+    const sortDropdownMenu = document.getElementById('sortDropdownMenu');
+    const sortOptions = document.querySelectorAll('.sort-option');
+    const currentSortText = document.getElementById('currentSort');
+
+    if (!sortOptions.length || !currentSortText) {
+      console.error("Sort elements not found in the DOM");
+      return;
+    }
+
+    sortDropdown.addEventListener('click', function() {
+        sortDropdownMenu.classList.toggle('show'); // Use toggle to show/hide
     });
+    
+
+    // Add click event to all sort options
+    sortOptions.forEach((option) => {
+        option.addEventListener("click", function (e) {
+            const innerSortOptions = document.querySelectorAll('.sort-option');
+            innerSortOptions.forEach((option) => {
+                option.classList.remove('active');
+            })
+            e.preventDefault();
+            const sortBy = this.getAttribute("data-sort");
+            currentSortText.textContent = sortBy.charAt(0).toUpperCase() + sortBy.slice(1);
+            sortSolutions(sortBy);
+            option.classList.add('active');
+            sortDropdownMenu.classList.remove('show'); // Close the dropdown after selection
+        });
+    });
+
+    // Default sort by votes
+    sortSolutions("votes");
+  }
+
+  function sortSolutions(sortBy) {
+    const solutionsContainer = document.getElementById("solutions-container");
+    if (!solutionsContainer) {
+      console.error("Solutions container not found");
+      return;
+    }
+
+    const acceptedSolution = document.querySelector(".accepted-solution");
+    const regularSolutions = Array.from(
+      document.querySelectorAll(".solution-container:not(.accepted-solution)")
+    );
+
+    // Sort regular solutions
+    if (sortBy === "votes") {
+      regularSolutions.sort((a, b) => {
+        const votesAElement = a.querySelector(".vote-count");
+        const votesBElement = b.querySelector(".vote-count");
+        if (!votesAElement || !votesBElement) {
+          console.error(
+            "Vote count element not found for one of the solutions"
+          );
+          return 0; // Skip sorting for this pair
+        }
+        const votesA = parseInt(votesAElement.textContent) || 0;
+        const votesB = parseInt(votesBElement.textContent) || 0;
+        return votesB - votesA; // Descending order
+      });
+    } else if (sortBy === "recency") {
+      regularSolutions.sort((a, b) => {
+        const dateTextA = a.querySelector(".author-info .text-muted");
+        const dateTextB = b.querySelector(".author-info .text-muted");
+        if (!dateTextA || !dateTextB) {
+          console.error("Date text element not found for one of the solutions");
+          return 0; // Skip sorting for this pair
+        }
+        const dateStrA = dateTextA.textContent.replace("Answered ", "");
+        const dateStrB = dateTextB.textContent.replace("Answered ", "");
+        const dateA = new Date(dateStrA);
+        const dateB = new Date(dateStrB);
+        return dateB - dateA; // Newest first
+      });
+    }
+
+    // Clear the container but preserve any content that should remain
+    while (solutionsContainer.firstChild) {
+      solutionsContainer.removeChild(solutionsContainer.firstChild);
+    }
+
+    // Always add accepted solution first if it exists
+    if (acceptedSolution) {
+      solutionsContainer.appendChild(acceptedSolution);
+    }
+
+    // Add sorted regular solutions
+    regularSolutions.forEach((solution) => {
+      solutionsContainer.appendChild(solution);
+    });
+
+
+  }
+
 </script>
 
 {% endblock %}

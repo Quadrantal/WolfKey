@@ -1,5 +1,4 @@
 const createEditor = (holder,initialData, csrfToken, isReadOnly = false, contentElementId = 'editorjs-content') => {
-    console.log("DATA: ", initialData);
     return new EditorJS({
         holder: holder,  // The container where Editor.js will be initialized
         data: initialData,
