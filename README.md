@@ -1,4 +1,4 @@
-# Student Forum
+# Wolfkey
 
 This is a Django-based forum application where users can create posts, add solutions, and comment on solutions. The application supports user registration, login, and logout functionalities.
 
