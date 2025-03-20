@@ -226,7 +226,24 @@ window.InlineMath = class InlineMath {
     node.style.marginLeft = '5px';
     node.style.marginRight = '5px';
     node.mf = mathField;
+
+    // Add a zero-width space before and after the mathfield to prevent empty paragraph
+    const afterSpace = document.createTextNode('\u200B');
+    node.appendChild(afterSpace);
     
+    setTimeout(() => {
+      const paragraph = node.closest('.ce-paragraph');
+      if (paragraph) {
+        paragraph.addEventListener('keydown', (event) => {
+          if ((event.keyCode === 8 || event.keyCode === 46) && 
+              document.activeElement !== node.mf) {
+            // Allow deletion if we're not focused on the mathfield
+            return true;
+          }
+        });
+      }
+    }, 0);
+
     
     node.mf.addEventListener('keydown', (event) => {
       const pos = node.mf.position;
@@ -244,6 +261,15 @@ window.InlineMath = class InlineMath {
         event.preventDefault();
         event.stopPropagation();
 
+        node.mf.focus();
+      }
+
+      if (event.keyCode == 8 || event.keyCode == 46) {
+        console.log("Delete/Backspace pressed");
+        event.stopImmediatePropagation();
+        event.stopPropagation();
+        event.preventDefault();
+        
         node.mf.focus();
       }
     });
@@ -393,12 +419,12 @@ window.InlineMath = class InlineMath {
       }
 
       if(event.key === "/"|| event.code === "Slash"){
-        console.log("Why");
         event.stopPropagation();
         event.preventDefault();
 
         this.inlineMathTextInput.focus();
       }
+
 
     });
 
@@ -407,7 +433,6 @@ window.InlineMath = class InlineMath {
       event.preventDefault();
       // Check if the related target (new focused element) is still within the mathfield
       setTimeout(() => {
-        console.log("WHY WON'T THIS WORK", document.activeElement);
         if (document.activeElement === this.inlineMathTextInput) {
           return; // Do nothing if it's still focused
         }
