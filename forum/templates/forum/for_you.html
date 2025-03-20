@@ -1,0 +1,50 @@
+{% extends 'forum/base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1>For You</h1>
+    
+    {% if not posts_with_context %}
+        <div class="alert alert-info">
+            No personalized posts found. Try adding more courses to your profile!
+        </div>
+    {% endif %}
+
+    {% for post_context in posts_with_context %}
+        <div class="card mb-3">
+            {% if post_context.post.accepted_solution %}
+                <div class="banner">Solved</div>    
+            {% endif %}
+            <div class="card-body">
+
+                <h5 class="card-title">
+                    <a href="{% url 'post_detail' post_context.post.id %}">
+                        {{ post_context.post.title }}
+                    </a>
+                </h5>
+                
+                
+                <p class="card-text">{{ post_context.post.preview_text|truncatewords:50 }}</p>
+
+                <div class="recommendation-context mb-2">
+                    {% for course in post_context.relevant_courses %}
+                        <span class="badge {% if course.is_experienced %}bg-success{% elif course.needs_help %}bg-info{% endif %} me-2">
+                            {{ course.name }}
+                            {% if course.is_experienced %}
+                                (You're experienced)
+                            {% elif course.needs_help %}
+                                (You need help)
+                            {% endif %}
+                        </span>
+                    {% endfor %}
+                </div>
+                
+                <div class="text-muted">
+                    Posted by {{ post_context.post.author.get_full_name }} 
+                    on {{ post_context.post.created_at|date:"M d, Y" }}
+                </div>
+            </div>
+        </div>
+    {% endfor %}
+</div>
+{% endblock %}

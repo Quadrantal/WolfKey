@@ -23,7 +23,8 @@ from django.conf.urls.static import static
 from django.urls import re_path, include
 
 urlpatterns = [
-    path('', views.home, name='home'),
+    path('', views.for_you, name='for_you'),
+    path('all-posts', views.all_posts, name='all_posts'),
     path('post/<int:post_id>/', views.post_detail, name='post_detail'),
     path('post/<int:post_id>/edit/', views.edit_post, name='edit_post'),
     path('post/<int:post_id>/delete/', views.delete_post, name='delete_post'),

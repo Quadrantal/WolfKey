@@ -43,8 +43,88 @@ def acknowledge_update(request):
         return JsonResponse({'success': False, 'error': 'Update not found'}, status=404)
     except Exception as e:
         return JsonResponse({'success': False, 'error': str(e)}, status=500)
+    
+def for_you(request):
+    if not request.user.is_authenticated:
+        return redirect('login')
+        
+    # Get user's experienced and help-needed courses
+    experienced_courses = Course.objects.filter(
+        id__in=UserCourseExperience.objects.filter(
+            user=request.user
+        ).values_list('course_id', flat=True)
+    )
+    
+    help_needed_courses = Course.objects.filter(
+        id__in=UserCourseHelp.objects.filter(
+            user=request.user,
+            active=True
+        ).values_list('course_id', flat=True)
+    )
 
-def home(request):
+    # Get posts for both types of courses
+    experienced_posts = Post.objects.filter(
+        courses__in=experienced_courses
+    ).distinct()
+    
+    help_needed_posts = Post.objects.filter(
+        courses__in=help_needed_courses
+    ).distinct()
+
+    # Combine and sort posts
+    all_posts = (experienced_posts | help_needed_posts).distinct().order_by('-created_at')
+
+    # Add context for each post to show why it's recommended
+    posts_with_context = []
+    for post in all_posts:
+        post_courses = post.courses.all()
+        context = {
+            'post': post,
+            'is_experienced': any(course in experienced_courses for course in post_courses),
+            'needs_help': any(course in help_needed_courses for course in post_courses),
+            'relevant_courses': [
+                {
+                    'name': course.name,
+                    'is_experienced': course in experienced_courses,
+                    'needs_help': course in help_needed_courses
+                }
+                for course in post_courses
+            ]
+        }
+        posts_with_context.append(context)
+
+    # Process post previews (similar to all_posts view)
+    for post_context in posts_with_context:
+        post = post_context['post']
+        if isinstance(post.content, dict) and 'blocks' in post.content:
+            paragraphs = []
+            for block in post.content['blocks']:
+                if block.get('type') == 'paragraph':
+                    text = block.get('data', {}).get('text', '')
+                    text = re.sub(r'<br\s*/?>', ' ', text)
+                    text = re.sub(r'<i\s*/?>', ' ', text)
+                    text = re.sub(r'<em\s*/?>', ' ', text)
+                    text = strip_tags(text)
+                    text = ' '.join(text.split())
+                    if text:
+                        paragraphs.append(text)
+            post.preview_text = ' '.join(paragraphs)
+        else:
+            text = str(post.content)
+            text = re.sub(r'<br\s*/?>', ' ', text)
+            text = strip_tags(text)
+            text = ' '.join(text.split())
+            post.preview_text = text
+            
+    print(posts_with_context)
+
+    return render(request, 'forum/for_you.html', {
+        'posts_with_context': posts_with_context,
+        'experienced_courses': experienced_courses,
+        'help_needed_courses': help_needed_courses,
+    })
+
+def all_posts(request):
     query = request.GET.get('q', '')
     tag_ids = request.GET.get('tags', '').split(',')
     tag_ids = [tag_id for tag_id in tag_ids if tag_id]  # Filter out empty strings
@@ -87,7 +167,7 @@ def home(request):
 
     tags = Tag.objects.all().order_by('name')  # Sort tags alphabetically
 
-    return render(request, 'forum/home.html', {'posts': posts, 'tags': tags, 'query': query, 'selected_tags': tag_ids})
+    return render(request, 'forum/all_posts.html', {'posts': posts, 'tags': tags, 'query': query, 'selected_tags': tag_ids})
 
 def selective_quote_replace(content):
     """Helper function to selectively replace quotes while preserving inlineMath"""
@@ -386,7 +466,7 @@ def register(request):
             
             login(request, user)
             messages.success(request, 'Welcome to Student Forum!')
-            return redirect('home')
+            return redirect('all_posts')
         else:
             print(form.errors)
             return render(request, 'forum/register.html', {
@@ -410,7 +490,7 @@ def login_view(request):
             user = form.get_user()
             login(request, user)
             messages.success(request, 'You are now logged in!')
-            return redirect('home')
+            return redirect('for_you')
         else:
             school_email = request.POST.get('username')  # AuthenticationForm uses 'username' field
             try:
@@ -426,7 +506,7 @@ def login_view(request):
 def logout_view(request):
     logout(request)
     messages.success(request, 'You have been logged out.')
-    return redirect('home')
+    return redirect('all_posts')
 
 @login_required
 def create_post(request):
@@ -506,7 +586,7 @@ def delete_post(request, post_id):
     if request.method == 'POST':
         post.delete()
         messages.success(request, 'Post deleted successfully!')
-        return redirect('home')
+        return redirect('all_posts')
         
     return render(request, 'forum/delete_confirm.html', {'post': post})
 
@@ -561,7 +641,7 @@ def create_tag(request):
         if form.is_valid():
             form.save()
             messages.success(request, 'Tag created successfully!')
-            return redirect('home')
+            return redirect('all_posts')
     else:
         form = TagForm()
     return render(request, 'forum/tag_form.html', {'form': form})
@@ -619,7 +699,7 @@ def search_results_new_page(request):
                 'selected_tags': tag_ids
             })
 
-    return redirect('home')
+    return redirect('all_posts')
 
 
 
