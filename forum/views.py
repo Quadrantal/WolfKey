@@ -26,6 +26,7 @@ from django.db.models import Q
 from django.utils.html import strip_tags
 from django.views.decorators.http import require_POST
 import re
+from .utils import process_post_preview, add_course_context
 
 logger = logging.getLogger(__name__)
 
@@ -43,8 +44,52 @@ def acknowledge_update(request):
         return JsonResponse({'success': False, 'error': 'Update not found'}, status=404)
     except Exception as e:
         return JsonResponse({'success': False, 'error': str(e)}, status=500)
+    
+def get_user_courses(user):
+    """Get user's experienced and help-needed courses"""
+    if not user.is_authenticated:
+        return [], []
+        
+    experienced_courses = Course.objects.filter(
+        id__in=UserCourseExperience.objects.filter(
+            user=user
+        ).values_list('course_id', flat=True)
+    )
+    
+    help_needed_courses = Course.objects.filter(
+        id__in=UserCourseHelp.objects.filter(
+            user=user,
+            active=True
+        ).values_list('course_id', flat=True)
+    )
+    
+    return experienced_courses, help_needed_courses
 
-def home(request):
+def for_you(request):
+    if not request.user.is_authenticated:
+        return redirect('login')
+        
+    experienced_courses, help_needed_courses = get_user_courses(request.user)
+
+    # Get posts for both types of courses
+    posts = Post.objects.filter(
+        Q(courses__in=experienced_courses) | 
+        Q(courses__in=help_needed_courses)
+    ).distinct().order_by('-created_at')
+
+    # Process posts
+    for post in posts:
+        post.preview_text = process_post_preview(post)
+        add_course_context(post, experienced_courses, help_needed_courses)
+        
+
+    return render(request, 'forum/for_you.html', {
+        'posts': posts,
+        'experienced_courses': experienced_courses,
+        'help_needed_courses': help_needed_courses,
+    })
+
+def all_posts(request):
     query = request.GET.get('q', '')
     posts = Post.objects.all().order_by('-created_at')
 
@@ -54,34 +99,18 @@ def home(request):
             rank=SearchRank(F('search_vector'), search_query) + TrigramSimilarity('title', query)
         ).filter(rank__gte=0.3).order_by('-rank')
 
-        
-    for post in posts:
-        if isinstance(post.content, dict) and 'blocks' in post.content:
-            # Combine text from paragraph blocks
-            paragraphs = []
-            for block in post.content['blocks']:
-                if block.get('type') == 'paragraph':
-                    text = block.get('data', {}).get('text', '')
-                    # Replace <br> tags with spaces
-                    text = re.sub(r'<br\s*/?>', ' ', text)
-                    text = re.sub(r'<i\s*/?>', ' ', text)
-                    text = re.sub(r'<em\s*/?>', ' ', text)
-                    # Strip remaining HTML tags
-                    text = strip_tags(text)
-                    # Remove extra whitespace
-                    text = ' '.join(text.split())
-                    if text:
-                        paragraphs.append(text)
-            post.preview_text = ' '.join(paragraphs)
-        else:
-            # Fallback for non-JSON content
-            text = str(post.content)
-            text = re.sub(r'<br\s*/?>', ' ', text)
-            text = strip_tags(text)
-            text = ' '.join(text.split())
-            post.preview_text = text
 
-    return render(request, 'forum/home.html', {'posts': posts, 'query': query})
+    experienced_courses, help_needed_courses = get_user_courses(request.user)
+    
+    # Process posts
+    for post in posts:
+        post.preview_text = process_post_preview(post)
+        add_course_context(post, experienced_courses, help_needed_courses)
+
+    return render(request, 'forum/all_posts.html', {
+        'posts': posts,
+        'query': query,
+    })
 
 def selective_quote_replace(content):
     """Helper function to selectively replace quotes while preserving inlineMath"""
@@ -185,7 +214,7 @@ def post_detail(request, post_id):
                 solution.delete()
                 messages.success(request, 'Solution deleted successfully!')
             except Exception as e:
-                print(e)
+                # print(e)
 
         # Handle comment creation or editing
         elif action in ['create_comment', 'edit_comment']:
@@ -380,7 +409,7 @@ def register(request):
             
             login(request, user)
             messages.success(request, 'Welcome to Student Forum!')
-            return redirect('home')
+            return redirect('all_posts')
         else:
             print(form.errors)
             return render(request, 'forum/register.html', {
@@ -404,7 +433,7 @@ def login_view(request):
             user = form.get_user()
             login(request, user)
             messages.success(request, 'You are now logged in!')
-            return redirect('home')
+            return redirect('for_you')
         else:
             school_email = request.POST.get('username')  # AuthenticationForm uses 'username' field
             try:
@@ -420,7 +449,7 @@ def login_view(request):
 def logout_view(request):
     logout(request)
     messages.success(request, 'You have been logged out.')
-    return redirect('home')
+    return redirect('all_posts')
 
 @login_required
 def create_post(request):
@@ -500,7 +529,7 @@ def delete_post(request, post_id):
     if request.method == 'POST':
         post.delete()
         messages.success(request, 'Post deleted successfully!')
-        return redirect('home')
+        return redirect('all_posts')
         
     return render(request, 'forum/delete_confirm.html', {'post': post})
 
@@ -547,7 +576,6 @@ def upvote_comment(request, comment_id):
         messages.warning(request, 'You have already upvoted this comment.')
     return redirect('post_detail', post_id=comment.solution.post.id)
 
-
 def search_posts(request):
     query = request.GET.get('q', '')
     posts = Post.objects.all().order_by('-created_at')
@@ -590,7 +618,7 @@ def search_results_new_page(request):
                 'query': query
             })
 
-    return redirect('home')
+    return redirect('all_posts')
 
 
 

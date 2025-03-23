@@ -52,7 +52,7 @@
                     <!-- Left section with logo and main nav -->
                     <div class="d-flex align-items-center gap-4">
                         <!-- Logo -->
-                        <a href="{% url 'home' %}" class="text-decoration-none">
+                        <a href="{% url 'for_you' %}" class="text-decoration-none">
                             <span class="fs-3 fw-bold text-primary">W</span>
                         </a>
                         
@@ -146,9 +146,11 @@
         <!-- Sidebar -->
         <nav class="sidebar">
             <ul class="list-unstyled">
-                <li><a href="{% url 'home' %}"><i class="bi bi-house"></i> Home</a></li>
+                <li><a href="{% url 'for_you' %}"><i class="bi bi-house"></i> Home</a></li>
+                <li><a href="{% url 'all_posts'%}"><i class="bi bi-bookmark"></i>All Posts</a></li>
                 <li><a href="{% url 'saved_posts' %}"><i class="bi bi-bookmark"></i> Saved</a></li>
                 <li><a href="{% url 'my_posts'%}"><i class="bi bi-bookmark"></i> My Posts</a></li>
+
             </ul>
         </nav>
 
