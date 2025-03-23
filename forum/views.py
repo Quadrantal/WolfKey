@@ -4,7 +4,7 @@ from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from django.contrib import messages 
 from django.contrib.auth.decorators import login_required
 from django.contrib.postgres.search import SearchVector, SearchQuery, SearchRank, TrigramSimilarity
-from .models import Post, Solution, Comment, SolutionUpvote, SolutionDownvote, CommentUpvote, Tag, File, User, SavedPost, UserCourseHelp, UserCourseExperience, UserProfile, Course, Notification, UpdateAnnouncement, UserUpdateView
+from .models import Post, Solution, Comment, SolutionUpvote, SolutionDownvote, CommentUpvote, File, User, SavedPost, UserCourseHelp, UserCourseExperience, UserProfile, Course, Notification, UpdateAnnouncement, UserUpdateView
 from .forms import PostForm, CommentForm, SolutionForm, TagForm, UserProfileForm, UserCourseExperienceForm, UserCourseHelpForm, CustomUserCreationForm
 from django.http import HttpResponseForbidden, JsonResponse
 from django.db.models import F, Case, When, IntegerField 
@@ -91,8 +91,6 @@ def for_you(request):
 
 def all_posts(request):
     query = request.GET.get('q', '')
-    tag_ids = request.GET.get('tags', '').split(',')
-    tag_ids = [tag_id for tag_id in tag_ids if tag_id]
     posts = Post.objects.all().order_by('-created_at')
 
     if query:
@@ -101,8 +99,6 @@ def all_posts(request):
             rank=SearchRank(F('search_vector'), search_query) + TrigramSimilarity('title', query)
         ).filter(rank__gte=0.3).order_by('-rank')
 
-    if tag_ids:
-        posts = posts.filter(tags__id__in=tag_ids).distinct()
 
     experienced_courses, help_needed_courses = get_user_courses(request.user)
     
@@ -113,9 +109,7 @@ def all_posts(request):
 
     return render(request, 'forum/all_posts.html', {
         'posts': posts,
-        'tags': Tag.objects.all().order_by('name'),
         'query': query,
-        'selected_tags': tag_ids,
     })
 
 def selective_quote_replace(content):
@@ -582,24 +576,8 @@ def upvote_comment(request, comment_id):
         messages.warning(request, 'You have already upvoted this comment.')
     return redirect('post_detail', post_id=comment.solution.post.id)
 
-
-@login_required
-def create_tag(request):
-    if request.method == 'POST':
-        form = TagForm(request.POST)
-        if form.is_valid():
-            form.save()
-            messages.success(request, 'Tag created successfully!')
-            return redirect('all_posts')
-    else:
-        form = TagForm()
-    return render(request, 'forum/tag_form.html', {'form': form})
-
-
 def search_posts(request):
     query = request.GET.get('q', '')
-    tag_ids = request.GET.get('tags', '').split(',')
-    tag_ids = [tag_id for tag_id in tag_ids if tag_id]  # Filter out empty strings
     posts = Post.objects.all().order_by('-created_at')
 
     if query:
@@ -608,8 +586,6 @@ def search_posts(request):
             rank=SearchRank(F('search_vector'), search_query) + TrigramSimilarity('title', query)
         ).filter(rank__gte=0.3).order_by('-rank')
 
-    if tag_ids:
-        posts = posts.filter(tags__id__in=tag_ids).distinct()
 
     results = []
     for post in posts:
@@ -622,30 +598,24 @@ def search_posts(request):
             'created_at': post.created_at,
         })
 
-    return JsonResponse({'results': results, 'query': query, 'selected_tags': tag_ids})
+    return JsonResponse({'results': results, 'query': query})
 
 def search_results_new_page(request):
     # print("Enters view")
     query = request.GET.get('q', '')
-    tag_ids = request.GET.get('tags', '').split(',')
-    tag_ids = [tag_id for tag_id in tag_ids if tag_id]  # Filter out empty strings
     posts = Post.objects.all().order_by('-created_at')
 
-    if query or tag_ids:
+    if query:
         if query:
             search_query = SearchQuery(query)
             posts = posts.annotate(
                 rank=SearchRank(F('search_vector'), search_query) + TrigramSimilarity('title', query)
             ).filter(rank__gte=0.3).order_by('-rank')
 
-        if tag_ids:
-            posts = posts.filter(tags__id__in=tag_ids).distinct()
-
 
         return render(request, 'forum/search_results.html', {
                 'posts': posts,
-                'query': query,
-                'selected_tags': tag_ids
+                'query': query
             })
 
     return redirect('all_posts')
