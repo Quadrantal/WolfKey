@@ -214,7 +214,7 @@ def post_detail(request, post_id):
                 solution.delete()
                 messages.success(request, 'Solution deleted successfully!')
             except Exception as e:
-                # print(e)
+                print(e)
 
         # Handle comment creation or editing
         elif action in ['create_comment', 'edit_comment']:
