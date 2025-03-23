@@ -11,28 +11,11 @@
         {% endif %}
     </div>
 
-
-
-    <!-- Search Results -->
     <div id="search-results" class="row"></div>
 
     <div class="row" id="post-list">
         {% for post in posts %}
-            <div class="col-md-6 mb-4">
-                <div class="card">
-                    {% if post.accepted_solution %}
-                        <div class="banner">Solved</div>    
-                    {% endif%}
-                    <div class="card-body">
-                        <h4 class="card-title">{{ post.title }}</h4>
-                        <p class="card-text">{{ post.preview_text|truncatewords:30 }}</p>
-                        <a href="{% url 'post_detail' post.id %}" class="btn btn-primary">Read More</a>
-                    </div>
-                    <div class="card-footer text-muted">
-                        Posted by {{ post.author.first_name }} {{ post.author.last_name }} on {{ post.created_at|date:"F d, Y" }}
-                    </div>
-                </div>
-            </div>
+            {% include 'forum/components/post_card.html' with post=post %}
         {% empty %}
             <div class="col-12">
                 <p>No posts found.</p>

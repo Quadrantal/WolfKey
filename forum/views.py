@@ -26,6 +26,7 @@ from django.db.models import Q
 from django.utils.html import strip_tags
 from django.views.decorators.http import require_POST
 import re
+from .utils import process_post_preview, add_course_context
 
 logger = logging.getLogger(__name__)
 
@@ -44,82 +45,46 @@ def acknowledge_update(request):
     except Exception as e:
         return JsonResponse({'success': False, 'error': str(e)}, status=500)
     
-def for_you(request):
-    if not request.user.is_authenticated:
-        return redirect('login')
+def get_user_courses(user):
+    """Get user's experienced and help-needed courses"""
+    if not user.is_authenticated:
+        return [], []
         
-    # Get user's experienced and help-needed courses
     experienced_courses = Course.objects.filter(
         id__in=UserCourseExperience.objects.filter(
-            user=request.user
+            user=user
         ).values_list('course_id', flat=True)
     )
     
     help_needed_courses = Course.objects.filter(
         id__in=UserCourseHelp.objects.filter(
-            user=request.user,
+            user=user,
             active=True
         ).values_list('course_id', flat=True)
     )
+    
+    return experienced_courses, help_needed_courses
+
+def for_you(request):
+    if not request.user.is_authenticated:
+        return redirect('login')
+        
+    experienced_courses, help_needed_courses = get_user_courses(request.user)
 
     # Get posts for both types of courses
-    experienced_posts = Post.objects.filter(
-        courses__in=experienced_courses
-    ).distinct()
-    
-    help_needed_posts = Post.objects.filter(
-        courses__in=help_needed_courses
-    ).distinct()
+    posts = Post.objects.filter(
+        Q(courses__in=experienced_courses) | 
+        Q(courses__in=help_needed_courses)
+    ).distinct().order_by('-created_at')
 
-    # Combine and sort posts
-    all_posts = (experienced_posts | help_needed_posts).distinct().order_by('-created_at')
-
-    # Add context for each post to show why it's recommended
-    posts_with_context = []
-    for post in all_posts:
-        post_courses = post.courses.all()
-        context = {
-            'post': post,
-            'is_experienced': any(course in experienced_courses for course in post_courses),
-            'needs_help': any(course in help_needed_courses for course in post_courses),
-            'relevant_courses': [
-                {
-                    'name': course.name,
-                    'is_experienced': course in experienced_courses,
-                    'needs_help': course in help_needed_courses
-                }
-                for course in post_courses
-            ]
-        }
-        posts_with_context.append(context)
-
-    # Process post previews (similar to all_posts view)
-    for post_context in posts_with_context:
-        post = post_context['post']
-        if isinstance(post.content, dict) and 'blocks' in post.content:
-            paragraphs = []
-            for block in post.content['blocks']:
-                if block.get('type') == 'paragraph':
-                    text = block.get('data', {}).get('text', '')
-                    text = re.sub(r'<br\s*/?>', ' ', text)
-                    text = re.sub(r'<i\s*/?>', ' ', text)
-                    text = re.sub(r'<em\s*/?>', ' ', text)
-                    text = strip_tags(text)
-                    text = ' '.join(text.split())
-                    if text:
-                        paragraphs.append(text)
-            post.preview_text = ' '.join(paragraphs)
-        else:
-            text = str(post.content)
-            text = re.sub(r'<br\s*/?>', ' ', text)
-            text = strip_tags(text)
-            text = ' '.join(text.split())
-            post.preview_text = text
-            
-    print(posts_with_context)
+    # Process posts
+    for post in posts:
+        post.preview_text = process_post_preview(post)
+        add_course_context(post, experienced_courses, help_needed_courses)
+        
 
     return render(request, 'forum/for_you.html', {
-        'posts_with_context': posts_with_context,
+        'posts': posts,
         'experienced_courses': experienced_courses,
         'help_needed_courses': help_needed_courses,
     })
@@ -127,7 +92,7 @@ def for_you(request):
 def all_posts(request):
     query = request.GET.get('q', '')
     tag_ids = request.GET.get('tags', '').split(',')
-    tag_ids = [tag_id for tag_id in tag_ids if tag_id]  # Filter out empty strings
+    tag_ids = [tag_id for tag_id in tag_ids if tag_id]
     posts = Post.objects.all().order_by('-created_at')
 
     if query:
@@ -138,36 +103,20 @@ def all_posts(request):
 
     if tag_ids:
         posts = posts.filter(tags__id__in=tag_ids).distinct()
-        
+
+    experienced_courses, help_needed_courses = get_user_courses(request.user)
+    
+    # Process posts
     for post in posts:
-        if isinstance(post.content, dict) and 'blocks' in post.content:
-            # Combine text from paragraph blocks
-            paragraphs = []
-            for block in post.content['blocks']:
-                if block.get('type') == 'paragraph':
-                    text = block.get('data', {}).get('text', '')
-                    # Replace <br> tags with spaces
-                    text = re.sub(r'<br\s*/?>', ' ', text)
-                    text = re.sub(r'<i\s*/?>', ' ', text)
-                    text = re.sub(r'<em\s*/?>', ' ', text)
-                    # Strip remaining HTML tags
-                    text = strip_tags(text)
-                    # Remove extra whitespace
-                    text = ' '.join(text.split())
-                    if text:
-                        paragraphs.append(text)
-            post.preview_text = ' '.join(paragraphs)
-        else:
-            # Fallback for non-JSON content
-            text = str(post.content)
-            text = re.sub(r'<br\s*/?>', ' ', text)
-            text = strip_tags(text)
-            text = ' '.join(text.split())
-            post.preview_text = text
+        post.preview_text = process_post_preview(post)
+        add_course_context(post, experienced_courses, help_needed_courses)
 
-    tags = Tag.objects.all().order_by('name')  # Sort tags alphabetically
-
-    return render(request, 'forum/all_posts.html', {'posts': posts, 'tags': tags, 'query': query, 'selected_tags': tag_ids})
+    return render(request, 'forum/all_posts.html', {
+        'posts': posts,
+        'tags': Tag.objects.all().order_by('name'),
+        'query': query,
+        'selected_tags': tag_ids,
+    })
 
 def selective_quote_replace(content):
     """Helper function to selectively replace quotes while preserving inlineMath"""
@@ -271,7 +220,7 @@ def post_detail(request, post_id):
                 solution.delete()
                 messages.success(request, 'Solution deleted successfully!')
             except Exception as e:
-                print(e)
+                # print(e)
 
         # Handle comment creation or editing
         elif action in ['create_comment', 'edit_comment']:
