@@ -131,7 +131,7 @@ def selective_quote_replace(content):
         .replace(';">', ';\\">')
         .replace('" >', '\\">')
         .replace('"/>', '\\"/>')
-        .replace('True', 'true')     # JavaScript booleans
+        .replace('True', 'true')     
         .replace('False', 'false')
         .replace('None', 'null')
         .replace('\n', '\\n')
@@ -575,30 +575,6 @@ def upvote_comment(request, comment_id):
     else:
         messages.warning(request, 'You have already upvoted this comment.')
     return redirect('post_detail', post_id=comment.solution.post.id)
-
-def search_posts(request):
-    query = request.GET.get('q', '')
-    posts = Post.objects.all().order_by('-created_at')
-
-    if query:
-        search_query = SearchQuery(query)
-        posts = posts.annotate(
-            rank=SearchRank(F('search_vector'), search_query) + TrigramSimilarity('title', query)
-        ).filter(rank__gte=0.3).order_by('-rank')
-
-
-    results = []
-    for post in posts:
-        results.append({
-            'id': post.id,
-            'title': post.title,
-            'content': post.content[:100],  # Truncate content for preview
-            'url': post.get_absolute_url(),
-            'author': post.author.username,
-            'created_at': post.created_at,
-        })
-
-    return JsonResponse({'results': results, 'query': query})
 
 def search_results_new_page(request):
     # print("Enters view")

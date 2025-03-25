@@ -75,13 +75,12 @@
         
                     <!-- Center section with search -->
                     <div class="flex-grow-1 mx-4" style="max-width: 36rem;">
-                        <form method="GET" action="" class="position-relative">
+                        <form method="GET" action="{% url 'search_results_new_page' %}" class="position-relative">
                             <input type="text" 
                                 name="q" 
                                 class="form-control" 
                                 placeholder="Search questions..." 
-                                value="{{ query }}"
-                                onkeypress="if(event.keyCode==13) { this.form.submit(); return false; }">
+                                value="{{ query }}">
                             <button type="submit" class="btn position-absolute end-0 top-50 translate-middle-y pe-3 text-secondary">
                                 <i class="bi bi-search"></i>
                             </button>
