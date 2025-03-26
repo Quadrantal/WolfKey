@@ -583,6 +583,15 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     validateCurrentCourses(currentCoursesSelector.getSelectedCourses());
     validateExperiencedCourses(experiencedCoursesSelector.getSelectedCourses());
+
+    form.addEventListener('keypress', function(event) {
+        if (event.key === 'Enter') {
+            event.preventDefault();
+            console.log("Enters");
+            return false;
+        }
+    });
 });
+
 </script>
 {% endblock %}
