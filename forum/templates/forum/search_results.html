@@ -10,11 +10,7 @@
         {% if posts %}
             <ul class="list-group">
                 {% for post in posts %}
-                    <li class="list-group-item">
-                        <h5>{{ post.title }}</h5>
-                        <p class="card-text">{{ post.content }}</p>
-                        <a href="{% url 'post_detail' post.id %}" class="btn btn-primary">View Post</a>
-                    </li>   
+                    {% include 'forum/components/post_card.html' with post=post %}
                 {% endfor %}
             </ul>
         {% else %}

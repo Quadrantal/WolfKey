@@ -4,7 +4,7 @@ from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from django.contrib import messages 
 from django.contrib.auth.decorators import login_required
 from django.contrib.postgres.search import SearchVector, SearchQuery, SearchRank, TrigramSimilarity
-from .models import Post, Solution, Comment, SolutionUpvote, SolutionDownvote, CommentUpvote, Tag, File, User, SavedPost, UserCourseHelp, UserCourseExperience, UserProfile, Course, Notification, UpdateAnnouncement, UserUpdateView
+from .models import Post, Solution, Comment, SolutionUpvote, SolutionDownvote, CommentUpvote, File, User, SavedPost, UserCourseHelp, UserCourseExperience, UserProfile, Course, Notification, UpdateAnnouncement, UserUpdateView
 from .forms import PostForm, CommentForm, SolutionForm, TagForm, UserProfileForm, UserCourseExperienceForm, UserCourseHelpForm, CustomUserCreationForm
 from django.http import HttpResponseForbidden, JsonResponse
 from django.db.models import F, Case, When, IntegerField 
@@ -26,6 +26,7 @@ from django.db.models import Q
 from django.utils.html import strip_tags
 from django.views.decorators.http import require_POST
 import re
+from .utils import process_post_preview, add_course_context
 
 logger = logging.getLogger(__name__)
 
@@ -43,11 +44,53 @@ def acknowledge_update(request):
         return JsonResponse({'success': False, 'error': 'Update not found'}, status=404)
     except Exception as e:
         return JsonResponse({'success': False, 'error': str(e)}, status=500)
+    
+def get_user_courses(user):
+    """Get user's experienced and help-needed courses"""
+    if not user.is_authenticated:
+        return [], []
+        
+    experienced_courses = Course.objects.filter(
+        id__in=UserCourseExperience.objects.filter(
+            user=user
+        ).values_list('course_id', flat=True)
+    )
+    
+    help_needed_courses = Course.objects.filter(
+        id__in=UserCourseHelp.objects.filter(
+            user=user,
+            active=True
+        ).values_list('course_id', flat=True)
+    )
+    
+    return experienced_courses, help_needed_courses
 
-def home(request):
+def for_you(request):
+    if not request.user.is_authenticated:
+        return redirect('login')
+        
+    experienced_courses, help_needed_courses = get_user_courses(request.user)
+
+    # Get posts for both types of courses
+    posts = Post.objects.filter(
+        Q(courses__in=experienced_courses) | 
+        Q(courses__in=help_needed_courses)
+    ).distinct().order_by('-created_at')
+
+    # Process posts
+    for post in posts:
+        post.preview_text = process_post_preview(post)
+        add_course_context(post, experienced_courses, help_needed_courses)
+        
+
+    return render(request, 'forum/for_you.html', {
+        'posts': posts,
+        'experienced_courses': experienced_courses,
+        'help_needed_courses': help_needed_courses,
+    })
+
+def all_posts(request):
     query = request.GET.get('q', '')
-    tag_ids = request.GET.get('tags', '').split(',')
-    tag_ids = [tag_id for tag_id in tag_ids if tag_id]  # Filter out empty strings
     posts = Post.objects.all().order_by('-created_at')
 
     if query:
@@ -56,38 +99,18 @@ def home(request):
             rank=SearchRank(F('search_vector'), search_query) + TrigramSimilarity('title', query)
         ).filter(rank__gte=0.3).order_by('-rank')
 
-    if tag_ids:
-        posts = posts.filter(tags__id__in=tag_ids).distinct()
-        
+
+    experienced_courses, help_needed_courses = get_user_courses(request.user)
+    
+    # Process posts
     for post in posts:
-        if isinstance(post.content, dict) and 'blocks' in post.content:
-            # Combine text from paragraph blocks
-            paragraphs = []
-            for block in post.content['blocks']:
-                if block.get('type') == 'paragraph':
-                    text = block.get('data', {}).get('text', '')
-                    # Replace <br> tags with spaces
-                    text = re.sub(r'<br\s*/?>', ' ', text)
-                    text = re.sub(r'<i\s*/?>', ' ', text)
-                    text = re.sub(r'<em\s*/?>', ' ', text)
-                    # Strip remaining HTML tags
-                    text = strip_tags(text)
-                    # Remove extra whitespace
-                    text = ' '.join(text.split())
-                    if text:
-                        paragraphs.append(text)
-            post.preview_text = ' '.join(paragraphs)
-        else:
-            # Fallback for non-JSON content
-            text = str(post.content)
-            text = re.sub(r'<br\s*/?>', ' ', text)
-            text = strip_tags(text)
-            text = ' '.join(text.split())
-            post.preview_text = text
+        post.preview_text = process_post_preview(post)
+        add_course_context(post, experienced_courses, help_needed_courses)
 
-    tags = Tag.objects.all().order_by('name')  # Sort tags alphabetically
-
-    return render(request, 'forum/home.html', {'posts': posts, 'tags': tags, 'query': query, 'selected_tags': tag_ids})
+    return render(request, 'forum/all_posts.html', {
+        'posts': posts,
+        'query': query,
+    })
 
 def selective_quote_replace(content):
     """Helper function to selectively replace quotes while preserving inlineMath"""
@@ -108,7 +131,7 @@ def selective_quote_replace(content):
         .replace(';">', ';\\">')
         .replace('" >', '\\">')
         .replace('"/>', '\\"/>')
-        .replace('True', 'true')     # JavaScript booleans
+        .replace('True', 'true')     
         .replace('False', 'false')
         .replace('None', 'null')
         .replace('\n', '\\n')
@@ -147,7 +170,7 @@ def post_detail(request, post_id):
 
         action = request.POST.get('action')
         
-        if has_solution and action != 'delete_solution':
+        if has_solution and action != 'delete_solution' and action != 'edit_solution':
             return redirect('post_detail', post_id=post.id)
         
         # print(action)
@@ -267,7 +290,7 @@ def post_detail(request, post_id):
         'content_json': content_json,
         'processed_solutions_json': json.dumps(processed_solutions),
         'courses': post.courses.all(),
-        'has_solution': has_solution, 
+        'has_solution_from_user': has_solution, 
     }
 
     # print(post.courses.all())
@@ -386,7 +409,7 @@ def register(request):
             
             login(request, user)
             messages.success(request, 'Welcome to Student Forum!')
-            return redirect('home')
+            return redirect('all_posts')
         else:
             print(form.errors)
             return render(request, 'forum/register.html', {
@@ -410,7 +433,7 @@ def login_view(request):
             user = form.get_user()
             login(request, user)
             messages.success(request, 'You are now logged in!')
-            return redirect('home')
+            return redirect('for_you')
         else:
             school_email = request.POST.get('username')  # AuthenticationForm uses 'username' field
             try:
@@ -426,7 +449,7 @@ def login_view(request):
 def logout_view(request):
     logout(request)
     messages.success(request, 'You have been logged out.')
-    return redirect('home')
+    return redirect('all_posts')
 
 @login_required
 def create_post(request):
@@ -506,7 +529,7 @@ def delete_post(request, post_id):
     if request.method == 'POST':
         post.delete()
         messages.success(request, 'Post deleted successfully!')
-        return redirect('home')
+        return redirect('all_posts')
         
     return render(request, 'forum/delete_confirm.html', {'post': post})
 
@@ -553,73 +576,25 @@ def upvote_comment(request, comment_id):
         messages.warning(request, 'You have already upvoted this comment.')
     return redirect('post_detail', post_id=comment.solution.post.id)
 
-
-@login_required
-def create_tag(request):
-    if request.method == 'POST':
-        form = TagForm(request.POST)
-        if form.is_valid():
-            form.save()
-            messages.success(request, 'Tag created successfully!')
-            return redirect('home')
-    else:
-        form = TagForm()
-    return render(request, 'forum/tag_form.html', {'form': form})
-
-
-def search_posts(request):
-    query = request.GET.get('q', '')
-    tag_ids = request.GET.get('tags', '').split(',')
-    tag_ids = [tag_id for tag_id in tag_ids if tag_id]  # Filter out empty strings
-    posts = Post.objects.all().order_by('-created_at')
-
-    if query:
-        search_query = SearchQuery(query)
-        posts = posts.annotate(
-            rank=SearchRank(F('search_vector'), search_query) + TrigramSimilarity('title', query)
-        ).filter(rank__gte=0.3).order_by('-rank')
-
-    if tag_ids:
-        posts = posts.filter(tags__id__in=tag_ids).distinct()
-
-    results = []
-    for post in posts:
-        results.append({
-            'id': post.id,
-            'title': post.title,
-            'content': post.content[:100],  # Truncate content for preview
-            'url': post.get_absolute_url(),
-            'author': post.author.username,
-            'created_at': post.created_at,
-        })
-
-    return JsonResponse({'results': results, 'query': query, 'selected_tags': tag_ids})
-
 def search_results_new_page(request):
     # print("Enters view")
     query = request.GET.get('q', '')
-    tag_ids = request.GET.get('tags', '').split(',')
-    tag_ids = [tag_id for tag_id in tag_ids if tag_id]  # Filter out empty strings
     posts = Post.objects.all().order_by('-created_at')
 
-    if query or tag_ids:
+    if query:
         if query:
             search_query = SearchQuery(query)
             posts = posts.annotate(
                 rank=SearchRank(F('search_vector'), search_query) + TrigramSimilarity('title', query)
             ).filter(rank__gte=0.3).order_by('-rank')
 
-        if tag_ids:
-            posts = posts.filter(tags__id__in=tag_ids).distinct()
-
 
         return render(request, 'forum/search_results.html', {
                 'posts': posts,
-                'query': query,
-                'selected_tags': tag_ids
+                'query': query
             })
 
-    return redirect('home')
+    return redirect('all_posts')
 
 
 

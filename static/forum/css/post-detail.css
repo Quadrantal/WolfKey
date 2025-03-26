@@ -169,3 +169,11 @@
     .vote-button:focus {
         outline: none;
     }
+
+    .math-field {
+        margin: 0px;
+    }
+
+    .inline-math {
+        margin: 0px !important;
+    }

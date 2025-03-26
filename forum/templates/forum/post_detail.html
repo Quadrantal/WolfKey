@@ -40,12 +40,6 @@
             <div id="editorjs"></div>
         </div>
 
-        <!-- Tags -->
-        <div class="mt-4">
-            {% for tag in post.tags.all %}
-            <a href="#" class="tag">{{ tag.name }}</a>
-            {% endfor %}
-        </div>
 
         <!-- Courses -->
         {% if post.courses.all %}
@@ -271,7 +265,7 @@
 </div>
 
 <!-- Add Solution Form -->
-{% if user.is_authenticated %}
+{% if user.is_authenticated and not has_solution_from_user%}
 <div id="solution-form-container" class="card mt-4">
     <div class="card-body">
         <h4>Your Solution</h4>
@@ -285,7 +279,7 @@
     </div>
 </div>
 {% else %}
-<div class="alert alert-info mt-4">
+<div class="alert alert-info mt-4" style ="max-width: 920px; margin:auto">
     <i class="fas fa-info-circle"></i> You have already provided a solution for this question. You can edit your
     existing solution if needed.
 </div>

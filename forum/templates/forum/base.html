@@ -52,7 +52,7 @@
                     <!-- Left section with logo and main nav -->
                     <div class="d-flex align-items-center gap-4">
                         <!-- Logo -->
-                        <a href="{% url 'home' %}" class="text-decoration-none">
+                        <a href="{% url 'for_you' %}" class="text-decoration-none">
                             <span class="fs-3 fw-bold text-primary">W</span>
                         </a>
                         
@@ -75,13 +75,12 @@
         
                     <!-- Center section with search -->
                     <div class="flex-grow-1 mx-4" style="max-width: 36rem;">
-                        <form method="GET" action="" class="position-relative">
+                        <form method="GET" action="{% url 'search_results_new_page' %}" class="position-relative">
                             <input type="text" 
                                 name="q" 
                                 class="form-control" 
                                 placeholder="Search questions..." 
-                                value="{{ query }}"
-                                onkeypress="if(event.keyCode==13) { this.form.submit(); return false; }">
+                                value="{{ query }}">
                             <button type="submit" class="btn position-absolute end-0 top-50 translate-middle-y pe-3 text-secondary">
                                 <i class="bi bi-search"></i>
                             </button>
@@ -146,9 +145,11 @@
         <!-- Sidebar -->
         <nav class="sidebar">
             <ul class="list-unstyled">
-                <li><a href="{% url 'home' %}"><i class="bi bi-house"></i> Home</a></li>
+                <li><a href="{% url 'for_you' %}"><i class="bi bi-house"></i> Home</a></li>
+                <li><a href="{% url 'all_posts'%}"><i class="bi bi-bookmark"></i>All Posts</a></li>
                 <li><a href="{% url 'saved_posts' %}"><i class="bi bi-bookmark"></i> Saved</a></li>
                 <li><a href="{% url 'my_posts'%}"><i class="bi bi-bookmark"></i> My Posts</a></li>
+
             </ul>
         </nav>
 

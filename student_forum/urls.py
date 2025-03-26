@@ -23,7 +23,8 @@ from django.conf.urls.static import static
 from django.urls import re_path, include
 
 urlpatterns = [
-    path('', views.home, name='home'),
+    path('', views.for_you, name='for_you'),
+    path('all-posts', views.all_posts, name='all_posts'),
     path('post/<int:post_id>/', views.post_detail, name='post_detail'),
     path('post/<int:post_id>/edit/', views.edit_post, name='edit_post'),
     path('post/<int:post_id>/delete/', views.delete_post, name='delete_post'),
@@ -31,11 +32,10 @@ urlpatterns = [
     path('register/', views.register, name='register'),
     path('login/', views.login_view, name='login'),
     path('logout/', views.logout_view, name='logout'),
-    path('tag/create/', views.create_tag, name='create_tag'),
     path('solution/<int:solution_id>/upvote/', views.upvote_solution, name='upvote_solution'),
     path('solution/<int:solution_id>/downvote/', views.downvote_solution, name='downvote_solution'),
     path('comment/<int:comment_id>/upvote/', views.upvote_comment, name='upvote_comment'),
-    path('search/', views.search_posts, name='search_posts'),
+    path('search/', views.search_results_new_page, name='search_posts'),
     path('search-results/', views.search_results_new_page, name='search_results_new_page'),
     path('admin/', admin.site.urls),
     path('upload-image/', views.upload_image, name='upload_image'),
