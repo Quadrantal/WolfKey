@@ -170,7 +170,7 @@ def post_detail(request, post_id):
 
         action = request.POST.get('action')
         
-        if has_solution and action != 'delete_solution':
+        if has_solution and action != 'delete_solution' and action != 'edit_solution':
             return redirect('post_detail', post_id=post.id)
         
         # print(action)
@@ -290,7 +290,7 @@ def post_detail(request, post_id):
         'content_json': content_json,
         'processed_solutions_json': json.dumps(processed_solutions),
         'courses': post.courses.all(),
-        'has_solution': has_solution, 
+        'has_solution_from_user': has_solution, 
     }
 
     # print(post.courses.all())
