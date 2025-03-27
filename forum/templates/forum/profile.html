@@ -73,8 +73,8 @@
             </div>
 
             <!-- Course Experience Section -->
-            <div class="card mb-4">
-                <div class="card-header d-flex justify-content-between align-items-center">
+            <div class="card mb-4 {% if not experienced_courses %}highlighted-card{% endif %}">
+                <div class="card-header d-flex justify-content-between align-items-center z-10">
                     <h5 class="mb-0">Experienced In</h5>
                     <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#addExperienceModal">
                         <i class="bi bi-plus"></i> Add Course
@@ -93,14 +93,14 @@
                             </form>
                         </div>
                         {% empty %}
-                        <p class="text-muted">No courses added yet.</p>
+                        <p><b>Please add some courses to improve your experience.</b></p>
                         {% endfor %}
                     </div>
                 </div>
             </div>
 
             <!-- Help Needed Section -->
-            <div class="card mb-4">
+            <div class="card mb-4 {% if not help_needed_courses %}highlighted-card{% endif %}" >
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <h5 class="mb-0">Need Help In</h5>
                     <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#addHelpModal">
@@ -120,7 +120,7 @@
                             </form>
                         </div>
                         {% empty %}
-                        <p class="text-muted">No courses added yet.</p>
+                        <p><b>Please add some courses to improve your experience.</b></p>
                         {% endfor %}
                     </div>
                 </div>

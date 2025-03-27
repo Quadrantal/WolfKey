@@ -38,7 +38,6 @@
     height: 40px;
     border-radius: 50%;
     background: white;
-    border: 2px solid #e0e0e0;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -46,7 +45,7 @@
     font-size: 18px;
     margin-bottom: 10px;
     transition: all 0.3s ease;
-    color: #888;
+    color: #6a6969;
 }
 
 .step-circle.active {
@@ -57,7 +56,7 @@
 
 .step-label {
     font-size: 14px;
-    color: #888;
+    color: #6a6969;
     font-weight: 500;
 }
 

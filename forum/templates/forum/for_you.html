@@ -10,10 +10,6 @@
     </div>
 
 
-    {% if not posts %}
-        <p>Add more interested courses in your profile to see more posts tailored towards you.</p>
-    {% endif %}
-
     <div class="row" id="post-list">
         {% for post in posts %}
             <div class="col-12 col-sm-12 col-md-6 mb-4">
@@ -22,4 +18,6 @@
 
         {% endfor %}
     </div>
+
+    <p>Add more interested courses <a href="{% url 'profile' user.username%}">here</a> in your profile to see more posts tailored towards you.</p>
 {% endblock %}

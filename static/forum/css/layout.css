@@ -106,13 +106,12 @@
 
 /* Navbar Styles */
 nav {
-    background-color: rgba(255, 255, 255, 0.6) !important; /* semi-transparent white */
+    background-color: rgba(255, 255, 255, 0.6) !important;
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px); /* for Safari */
     position: sticky;
     top: 0;
-    z-index: 1000;
-    border-bottom: 1px solid rgba(222, 226, 230, 0.7) !important; /* semi-transparent border */
+    z-index: 900;
     padding-top: .5rem !important;
     padding-bottom: .5rem !important;
 }
@@ -162,3 +161,63 @@ nav {
     margin: 0.5rem 0; /* Spacing above and below */
   }
   
+  /* General Toast Styling */
+.custom-toast {
+    min-width: 300px;
+    color: white;
+    border-radius: 8px;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.2);
+    border: none;
+}
+.z-901 {
+    z-index: 901 !important;
+}
+/* Success Toast */
+.custom-toast-success {
+    background-color: #28a746b9; /* Bootstrap's success green */
+}
+
+/* Failure/Error Toast */
+.custom-toast-error {
+    background-color: #dc3545b9; /* Bootstrap's danger red */
+}
+
+/* Warning Toast */
+.custom-toast-warning {
+    background-color: #ffc107b9; /* Bootstrap's warning yellow */
+}
+
+/* Info Toast */
+.custom-toast-info {
+    background-color: #17a2b8b9; /* Bootstrap's info blue */
+}
+
+@keyframes toastSlideIn {
+    0% {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    100% {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+@keyframes toastFadeOut {
+    0% {
+        opacity: 1;
+    }
+    100% {
+        opacity: 0;
+    }
+}
+
+.toast {
+    animation: toastSlideIn 0.5s ease-out forwards;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px); /* for Safari */
+}
+
+.toast.fade-out {
+    animation: toastFadeOut 0.5s ease-out forwards;
+}
