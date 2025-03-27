@@ -6,17 +6,17 @@
 
     {% load static %}
     <link rel="stylesheet" href="{% static 'forum/css/editorjs.css' %}">
-    <link rel="stylesheet" href="{% static 'forum/css/post-form.css' %}">
     <link rel="stylesheet" href="{% static 'forum/css/course-selector.css' %}"> 
+    <link rel="stylesheet" href="{% static 'forum/css/post-detail.css' %}"> 
+
 {% endblock %}
 
 {% block content %}
 <div class="row justify-content-center">
-    <div class="col-md-8">
         <div class="card">
             <div class="card-body">
                 <h2 class="card-title">{{ action }} Post</h2>
-                <form method="post" enctype="multipart/form-data">
+                <form id= "postCreationForm" method="post" action="{% url 'create_post' %}" enctype="multipart/form-data">
                     {% csrf_token %}
                     
                     <h3>Title:</h3>
@@ -36,7 +36,6 @@
                 </form>
             </div>
         </div>
-    </div>
 </div>
 
 
@@ -60,10 +59,10 @@
 
 <script>
 document.addEventListener("DOMContentLoaded", function () {
-    const form = document.querySelector('form');
+    const form = document.getElementById("postCreationForm");
     const submitButton = document.getElementById('submitPostButton');
     console.log(submitButton);
-    let selectedCourses = []; // Move this here to share between all functions
+    let selectedCourses = []; 
     
     // Prevent enter key from submitting form
     form.addEventListener('keydown', function(e) {

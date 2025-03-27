@@ -7,22 +7,19 @@
     <div class="d-flex justify-content-between align-items-center mb-4">
 
         <h1>Welcome back {{user.first_name}}!</h1>
-
-        {% if user.is_authenticated %}
-            <a href="{% url 'create_post' %}" class="btn btn-primary">Create Post</a>
-        {% endif %}
     </div>
 
 
     {% if not posts %}
-        <div class="alert alert-info">
-            No personalized posts found. Try adding more courses to your profile!
-        </div>
+        <p>Add more interested courses in your profile to see more posts tailored towards you.</p>
     {% endif %}
 
     <div class="row" id="post-list">
         {% for post in posts %}
-            {% include 'forum/components/post_card.html' with post=post %}
+            <div class="col-12 col-sm-12 col-md-6 mb-4">
+                {% include 'forum/components/post_card.html' with post=post %}
+            </div>
+
         {% endfor %}
     </div>
 {% endblock %}

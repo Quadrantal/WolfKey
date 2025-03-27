@@ -5,19 +5,19 @@
     <title>Wolfkey</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
-
+    
     <!-- Bootstrap-->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"></script>
-
+    
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     {% load static %}
-    <link rel="stylesheet" href="{% static 'forum/css/styles.css' %}">
+    <link rel="icon" type="image/x-icon" href="{% static 'forum/images/WolfkeyLogo.ico' %}">
+    <link rel="stylesheet" href="{% static 'forum/css/base.css' %}">
+    <link rel="stylesheet" href="{% static 'forum/css/layout.css' %}">
     <link rel="stylesheet" href="{% static 'forum/css/whats-new.css' %}">
 
     {% block head %}
     {% endblock %}
-
-    
 </head>
 <body>
 
@@ -46,14 +46,14 @@
 
     {% block scripts %}{% endblock %}
 
-        <nav class="border-bottom bg-white py-2">
+        <nav>
             <div class="container-fluid px-4">
                 <div class="d-flex align-items-center justify-content-between" style="height: 3.5rem;">
                     <!-- Left section with logo and main nav -->
                     <div class="d-flex align-items-center gap-4">
                         <!-- Logo -->
                         <a href="{% url 'for_you' %}" class="text-decoration-none">
-                            <span class="fs-3 fw-bold text-primary">W</span>
+                            <img src="{% static 'forum/images/WolfkeyLogo.png' %}" alt="Wolfkey Logo" class="logo"> 
                         </a>
                         
                         <!-- Main navigation -->
@@ -75,7 +75,7 @@
         
                     <!-- Center section with search -->
                     <div class="flex-grow-1 mx-4" style="max-width: 36rem;">
-                        <form method="GET" action="{% url 'search_results_new_page' %}" class="position-relative">
+                        <form method="GET" action="{% url 'search_results_new_page' %}" class="position-relative" novalidate>
                             <input type="text" 
                                 name="q" 
                                 class="form-control" 
@@ -92,7 +92,7 @@
                         {% if user.is_authenticated %}
                             <a href="{% url 'create_post' %}" class="btn btn-primary d-flex align-items-center gap-2 rounded-3">
                                 <i class="bi bi-plus-square"></i>
-                                Add question
+                                Ask
                             </a>
                             {% if user.is_moderator or user.is_superuser %}
                                 <li class="nav-item"><a href="{% url 'admin:index' %}" class="btn btn-link text-secondary p-2" title="Admin Panel"><i class="bi bi-gear"></i></a></li>
@@ -145,11 +145,26 @@
         <!-- Sidebar -->
         <nav class="sidebar">
             <ul class="list-unstyled">
-                <li><a href="{% url 'for_you' %}"><i class="bi bi-house"></i> Home</a></li>
-                <li><a href="{% url 'all_posts'%}"><i class="bi bi-bookmark"></i>All Posts</a></li>
-                <li><a href="{% url 'saved_posts' %}"><i class="bi bi-bookmark"></i> Saved</a></li>
-                <li><a href="{% url 'my_posts'%}"><i class="bi bi-bookmark"></i> My Posts</a></li>
-
+                <li>
+                    <a href="{% url 'for_you' %}" class="sidebar-item" data-title="Home">
+                        <i class="bi bi-house"></i> <span class="sidebar-text">Home</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="{% url 'all_posts'%}" class="sidebar-item" data-title="All Posts">
+                        <i class="bi bi-journal-text"></i> <span class="sidebar-text">All Posts</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="{% url 'saved_posts' %}" class="sidebar-item" data-title="Saved">
+                        <i class="bi bi-bookmarks"></i> <span class="sidebar-text">Saved</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="{% url 'my_posts'%}" class="sidebar-item" data-title="My Posts">
+                        <i class="bi bi-pencil-square"></i> <span class="sidebar-text">My Posts</span>
+                    </a>
+                </li>
             </ul>
         </nav>
 
@@ -170,8 +185,6 @@
                 {% endblock %}
             </div>
         </div>
-
-    <!-- Floating Tag Selector -->
 
 
     <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqV</li>gRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" c""rossorigin="anonymous"></script>

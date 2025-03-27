@@ -6,16 +6,13 @@
 {% block content %}
 <div class="container mt-4">
     <h1>Search Results</h1>
-    <div class="search-results">
-        {% if posts %}
-            <ul class="list-group">
-                {% for post in posts %}
-                    {% include 'forum/components/post_card.html' with post=post %}
-                {% endfor %}
-            </ul>
-        {% else %}
-            <p>No results found for your search.</p>
-        {% endif %}
+    <div class="row" id="post-list">
+        {% for post in posts %}
+            <div class="col-12 mb-4">
+                {% include 'forum/components/post_card.html' with post=post %}
+            </div>
+
+        {% endfor %}
     </div>
 </div>
 {% endblock %}
