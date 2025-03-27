@@ -71,8 +71,6 @@
     document.addEventListener("DOMContentLoaded", function () {
         const form = document.querySelector('form');
         const submitButton = form.querySelector('button[type="submit"]');
-
-        console.log("TEST");
         
     
         form.addEventListener('keydown', function(e) {
@@ -110,7 +108,6 @@
                 return block;
             });
             
-            console.log("Processed content:", initialData);
         } catch (e) {
             console.error('Failed to parse initial content:', e);
             initialData = {
@@ -124,7 +121,6 @@
                 ]
             };
         }        
-        console.log("I: ", initialData);
 
         const editor = createEditor(
                 'editorjs', 

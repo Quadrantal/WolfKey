@@ -455,12 +455,12 @@ def logout_view(request):
 def create_post(request):
     if request.method == 'POST':
         # print("Enter 1")
-        print(f"POST data: {request.POST}")
-        print(f"FILES: {request.FILES}")
+        # print(f"POST data: {request.POST}")
+        # print(f"FILES: {request.FILES}")
         
         form = PostForm(request.POST)
         # print(f"Form data: {form.data}")
-        print(f"Form is valid: {form.is_valid()}")
+        # print(f"Form is valid: {form.is_valid()}")
         if not form.is_valid():
             print(f"Form errors: {form.errors}")
         
@@ -506,7 +506,7 @@ def create_post(request):
 def upload_image(request):
     if request.method == 'POST' and request.FILES.get('image'):
         image = request.FILES['image']
-        # Optionally, process the image before saving (e.g., resize, convert formats)
+        # Optionally, process the image before saving (e.g., resize, convert formats) TODO
         
         # Save the image in your static or media directory
         filename = default_storage.save('uploads/' + image.name, ContentFile(image.read()))
