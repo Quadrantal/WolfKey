@@ -4,7 +4,7 @@ class CourseSelector {
         this.maxCourses = options.maxCourses;
         this.onSelectionChange = options.onSelectionChange;
         this.selectedCourses = options.initialSelection || [];
-        this.form = document.querySelector('form');
+        this.form = document.getElementById("postCreationForm");
         
         this.init();
     }
