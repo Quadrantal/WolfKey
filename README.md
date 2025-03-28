@@ -108,7 +108,8 @@ By following these steps, you will have PostgreSQL installed and configured for 
 
 **Common Issues**
 - Sometimes python3 is required to correctly execute some commands. E.g. python3 -m venv venv, or python3 manage.py migrate
-- Sometimes the libraries don't install correctly from requirements.txt. You'd need to do `pip install` to install the libraries if that happens until you no longer have errors. 
+- Sometimes the libraries don't install correctly from requirements.txt. You'd need to do `pip install` to install the libraries if that happens until you no longer have errors.
+- Sometimes static files (JS/CSS) don’t show up when DEBUG=False. Run `python manage.py collectstatic` to fix that.
 
 
 ## Database
