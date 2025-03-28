@@ -16,55 +16,107 @@ Including another URLconf
 """
 
 from django.urls import path
-from forum import views
 from django.contrib import admin
 from django.conf import settings
 from django.conf.urls.static import static
 from django.urls import re_path, include
+from forum.views.auth_views import register, login_view, logout_view
+from forum.views.post_views import (
+    post_detail, 
+    edit_post, 
+    delete_post, 
+    create_post
+)
+from forum.views.search_views import (
+    for_you, 
+    all_posts,
+    my_posts
+)
+from forum.views.solution_views import (
+    upvote_solution, 
+    downvote_solution,
+    accept_solution
+)
+from forum.views.comments_views import upvote_comment
+from forum.views.search_views import search_results_new_page
+from forum.views.profile_views import (
+    add_experience,
+    remove_experience,
+    add_help_request,
+    remove_help_request,
+    edit_profile,
+    my_profile,
+    profile_view
+)
+from forum.views.course_views import (
+    course_search
+)
+from forum.views.save_posts_views import (
+    saved_posts,
+    save_post,
+    unsave_post,
+)
+from forum.views.notification_views import (
+    all_notifications,
+    mark_notification_read
+)
+from forum.views.updates_views import acknowledge_update
+from forum.views.utils import upload_image
 
 urlpatterns = [
-    path('', views.for_you, name='for_you'),
-    path('all-posts', views.all_posts, name='all_posts'),
-    path('post/<int:post_id>/', views.post_detail, name='post_detail'),
-    path('post/<int:post_id>/edit/', views.edit_post, name='edit_post'),
-    path('post/<int:post_id>/delete/', views.delete_post, name='delete_post'),
-    path('post/create/', views.create_post, name='create_post'),
-    path('register/', views.register, name='register'),
-    path('login/', views.login_view, name='login'),
-    path('logout/', views.logout_view, name='logout'),
-    path('solution/<int:solution_id>/upvote/', views.upvote_solution, name='upvote_solution'),
-    path('solution/<int:solution_id>/downvote/', views.downvote_solution, name='downvote_solution'),
-    path('comment/<int:comment_id>/upvote/', views.upvote_comment, name='upvote_comment'),
-    path('search/', views.search_results_new_page, name='search_posts'),
-    path('search-results/', views.search_results_new_page, name='search_results_new_page'),
-    path('admin/', admin.site.urls),
-    path('upload-image/', views.upload_image, name='upload_image'),
+    # Post related URLs
+    path('', for_you, name='for_you'),
+    path('all-posts/', all_posts, name='all_posts'),
+    path('post/<int:post_id>/', post_detail, name='post_detail'),
+    path('post/<int:post_id>/edit/', edit_post, name='edit_post'),
+    path('post/<int:post_id>/delete/', delete_post, name='delete_post'),
+    path('post/create/', create_post, name='create_post'),
+    
+    # Auth related URLs
+    path('register/', register, name='register'),
+    path('login/', login_view, name='login'),
+    path('logout/', logout_view, name='logout'),
+    
+    # Voting URLs
+    path('solution/<int:solution_id>/upvote/', upvote_solution, name='upvote_solution'),
+    path('solution/<int:solution_id>/downvote/', downvote_solution, name='downvote_solution'),
+    path('solution/<int:solution_id>/accept/', accept_solution, name='accept_solution'),
+    path('comment/<int:comment_id>/upvote/', upvote_comment, name='upvote_comment'),
+    
+    # Search URLs
+    path('search/', search_results_new_page, name='search_posts'),
+    path('search-results/', search_results_new_page, name='search_results_new_page'),
+    
+    # Media upload URL
+    path('upload-image/', upload_image, name='upload_image'),
     
     # Profile URLs
-    path('profile/edit/', views.edit_profile, name='edit_profile'),
-    path('my-profile/', views.my_profile, name='my_profile'),
-    path('profile/<str:username>/', views.profile_view, name='profile'),
+    path('profile/edit/', edit_profile, name='edit_profile'),
+    path('my-profile/', my_profile, name='my_profile'),
+    path('profile/<str:username>/', profile_view, name='profile'),
     
     # Course management URLs
-    path('courses/experience/add/', views.add_experience, name='add_experience'),
-    path('courses/experience/remove/<int:experience_id>/', views.remove_experience, name='remove_experience'),
-    path('courses/help/add/', views.add_help_request, name='add_help_request'),
-    path('courses/help/remove/<int:help_id>/', views.remove_help_request, name='remove_help_request'),
+    path('courses/experience/add/', add_experience, name='add_experience'),
+    path('courses/experience/remove/<int:experience_id>/', remove_experience, name='remove_experience'),
+    path('courses/help/add/', add_help_request, name='add_help_request'),
+    path('courses/help/remove/<int:help_id>/', remove_help_request, name='remove_help_request'),
+    path('api/courses/', course_search, name='course-search'),
     
-    # Other profile-related URLs
-    path('saved-posts/', views.saved_posts, name='saved_posts'),
-    path('my-posts/', views.my_posts, name='my_posts'),
-    path('save-post/<int:post_id>/', views.save_post, name='save_post'),
-    path('unsave-post/<int:post_id>/', views.unsave_post, name='unsave_post'),
+    # Saved posts URLs
+    path('saved-posts/', saved_posts, name='saved_posts'),
+    path('my-posts/', my_posts, name='my_posts'),
+    path('save-post/<int:post_id>/', save_post, name='save_post'),
+    path('unsave-post/<int:post_id>/', unsave_post, name='unsave_post'),
 
-    path('api/courses/', views.course_search, name='course-search'),
-
-    path('notifications/', views.all_notifications, name='all_notifications'),
-    path('notifications/<int:notification_id>/read/', views.mark_notification_read, name='mark_notification_read'),
+    # API URLs
+    path('api/acknowledge-update/', acknowledge_update, name='acknowledge_update'),
     
-    path('api/acknowledge-update/', views.acknowledge_update, name='acknowledge_update'),
+    # Notification URLs
+    path('notifications/', all_notifications, name='all_notifications'),
+    path('notifications/<int:notification_id>/read/', mark_notification_read, name='mark_notification_read'),
     
-    path('solution/<int:solution_id>/accept/', views.accept_solution, name='accept_solution'),
+    # Admin URL
+    path('admin/', admin.site.urls),
 ]
 
 if settings.DEBUG:
