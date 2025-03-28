@@ -33,7 +33,7 @@ This is a Django-based forum application where users can create posts, add solut
     ```sh
     Mac: brew install postgresql
     Windows: go to <https://www.postgresql.org/download/windows/> and download the official installer
-    Windows (Simpler option): go to <https://github.com/garethflowers/postgresql-portable/releases/tag/v10.4.1> and run the .exe in the .zip
+    
     
     ```
 
