@@ -40,7 +40,6 @@ from forum.views.solution_views import (
     downvote_solution,
     accept_solution
 )
-from forum.views.comments_views import upvote_comment
 from forum.views.search_views import search_results_new_page
 from forum.views.profile_views import (
     add_experience,
@@ -90,7 +89,6 @@ urlpatterns = [
     path('solution/<int:solution_id>/upvote/', upvote_solution, name='upvote_solution'),
     path('solution/<int:solution_id>/downvote/', downvote_solution, name='downvote_solution'),
     path('solution/<int:solution_id>/accept/', accept_solution, name='accept_solution'),
-    path('comment/<int:comment_id>/upvote/', upvote_comment, name='upvote_comment'),
     
     # Search URLs
     path('search/', search_results_new_page, name='search_posts'),

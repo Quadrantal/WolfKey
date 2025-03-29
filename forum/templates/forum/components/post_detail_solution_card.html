@@ -1,0 +1,88 @@
+{% load custom_filters %}
+
+
+<div class="solution-container {% if solution == accepted_solution %}accepted-solution{% endif %}" data-solution-id="{{ solution.id }}">
+    <!-- Solution Vote Cell -->
+    <div class="vote-cell">
+        <form method="post" action="{% url 'upvote_solution' solution.id %}" class="d-inline">
+            {% csrf_token %}
+            <button type="submit" class="vote-button {% if solution|has_upvoted:user %}voted-up{% endif %}">
+                <svg width="36" height="36" viewBox="0 0 36 36">
+                    <path d="M2 26h32L18 10 2 26z"></path>
+                </svg>
+            </button>
+            <input type="hidden" name="solution_id" value="{{ solution.id }}">
+            <input type="hidden" name="action" value="upvote">
+        </form>
+        
+        <div class="vote-count">{{ solution|vote_difference }}</div>
+        
+        <form method="post" action="{% url 'downvote_solution' solution.id %}" class="d-inline">
+            {% csrf_token %}
+            <button type="submit" class="vote-button {% if solution|has_downvoted:user %}voted-down{% endif %}">
+                <svg width="36" height="36" viewBox="0 0 36 36">
+                    <path d="M2 10h32L18 26 2 10z"></path>
+                </svg>
+            </button>
+            <input type="hidden" name="solution_id" value="{{ solution.id }}">
+            <input type="hidden" name="action" value="downvote">
+        </form>
+
+        {% if user == post.author %}
+        <form method="post" action="{% url 'accept_solution' solution.id %}" class="d-inline">
+            {% csrf_token %}
+            <button type="submit" class="{% if solution == accepted_solution %}accept-button-accepted{% else %}accept-button-unaccepted{% endif %}" 
+                    title="{% if solution == accepted_solution %}Unaccept this answer{% else %}Accept this answer{% endif %}">
+                <svg aria-hidden="true" class="m0 svg-icon iconCheckmarkLg" width="36" height="36" viewBox="0 0 36 36">
+                    <path d="m6 14 8 8L30 6v8L14 30l-8-8z"></path>
+                </svg>
+            </button>
+        </form>
+        {% endif %}
+    </div>
+
+    <!-- Solution Content -->
+    <div class="post-content-cell">
+        <div id="editorjs-solution-{{ solution.id }}"></div>
+
+        <!-- Solution Author -->
+        <div class="author-info mt-3">
+            <div class="author-avatar"></div>
+            <div>
+                <div>{{ solution.author.get_full_name }}</div>
+                <div class="text-muted">Answered {{ solution.created_at|date:"M d, Y" }}</div>
+            </div>
+        </div>
+
+        <!-- Solution Actions -->
+        {% if user.is_authenticated %}
+        <div class="solution-actions mt-3" data-solution-id="{{ solution.id }}">
+            {% if user == solution.author %}
+            <div class="default-actions">
+                <button class="btn btn-outline-secondary btn-sm"
+                    onclick="showEditSolutionForm(Number('{{ solution.id }}'))">Edit</button>
+                <form id="delete-solution-form-{{ solution.id }}"  method="post" action="{% url 'delete_solution' solution.id %}" class="delete-solution-form d-inline">
+                    {% csrf_token %}
+                    <input type="hidden" name="solution_id" value="{{ solution.id }}">
+                    <button type="submit" class="btn btn-outline-danger btn-sm">Delete</button>
+                </form>
+            </div>
+            <div class="edit-actions" style="display: none;">
+                <button class="btn btn-primary btn-sm" onclick="saveSolutionEdit(Number('{{ solution.id }}'))">Save</button>
+                <button class="btn btn-secondary btn-sm"
+                    onclick="cancelSolutionEdit(Number('{{ solution.id }}'))">Cancel</button>
+            </div>
+            {% endif %}
+        </div>
+        {% endif %}
+
+        <!-- Comments -->
+        <div class="comment-section mt-3">
+            {% for comment in solution.comments.all %}
+            {% if not comment.parent %}  <!-- Only show top-level comments -->
+                {% include 'comment_item.html' with comment=comment %}
+            {% endif %}
+            {% endfor %}
+        </div>
+    </div>
+</div>

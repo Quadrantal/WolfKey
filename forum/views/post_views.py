@@ -122,6 +122,7 @@ def post_detail(request, post_id):
                 'downvotes': solution.downvotes,
             })
     # print("Author", post.author.get_full_name())
+
     context = {
         'post': post,
         'solutions': solutions,

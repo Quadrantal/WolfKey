@@ -12,60 +12,10 @@
     {% endblock %}
 </head>
 {% block content %}
-<div class="container py-4" id="main-section">
-    <!-- Question Header -->
-    <div class="question-header">
-        <h1>{{ post.title }}</h1>
-        <div class="actions">
-            <button class="button follow-button">
-                Follow<span class="follow-count">90</span>
-            </button>
-            <button class="button add-answer-button">Add answer</button>
-            {% if user.is_authenticated and post.author == user %}
-            <a href="{% url 'edit_post' post.id %}" class="btn btn-primary btn-sm rounded-pill shadow-sm px-3">
-                <i class="fas fa-edit"></i> Edit
-            </a>
-            {% endif %}
-        </div>
 
-    </div>
+{% include 'forum/components/post_detail_post_card.html' %}
 
-    <!-- Question Content with Voting -->
-    <div class="post-container">
-        <!-- Post Content -->
-        <div class="post-content-cell">
-            <div id="editorjs"></div>
-        </div>
-
-
-        <!-- Courses -->
-        {% if post.courses.all %}
-        <div class="courses-section">
-            <h6 class="text-muted mb-2">Related Courses:</h6>
-            <div class="d-flex flex-wrap gap-2">
-                {% for course in post.courses.all %}
-                <span class="badge bg-light text-dark border">
-                    {{ course.code }} - {{ course.name }}
-                </span>
-                {% endfor %}
-            </div>
-        </div>
-        {% endif %}
-
-        <!-- Author Card -->
-        <div class="author-card">
-            <div class="author-info">
-                <div class="author-avatar"></div>
-                <div>
-                    <div class="text-muted">asked {{ post.created_at|date:"M d, Y" }}</div>
-                    <div class="fw-bold">{{ post.author.get_full_name }}</div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
 <hr>
-
 
 <!-- Solutions -->
 <div class="solutions-header">
@@ -80,177 +30,16 @@
         </div>
     </div>
 </div>
-<div id="solutions-container" >
-    {% with accepted=post.accepted_solution %}
-    {% if accepted %}
-    <!-- Show accepted solution first -->
-    <div class="solution-container accepted-solution" data-solution-id="{{ post.accepted_solution.id }}">
-        <!-- Add accepted solution badge -->
-        <div class="vote-cell">
-            <form method="post" action="{% url 'upvote_solution' accepted.id %}" class="d-inline">
-                {% csrf_token %}
-                <button type="submit" class="vote-button {% if accepted|has_upvoted:user %}voted-up{% endif %}">
-                    <svg width="36" height="36" viewBox="0 0 36 36">
-                        <path d="M2 26h32L18 10 2 26z"></path>
-                    </svg>
-                </button>
-                <input type="hidden" name="solution_id" value="{{ accepted.id }}">
-                <input type="hidden" name="action" value="upvote">
-            </form>
-    
-            <div class="vote-count">{{ accepted|vote_difference }}</div>
-    
-            <form method="post" action="{% url 'downvote_solution' accepted.id %}" class="d-inline">
-                {% csrf_token %}
-                <button type="submit" class="vote-button {% if accepted|has_downvoted:user %}voted-down{% endif %}">
-                    <svg width="36" height="36" viewBox="0 0 36 36">
-                        <path d="M2 10h32L18 26 2 10z"></path>
-                    </svg>
-                </button>
-                <input type="hidden" name="solution_id" value="{{ accepted.id }}">
-                <input type="hidden" name="action" value="downvote">
-            </form>
-
-            {% if user == post.author %}
-            <form method="post" action="{% url 'accept_solution' accepted.id %}" class="d-inline">
-                {% csrf_token %}
-                <button type="submit" class="accept-button-accepted" title="Unaccept this answer">
-                    <svg aria-hidden="true" class="m0 svg-icon iconCheckmarkLg" width="36" height="36"
-                        viewBox="0 0 36 36">
-                        <path d="m6 14 8 8L30 6v8L14 30l-8-8z"></path>
-                    </svg>
-                </button>
-            </form>
-            {% endif %}
-        </div>
-
-        <div class="post-content-cell">
-            <div id="editorjs-solution-{{ accepted.id }}"></div>
-
-            <!-- Solution Author -->
-            <div class="author-info mt-3">
-                <div class="author-avatar"></div>
-                <div>
-                    <div>{{ accepted.author.get_full_name }}</div>
-                    <div class="text-muted">Answered {{ accepted.created_at|date:"M d, Y" }}</div>
-                </div>
-            </div>
-
-            <!-- Solution Actions -->
-            {% if user.is_authenticated %}
-            <div class="solution-actions mt-3" data-solution-id="{{ accepted.id }}">
-                {% if user == accepted.author %}
-                <div class="default-actions">
-                    <button class="btn btn-outline-secondary btn-sm"
-                        onclick="showEditSolutionForm('{{ accepted.id }}')">Edit</button>
-                    <form id="delete-solution-form" method="post" action="{% url 'delete_solution' accepted.id %}" class="d-inline">
-                        {% csrf_token %}
-                        <input type="hidden" name="solution_id" value="{{ accepted.id }}">
-                        <button type="submit" class="btn btn-outline-danger btn-sm">Delete</button>
-                    </form>
-                </div>
-                <div class="edit-actions" style="display: none;">
-                    <button class="btn btn-primary btn-sm" onclick="saveSolutionEdit('{{ accepted.id }}')">Save</button>
-                    <button class="btn btn-secondary btn-sm"
-                        onclick="cancelSolutionEdit('{{ accepted.id }}')">Cancel</button>
-                </div>
-                {% endif %}
-            </div>
-            {% endif %}
-        </div>
-    </div>
+<div id="solutions-container">
+    {% with accepted_solution=post.accepted_solution %}
+    {% if accepted_solution %}
+        {% include 'forum/components/post_detail_solution_card.html' with solution=accepted_solution accepted_solution=accepted_solution %}
     {% endif %}
-
-    <!-- Show other solutions -->
+    
     {% for solution in solutions %}
-    {% if solution != accepted %}
-    <div class="solution-container" data-solution-id="{{ solution.id }}">
-        <!-- Solution Vote Cell -->
-        <div class="vote-cell">
-            <form method="post" action="{% url 'upvote_solution' solution.id %}" class="d-inline">
-                {% csrf_token %}
-                <button type="submit" class="vote-button {% if solution|has_upvoted:user %}voted-up{% endif %}">
-                    <svg width="36" height="36" viewBox="0 0 36 36">
-                        <path d="M2 26h32L18 10 2 26z"></path>
-                    </svg>
-                </button>
-                <input type="hidden" name="solution_id" value="{{ solution.id }}">
-                <input type="hidden" name="action" value="upvote">
-            </form>
-            
-            <div class="vote-count">{{ solution|vote_difference }}</div>
-            
-            <form method="post" action="{% url 'downvote_solution' solution.id %}" class="d-inline">
-                {% csrf_token %}
-                <button type="submit" class="vote-button {% if solution|has_downvoted:user %}voted-down{% endif %}">
-                    <svg width="36" height="36" viewBox="0 0 36 36">
-                        <path d="M2 10h32L18 26 2 10z"></path>
-                    </svg>
-                </button>
-                <input type="hidden" name="solution_id" value="{{ solution.id }}">
-                <input type="hidden" name="action" value="downvote">
-            </form>
-
-            {% if user == post.author %}
-            <form method="post" action="{% url 'accept_solution' solution.id %}" class="d-inline">
-                {% csrf_token %}
-
-                <button type="submit" class="accept-button-unaccepted" title="Accept this answer">
-                    <svg aria-hidden="true" class="m0 svg-icon iconCheckmarkLg" width="36" height="36"
-                        viewBox="0 0 36 36">
-                        <path d="m6 14 8 8L30 6v8L14 30l-8-8z"></path>
-                    </svg>
-                </button>
-            </form>
-            {% endif %}
-        </div>
-
-        <!-- Solution Content -->
-        <div class="post-content-cell">
-            <div id="editorjs-solution-{{ solution.id }}"></div>
-
-            <!-- Solution Author -->
-            <div class="author-info mt-3">
-                <div class="author-avatar"></div>
-                <div>
-                    <div>{{ solution.author.get_full_name }}</div>
-                    <div class="text-muted">Answered {{ solution.created_at|date:"M d, Y" }}</div>
-                </div>
-            </div>
-
-            <!-- Solution Actions -->
-            {% if user.is_authenticated %}
-            <div class="solution-actions mt-3" data-solution-id="{{ solution.id }}">
-                {% if user == solution.author %}
-                <div class="default-actions">
-                    <button class="btn btn-outline-secondary btn-sm"
-                        onclick="showEditSolutionForm('{{ solution.id }}')">Edit</button>
-                    <form method="post" action="{% url 'delete_solution' solution.id %}" class="d-inline" id="delete-solution-form">
-                        {% csrf_token %}
-                        <input type="hidden" name="solution_id" value="{{ solution.id }}">
-                        <button type="submit" class="btn btn-outline-danger btn-sm">Delete</button>
-                    </form>
-                </div>
-                <div class="edit-actions" style="display: none;">
-                    <button class="btn btn-primary btn-sm" onclick="saveSolutionEdit('{{ solution.id }}')">Save</button>
-                    <button class="btn btn-secondary btn-sm"
-                        onclick="cancelSolutionEdit('{{ solution.id }}')">Cancel</button>
-                </div>
-                {% endif %}
-            </div>
-            {% endif %}
-
-            <!-- Comments -->
-            <div class="comment-section mt-3">
-                {% for comment in solution.comments.all %}
-                {% if not comment.parent %}  <!-- Only show top-level comments -->
-                    {% include 'comment_item.html' with comment=comment %}
-                {% endif %}
-            {% endfor %}
-            </div>
-        </div>
-    </div>
-    {% endif %}
+        {% if solution != accepted_solution %}
+            {% include 'forum/components/post_detail_solution_card.html' with solution=solution accepted_solution=accepted_solution %}
+        {% endif %}
     {% endfor %}
     {% endwith %}
 </div>
@@ -281,8 +70,6 @@
 <script defer src="//unpkg.com/mathlive"></script>
 <link rel="stylesheet" href="https://unpkg.com/mathlive/dist/mathlive-static.css">
 
-
-
 <!-- Initialize Editor.js -->
 <script src="https://cdn.jsdelivr.net/npm/@editorjs/editorjs@latest"></script>
 <script src="https://cdn.jsdelivr.net/npm/@editorjs/image@latest"></script>
@@ -299,406 +86,76 @@
 <script src="{% static 'forum/js/editor-config.js' %}" defer></script>
 
 <script src="https://unpkg.com/mathlive/dist/mathlive.min.js" defer></script>
-<script>
-    document.addEventListener("DOMContentLoaded", function () {
-        const solutionEditors = new Map();
+<script type="module">
+    import { EditorManager } from '{% static "forum/js/editor-manager.js" %}';
+    import { VotingSystem } from '{% static "forum/js/voting-system.js" %}';
+    import { SolutionEditor } from '{% static "forum/js/solution-editing.js" %}';
+    import { SolutionSorter } from '{% static "forum/js/solution-sorting.js" %}';
 
-        try {
-            // console.log("processed", '{{processed_solutions}}');
-            // Initialize main post editor
-            const content = JSON.parse('{{ content_json|escapejs }}');
-            const editor = createEditor(
-                'editorjs',
-                content,
-                '{{ csrf_token }}',
-                true
+    document.addEventListener("DOMContentLoaded", async function () {
+    console.log("Boo 1");
+
+    try {
+
+
+        // Initialize Editor Manager
+        const editorManager = new EditorManager();
+
+        
+        // Initialize main post editor
+        const contentJSON = '{{ content_json|escapejs }}';
+        console.log(contentJSON);
+        const content = JSON.parse(contentJSON);
+        await editorManager.initializeMainEditor('editorjs', content, '{{ csrf_token }}', true);
+        console.log("Boo");
+        // Initialize solution editors
+        const processedSolutions = JSON.parse('{{ processed_solutions_json|escapejs }}');
+        await editorManager.initializeSolutionEditors(processedSolutions, '{{ csrf_token }}');
+
+        // Initialize solution form editor
+
+        const user_posted_a_solution = {{ has_solution_from_user|yesno:"true,false"|safe }};
+        console.log(user_posted_a_solution);
+        if(!user_posted_a_solution){
+            var solutionFormEditor = await editorManager.initializeSolutionFormEditor(
+            'editorjs-solution-form',
+            '{{ csrf_token }}',
+            'solution-content'
             );
-
-            // Initialize solution editors
-            const processedSolutions = JSON.parse('{{ processed_solutions_json|escapejs }}');
-            processedSolutions.forEach(solution => {
-                try {
-                    // console.log(solution.content);
-                    const editor = createEditor(
-                        `editorjs-solution-${solution.id}`,
-                        solution.content,
-                        '{{ csrf_token }}',
-                        true
-                    );
-                    solutionEditors.set(solution.id, editor);
-                } catch (solutionError) {
-                    console.error(`Error initializing solution ${solution.id}:`, solutionError);
-                }
-            });
-            const solutionFormEditor = createEditor(
-                'editorjs-solution-form',
-                {},
-                '{{ csrf_token }}',
-                false,
-                'solution-content'
-            );  
-            const solutionForm = document.getElementById('solutionForm');
-            if (solutionForm) {
-                solutionForm.addEventListener('submit', async function (e) {
-                    e.preventDefault();
-                    try {
-                        const outputData = await solutionFormEditor.save();
-                        document.getElementById('solution-content').value = JSON.stringify(outputData);
-                        this.submit();
-                    } catch (error) {
-                        console.error('Failed to save solution content:', error);
-                    }
-                });
-            }
-
-            
-
-            // Add edit solution functionality
-            window.showEditSolutionForm = async function (solutionId) {
-                const editor = solutionEditors.get(parseInt(solutionId));
-                if (!editor) return;
-
-                try {
-                    await editor.readOnly.toggle();
-
-                    // Get solution container and update UI
-                    const container = document.querySelector(`#editorjs-solution-${solutionId}`);
-                    const solutionContainer = container.closest('.solution-container');
-                    const actionsDiv = solutionContainer.querySelector('.solution-actions');
-
-                    // Store original actions
-                    const defaultActions = actionsDiv.querySelector('.default-actions');
-                    const editActions = actionsDiv.querySelector('.edit-actions');
-
-                    // Toggle visibility
-                    defaultActions.style.display = 'none';
-                    editActions.style.display = 'block';
-
-                    // Handle math fields after editor is ready
-                    setTimeout(() => {
-                        container.querySelectorAll('.inline-math').forEach(elem => {
-                            const existingMathField = elem.querySelector('math-field');
-                            if (existingMathField) {
-                                existingMathField.remove();
-                            }
-
-                            const tex = elem.getAttribute('data-tex');
-                            if (tex) {
-                                const mathField = new MathfieldElement();
-                                mathField.value = tex;
-                                if (editor.readOnly.isEnabled) {
-                                    mathField.setAttribute('read-only', '');
-                                }
-                                elem.appendChild(mathField);
-                            }
-                        });
-                    }, 100);
-
-                } catch (error) {
-                    console.error('Error enabling edit mode:', error);
-                }
-            };
-
-            window.saveSolutionEdit = async function (solutionId) {
-                const editor = solutionEditors.get(parseInt(solutionId));
-                if (!editor) return;
-
-                try {
-                    const outputData = await editor.save();
-
-                    const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
-
-                    const editSolutionUrl = `/solution/${solutionId}/edit/`;  
-
-                    const formData = new FormData();
-                    formData.append('csrfmiddlewaretoken', csrfToken);
-                    formData.append('solution_id', solutionId);
-                    formData.append('content', JSON.stringify(outputData));
-
-                    // Send request via fetch()
-                    const response = await fetch(editSolutionUrl, {
-                        method: 'POST',
-                        body: formData,
-                    });
-
-                    const data = await response.json();
-
-                    if (data.messages) {
-                        data.messages.forEach(function(messageData) {
-                            showMessage(messageData.message, messageData.tags);
-                        });
-                    }
-
-                    if (data.status === 'success') {
-                        toggleSolutionEditor(solutionId);
-                    }else{
-                        console.error('Failed to save solution:', data.message);
-                    }
-                } catch (error) {
-                    console.error('Failed to save edited solution:', error);
-                }
-            };
-
-            window.cancelSolutionEdit = function (solutionId) {
-                toggleSolutionEditor(solutionId);
-            };
-
-            window.toggleSolutionEditor = function(solutionId){
-                const editor = solutionEditors.get(parseInt(solutionId));
-                if (!editor) return;
-
-                // Toggle back to read-only
-                editor.readOnly.toggle();
-
-                // Restore button visibility
-                const container = document.querySelector(`#editorjs-solution-${solutionId}`);
-                const solutionContainer = container.closest('.solution-container');
-                const defaultActions = solutionContainer.querySelector('.default-actions');
-                const editActions = solutionContainer.querySelector('.edit-actions');
-
-                defaultActions.style.display = 'block';
-                editActions.style.display = 'none';
-
-                // Reinitialize math fields
-                setTimeout(() => {
-                    container.querySelectorAll('.inline-math').forEach(elem => {
-                        const existingMathField = elem.querySelector('math-field');
-                        if (existingMathField) {
-                            existingMathField.remove();
-                        }
-
-                        const tex = elem.getAttribute('data-tex');
-                        if (tex) {
-                            const mathField = new MathfieldElement();
-                            mathField.value = tex;
-                            mathField.setAttribute('read-only', '');
-                            elem.appendChild(mathField);
-                        }
-                    });
-                }, 100);
-            }
-
-
-            document.getElementById('delete-solution-form').addEventListener('submit', function(event) { 
-                event.preventDefault();
-                var formData = new FormData(this); 
-                var actionUrl = document.getElementById('delete-solution-form').action;
-                console.log(this.action);
-                try {
-                    fetch(actionUrl, {
-                        method: 'POST',
-                        body: formData,
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.messages) {
-                            data.messages.forEach(function(messageData) {
-                                showMessage(messageData.message, messageData.tags);
-                            });
-                        }
-                        var solutionId = this.querySelector('input[name="solution_id"]').value;
-                        var solutionContainer = document.querySelector('.solution-container[data-solution-id="'+solutionId+'"]');
-
-                        console.log(solutionId);
-                        console.log(solutionContainer);
-
-                        if (solutionContainer) {
-                            solutionContainer.remove(); 
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error:', error);
-                    });
-                } catch (error) {
-                    console.error('Failed to save edited solution:', error);
-                }
-                this.remove();
-            });
-            
-
-            // Initialize solution sorting functionality
-            initSolutionSorting();
-        } catch (error) {
-            console.error("Error initializing editors:", error);
         }
 
-        document.querySelectorAll('.vote-button').forEach(button => {
-            button.addEventListener('click', function (e) {
+
+        // Set up solution form submission
+        const solutionForm = document.getElementById('solutionForm');
+        if (solutionForm) {
+            solutionForm.addEventListener('submit', async function (e) {
                 e.preventDefault();
-                const form = this.closest('form');
-                if (!form) {
-                    console.error("Form not found for the vote button");
-                    return;
+                try {
+                    const outputData = await solutionFormEditor.save();
+                    document.getElementById('solution-content').value = JSON.stringify(outputData);
+                    this.submit();
+                } catch (error) {
+                    console.error('Failed to save solution content:', error);
                 }
-
-                const url = form.getAttribute('action');
-                const solutionIdInput = form.querySelector('input[name="solution_id"]');
-                const voteTypeInput = form.querySelector('input[name="action"]');
-
-                if (!solutionIdInput || !voteTypeInput) {
-                    console.error("Solution ID or action input not found in the form");
-                    return;
-                }
-
-                fetch(url, {
-                    method: 'POST',
-                    headers: {
-                        'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
-                        'Content-Type': 'application/json',
-                        'Accept': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        solution_id: solutionIdInput.value,
-                        action: voteTypeInput.value
-                    })
-                })
-                .then(response => {
-                    if (!response.ok) {
-                        return response.json().then(data => {
-                            if (data && data.message) {
-                                alert(data.message);
-                            } else {
-                                alert('An unexpected error occurred.');
-                            }
-                            throw new Error(data.message || `HTTP error! status: ${response.status}`);
-                        });
-                    }
-                    return response.json(); // Return the parsed JSON for the next then block
-                })
-                .then(data => {
-                    if (data.success) {
-                        // Reset both vote buttons
-                        const voteCell = form.closest('.vote-cell');
-                        const voteCount = voteCell.querySelector('.vote-count');
-                        if (voteCount) {
-                            voteCount.textContent = data.upvotes - data.downvotes;
-                        }
-                        const upvoteButton = voteCell.querySelector('form[action*="upvote"] button');
-                        const downvoteButton = voteCell.querySelector('form[action*="downvote"] button');
-
-                        // console.log(upvoteButton);
-                        // console.log(downvoteButton);
-                        
-                        upvoteButton.classList.remove('voted-up');
-                        downvoteButton.classList.remove('voted-down');
-                        // console.log("Removed classes");
-
-                        console.log(data.vote_state);
-                        // Add appropriate class based on vote state
-                        if (data.vote_state === 'upvoted') {
-                            // console.log("Voted up");
-                            upvoteButton.classList.add('voted-up');
-                        } else if (data.vote_state === 'downvoted') {
-                            // console.log("Voted down");
-                            downvoteButton.classList.add('voted-down');
-                        }
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                });
             });
-        });
-    });
-
-    // Solution sorting functions
-    function initSolutionSorting() {
-        const sortDropdown = document.getElementById('sortDropdown');
-        const sortDropdownMenu = document.getElementById('sortDropdownMenu');
-        const sortOptions = document.querySelectorAll('.sort-option');
-        const currentSortText = document.getElementById('currentSort');
-
-        if (!sortOptions.length || !currentSortText) {
-            console.error("Sort elements not found in the DOM");
-            return;
         }
 
-        sortDropdown.addEventListener('click', function () {
-            sortDropdownMenu.classList.toggle('show'); // Use toggle to show/hide
-        });
+        // Initialize voting system
+        new VotingSystem('{{ csrf_token }}');
 
+        // Initialize solution editor
+        const solutionEditor = new SolutionEditor(editorManager, '{{ csrf_token }}');
+        window.showEditSolutionForm = solutionEditor.showEditForm.bind(solutionEditor);
+        window.saveSolutionEdit = solutionEditor.saveSolution.bind(solutionEditor);
+        window.cancelSolutionEdit = solutionEditor.cancelEdit.bind(solutionEditor);
 
-        // Add click event to all sort options
-        sortOptions.forEach((option) => {
-            option.addEventListener("click", function (e) {
-                const innerSortOptions = document.querySelectorAll('.sort-option');
-                innerSortOptions.forEach((option) => {
-                    option.classList.remove('active');
-                })
-                e.preventDefault();
-                const sortBy = this.getAttribute("data-sort");
-                currentSortText.textContent = sortBy.charAt(0).toUpperCase() + sortBy.slice(1);
-                sortSolutions(sortBy);
-                option.classList.add('active');
-                sortDropdownMenu.classList.remove('show'); // Close the dropdown after selection
-            });
-        });
+        // Initialize solution sorting
+        new SolutionSorter();
 
-        // Default sort by votes
-        sortSolutions("votes");
+    } catch (error) {
+        console.error("Error initializing post detail page:", error);
     }
-
-    function sortSolutions(sortBy) {
-        const solutionsContainer = document.getElementById("solutions-container");
-        if (!solutionsContainer) {
-            console.error("Solutions container not found");
-            return;
-        }
-
-        const acceptedSolution = document.querySelector(".accepted-solution");
-        const regularSolutions = Array.from(
-            document.querySelectorAll(".solution-container:not(.accepted-solution)")
-        );
-
-        // Sort regular solutions
-        if (sortBy === "votes") {
-            regularSolutions.sort((a, b) => {
-                const votesAElement = a.querySelector(".vote-count");
-                const votesBElement = b.querySelector(".vote-count");
-                if (!votesAElement || !votesBElement) {
-                    console.error(
-                        "Vote count element not found for one of the solutions"
-                    );
-                    return 0; // Skip sorting for this pair
-                }
-                const votesA = parseInt(votesAElement.textContent) || 0;
-                const votesB = parseInt(votesBElement.textContent) || 0;
-                return votesB - votesA; // Descending order
-            });
-        } else if (sortBy === "recency") {
-            regularSolutions.sort((a, b) => {
-                const dateTextA = a.querySelector(".author-info .text-muted");
-                const dateTextB = b.querySelector(".author-info .text-muted");
-                if (!dateTextA || !dateTextB) {
-                    console.error("Date text element not found for one of the solutions");
-                    return 0; // Skip sorting for this pair
-                }
-                const dateStrA = dateTextA.textContent.replace("Answered ", "");
-                const dateStrB = dateTextB.textContent.replace("Answered ", "");
-                const dateA = new Date(dateStrA);
-                const dateB = new Date(dateStrB);
-                return dateB - dateA; // Newest first
-            });
-        }
-
-        // Clear the container but preserve any content that should remain
-        while (solutionsContainer.firstChild) {
-            solutionsContainer.removeChild(solutionsContainer.firstChild);
-        }
-
-        // Always add accepted solution first if it exists
-        if (acceptedSolution) {
-            solutionsContainer.appendChild(acceptedSolution);
-        }
-
-        // Add sorted regular solutions
-        regularSolutions.forEach((solution) => {
-            solutionsContainer.appendChild(solution);
-        });
-
-
-    }
-
+});
 </script>
 
 {% endblock %}
