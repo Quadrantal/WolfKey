@@ -33,6 +33,9 @@ from forum.views.search_views import (
     my_posts
 )
 from forum.views.solution_views import (
+    create_solution,
+    delete_solution,
+    edit_solution,
     upvote_solution, 
     downvote_solution,
     accept_solution
@@ -71,6 +74,12 @@ urlpatterns = [
     path('post/<int:post_id>/edit/', edit_post, name='edit_post'),
     path('post/<int:post_id>/delete/', delete_post, name='delete_post'),
     path('post/create/', create_post, name='create_post'),
+
+    path('solution/<int:solution_id>/edit/', edit_solution, name='edit_solution'),
+    path('solution/<int:solution_id>/delete/', delete_solution, name='delete_solution'),
+    path('solution/<int:post_id>/create/', create_solution, name='create_solution'),
+
+
     
     # Auth related URLs
     path('register/', register, name='register'),

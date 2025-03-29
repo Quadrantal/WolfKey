@@ -7,7 +7,7 @@ from forum.models import Post, Solution, SolutionDownvote, SolutionUpvote
 from forum.forms import SolutionForm
 from django.contrib import messages
 from django.http import HttpResponseForbidden
-
+from .utils import process_messages_to_json
 
 
 @login_required
@@ -17,7 +17,8 @@ def create_solution(request, post_id):
 
         has_solution = Solution.objects.filter(post=post, author=request.user).exists()
         if has_solution:
-            return JsonResponse({'error': 'You have already submitted a solution.'}, status=400)
+            messages.error(request, 'You have already submitted a solution.')
+            return redirect(post.get_absolute_url())
 
         solution_form = SolutionForm(request.POST)
         if solution_form.is_valid():
@@ -28,9 +29,11 @@ def create_solution(request, post_id):
             solution.post = post
             solution.author = request.user
             solution.save()
-            return JsonResponse({'message': 'Solution created successfully.'}, status=201)
+            messages.success(request, 'Solution submitted succesfully.')
+            return redirect(post.get_absolute_url())
 
-    return JsonResponse({'error': 'Invalid request'}, status=400)
+    messages.error(request, 'An error occured.')
+    return redirect(post.get_absolute_url())
 
 @login_required
 def edit_solution(request, solution_id):
@@ -44,9 +47,13 @@ def edit_solution(request, solution_id):
             solution = solution_form.save(commit=False)
             solution.content = solution_data
             solution.save()
-            return JsonResponse({'message': 'Solution updated successfully.'}, status=200)
-
-    return JsonResponse({'error': 'Invalid request'}, status=400)
+            messages.success(request, 'Solution edited succesfully')
+            messages_data = process_messages_to_json(request)
+            return JsonResponse({'status': 'success','messages': messages_data}, status=200)
+    messages.error(request, "Invalid request.")
+    
+    messages_data = process_messages_to_json(request)
+    return JsonResponse({'status' : 'error', 'messages': messages_data}, status=400)
 
 @login_required
 def delete_solution(request, solution_id):
@@ -54,9 +61,13 @@ def delete_solution(request, solution_id):
     
     if request.method == 'POST':
         solution.delete()
-        return JsonResponse({'message': 'Solution deleted successfully.'}, status=200)
+        messages.success(request, 'Solution deleted succesfully')
+        messages_data = process_messages_to_json(request)
 
-    return JsonResponse({'error': 'Invalid request'}, status=400)
+        return JsonResponse({'status': 'success','messages': messages_data}, status=200)
+
+    messages_data = process_messages_to_json(request)
+    return JsonResponse({'status': 'error','messages': messages_data}, status=400)
 
 
 @login_required

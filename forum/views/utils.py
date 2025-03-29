@@ -3,6 +3,8 @@ from django.utils.html import strip_tags
 from django.core.files.base import ContentFile
 from django.core.files.storage import default_storage
 from django.http import JsonResponse
+from django.contrib import messages
+
 
 def process_post_preview(post):
     """Process post content to create preview text"""
@@ -82,3 +84,14 @@ def selective_quote_replace(content):
     content = content.replace("__INLINEMATH__", "'inline-math'")
 
     return content
+
+def process_messages_to_json(request):
+    messages_data = [
+        {
+            'message': message.message,
+            'tags': message.tags
+        }
+        for message in messages.get_messages(request)
+    ]
+
+    return messages_data
