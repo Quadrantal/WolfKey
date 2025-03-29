@@ -164,6 +164,7 @@ def post_detail(request, post_id):
     has_solution = Solution.objects.filter(post=post, author=request.user).exists()
 
     if request.method == 'POST':
+        # print("check 1")
         if not request.user.is_authenticated: 
             return redirect('login')
 
@@ -171,7 +172,9 @@ def post_detail(request, post_id):
         
         if has_solution and action != 'delete_solution' and action != 'edit_solution':
             return redirect('post_detail', post_id=post.id)
-
+        
+        # print(action)
+        # Handle solution creation
         if action == 'create_solution':
             solution_form = SolutionForm(request.POST)
             if solution_form.is_valid():
@@ -187,6 +190,7 @@ def post_detail(request, post_id):
             if solution.author != post.author:
                 send_solution_notification(solution)
 
+        # Handle solution editing
         elif action == 'edit_solution':
             solution_id = request.POST.get('solution_id')
             solution = get_object_or_404(Solution, id=solution_id, author=request.user)
@@ -201,35 +205,39 @@ def post_detail(request, post_id):
                 solution.save()
                 messages.success(request, 'Solution updated successfully!')
 
+        # Handle solution deletion
         elif action == 'delete_solution':
-            solution_id = request.POST.get('solution_id')
-            solution = get_object_or_404(Solution, id=solution_id, author=request.user)
-            solution.delete()
-            messages.success(request, 'Solution deleted successfully!')
+            try:
+                # print("hi")
+                solution_id = request.POST.get('solution_id')
+                solution = get_object_or_404(Solution, id=solution_id, author=request.user)
+                solution.delete()
+                messages.success(request, 'Solution deleted successfully!')
+            except Exception as e:
+                print(e)
 
-        elif action == 'create_comment':
+        # Handle comment creation or editing
+        elif action in ['create_comment', 'edit_comment']:
             comment_form = CommentForm(request.POST)
             solution_id = request.POST.get('solution_id')
             solution = get_object_or_404(Solution, id=solution_id)
-            parent_id = request.POST.get('parent_id')
 
-            if comment_form.is_valid():
-                comment = comment_form.save(commit=False)
-                comment.solution = solution
-                comment.author = request.user
-                if parent_id:
-                    parent_comment = get_object_or_404(Comment, id=parent_id)
-                    comment.parent = parent_comment
+            if action == 'create_comment':
+                if comment_form.is_valid():
+                    comment = comment_form.save(commit=False)
+                    comment.solution = solution
+                    comment.author = request.user
+                    comment.save()
+                    messages.success(request, 'Comment added successfully!')
+
+            elif action == 'edit_comment':
+                comment_id = request.POST.get('comment_id')
+                comment = get_object_or_404(Comment, id=comment_id, author=request.user)
+                comment.content = comment_form.cleaned_data['content']
                 comment.save()
-                messages.success(request, 'Comment added successfully!')
+                messages.success(request, 'Comment updated successfully!')
 
-        elif action == 'edit_comment':
-            comment_id = request.POST.get('comment_id')
-            comment = get_object_or_404(Comment, id=comment_id, author=request.user)
-            comment.content = comment_form.cleaned_data['content']
-            comment.save()
-            messages.success(request, 'Comment updated successfully!')
-
+        # Handle comment deletion
         elif action == 'delete_comment':
             comment_id = request.POST.get('comment_id')
             comment = get_object_or_404(Comment, id=comment_id, author=request.user)
