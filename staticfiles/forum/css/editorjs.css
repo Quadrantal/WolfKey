@@ -1,0 +1,67 @@
+/* Ensure the image doesn't go beyond the screen width */
+.editor-image img {
+    max-width: 100%;
+    height: auto;
+    display: block;
+    margin: 0 auto;  /* Center image if it has extra space */
+}
+
+.image-tool__image-picture {
+    max-width: 500px; /* Adjust to desired size */
+    height: auto;
+    display: block;
+    margin: 0 auto; /* Center the image */
+}
+
+/* If stretched is true, still maintain max-width and height auto */
+.image-stretched img {
+    width: 100%;
+    max-width: 100%;
+    height: auto;
+    display: block;
+}
+
+/* Add border if needed */
+.image-border img {
+    border: 2px solid #000;
+}
+
+/* Add background styling if needed */
+.image-background {
+    background-color: #f8f8f8;
+    padding: 10px;
+    display: inline-block;  /* Prevent full width background if not stretched */
+    max-width: 100%;
+}
+
+/* Caption styling */
+.image-caption {
+    font-size: 0.9em;
+    color: #555;
+    text-align: center;
+    margin-top: 5px;
+}
+
+.hljs {
+    border-radius: 5px;
+}
+
+math-field::part(menu-toggle) {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    margin: 0 !important;
+    padding: 5px !important;
+}
+
+
+/* Check if the menu item is clickable */
+math-field::part(menu-item) {
+    pointer-events: auto !important; 
+    cursor: pointer !important;
+    user-select: auto !important;
+}
+
+.inline-math-floating-container {
+    z-index: 9999;
+}

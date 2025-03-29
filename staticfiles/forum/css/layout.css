@@ -1,0 +1,223 @@
+
+.wrapper {
+    display: flex;
+    width: 100%;
+    min-height: calc(100vh - 56px);
+    margin-top: 0;
+    position: relative;
+}
+
+/* Sidebar */
+.sidebar {
+    width: 80px;
+    padding: 10px;
+    position: fixed;
+    height: 100vh;
+    transition: width 0.3s;
+    overflow: hidden;
+    top: 73px;
+    background: none !important;
+}
+
+.sidebar:hover {
+    width: 200px;
+}
+
+.sidebar ul {
+    padding: 0;
+    list-style: none;
+}
+
+.sidebar-item {
+    display: flex;
+    align-items: center;
+    color: black;
+    text-decoration: none;
+    padding: 15px;
+    border-radius: 5px;
+    transition: background 0.3s;
+    white-space: nowrap;
+
+}
+
+.sidebar-item i {
+    font-size: 24px;
+    margin-right: 15px;
+    color: black;
+}
+
+.sidebar-item .sidebar-text {
+    opacity: 0;
+    transition: opacity 0.3s;
+}
+
+.sidebar:hover .sidebar-item .sidebar-text {
+    opacity: 1;
+}
+
+.sidebar-item:hover {
+    background: #34495e;
+    color: white
+}
+.sidebar-item:hover i {
+    color: white;
+}
+
+/* Main Content */
+.main-content {
+    flex: 1;
+    padding: 20px;
+    margin: 0 auto;
+    width: calc(100% - 80px);
+    margin-left: 80px;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .sidebar {
+        width: 60px;
+        overflow: hidden;
+
+    }
+    .sidebar:hover {
+        width: 60px;
+    }
+
+    .main-content {
+        width: 100%; 
+        margin-left: 60px; 
+        padding: 10px; 
+    }
+
+    .sidebar-item {
+        justify-content: center; 
+        padding: 10px;
+    }
+
+    .sidebar-item .sidebar-text {
+        display: none; 
+    }
+
+    .sidebar:hover .sidebar-item .sidebar-text {
+        display: none; 
+        opacity: 0; 
+    }
+}
+
+/* Navbar Styles */
+nav {
+    background-color: rgba(255, 255, 255, 0.6) !important;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px); /* for Safari */
+    position: sticky;
+    top: 0;
+    z-index: 900;
+    padding-top: .5rem !important;
+    padding-bottom: .5rem !important;
+}
+
+nav {
+    transition: background-color 0.3s ease;
+}
+
+/* Dropdown styles */
+
+
+.dropdown .btn {
+    background-color: transparent;
+    border: none;
+    font-size: 1.2rem; /* Adjust the icon size */
+    cursor: pointer;
+  }
+  
+  .dropdown .btn:hover {
+    color: #007bff; /* Change icon color on hover */
+  }
+  
+  /* Dropdown menu styling */
+  .dropdown-menu {
+    background-color: #ffffff; /* Background color */
+    border: 1px solid #eaeaea; /* Border color */
+    border-radius: 0.25rem; /* Rounded corners */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Slight shadow for depth */
+  }
+  
+  /* Dropdown item styling */
+  .dropdown-menu .dropdown-item {
+    font-size: 0.9rem; /* Font size */
+    color: #333333; /* Text color */
+    padding: 0.5rem 1rem; /* Spacing */
+    transition: background-color 0.2s, color 0.2s; /* Smooth hover effect */
+  }
+  
+  .dropdown-menu .dropdown-item:hover {
+    background-color: #f8f9fa; /* Light hover background */
+    color: #007bff; /* Hover text color */
+  }
+  
+  /* Divider style */
+  .dropdown-menu .dropdown-divider {
+    border-top: 1px solid #eaeaea; /* Divider color */
+    margin: 0.5rem 0; /* Spacing above and below */
+  }
+  
+  /* General Toast Styling */
+.custom-toast {
+    min-width: 300px;
+    color: white;
+    border-radius: 8px;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.2);
+    border: none;
+}
+.z-901 {
+    z-index: 901 !important;
+}
+/* Success Toast */
+.custom-toast-success {
+    background-color: #28a746b9; /* Bootstrap's success green */
+}
+
+/* Failure/Error Toast */
+.custom-toast-error {
+    background-color: #dc3545b9; /* Bootstrap's danger red */
+}
+
+/* Warning Toast */
+.custom-toast-warning {
+    background-color: #ffc107b9; /* Bootstrap's warning yellow */
+}
+
+/* Info Toast */
+.custom-toast-info {
+    background-color: #17a2b8b9; /* Bootstrap's info blue */
+}
+
+@keyframes toastSlideIn {
+    0% {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    100% {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+@keyframes toastFadeOut {
+    0% {
+        opacity: 1;
+    }
+    100% {
+        opacity: 0;
+    }
+}
+
+.toast {
+    animation: toastSlideIn 0.5s ease-out forwards;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px); /* for Safari */
+}
+
+.toast.fade-out {
+    animation: toastFadeOut 0.5s ease-out forwards;
+}

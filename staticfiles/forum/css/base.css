@@ -1,0 +1,58 @@
+/* Core styles that apply globally */
+/* Variables */
+
+@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@200;400;600;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,100;0,300;0,400;0,700;0,900;1,100;1,300;1,400;1,700;1,900&family=Nunito+Sans:ital,opsz,wght@0,6..12,200..1000;1,6..12,200..1000&family=Overlock&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,100;0,300;0,400;0,700;0,900;1,100;1,300;1,400;1,700;1,900&family=Nunito+Sans:ital,opsz,wght@0,6..12,200..1000;1,6..12,200..1000&family=Overlock&display=swap');
+
+
+:root {
+  /* Colors */
+  --primary-color: #004080;
+  --secondary-color: #21a8f3;
+  --background-color: #f5f9fc;
+  --text-color: #333;
+  --border-color: #e0e0e0;
+  
+  /* Typography */
+  --font-primary: "Lato";
+  --font-secondary: "Nunito";
+  
+  /* Spacing */
+  --spacing-sm: 0.5rem;
+  --spacing-md: 1rem;
+  --spacing-lg: 2rem;
+  
+}
+
+/* Global Reset & Base Styles */
+body {
+  background: radial-gradient(circle, rgba(170,183,254,1) 0%, rgba(255,255,255,1) 100%);
+}
+
+/* Typography */
+h1 { font-family: var(--font-primary); }
+h2 { font-family: var(--font-secondary); }
+h3 { font-family: var(--font-secondary); }
+h4 { font-family: var(--font-secondary); }
+p { font-family: var(--font-secondary); }
+
+
+/* Form Controls */
+.form-control:focus {
+  box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.15);
+}
+
+/* Global animations */
+.btn:hover{
+    transform: scale(1.05);
+}
+
+.btn {
+    transition: all 0.2s ease;
+}
+
+.logo {
+    height: 40px; 
+    width: auto; 
+}
