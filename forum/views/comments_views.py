@@ -2,20 +2,32 @@
 from django.shortcuts import get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
-from forum.models import Post, Solution, Comment
+from forum.models import Post, Solution, Comment, CommentUpvote
 from forum.forms import CommentForm
+from django.shortcuts import render, get_object_or_404, redirect
+from django.contrib import messages
+import json
 
 @login_required
 def create_comment(request, solution_id):
     if request.method == 'POST':
         solution = get_object_or_404(Solution, id=solution_id)
-        comment_form = CommentForm(request.POST)
-        if comment_form.is_valid():
-            comment = comment_form.save(commit=False)
-            comment.solution = solution
-            comment.author = request.user
-            comment.save()
-            return JsonResponse({'message': 'Comment created successfully.'}, status=201)
+        data = json.loads(request.body) 
+        content = data.get('content')
+        parent_id = data.get('parent_id') 
+        
+        if content:
+            parent_comment = None
+            if parent_id:
+                parent_comment = get_object_or_404(Comment, id=parent_id)
+            
+            comment = Comment.objects.create(
+                solution=solution, 
+                author=request.user, 
+                content=content,
+                parent=parent_comment
+            )
+            return JsonResponse({'message': 'Comment created successfully.', 'comment_id': comment.id}, status=201)
 
     return JsonResponse({'error': 'Invalid request'}, status=400)
 
@@ -24,9 +36,12 @@ def edit_comment(request, comment_id):
     comment = get_object_or_404(Comment, id=comment_id, author=request.user)
 
     if request.method == 'POST':
-        comment_form = CommentForm(request.POST, instance=comment)
-        if comment_form.is_valid():
-            comment_form.save()
+        data = json.loads(request.body)
+        content = data.get('content')
+
+        if content:
+            comment.content = content
+            comment.save()
             return JsonResponse({'message': 'Comment updated successfully.'}, status=200)
 
     return JsonResponse({'error': 'Invalid request'}, status=400)
@@ -40,16 +55,3 @@ def delete_comment(request, comment_id):
         return JsonResponse({'message': 'Comment deleted successfully.'}, status=200)
 
     return JsonResponse({'error': 'Invalid request'}, status=400)
-
-
-@login_required
-def upvote_comment(request, comment_id):
-    comment = get_object_or_404(Comment, id=comment_id)
-    if not CommentUpvote.objects.filter(comment=comment, user=request.user).exists():
-        CommentUpvote.objects.create(comment=comment, user=request.user)
-        comment.upvotes += 1
-        comment.save()
-        messages.success(request, 'Comment upvoted successfully!')
-    else:
-        messages.warning(request, 'You have already upvoted this comment.')
-    return redirect('post_detail', post_id=comment.solution.post.id)

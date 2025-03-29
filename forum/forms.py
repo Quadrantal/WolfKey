@@ -76,6 +76,12 @@ class CommentForm(forms.ModelForm):
         widgets = {
             'content': forms.Textarea(attrs={'rows': 2, 'placeholder': 'Write your comment here...'}),
         }
+
+    def clean_content(self):
+        data = self.cleaned_data['content']
+        if not isinstance(data, dict):  # Ensure content is valid JSON
+            raise forms.ValidationError("Invalid content format.")
+        return data
         
 class TagForm(forms.ModelForm):
     class Meta:

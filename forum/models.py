@@ -209,9 +209,10 @@ class Solution(models.Model):
 class Comment(models.Model):
     solution = models.ForeignKey(Solution, on_delete=models.CASCADE, related_name='comments')
     author = models.ForeignKey(User, on_delete=models.CASCADE)
-    content = models.TextField()
+    content = models.JSONField() 
     created_at = models.DateTimeField(auto_now_add=True)
     upvotes = models.IntegerField(default=0)
+    parent = models.ForeignKey('self', null=True, blank=True, on_delete=models.CASCADE, related_name='replies') 
 
     class Meta:
         ordering = ['-created_at']

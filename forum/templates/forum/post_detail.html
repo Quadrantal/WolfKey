@@ -243,14 +243,10 @@
             <!-- Comments -->
             <div class="comment-section mt-3">
                 {% for comment in solution.comments.all %}
-                <div class="comment mb-2">
-                    <div class="comment-content">{{ comment.content }}</div>
-                    <div class="small text-muted">
-                        – {{ comment.author.first_name }} {{comment.author.last_name}} {{ comment.created_at|date:"M d,
-                        Y" }}
-                    </div>
-                </div>
-                {% endfor %}
+                {% if not comment.parent %}  <!-- Only show top-level comments -->
+                    {% include 'comment_item.html' with comment=comment %}
+                {% endif %}
+            {% endfor %}
             </div>
         </div>
     </div>
