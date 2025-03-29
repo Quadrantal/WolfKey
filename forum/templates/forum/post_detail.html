@@ -5,11 +5,8 @@
 <head>
     {% block head %}
     {{ block.super }}
-    <link rel="stylesheet" href="{% static 'forum/css/carousel.css' %}">
-    <link rel="stylesheet" href="{% static 'forum/css/files-display.css' %}">
     <link rel="stylesheet" href="{% static 'forum/css/editorjs.css' %}">
     <link rel="stylesheet" href="{% static 'forum/css/post-detail.css' %}">
-    <link href="https://vjs.zencdn.net/8.16.1/video-js.css" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.19/dist/katex.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/default.min.css">
     {% endblock %}
@@ -83,11 +80,11 @@
         </div>
     </div>
 </div>
-<div id="solutions-container">
+<div id="solutions-container" >
     {% with accepted=post.accepted_solution %}
     {% if accepted %}
     <!-- Show accepted solution first -->
-    <div class="solution-container accepted-solution">
+    <div class="solution-container accepted-solution" data-solution-id="{{ post.accepted_solution.id }}">
         <!-- Add accepted solution badge -->
         <div class="vote-cell">
             <form method="post" action="{% url 'upvote_solution' accepted.id %}" class="d-inline">
@@ -146,9 +143,8 @@
                 <div class="default-actions">
                     <button class="btn btn-outline-secondary btn-sm"
                         onclick="showEditSolutionForm('{{ accepted.id }}')">Edit</button>
-                    <form method="post" action="{% url 'post_detail' post.id %}" class="d-inline">
+                    <form id="delete-solution-form" method="post" action="{% url 'delete_solution' accepted.id %}" class="d-inline">
                         {% csrf_token %}
-                        <input type="hidden" name="action" value="delete_solution">
                         <input type="hidden" name="solution_id" value="{{ accepted.id }}">
                         <button type="submit" class="btn btn-outline-danger btn-sm">Delete</button>
                     </form>
@@ -168,7 +164,7 @@
     <!-- Show other solutions -->
     {% for solution in solutions %}
     {% if solution != accepted %}
-    <div class="solution-container">
+    <div class="solution-container" data-solution-id="{{ solution.id }}">
         <!-- Solution Vote Cell -->
         <div class="vote-cell">
             <form method="post" action="{% url 'upvote_solution' solution.id %}" class="d-inline">
@@ -229,9 +225,8 @@
                 <div class="default-actions">
                     <button class="btn btn-outline-secondary btn-sm"
                         onclick="showEditSolutionForm('{{ solution.id }}')">Edit</button>
-                    <form method="post" action="{% url 'post_detail' post.id %}" class="d-inline">
+                    <form method="post" action="{% url 'delete_solution' solution.id %}" class="d-inline" id="delete-solution-form">
                         {% csrf_token %}
-                        <input type="hidden" name="action" value="delete_solution">
                         <input type="hidden" name="solution_id" value="{{ solution.id }}">
                         <button type="submit" class="btn btn-outline-danger btn-sm">Delete</button>
                     </form>
@@ -269,7 +264,7 @@
 <div id="solution-form-container" class="card mt-4">
     <div class="card-body">
         <h4>Your Solution</h4>
-        <form method="post" action="{% url 'post_detail' post.id %}" id="solutionForm">
+        <form method="post" action="{% url 'create_solution' post.id %}" id="solutionForm">
             {% csrf_token %}
             <input type="hidden" name="action" value="create_solution">
             <input type="hidden" id="solution-content" name="content">
@@ -414,27 +409,45 @@
 
                 try {
                     const outputData = await editor.save();
-                    const form = document.createElement('form');
-                    form.method = 'POST';
 
-                    // Create form content safely
-                    const csrf = document.querySelector('[name=csrfmiddlewaretoken]').value;
-                    const formContent = `
-                    <input type="hidden" name="csrfmiddlewaretoken" value="${csrf}">
-                    <input type="hidden" name="action" value="edit_solution">
-                    <input type="hidden" name="solution_id" value="${solutionId}">
-                        <input type="hidden" name="content" value='${JSON.stringify(outputData).replace(/'/g, "&#39;")}'>
-                `;
+                    const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
 
-                    form.innerHTML = formContent;
-                    document.body.appendChild(form);
-                    form.submit();
+                    const editSolutionUrl = `/solution/${solutionId}/edit/`;  
+
+                    const formData = new FormData();
+                    formData.append('csrfmiddlewaretoken', csrfToken);
+                    formData.append('solution_id', solutionId);
+                    formData.append('content', JSON.stringify(outputData));
+
+                    // Send request via fetch()
+                    const response = await fetch(editSolutionUrl, {
+                        method: 'POST',
+                        body: formData,
+                    });
+
+                    const data = await response.json();
+
+                    if (data.messages) {
+                        data.messages.forEach(function(messageData) {
+                            showMessage(messageData.message, messageData.tags);
+                        });
+                    }
+
+                    if (data.status === 'success') {
+                        toggleSolutionEditor(solutionId);
+                    }else{
+                        console.error('Failed to save solution:', data.message);
+                    }
                 } catch (error) {
                     console.error('Failed to save edited solution:', error);
                 }
             };
 
             window.cancelSolutionEdit = function (solutionId) {
+                toggleSolutionEditor(solutionId);
+            };
+
+            window.toggleSolutionEditor = function(solutionId){
                 const editor = solutionEditors.get(parseInt(solutionId));
                 if (!editor) return;
 
@@ -467,7 +480,45 @@
                         }
                     });
                 }, 100);
-            };
+            }
+
+
+            document.getElementById('delete-solution-form').addEventListener('submit', function(event) { 
+                event.preventDefault();
+                var formData = new FormData(this); 
+                var actionUrl = document.getElementById('delete-solution-form').action;
+                console.log(this.action);
+                try {
+                    fetch(actionUrl, {
+                        method: 'POST',
+                        body: formData,
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.messages) {
+                            data.messages.forEach(function(messageData) {
+                                showMessage(messageData.message, messageData.tags);
+                            });
+                        }
+                        var solutionId = this.querySelector('input[name="solution_id"]').value;
+                        var solutionContainer = document.querySelector('.solution-container[data-solution-id="'+solutionId+'"]');
+
+                        console.log(solutionId);
+                        console.log(solutionContainer);
+
+                        if (solutionContainer) {
+                            solutionContainer.remove(); 
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                    });
+                } catch (error) {
+                    console.error('Failed to save edited solution:', error);
+                }
+                this.remove();
+            });
+            
 
             // Initialize solution sorting functionality
             initSolutionSorting();

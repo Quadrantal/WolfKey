@@ -65,3 +65,8 @@ math-field::part(menu-item) {
 .inline-math-floating-container {
     z-index: 9999;
 }
+
+
+.codex-editor__redactor {
+    padding-bottom: 10px !important;
+  }

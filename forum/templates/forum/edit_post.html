@@ -9,7 +9,7 @@
     {% load static %}
     <link rel="stylesheet" href="{% static 'forum/css/editorjs.css' %}">
     <link rel="stylesheet" href="{% static 'forum/css/course-selector.css' %}"> 
-    <link rel="stylesheet" href="{% static 'forum/css/post-form.css' %}">
+    <link rel="stylesheet" href="{% static 'forum/css/post-detail.css' %}">
 
 
 
@@ -18,7 +18,6 @@
 
 {% block content %}
 <div class="row justify-content-center">
-    <div class="col-md-8">
         <div class="card">
             <div class="card-body">
                 <h2 class="card-title">{{ action }} Post</h2>
@@ -39,12 +38,11 @@
                     </div>
 
                     <button type="submit" class="btn btn-primary">{{ action }} Finish</button>
-                    <a href="{% url 'home' %}" class="btn btn-secondary">Cancel</a>
+                    <a href="{% url 'for_you' %}" class="btn btn-secondary">Cancel</a>
                 </form>
             </div>
         </div>
     </div>
-</div>
 {% endblock %}
 
 {% block scripts %}
