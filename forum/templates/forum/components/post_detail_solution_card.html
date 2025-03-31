@@ -77,12 +77,20 @@
         {% endif %}
 
         <!-- Comments -->
-        <div class="comment-section mt-3">
-            {% for comment in solution.comments.all %}
-            {% if not comment.parent %}  <!-- Only show top-level comments -->
-                {% include 'comment_item.html' with comment=comment %}
+        <div class="comments-section">
+            <div class="comments">
+                {% for comment in solution.comments.all %}
+                {% if comment.get_depth == 0 %}
+                    {% include 'forum/components/comment.html' with comment=comment %}
+                {% endif %}
+                    {% endfor %}
+            </div>
+            {% if user.is_authenticated %}
+            <button class="reply-button btn btn-outline-secondary btn-sm mt-2" 
+                    data-solution-id="{{ solution.id }}">
+                Add a comment
+            </button>
             {% endif %}
-            {% endfor %}
         </div>
     </div>
 </div>

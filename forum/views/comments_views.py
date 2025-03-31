@@ -6,6 +6,8 @@ from forum.models import Post, Solution, Comment
 from forum.forms import CommentForm
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib import messages
+from django.core.serializers.json import DjangoJSONEncoder
+from django.template.loader import render_to_string
 import json
 
 @login_required
@@ -55,3 +57,37 @@ def delete_comment(request, comment_id):
         return JsonResponse({'message': 'Comment deleted successfully.'}, status=200)
 
     return JsonResponse({'error': 'Invalid request'}, status=400)
+
+def get_comments(request, solution_id):
+    solution = get_object_or_404(Solution, id=solution_id)
+    comments = Comment.objects.filter(solution=solution).order_by('created_at')
+
+    def process_comment(comment):
+        return {
+            'id': comment.id,
+            'content': comment.content,
+            'author': {
+                'name': comment.author.get_full_name(),
+                'id': comment.author.id
+            },
+            'created_at': comment.created_at.strftime("%Y-%m-%d %H:%M:%S"),
+            'replies': [process_comment(reply) for reply in comment.replies.all()]
+        }
+    
+    comments_data = [process_comment(comment) for comment in comments]
+
+    
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        print("--------------------------------------")
+        return JsonResponse({
+            'comments': comments_data,
+            'html': render_to_string('forum/components/comments_list.html', {
+                'comments': comments,
+                'solution': solution
+            }, request=request)
+        })
+    
+    return render(request, 'forum/components/comments_list.html', {
+        'comments': comments,
+        'solution': solution
+    })

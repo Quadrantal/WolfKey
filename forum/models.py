@@ -211,7 +211,6 @@ class Comment(models.Model):
     author = models.ForeignKey(User, on_delete=models.CASCADE)
     content = models.JSONField() 
     created_at = models.DateTimeField(auto_now_add=True)
-    upvotes = models.IntegerField(default=0)
     parent = models.ForeignKey('self', null=True, blank=True, on_delete=models.CASCADE, related_name='replies') 
 
     class Meta:
@@ -219,6 +218,22 @@ class Comment(models.Model):
 
     def __str__(self):
         return f'Comment by {self.author.username}'
+    
+    @property
+    def replies(self):
+        return Comment.objects.filter(parent=self).order_by('created_at')
+    
+    def get_absolute_url(self):
+        return f'#comment-{self.id}'
+    
+    def get_depth(self):
+        """Calculate the nesting depth of this comment"""
+        depth = 0
+        parent = self.parent
+        while parent:
+            depth += 1
+            parent = parent.parent
+        return min(depth, 5)  # Limit maximum nesting depth to 5
 
 class SolutionUpvote(models.Model):
     solution = models.ForeignKey(Solution, on_delete=models.CASCADE)

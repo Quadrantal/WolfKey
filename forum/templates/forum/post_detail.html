@@ -68,7 +68,6 @@
 {% block scripts %}
 
 <script defer src="//unpkg.com/mathlive"></script>
-<link rel="stylesheet" href="https://unpkg.com/mathlive/dist/mathlive-static.css">
 
 <!-- Initialize Editor.js -->
 <script src="https://cdn.jsdelivr.net/npm/@editorjs/editorjs@latest"></script>
@@ -85,12 +84,13 @@
 <script src="{% static 'forum/js/inline-math.js' %}" defer></script>
 <script src="{% static 'forum/js/editor-config.js' %}" defer></script>
 
-<script src="https://unpkg.com/mathlive/dist/mathlive.min.js" defer></script>
+<script src="https://cdn.jsdelivr.net/npm/mathlive@0.105.0/mathlive.min.js" defer></script>
 <script type="module">
     import { EditorManager } from '{% static "forum/js/editor-manager.js" %}';
     import { VotingSystem } from '{% static "forum/js/voting-system.js" %}';
     import { SolutionEditor } from '{% static "forum/js/solution-editing.js" %}';
     import { SolutionSorter } from '{% static "forum/js/solution-sorting.js" %}';
+    import { CommentEditor } from '{% static "forum/js/comment-editing.js" %}';
 
     document.addEventListener("DOMContentLoaded", async function () {
     console.log("Boo 1");
@@ -111,6 +111,12 @@
         // Initialize solution editors
         const processedSolutions = JSON.parse('{{ processed_solutions_json|escapejs }}');
         await editorManager.initializeSolutionEditors(processedSolutions, '{{ csrf_token }}');
+
+        for (const solution of processedSolutions) {
+            if (solution.comments && solution.comments.length > 0) {
+                await editorManager.initializeCommentEditors(solution.comments);
+            }
+        }
 
         // Initialize solution form editor
 
@@ -148,6 +154,8 @@
         window.showEditSolutionForm = solutionEditor.showEditForm.bind(solutionEditor);
         window.saveSolutionEdit = solutionEditor.saveSolution.bind(solutionEditor);
         window.cancelSolutionEdit = solutionEditor.cancelEdit.bind(solutionEditor);
+
+        const commentEditor = new CommentEditor(editorManager, '{{ csrf_token }}');
 
         // Initialize solution sorting
         new SolutionSorter();

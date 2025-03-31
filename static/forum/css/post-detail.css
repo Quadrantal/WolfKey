@@ -70,12 +70,6 @@
   background-color: #e0e0e0;
 }
 
-.comment-section {
-  background-color: #f8f9fa;
-  padding: 15px;
-  margin-top: 10px;
-  border-top: 1px solid #e0e0e0;
-}
 
 .vote-cell {
   display: flex;
@@ -364,3 +358,83 @@
     .inline-math {
         margin: 0px !important;
     }
+
+    /* Comment styling */
+.comment {
+  position: relative;
+}
+.comments {
+  border-left: 2px solid #e1e4e8;
+}
+
+.comment-reply {
+  margin-left: 2rem;
+}
+
+.comment-indicator {
+  position: absolute;
+  left: -2px;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background-color: transparent;
+  transition: background-color 0.2s ease;
+}
+
+.comment:hover > .comment-content > .comment-indicator {
+  background-color: #0366d6;
+}
+
+/* Increase indentation based on nesting level */
+.comment[data-depth="1"] { margin-left: 2rem; }
+.comment[data-depth="2"] { margin-left: 4rem; }
+.comment[data-depth="3"] { margin-left: 6rem; }
+.comment[data-depth="4"] { margin-left: 8rem; }
+.comment[data-depth="5"] { margin-left: 10rem; }
+
+.comment[data-depth="1"] {border-left: 2px solid #e1e4e8;}
+.comment[data-depth="2"] {border-left: 2px solid #e1e4e8;}
+.comment[data-depth="3"] {border-left: 2px solid #e1e4e8;}
+.comment[data-depth="4"] {border-left: 2px solid #e1e4e8;}
+.comment[data-depth="5"] {border-left: 2px solid #e1e4e8;}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .comment[data-depth="1"] { margin-left: 1rem; }
+  .comment[data-depth="2"] { margin-left: 2rem; }
+  .comment[data-depth="3"] { margin-left: 3rem; }
+  .comment[data-depth="4"] { margin-left: 4rem; }
+  .comment[data-depth="5"] { margin-left: 5rem; }
+}
+
+/* Comment content spacing */
+.comment-content {
+  position: relative;
+  margin-bottom: 0.5rem;
+}
+
+.replies {
+  position: relative;
+}
+
+.codex-editor__redactor {
+  padding-bottom: 0px !important;
+  margin-left: 5px;
+}
+
+.comment-metadata{
+  margin-left: auto;
+}
+
+.comment-info {
+  margin-left: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.comment-actions {
+  margin-left: 0.5rem;
+}
+
+div[id^="comment-form-"][id$="-root"] {
+  border-top: 2px solid #e1e4e8;
+}

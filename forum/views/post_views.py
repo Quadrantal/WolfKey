@@ -90,16 +90,24 @@ def post_detail(request, post_id):
     
     processed_solutions = []
     for solution in solutions:
-        # print("Solution: ", solution.content)
         try:
             solution_content = solution.content
-            # If content is a string, convert to object
-            # print(type(solution_content))
             if isinstance(solution_content, str):
                 solution_content = selective_quote_replace(solution_content)
                 solution_content = json.loads(solution_content)
-
-            # print("Solution: ", solution_content)
+            
+            # Get comments for this solution
+            comments = solution.comments.select_related('author').order_by('created_at')
+            processed_comments = []
+            
+            for comment in comments:
+                processed_comments.append({
+                    'id': comment.id,
+                    'content': comment.content,
+                    'author': f"{comment.author.first_name} {comment.author.last_name}",
+                    'created_at': comment.created_at.strftime("%Y-%m-%d %H:%M:%S"),
+                    'parent_id': comment.parent_id,
+                })
                 
             processed_solutions.append({
                 'id': solution.id,
@@ -108,6 +116,7 @@ def post_detail(request, post_id):
                 'created_at': solution.created_at.strftime("%Y-%m-%d %H:%M:%S"),
                 'upvotes': solution.upvotes,
                 'downvotes': solution.downvotes,
+                'comments': processed_comments,
             })
         except Exception as e:
             logger.error(f"Error processing solution {solution.id}: {e}")
@@ -120,8 +129,9 @@ def post_detail(request, post_id):
                 'created_at': solution.created_at.strftime("%Y-%m-%d %H:%M:%S"),
                 'upvotes': solution.upvotes,
                 'downvotes': solution.downvotes,
+                'comments': [],
             })
-    # print("Author", post.author.get_full_name())
+
 
     context = {
         'post': post,

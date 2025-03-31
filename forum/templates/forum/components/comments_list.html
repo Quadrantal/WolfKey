@@ -1,0 +1,9 @@
+<script type="application/json" id="comments-data-{{ solution.id }}">
+    {{ comments_data|safe }}
+</script>
+{% for comment in comments %}
+    {% if comment.get_depth == 0 %}
+
+    {% include 'forum/components/comment.html' with comment=comment %}
+    {% endif %}
+{% endfor %}
