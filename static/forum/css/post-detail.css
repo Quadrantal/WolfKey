@@ -367,10 +367,6 @@
   border-left: 2px solid #e1e4e8;
 }
 
-.comment-reply {
-  margin-left: 2rem;
-}
-
 .comment-indicator {
   position: absolute;
   left: -2px;
@@ -389,22 +385,17 @@
 .comment[data-depth="1"] { margin-left: 2rem; }
 .comment[data-depth="2"] { margin-left: 4rem; }
 .comment[data-depth="3"] { margin-left: 6rem; }
-.comment[data-depth="4"] { margin-left: 8rem; }
-.comment[data-depth="5"] { margin-left: 10rem; }
 
 .comment[data-depth="1"] {border-left: 2px solid #e1e4e8;}
 .comment[data-depth="2"] {border-left: 2px solid #e1e4e8;}
 .comment[data-depth="3"] {border-left: 2px solid #e1e4e8;}
-.comment[data-depth="4"] {border-left: 2px solid #e1e4e8;}
-.comment[data-depth="5"] {border-left: 2px solid #e1e4e8;}
+
 
 /* Responsive adjustments */
 @media (max-width: 768px) {
   .comment[data-depth="1"] { margin-left: 1rem; }
   .comment[data-depth="2"] { margin-left: 2rem; }
   .comment[data-depth="3"] { margin-left: 3rem; }
-  .comment[data-depth="4"] { margin-left: 4rem; }
-  .comment[data-depth="5"] { margin-left: 5rem; }
 }
 
 /* Comment content spacing */

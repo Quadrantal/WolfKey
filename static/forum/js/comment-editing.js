@@ -100,6 +100,12 @@ export class CommentEditor {
 
             if (response.ok) {
                 const data = await response.json();
+                
+                if (data.messages) {
+                    data.messages.forEach(messageData => {
+                        showMessage(messageData.message, messageData.tags);
+                    });
+                }
                 this.removeCommentForm(formId);
                 this.refreshComments(solutionId);
             }
@@ -206,9 +212,16 @@ export class CommentEditor {
                 body: JSON.stringify({ content })
             });
 
+            const data = await response.json();
+            if (data.messages) {
+                data.messages.forEach(messageData => {
+                    showMessage(messageData.message, messageData.tags);
+                });
+            }
+
 
             if (response.ok) {
-                await this.editorManager.toggleEditorReadOnly(`comment-${commentId}`, true);
+                await this.editorManager.toggleEditorReadOnly(commentId, true);
                 this.toggleCommentActions(commentId, false);
                 delete this.originalContents[commentId];
                 this.reinitMathFields(commentId);

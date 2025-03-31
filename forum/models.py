@@ -205,6 +205,13 @@ class Solution(models.Model):
 
     def __str__(self):
         return f'Solution by {self.author.username} for {self.post.title}'
+    
+    def get_absolute_url(self):
+        """
+        Returns the URL to the specific solution element on the post detail page.
+        """
+        return f"{self.post.get_absolute_url()}#solution-{self.id}"
+        
 
 class Comment(models.Model):
     solution = models.ForeignKey(Solution, on_delete=models.CASCADE, related_name='comments')

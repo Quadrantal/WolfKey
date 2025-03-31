@@ -93,7 +93,6 @@
     import { CommentEditor } from '{% static "forum/js/comment-editing.js" %}';
 
     document.addEventListener("DOMContentLoaded", async function () {
-    console.log("Boo 1");
 
     try {
 
@@ -104,10 +103,8 @@
         
         // Initialize main post editor
         const contentJSON = '{{ content_json|escapejs }}';
-        console.log(contentJSON);
         const content = JSON.parse(contentJSON);
         await editorManager.initializeMainEditor('editorjs', content, '{{ csrf_token }}', true);
-        console.log("Boo");
         // Initialize solution editors
         const processedSolutions = JSON.parse('{{ processed_solutions_json|escapejs }}');
         await editorManager.initializeSolutionEditors(processedSolutions, '{{ csrf_token }}');
@@ -121,7 +118,6 @@
         // Initialize solution form editor
 
         const user_posted_a_solution = {{ has_solution_from_user|yesno:"true,false"|safe }};
-        console.log(user_posted_a_solution);
         if(!user_posted_a_solution){
             var solutionFormEditor = await editorManager.initializeSolutionFormEditor(
             'editorjs-solution-form',

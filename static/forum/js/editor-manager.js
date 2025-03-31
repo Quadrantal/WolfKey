@@ -41,7 +41,6 @@ export class EditorManager {
         try {
             comments.forEach(comment => {
                 try {
-                    console.log(comment.id);
                     const editor = createEditor(
                         `editorjs-comment-${comment.id}`,
                         comment.content,
@@ -49,7 +48,6 @@ export class EditorManager {
                         true
                     );
                     this.editors.set(comment.id, editor);
-                    console.log(this.editors.get(comment.id));
                 } catch (commentError) {
                     console.error(`Error initializing solution ${solution.id}:`, commentError);
                 }
@@ -101,7 +99,6 @@ export class EditorManager {
     toggleEditorReadOnly(editorId, readOnly) {
 
         const id = Number(editorId);
-
         const editor = this.getEditor(id);
         if (editor) {
             editor.readOnly.toggle(readOnly);

@@ -8,9 +8,10 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib import messages
 from django.core.serializers.json import DjangoJSONEncoder
 from django.template.loader import render_to_string
+from .notification_views import send_notification, send_comment_notifications
 import json
+from .utils import process_messages_to_json
 
-@login_required
 def create_comment(request, solution_id):
     if request.method == 'POST':
         solution = get_object_or_404(Solution, id=solution_id)
@@ -23,13 +24,20 @@ def create_comment(request, solution_id):
             if parent_id:
                 parent_comment = get_object_or_404(Comment, id=parent_id)
             
+            # Create the comment
             comment = Comment.objects.create(
                 solution=solution, 
                 author=request.user, 
                 content=content,
                 parent=parent_comment
             )
-            return JsonResponse({'message': 'Comment created successfully.', 'comment_id': comment.id}, status=201)
+
+            # Send notifications
+            send_comment_notifications(comment, solution, parent_comment)
+
+            messages.success(request, 'Comment created succesfully')
+            messages_data = process_messages_to_json(request)
+            return JsonResponse({'status': 'success','messages': messages_data}, status=201)
 
     return JsonResponse({'error': 'Invalid request'}, status=400)
 
@@ -44,7 +52,9 @@ def edit_comment(request, comment_id):
         if content:
             comment.content = content
             comment.save()
-            return JsonResponse({'message': 'Comment updated successfully.'}, status=200)
+            messages.success(request, 'Solution edited succesfully')
+            messages_data = process_messages_to_json(request)
+            return JsonResponse({'status': 'success','messages': messages_data}, status=200)
 
     return JsonResponse({'error': 'Invalid request'}, status=400)
 
@@ -54,7 +64,9 @@ def delete_comment(request, comment_id):
 
     if request.method == 'POST':
         comment.delete()
-        return JsonResponse({'message': 'Comment deleted successfully.'}, status=200)
+        messages.success(request, 'Solution deleted succesfully')
+        messages_data = process_messages_to_json(request)
+        return JsonResponse({'status': 'success','messages': messages_data}, status=200)
 
     return JsonResponse({'error': 'Invalid request'}, status=400)
 
