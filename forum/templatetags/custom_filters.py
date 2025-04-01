@@ -35,3 +35,8 @@ def has_upvoted(solution, user):
 @register.filter
 def has_downvoted(solution, user):
     return solution.solutiondownvote_set.filter(user=user).exists()
+
+@register.simple_tag
+def increment(value):
+    """Increments a counter by 1."""
+    return value + 1

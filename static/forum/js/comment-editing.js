@@ -8,7 +8,8 @@ export class CommentEditor {
         this.saveCommentEdit = this.saveCommentEdit.bind(this);
         this.cancelCommentEdit = this.cancelCommentEdit.bind(this);
         this.originalContents = {};
-
+        this.toggleReplies = this.toggleReplies.bind(this);
+        this.toggleRootComments = this.toggleRootComments.bind(this);
         this.bindEvents();
     }
 
@@ -38,6 +39,14 @@ export class CommentEditor {
             if (button.matches('.delete-comment')) {
                 const commentId = Number(button.dataset.commentId);
                 this.deleteComment(commentId);
+            }
+            if (button.matches('.toggle-replies')) {
+                const commentId = Number(button.dataset.commentId);
+                this.toggleReplies(button, commentId);
+            }
+            if (button.matches('.toggle-root-comments')) {
+                const solutionId = Number(button.dataset.solutionId);
+                this.toggleRootComments(button, solutionId);
             }
         });
     }
@@ -294,6 +303,33 @@ export class CommentEditor {
         } catch (error) {
             console.error('Delete comment failed:', error);
             showMessage('Failed to delete comment', 'error');
+        }
+    }
+
+    toggleReplies(button, commentId) {
+        const comment = document.querySelector(`#comment-${commentId}`);
+        const collapsedReplies = comment.querySelector('.collapsed-replies');
+        
+        if (collapsedReplies) {
+            const isHidden = collapsedReplies.style.display === 'none';
+            collapsedReplies.style.display = isHidden ? 'block' : 'none';
+            button.textContent = isHidden ? 
+                button.dataset.hideText : 
+                button.dataset.showText;
+        }
+    }
+
+
+    toggleRootComments(button, solutionId) {
+        const container = button.closest('.root-comments');
+        const collapsedComments = container.querySelector('.collapsed-root-comments');
+        
+        if (collapsedComments) {
+            const isHidden = collapsedComments.style.display === 'none';
+            collapsedComments.style.display = isHidden ? 'block' : 'none';
+            button.textContent = isHidden ? 
+                button.dataset.hideText : 
+                button.dataset.showText;
         }
     }
 

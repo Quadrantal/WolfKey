@@ -107,6 +107,7 @@ def post_detail(request, post_id):
                     'author': f"{comment.author.first_name} {comment.author.last_name}",
                     'created_at': comment.created_at.strftime("%Y-%m-%d %H:%M:%S"),
                     'parent_id': comment.parent_id,
+                    'depth' : comment.get_depth(),
                 })
                 
             processed_solutions.append({
@@ -132,7 +133,7 @@ def post_detail(request, post_id):
                 'comments': [],
             })
 
-
+    root_comments_count = sum(1 for comment in comments if comment.get_depth() == 0)
     context = {
         'post': post,
         'solutions': solutions,
@@ -140,6 +141,7 @@ def post_detail(request, post_id):
         'processed_solutions_json': json.dumps(processed_solutions),
         'courses': post.courses.all(),
         'has_solution_from_user': has_solution, 
+        "root_comments_count": root_comments_count,
     }
 
     return render(request, 'forum/post_detail.html', context)

@@ -47,7 +47,23 @@
     </div>
     <div class="replies">
         {% for reply in comment.replies.all %}
-            {% include 'forum/components/comment.html' with comment=reply %}
+            {% if forloop.counter <= 2 %}
+                {% include 'forum/components/comment.html' with comment=reply %}
+            {% elif forloop.counter == 3 %}
+                <div class="collapsed-replies" style="display: none;">
+                    {% include 'forum/components/comment.html' with comment=reply %}
+            {% else %}
+                    {% include 'forum/components/comment.html' with comment=reply %}
+            {% endif %}
         {% endfor %}
+        {% if comment.replies.count > 2 %}
+            </div>
+            <button class="toggle-replies btn btn-link btn-sm" 
+                    data-comment-id="{{ comment.id }}"
+                    data-show-text="Show {{ comment.replies.count|add:'-3' }} more replies"
+                    data-hide-text="Hide replies">
+                Show {{ comment.replies.count|add:'-3' }} more replies
+            </button>
+        {% endif %}
     </div>
 </div>

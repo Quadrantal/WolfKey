@@ -79,11 +79,7 @@
         <!-- Comments -->
         <div class="comments-section">
             <div class="comments">
-                {% for comment in solution.comments.all %}
-                {% if comment.get_depth == 0 %}
-                    {% include 'forum/components/comment.html' with comment=comment %}
-                {% endif %}
-                    {% endfor %}
+                {% include 'forum/components/comments_list.html' with comments=solution.comments.all %}
             </div>
             {% if user.is_authenticated %}
             <button class="reply-button btn btn-outline-secondary btn-sm mt-2" 

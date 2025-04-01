@@ -386,10 +386,14 @@
 .comment[data-depth="2"] { margin-left: 4rem; }
 .comment[data-depth="3"] { margin-left: 6rem; }
 
+.comment[data-depth="0"] > .replies > .toggle-replies { margin-left: 2rem !important ;}
+.comment[data-depth="1"] > .replies > .toggle-replies { margin-left: 4rem !important; }
+.comment[data-depth="2"] > .replies > .toggle-replies { margin-left: 6rem !important; }
+
+
 .comment[data-depth="1"] {border-left: 2px solid #e1e4e8;}
 .comment[data-depth="2"] {border-left: 2px solid #e1e4e8;}
 .comment[data-depth="3"] {border-left: 2px solid #e1e4e8;}
-
 
 /* Responsive adjustments */
 @media (max-width: 768px) {
