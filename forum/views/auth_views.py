@@ -5,14 +5,13 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from forum.models import User, Course, UserCourseHelp, UserCourseExperience
 from forum.forms import CustomUserCreationForm
-
+import json
 
 def register(request):
     if request.method == 'POST':
         form = CustomUserCreationForm(request.POST)
         # print(form)
         if form.is_valid():
-            user = form.save()
             current_courses = request.POST.get('current_courses', '').split(',')
             experienced_courses = request.POST.get('experienced_courses', '').split(',')
             
@@ -34,6 +33,7 @@ def register(request):
                     'courses': Course.objects.all().order_by('name'),
                     'form_errors': form.errors.as_json()  
             })
+            user = form.save()
             
             # Add current courses as help needed
             for course_id in current_courses:
@@ -54,11 +54,21 @@ def register(request):
             messages.success(request, 'Welcome to Student Forum!')
             return redirect('all_posts')
         else:
-            print(form.errors)
+            current_course_ids = request.POST.get('current_courses', '').split(',')
+            experienced_course_ids = request.POST.get('experienced_courses', '').split(',')
+
+            current_course_ids = [int(id) for id in current_course_ids if id]
+            experienced_course_ids = [int(id) for id in experienced_course_ids if id]
+
+            current_courses = list(Course.objects.filter(id__in=current_course_ids).values('id', 'name', 'code'))
+            experienced_courses = list(Course.objects.filter(id__in=experienced_course_ids).values('id', 'name', 'code'))
+
             return render(request, 'forum/register.html', {
                 'form': form,
                 'courses': Course.objects.all().order_by('name'),
-                'form_errors': form.errors.as_json()  
+                'form_errors': form.errors.as_json(),
+                'selected_current_courses': json.dumps(current_courses),
+                'selected_experienced_courses': json.dumps(experienced_courses) 
             })
     else:
         form = CustomUserCreationForm()
