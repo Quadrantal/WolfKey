@@ -23,13 +23,13 @@
 
     
 
-    {% if root_comments_count > 2 %}
+    {% if solution.root_comments_count > 2 %}
         </div>
         <button class="toggle-root-comments btn btn-link btn-sm" 
                 data-solution-id="{{ solution.id }}"
-                data-show-text="Show {{ root_comments_count|add:'-3' }} more comments"
+                data-show-text="Show {{ solution.root_comments_count|add:'-3' }} more comments"
                 data-hide-text="Hide comments">
-            Show {{ root_comments_count|add:'-3' }} more comments
+            Show {{ solution.root_comments_count|add:'-3' }} more comments
         </button>
     {% endif %}
 {% endwith %}

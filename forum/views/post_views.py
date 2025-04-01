@@ -109,7 +109,8 @@ def post_detail(request, post_id):
                     'parent_id': comment.parent_id,
                     'depth' : comment.get_depth(),
                 })
-                
+            root_comments_count = sum(1 for comment in comments if comment.get_depth() == 0)
+            
             processed_solutions.append({
                 'id': solution.id,
                 'content': solution_content,  
@@ -118,6 +119,8 @@ def post_detail(request, post_id):
                 'upvotes': solution.upvotes,
                 'downvotes': solution.downvotes,
                 'comments': processed_comments,
+                "root_comments_count": root_comments_count,
+
             })
         except Exception as e:
             logger.error(f"Error processing solution {solution.id}: {e}")
@@ -133,7 +136,6 @@ def post_detail(request, post_id):
                 'comments': [],
             })
 
-    root_comments_count = sum(1 for comment in comments if comment.get_depth() == 0)
     context = {
         'post': post,
         'solutions': solutions,
@@ -141,7 +143,6 @@ def post_detail(request, post_id):
         'processed_solutions_json': json.dumps(processed_solutions),
         'courses': post.courses.all(),
         'has_solution_from_user': has_solution, 
-        "root_comments_count": root_comments_count,
     }
 
     return render(request, 'forum/post_detail.html', context)
