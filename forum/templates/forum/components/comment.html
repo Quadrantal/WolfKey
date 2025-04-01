@@ -1,0 +1,69 @@
+<div class="comment {% if comment.parent %}comment-reply{% endif %}" 
+     id="comment-{{ comment.id }}" 
+     data-comment-id="{{ comment.id }}"
+     data-depth="{{ comment.get_depth }}">
+     <div class = "comment-header d-flex" >
+        <div class="comment-info d-flex">
+            <span class="comment-author me-2">{{ comment.author.get_full_name }}</span>
+            <span class="comment-date me-5 text-muted">{{ comment.created_at|timesince }} ago</span>
+        </div>
+    
+        <div class="comment-metadata d-flex align-items-end justify-content-between">
+            
+            <div class="comment-actions">
+                <div class="default-actions" style="display: block;">
+                    {% if user == comment.author %}
+                    <button class="edit-comment btn btn-link btn-sm" data-comment-id="{{ comment.id }}">
+                        <i class="bi bi-pencil"></i> <!-- Bootstrap icon for edit -->
+                    </button>
+                    <button class="delete-comment btn btn-link btn-sm" data-comment-id="{{ comment.id }}">
+                        <i class="bi bi-trash"></i> <!-- Bootstrap icon for delete -->
+                    </button>
+                    {% endif %}
+                    {% if user.is_authenticated %}
+                    <button class="reply-button btn btn-link btn-sm" 
+                            data-solution-id="{{ comment.solution.id }}"
+                            data-parent-id="{{ comment.id }}">
+                        <i class="bi bi-reply"></i> <!-- Bootstrap icon for reply -->
+                    </button>
+                    {% endif %}
+                </div>
+                {% if user == comment.author %}
+                <div class="edit-actions" style="display: none;">
+                    <button class="save-comment btn btn-link btn-sm" data-comment-id="{{ comment.id }}">
+                        <i class="bi bi-check-lg"></i> <!-- Bootstrap icon for save -->
+                    </button>
+                    <button class="cancel-comment btn btn-link btn-sm" data-comment-id="{{ comment.id }}">
+                        <i class="bi bi-x-lg"></i> <!-- Bootstrap icon for cancel -->
+                    </button>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+     </div>
+
+    <div class="comment-content">
+        <div id="editorjs-comment-{{ comment.id }}"></div>
+    </div>
+    <div class="replies">
+        {% for reply in comment.replies.all %}
+            {% if forloop.counter <= 2 %}
+                {% include 'forum/components/comment.html' with comment=reply %}
+            {% elif forloop.counter == 3 %}
+                <div class="collapsed-replies" style="display: none;">
+                    {% include 'forum/components/comment.html' with comment=reply %}
+            {% else %}
+                    {% include 'forum/components/comment.html' with comment=reply %}
+            {% endif %}
+        {% endfor %}
+        {% if comment.replies.count > 2 %}
+            </div>
+            <button class="toggle-replies btn btn-link btn-sm" 
+                    data-comment-id="{{ comment.id }}"
+                    data-show-text="Show {{ comment.replies.count|add:'-3' }} more replies"
+                    data-hide-text="Hide replies">
+                Show {{ comment.replies.count|add:'-3' }} more replies
+            </button>
+        {% endif %}
+    </div>
+</div>

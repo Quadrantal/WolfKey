@@ -56,3 +56,7 @@ p { font-family: var(--font-secondary); }
     height: 40px; 
     width: auto; 
 }
+
+.text-muted {
+  font-size: smaller;
+}

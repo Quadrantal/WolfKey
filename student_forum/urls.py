@@ -65,6 +65,13 @@ from forum.views.notification_views import (
 from forum.views.updates_views import acknowledge_update
 from forum.views.utils import upload_image
 
+from forum.views.comments_views import (
+    create_comment,
+    edit_comment,
+    delete_comment,
+    get_comments
+)
+
 urlpatterns = [
     # Post related URLs
     path('', for_you, name='for_you'),
@@ -78,7 +85,11 @@ urlpatterns = [
     path('solution/<int:solution_id>/delete/', delete_solution, name='delete_solution'),
     path('solution/<int:post_id>/create/', create_solution, name='create_solution'),
 
+    path('comment/create/<int:solution_id>/', create_comment, name='create_comment'),
+    path('comment/edit/<int:comment_id>/', edit_comment, name='edit_comment'),
+    path('comment/delete/<int:comment_id>/', delete_comment, name='delete_comment'),
 
+    path('solution/<int:solution_id>/comments/', get_comments, name='get_solution_comments'),
     
     # Auth related URLs
     path('register/', register, name='register'),

@@ -37,7 +37,29 @@ export class EditorManager {
         }
     }
 
+    async initializeCommentEditors(comments, csrfToken) {
+        try {
+            comments.forEach(comment => {
+                try {
+                    const editor = createEditor(
+                        `editorjs-comment-${comment.id}`,
+                        comment.content,
+                        csrfToken,
+                        true
+                    );
+                    this.editors.set(comment.id, editor);
+                } catch (commentError) {
+                    console.error(`Error initializing solution ${solution.id}:`, commentError);
+                }
+            });
+        } catch (error) {
+            console.error('Error initializing comment editors:', error);
+            throw error;
+        }
+    }
+
     async initializeSolutionFormEditor(editorId, csrfToken, contentFieldId) {
+        
         try {
             const editor = createEditor(
                 editorId,
@@ -53,6 +75,22 @@ export class EditorManager {
             throw error;
         }
     }
+    async initializeCommentFormEditor(editorId, csrfToken) {
+        try {
+            const editor = createEditor(
+                editorId,
+                {},
+                csrfToken,
+                false
+            );
+            this.editors.set(editorId, editor);
+            return editor;
+        } catch (error) {
+            console.error('Error initializing comment form editor:', error);
+            throw error;
+        }
+    }
+
 
     getEditor(id) {
         return this.editors.get(id);
@@ -61,7 +99,6 @@ export class EditorManager {
     toggleEditorReadOnly(editorId, readOnly) {
 
         const id = Number(editorId);
-
         const editor = this.getEditor(id);
         if (editor) {
             editor.readOnly.toggle(readOnly);
