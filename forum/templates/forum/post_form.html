@@ -128,7 +128,9 @@ document.addEventListener("DOMContentLoaded", function () {
     const courseSelector = new CourseSelector({
         containerId: 'postCoursesSelector',
         maxCourses: 5,
-        initialSelection: {% if selected_courses_json %}{{ selected_courses_json|safe }}{% else %}[]{% endif %}
+        initialSelection: {% if selected_courses_json %}{{ selected_courses_json|safe }}{% else %}[]{% endif %},
+        formName: "postCreationForm"
+
     });
 });
 </script>
