@@ -171,8 +171,7 @@
 
         <div id="content">
             <div class="main-content">
-                {% if messages %}
-                <div class="toast-container position-fixed bottom-0 start-0 p-3 z-901">
+                <div class="toast-container position-fixed bottom-0 start-0 p-3 z-901" id = "toast-container">
                     {% for message in messages %}
                         <div class="toast custom-toast 
                             {% if message.tags == 'success' %}custom-toast-success
@@ -192,7 +191,6 @@
                     {% endfor %}
 
                 </div>
-                {% endif %}
                 
                 {% block content %}
                 {% endblock %}
@@ -205,28 +203,7 @@
     {% block extra_js %}
     <script>
     document.addEventListener('DOMContentLoaded', function() {
-        var toastElements = document.querySelectorAll('.toast');
-        toastElements.forEach(function (toastEl) {
-            var toast = new bootstrap.Toast(toastEl);
-            toast.show();
-        });
-
-
-        toastElements.forEach(function (toast) {
-            // When the toast is about to be hidden, add the fade-out class
-            toast.addEventListener('hidden.bs.toast', function () {
-                toast.classList.add('fade-out');
-            });
-
-            const delay = toast.getAttribute('data-bs-delay') || 10000; 
-            setTimeout(function () {
-                toast.classList.add('fade-out');
-                setTimeout(function () {
-                    const toastBootstrap = bootstrap.Toast.getInstance(toast);
-                    toastBootstrap.hide();
-                }, 500);  // Match the duration of the fade-out animation
-            }, delay);
-        });
+        initializeToasts();
 
 
         const searchInput = document.getElementById('search-input');
@@ -317,6 +294,57 @@ function acknowledgeUpdate(updateId) {
             if (data.success) {
                 document.getElementById('updateOverlay').style.display = 'none';
             }
+        });
+    }
+
+    function showMessage(text, type) {
+        const toastContainer = document.getElementById('toast-container');
+
+        const toast = document.createElement('div');
+        toast.className = `toast custom-toast ${type === 'success' ? 'custom-toast-success' :
+                                             type === 'error' ? 'custom-toast-error' :
+                                             type === 'warning' ? 'custom-toast-warning' :
+                                             type === 'info' ? 'custom-toast-info' : ''}`;
+        toast.setAttribute('role', 'alert');
+        toast.setAttribute('aria-live', 'assertive');
+        toast.setAttribute('aria-atomic', 'true');
+        toast.setAttribute('data-bs-delay', '10000');
+
+        toast.innerHTML = `
+            <div class="d-flex">
+                <div class="toast-body">${text}</div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+        `;
+
+        toastContainer.appendChild(toast);
+
+        initializeToasts(toast);
+    }
+
+    // Function to initialize all toasts (including dynamically created ones)
+    function initializeToasts(toastElement = null) {
+        const toastElements = toastElement ? [toastElement] : document.querySelectorAll('.toast');
+
+        console.log("initailized toasts");
+
+        toastElements.forEach(function (toastEl) {
+            var toast = new bootstrap.Toast(toastEl);
+            toast.show();
+
+            // Handle fade-out animation before hiding
+            toastEl.addEventListener('hidden.bs.toast', function () {
+                toastEl.classList.add('fade-out');
+            });
+
+            const delay = toastEl.getAttribute('data-bs-delay') || 10000;
+            setTimeout(function () {
+                toastEl.classList.add('fade-out');
+                setTimeout(function () {
+                    const toastBootstrap = bootstrap.Toast.getInstance(toastEl);
+                    toastBootstrap.hide();
+                }, 500);
+            }, delay);
         });
     }
 </script>

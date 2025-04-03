@@ -243,11 +243,10 @@ document.addEventListener('DOMContentLoaded', function() {
         containerId: 'currentCoursesSelector',
         maxCourses: 20,
         onSelectionChange: (courses) => {
-            // Handle current courses selection
-            // console.log('Current courses:', courses);
             validateCurrentCourses(courses);
         },
-        initialSelection: [] // Add any initial courses here
+        initialSelection: {% if selected_current_courses %}{{ selected_current_courses|safe }}{% else %}[]{% endif %},
+        formName: "onboardingForm"
     });
 
     // Initialize experienced courses selector
@@ -255,11 +254,10 @@ document.addEventListener('DOMContentLoaded', function() {
         containerId: 'experiencedCoursesSelector',
         maxCourses: 20,
         onSelectionChange: (courses) => {
-            // Handle experienced courses selection
-            // console.log('Experienced courses:', courses);
             validateExperiencedCourses(courses);
         },
-        initialSelection: [] // Add any initial courses here
+        initialSelection: {% if selected_experienced_courses %}{{ selected_experienced_courses|safe }}{% else %}[]{% endif %},
+        formName: "onboardingForm"
     });
 
 
