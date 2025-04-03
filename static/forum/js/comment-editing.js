@@ -164,8 +164,6 @@ export class CommentEditor {
                     // Reinitialize math fields
                     data.comments.forEach(comment => {
 
-                        this.reinitMathFields(comment.id);
-
                     });
                 }
             }
@@ -179,13 +177,18 @@ export class CommentEditor {
             await this.editorManager.toggleEditorReadOnly(commentId, false);
             const editor = this.editorManager.editors.get(commentId);
             if (editor) {
+                if (!editor.readOnly.isEnabled) {
+                    const content = await editor.save();
+                    this.originalContents[commentId] = content;
+                } else {
+                    console.warn(`Editor for comment ${commentId} is still in read-only mode.`);
+                }
                 const content = await editor.save();
                 this.originalContents[commentId] = content;
             }
             this.editorManager.editors.set(commentId, editor);
 
             this.toggleCommentActions(commentId, true);
-            this.reinitMathFields(commentId);
         } catch (error) {
             console.error('Error enabling edit mode:', error);
         }
@@ -233,7 +236,6 @@ export class CommentEditor {
                 await this.editorManager.toggleEditorReadOnly(commentId, true);
                 this.toggleCommentActions(commentId, false);
                 delete this.originalContents[commentId];
-                this.reinitMathFields(commentId);
             } else {
                 console.error('Failed to save comment');
             }
@@ -256,8 +258,6 @@ export class CommentEditor {
                 // Cleanup
                 delete this.originalContents[commentId];
                 
-                // Reinitialize math fields if present
-                this.reinitMathFields(commentId);
             } catch (error) {
                 console.error('Error canceling comment edit:', error);
             }
@@ -333,30 +333,4 @@ export class CommentEditor {
         }
     }
 
-    reinitMathFields(commentId) {
-        setTimeout(() => {
-            const container = document.querySelector(`#editorjs-comment-${commentId}`);
-            if (!container) return;
-
-            container.querySelectorAll('.inline-math').forEach(elem => {
-                const existingMathField = elem.querySelector('math-field');
-                if (existingMathField) {
-                    existingMathField.remove();
-                }
-
-                const tex = elem.getAttribute('data-tex');
-                if (tex) {
-                    const mathField = new MathfieldElement();
-                    mathField.value = tex;
-                    
-                    const editor = this.editorManager.editors.get(commentId);
-                    if (editor?.readOnly?.isEnabled) {
-                        mathField.setAttribute('read-only', '');
-                    }
-                    
-                    elem.appendChild(mathField);
-                }
-            });
-        }, 100);
-    }
 }

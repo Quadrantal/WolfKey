@@ -1,4 +1,4 @@
-
+import { MathLiveBlock } from './math-block.js';
 const createEditor = (holder,initialData, csrfToken, isReadOnly = false, contentElementId = 'editorjs-content') => {
     return new EditorJS({
         holder: holder,  // The container where Editor.js will be initialized
@@ -50,47 +50,61 @@ const createEditor = (holder,initialData, csrfToken, isReadOnly = false, content
                     defaultStyle: 'unordered'
                 },
             },
-            Math: {
-                class: EJLaTeX,
-            },
             code: editorJsCodeCup,
             inlineCode: {
                 class: InlineCode,
             },
-            inlineMath: InlineMath,
+            math: MathLiveBlock
         },
         onReady: () => {
             console.log('Editor.js is ready!');
-            document.querySelectorAll('.inline-math').forEach(elem => {
-                if (!elem.querySelector('math-field')) {
-                    const tex = elem.getAttribute('data-tex');
-                    if (tex) {
-                        const mathField = new MathfieldElement();
-                        mathField.value = tex;
-                        if (isReadOnly) {
-                            mathField.setAttribute('read-only', '');
-                        }
-                        elem.appendChild(mathField);
+            document.querySelectorAll('math-field').forEach(mathField => {
+                const tex = mathField.value;
+
+                if (tex) {
+                    const mathElement = new MathfieldElement();
+                    mathElement.value = tex;
+
+
+                    // If the editor is in read-only mode, set the math field to read-only
+                    if (isReadOnly) {
+                        mathElement.readOnly = true;
                     }
+
+                    // Replace the placeholder math-field with the initialized MathfieldElement
+                    mathField.replaceWith(mathElement);
                 }
             });
         },
-        onChange: !isReadOnly ? (api) => {
-            api.saver.save()
-                .then((outputData) => {
-                    const contentElement = document.getElementById(contentElementId);
-                    if (contentElement) {
-                        contentElement.value = JSON.stringify(outputData);
-                        console.log("Editor.js content saved");
-                    } else {
-                        console.warn(`Content element with ID '${contentElementId}' not found`);
+        onChange: !isReadOnly ? async (api) => {
+            try {
+                const outputData = await api.saver.save();
+                const blocks = outputData.blocks;
+
+                // Check if the last block is a math block
+                if (blocks.length > 0) {
+                    const lastBlock = blocks[blocks.length - 1];
+                    if (lastBlock.type === 'math') {
+                        // Add a paragraph block after the math block
+                        api.blocks.insert('paragraph', { text: 'Note: Have at least another block if a math block is used. Edit this msg once you understand. ' }, undefined, blocks.length);
                     }
-                })
-                .catch((error) => {
-                    console.error('Saving failed:', error);
-                });
+                }
+
+                const contentElement = document.getElementById(contentElementId);
+                if (contentElement) {
+                    contentElement.value = JSON.stringify(outputData);
+                    console.log("Editor.js content saved");
+                } else {
+                    console.warn(`Content element with ID '${contentElementId}' not found`);
+                }
+            } catch (error) {
+                console.error('Saving failed:', error);
+            }
         } : undefined,
         minHeight: 75,
     })
 }
+
+console.log('editor-config.js loaded');
+export default createEditor;
 

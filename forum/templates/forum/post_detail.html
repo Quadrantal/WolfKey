@@ -91,11 +91,13 @@
     import { SolutionEditor } from '{% static "forum/js/solution-editing.js" %}';
     import { SolutionSorter } from '{% static "forum/js/solution-sorting.js" %}';
     import { CommentEditor } from '{% static "forum/js/comment-editing.js" %}';
+    import { MathLiveBlock } from '{% static "forum/js/math-block.js" %}';
+    import createEditor from '{% static "forum/js/editor-config.js" %}'; 
 
     document.addEventListener("DOMContentLoaded", async function () {
 
+    console.log(createEditor);
     try {
-
 
         // Initialize Editor Manager
         const editorManager = new EditorManager();
