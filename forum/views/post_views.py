@@ -8,7 +8,7 @@ from django.http import JsonResponse
 from django.utils.html import escape
 from forum.models import Post, Solution, Comment, Course
 from forum.forms import SolutionForm, CommentForm, PostForm
-from .utils import selective_quote_replace
+from .utils import selective_quote_replace, detect_bad_words
 from django.contrib import messages
 from .notification_views import send_course_notifications
 from django.http import HttpResponseForbidden
@@ -16,52 +16,36 @@ from django.http import HttpResponseForbidden
 
 logger = logging.getLogger(__name__)
 
-
 @login_required
 def create_post(request):
     if request.method == 'POST':
-        # print("Enter 1")
-        # print(f"POST data: {request.POST}")
-        # print(f"FILES: {request.FILES}")
-        
         form = PostForm(request.POST)
-        # print(f"Form data: {form.data}")
-        # print(f"Form is valid: {form.is_valid()}")
-        if not form.is_valid():
-            print(f"Form errors: {form.errors}")
-        
         if form.is_valid():
-            # print("Enter 2")
             try:
-                # Create and save the post first
                 post = form.save(commit=False)
                 post.author = request.user
-                
+
                 # Handle content
                 content_json = request.POST.get('content')
-                print(f"Content JSON: {content_json}")
                 content_data = json.loads(content_json) if content_json else {}
+                detect_bad_words(content_data) 
                 post.content = content_data
-                
-                # Save post to generate ID
+
+                # Save post and handle courses
                 post.save()
-                
-                # Handle courses from the form
                 course_ids = request.POST.getlist('courses')
-                print(f"Course IDs: {course_ids}")
                 if course_ids:
                     courses = Course.objects.filter(id__in=course_ids)
                     post.courses.set(courses)
-                    print(f"Added courses: {list(courses.values_list('id', 'name'))}")
-
                     send_course_notifications(post, courses)
-                
+
                 return redirect(post.get_absolute_url())
-                
+            except ValueError as e:
+                # Catch bad word detection errors
+                messages.error(request, f"Content contains inappropriate language: {str(e)}")
             except Exception as e:
-                print(f"Error creating post: {str(e)}")
+                # Catch other errors
                 messages.error(request, f"Error creating post: {str(e)}")
-                return redirect('create_post')
         else:
             messages.error(request, f"Form validation failed: {form.errors}")
     else:
@@ -161,7 +145,7 @@ def edit_post(request, post_id):
             content = request.POST.get('content')
             if content:
                 content = json.loads(content)
-            
+            detect_bad_words(content)  # This will raise ValueError if bad words are detected
             # Update post
             post.content = content
             
@@ -173,7 +157,9 @@ def edit_post(request, post_id):
             post.save()
             messages.success(request, 'Post updated successfully!')
             return redirect('post_detail', post_id=post.id)
-            
+        except ValueError as e:
+            # Catch bad word detection errors
+            messages.error(request, f"Content contains inappropriate language: {str(e)}")
         except json.JSONDecodeError as e:
             messages.error(request, 'Invalid content format')
             logger.error(f"JSON decode error: {e}")

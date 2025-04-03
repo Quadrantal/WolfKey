@@ -95,3 +95,61 @@ def process_messages_to_json(request):
     ]
 
     return messages_data
+
+leet_mapping = str.maketrans({
+    '4': 'a', '@': 'a',
+    '8': 'b',
+    '(': 'c', '{': 'c', '[': 'c', '<': 'c',
+    '3': 'e',
+    '6': 'g', '9': 'g',
+    '1': 'i', '!': 'i', '|': 'i',
+    '0': 'o',
+    '5': 's', '$': 's',
+    '7': 't', '+': 't',
+    '2': 'z'
+})
+
+def normalize_text(text):
+    """Normalizes text by converting leetspeak, removing special characters, and reducing repeated letters."""
+    if not text:
+        return ""
+    
+    text = text.translate(leet_mapping)  # Convert leetspeak
+    text = re.sub(r'[^a-zA-Z\s]', '', text)  # Remove non-alphabetic characters, keep spaces
+    text = re.sub(r'\s+', ' ', text).strip()  # Normalize spaces
+    text = re.sub(r'(.)\1{2,}', r'\1', text)  # Reduce repeated letters (e.g., "loooool" -> "lol")
+    
+    return text.lower()
+
+bad_word_list = ['fuck', 'bitch', 'shit', 'ass', 'dick', 'cunt', 'cock', 'pussy']
+bad_word_pattern = re.compile(r'\b(' + '|'.join(map(re.escape, bad_word_list)) + r')\b', re.IGNORECASE)
+
+def detect_bad_words(content):
+    """
+    Detects bad words in plain text or structured Editor.js content.
+    Raises ValueError if bad words are found, specifying the location.
+    """
+    if isinstance(content, str):
+        normalized_text = normalize_text(content)
+        if bad_word_pattern.search(normalized_text):
+            raise ValueError("Bad word detected in text.")
+    
+    elif isinstance(content, dict) and 'blocks' in content:
+        for block in content['blocks']:
+            block_type = block.get("type", "unknown")
+            data = block.get("data", {})
+            
+            text = data.get("text", "")
+            items = data.get("items", [])
+            
+            if text:
+                normalized_text = normalize_text(text)
+                if bad_word_pattern.search(normalized_text):
+                    raise ValueError(f"Bad word detected in block of type '{block_type}'.")
+            
+            for item in items:
+                item_text = normalize_text(item)
+                if bad_word_pattern.search(item_text):
+                    raise ValueError(f"Bad word detected in list item in block of type '{block_type}'.")
+    else:
+        raise ValueError("Unsupported content format for bad word detection.")

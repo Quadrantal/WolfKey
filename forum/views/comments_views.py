@@ -10,7 +10,7 @@ from django.core.serializers.json import DjangoJSONEncoder
 from django.template.loader import render_to_string
 from .notification_views import send_notification, send_comment_notifications
 import json
-from .utils import process_messages_to_json
+from .utils import process_messages_to_json, detect_bad_words
 
 def create_comment(request, solution_id):
     if request.method == 'POST':
@@ -18,6 +18,12 @@ def create_comment(request, solution_id):
         data = json.loads(request.body) 
         content = data.get('content')
         parent_id = data.get('parent_id') 
+        try:
+            detect_bad_words(content)
+        except Exception as e:
+            messages.error(request,str(e))
+            messages_data = process_messages_to_json(request)
+            return JsonResponse({'status': 'error','messages': messages_data}, status=400)
         
         if content:
             parent_comment = None
@@ -50,6 +56,12 @@ def edit_comment(request, comment_id):
         content = data.get('content')
 
         if content:
+            try:
+                detect_bad_words(content)
+            except Exception as e:
+                messages.error(request,str(e))
+                messages_data = process_messages_to_json(request)
+                return JsonResponse({'status': 'error','messages': messages_data}, status=400)
             comment.content = content
             comment.save()
             messages.success(request, 'Solution edited succesfully')
