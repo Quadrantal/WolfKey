@@ -326,6 +326,8 @@ function acknowledgeUpdate(updateId) {
     function initializeToasts(toastElement = null) {
         const toastElements = toastElement ? [toastElement] : document.querySelectorAll('.toast');
 
+        console.log("initailized toasts");
+
         toastElements.forEach(function (toastEl) {
             var toast = new bootstrap.Toast(toastEl);
             toast.show();
