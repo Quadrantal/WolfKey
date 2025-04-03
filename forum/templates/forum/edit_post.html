@@ -1,48 +1,41 @@
 {% extends 'forum/base.html' %}
 
 {% block head %}
-    <!-- Editor.js CSS -->
     <link href="https://cdn.jsdelivr.net/npm/@editorjs/editorjs@2.22.0/dist/editor.css" rel="stylesheet"></link>
-
     <link rel="stylesheet" href="https://unpkg.com/mathlive/dist/mathlive-static.css" />
 
     {% load static %}
     <link rel="stylesheet" href="{% static 'forum/css/editorjs.css' %}">
     <link rel="stylesheet" href="{% static 'forum/css/course-selector.css' %}"> 
     <link rel="stylesheet" href="{% static 'forum/css/post-detail.css' %}">
-
-
-
-
 {% endblock %}
 
 {% block content %}
 <div class="row justify-content-center">
-        <div class="card">
-            <div class="card-body">
-                <h2 class="card-title">{{ action }} Post</h2>
-                <form method="post" enctype="multipart/form-data">
-                    {% csrf_token %}
-                    <h3> Title: </h3>
-                    <p>{{ post.title }}</p>
+    <div class="card">
+        <div class="card-body">
+            <h2 class="card-title">{{ action }} Post</h2>
+            <form id="postEditForm" method="post" action="{% url 'edit_post' post.id %}" enctype="multipart/form-data">
+                {% csrf_token %}
+                
+                <h3>Title:</h3>
+                <input type="text" id="id_title" name="title" class="form-control" value="{{ post.title }}">
 
-                    <h3> Content: </h3>
-                    <!-- Editor.js Container -->
-                    <div id="editorjs"></div>
-                    <input type="hidden" id="editorjs-content" name="content">
+                <h3>Content:</h3>
+                <!-- Editor.js Container -->
+                <div id="editorjs"></div>
+                <input type="hidden" id="editorjs-content" name="content">
 
-                    <h3>Select a Course:</h3>
-                    <div style="position: relative;">
-                        <input type="text" id="courseInput" class="search-box" placeholder="Add more courses..." oninput="fetchCourses()">
-                        <div id="dropdown" class="dropdown"></div>
-                    </div>
+                <!-- Course Selector -->
+                <h3>Select a Course:</h3>
+                <div id="postCoursesSelector"></div>
 
-                    <button type="submit" class="btn btn-primary">{{ action }} Finish</button>
-                    <a href="{% url 'for_you' %}" class="btn btn-secondary">Cancel</a>
-                </form>
-            </div>
+                <button id="submitPostButton" type="submit" class="btn btn-primary">{{ action }} Post</button>
+                <a href="{% url 'for_you' %}" class="btn btn-secondary">Cancel</a>
+            </form>
         </div>
     </div>
+</div>
 {% endblock %}
 
 {% block scripts %}
@@ -56,160 +49,103 @@
 <script src="https://cdn.jsdelivr.net/gh/mdgaziur/EditorJS-LaTeX@latest/dist/editorjs-latex.bundle-min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@editorjs/inline-code@latest"></script>
 <script src="https://cdn.jsdelivr.net/npm/@calumk/editorjs-codecup@latest"></script>
-<script src="https://unpkg.com/mathlive/dist/mathlive.min.js"></script>
+<script src="https://unpkg.com/mathlive"></script>
+
 
 {% load static %}
 <script src="{% static 'forum/js/inline-math.js' %}"></script>
 <script src="{% static 'forum/js/editor-config.js' %}"></script>
+<script src="{% static 'forum/js/course-selector.js' %}"></script>
 
-<script>
-    console.log("Script Starting");
-    console.log('{{post_content}}');
+<script type="module">
+    import createEditor from '{% static "forum/js/editor-config.js" %}';
+    import { CourseSelector } from '{% static "forum/js/course-selector.js" %}';
 
-    document.addEventListener("DOMContentLoaded", function () {
-        const form = document.querySelector('form');
-        const submitButton = form.querySelector('button[type="submit"]');
-        
-    
-        form.addEventListener('keydown', function(e) {
-            if(e.key === 'Enter' && e.target.tagName !== 'TEXTAREA') {
-                e.preventDefault();
-            }
-        });
-
-
-        form.addEventListener('submit', function(e) {
-            if (e.submitter !== submitButton) {
-                e.preventDefault();
-            }
-        });
-
-        let initialData = {};
-
-        try {
-            // Use JSON.parse with the |escapejs filter
-            const contentString = '{{ post_content|escapejs }}';
-            console.log("Raw content string:", contentString);
-            
-            initialData = JSON.parse(contentString);
-            if (!initialData || !initialData.blocks) {
-                throw new Error('Invalid content structure');
-            }
-            
-            // Unescape HTML entities in text content
-            initialData.blocks = initialData.blocks.map(block => {
-                if (block.type === 'paragraph' && block.data && block.data.text) {
-                    const textarea = document.createElement('textarea');
-                    textarea.innerHTML = block.data.text;
-                    block.data.text = textarea.value;
-                }
-                return block;
-            });
-            
-        } catch (e) {
-            console.error('Failed to parse initial content:', e);
-            initialData = {
-                blocks: [
-                    {
-                        type: 'paragraph',
-                        data: {
-                            text: ''
-                        }
-                    }
-                ]
-            };
-        }        
-
-        const editor = createEditor(
-                'editorjs', 
-                initialData,
-                document.querySelector('[name="csrfmiddlewaretoken"]').value
-        );
-
-
-        // Handle submit button click
-        submitButton.addEventListener('click', async function(e) {
-            e.preventDefault();
-            const content = await editor.save();
-            document.querySelector('#editorjs-content').value = JSON.stringify(content);
-            form.submit();
-        });
-
-        const inputField = document.getElementById("courseInput");
-        const dropdown = document.getElementById("dropdown");
-        const selectedContainer = document.createElement("div"); 
-        selectedContainer.classList.add("selected-courses");
-        inputField.parentNode.insertBefore(selectedContainer, inputField);
-
+    document.addEventListener("DOMContentLoaded", async function () {
+        await customWaitForMathLive();
+        const form = document.getElementById("postEditForm");
+        const submitButton = document.getElementById("submitPostButton");
         let selectedCourses = JSON.parse('{{ selected_courses_json|safe }}');
 
-        updateSelectedCourses();
-
-        function fetchCourses() {
-            let query = inputField.value.trim();
-
-            if (query.length === 0) {
-                dropdown.style.display = "none";
-                return;
+        // Prevent enter key from submitting form
+        form.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' && e.target.tagName !== 'TEXTAREA') {
+                e.preventDefault();
             }
+        });
 
-            fetch(`/api/courses/?q=${query}`)
-                .then(response => response.json())
-                .then(data => {
-                    dropdown.innerHTML = "";
-                    if (data.length > 0) {
-                        dropdown.style.display = "block";
-
-                        data.forEach(course => {
-                            let div = document.createElement("div");
-                            div.classList.add("dropdown-item");
-                            div.innerHTML = `<strong>${course.name}</strong><br><span>${course.category} • ${course.level}</span>`;
-                            div.onclick = () => addCourse(course);
-                            dropdown.appendChild(div);
-                        });
-                    } else {
-                        dropdown.style.display = "none";
-                    }
-                })
-                .catch(error => console.error("Error fetching courses:", error));
-        }
-
-        function addCourse(course) {
-            if (selectedCourses.length >= 5) return; // Prevent selecting more than 5 courses
-
-            if (!selectedCourses.some(c => c.id === course.id)) {
-                selectedCourses.push(course);
-                updateSelectedCourses();
-            }
+        // Single form submit handler
+        submitButton.addEventListener('click', async function(e) {
+            e.preventDefault();
             
-            inputField.value = "";
-            dropdown.style.display = "none";
-        }
+            try {
+                // Get Editor.js content
+                const content = await editor.save();
+                
+                // Create FormData object
+                const formData = new FormData(form);
+                formData.set('content', JSON.stringify(content));
+                formData.set('title', document.querySelector('#id_title').value);
+                
+                // Add selected courses
+                selectedCourses.forEach(course => {
+                    formData.append('courses', course.id);
+                });
 
-        function removeCourse(courseId) {
-            selectedCourses = selectedCourses.filter(course => course.id !== courseId);
-            updateSelectedCourses();
-        }
+                // Debug log
+                console.log('Submitting form data:');
+                for (let pair of formData.entries()) {
+                    console.log(pair[0] + ': ' + pair[1]);
+                }
 
-        function updateSelectedCourses() {
-            selectedContainer.innerHTML = ""; // Clear previous selection
+                // Send form data using fetch
+                const response = await fetch(form.action, {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                    }
+                });
 
-            selectedCourses.forEach(course => {
-                let courseTag = document.createElement("div");
-                courseTag.classList.add("course-tag");
-                courseTag.innerHTML = `
-                    ${course.name} 
-                    <span class="remove-btn" onclick="removeCourse(${course.id})">&times;</span>
-                `;
-                selectedContainer.appendChild(courseTag);
-            });
-        }
+                if (response.ok) {
+                    window.location.href = response.url;
+                } else {
+                    const errorData = await response.text();
+                    console.error('Server error:', errorData);
+                    throw new Error('Form submission failed');
+                }
 
-        // Make functions available globally
-        window.fetchCourses = fetchCourses;
-        window.removeCourse = removeCourse;
+            } catch (error) {
+                console.error('Error submitting form:', error);
+            }
+        });
+
+        // Initialize editor
+        const editor = createEditor(
+            'editorjs', 
+            JSON.parse('{{ post_content|escapejs }}'),
+            document.querySelector('[name="csrfmiddlewaretoken"]').value
+        );
+
+        // Initialize course selector
+        const courseSelector = new CourseSelector({
+            containerId: 'postCoursesSelector',
+            maxCourses: 5,
+            initialSelection: selectedCourses,
+            formName: "postEditForm"
+        });
     });
 
-    
+
+function customWaitForMathLive() {
+    return new Promise((resolve) => {
+        const checkMathField = setInterval(() => {
+            if (window.MathfieldElement) {
+                clearInterval(checkMathField);
+                resolve();
+            }
+        }, 50);
+    });
+}
 </script>
 {% endblock %}

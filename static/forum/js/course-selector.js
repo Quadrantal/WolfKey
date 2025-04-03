@@ -133,3 +133,5 @@ class CourseSelector {
         }
     }
 }
+
+export { CourseSelector };

@@ -28,7 +28,6 @@ export class SolutionEditor {
                 this.originalContents[solutionId] = content;
             }
             this.toggleSolutionActions(solutionId, true);
-            this.reinitMathFields(solutionId);
         } catch (error) {
             console.error('Error enabling edit mode:', error);
         }
@@ -61,7 +60,7 @@ export class SolutionEditor {
             }
 
             if (data.status === 'success') {
-                this.cancelEdit(solutionId);
+                this.cancelEdit(solutionId, false);
             } else {
                 console.error('Failed to save solution:', data.message);
             }
@@ -70,15 +69,14 @@ export class SolutionEditor {
         }
     }
 
-    async cancelEdit(solutionId) {
+    async cancelEdit(solutionId, revert = true) {
         const editor = this.editorManager.getEditor(solutionId);
-        if (editor && this.originalContents[solutionId]) {
+        if (editor && this.originalContents[solutionId] && revert) {
             // Restore original content
             await editor.render(this.originalContents[solutionId]);
         }
         this.editorManager.toggleEditorReadOnly(solutionId, true);
         this.toggleSolutionActions(solutionId, false);
-        this.reinitMathFields(solutionId);
     }
 
     toggleSolutionActions(solutionId, isEditing) {
@@ -127,30 +125,4 @@ export class SolutionEditor {
         }
     }
 
-    reinitMathFields(solutionId) {
-        setTimeout(() => {
-            const container = document.querySelector(`#editorjs-solution-${solutionId}`);
-            if (!container) return;
-
-            container.querySelectorAll('.inline-math').forEach(elem => {
-                const existingMathField = elem.querySelector('math-field');
-                if (existingMathField) {
-                    existingMathField.remove();
-                }
-
-                const tex = elem.getAttribute('data-tex');
-                if (tex) {
-                    const mathField = new MathfieldElement();
-                    mathField.value = tex;
-                    
-                    const editor = this.editorManager.getEditor(solutionId);
-                    if (editor?.readOnly?.isEnabled) {
-                        mathField.setAttribute('read-only', '');
-                    }
-                    
-                    elem.appendChild(mathField);
-                }
-            });
-        }, 100);
-    }
 }
