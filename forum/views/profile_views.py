@@ -2,6 +2,7 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib import messages
 from django.core.exceptions import ObjectDoesNotExist
+from forum.forms import UserUpdateForm
 
 from forum.models import User 
 from forum.models import Post, Solution 
@@ -23,14 +24,21 @@ def profile_view(request, username):
     recent_posts = Post.objects.filter(author=profile_user).order_by('-created_at')[:5]
     posts_count = Post.objects.filter(author=profile_user).count()
     solutions_count = Solution.objects.filter(author=profile_user).count()
-    
+
+    if request.method == 'POST':
+        request.user.first_name = request.POST.get('first_name', request.user.first_name)
+        request.user.last_name = request.POST.get('last_name', request.user.last_name)
+        request.user.personal_email = request.POST.get('personal_email', request.user.personal_email)
+        request.user.phone_number = request.POST.get('phone_number', request.user.phone_number)
+        request.user.save()
+        messages.success(request, 'Personal information updated successfully!')
+        return redirect('profile', username=request.user.username)
+
     context = {
         'profile_user': profile_user,
         'recent_posts': recent_posts,
         'posts_count': posts_count,
         'solutions_count': solutions_count,
-        'experience_form': UserCourseExperienceForm(user=profile_user),
-        'help_form': UserCourseHelpForm(user=profile_user),
         'experienced_courses': UserCourseExperience.objects.filter(user=profile_user),
         'help_needed_courses': UserCourseHelp.objects.filter(user=profile_user, active=True),
     }
