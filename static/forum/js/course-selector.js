@@ -19,13 +19,13 @@ class CourseSelector {
         this.container.innerHTML = `
             <div class="course-selector-wrapper">
                 <input type="text" class="form-control search-box" placeholder="Search courses...">
-                <div class="dropdown"></div>
+                <div class="course-dropdown"></div>
                 <div class="selected-courses"></div>
             </div>
         `;
 
         this.searchBox = this.container.querySelector('.search-box');
-        this.dropdown = this.container.querySelector('.dropdown');
+        this.dropdown = this.container.querySelector('.course-dropdown');
         this.selectedContainer = this.container.querySelector('.selected-courses');
 
         // Set up event listeners
