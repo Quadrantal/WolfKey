@@ -38,7 +38,18 @@
                     <h5 class="mb-0">About Me</h5>
                 </div>
                 <div class="card-body">
+                    {% if user == profile_user %}
+                    <form method="post">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <textarea name="bio" id="bio" class="form-control" maxlength="500" rows="4">{{ profile_user.userprofile.bio }}</textarea>
+                            <small class="text-muted">Max 500 characters. Avoid inappropriate language.</small>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Save Bio</button>
+                    </form>
+                    {% else %}
                     <p>{{ profile_user.userprofile.bio|default:"No bio provided." }}</p>
+                    {% endif %}
                 </div>
             </div>
 

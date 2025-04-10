@@ -18,6 +18,10 @@ from forum.forms import (
     UserProfileForm
 )
 
+from forum.views.utils import (
+    detect_bad_words
+)
+
 @login_required
 def profile_view(request, username):
     profile_user = get_object_or_404(User, username=username)
@@ -32,11 +36,19 @@ def profile_view(request, username):
         request.user.phone_number = request.POST.get('phone_number', request.user.phone_number)
         request.user.save()
 
+        if 'bio' in request.POST:
+            bio = request.POST.get('bio', profile_user.userprofile.bio)
+            try:
+                detect_bad_words(bio)  # Check for bad words
+                profile_user.userprofile.bio = bio
+                profile_user.userprofile.save()
+            except ValueError as e:
+                messages.error(request, str(e))
+
         # Update background hue
         hue_value = request.POST.get('background_hue', profile_user.userprofile.background_hue)
         profile_user.userprofile.background_hue = int(hue_value)
         profile_user.userprofile.save()
-        print(hue_value)
 
         messages.success(request, 'Profile updated successfully!')
         return redirect('profile', username=request.user.username)
