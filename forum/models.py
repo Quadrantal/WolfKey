@@ -270,6 +270,7 @@ class UserProfile(models.Model):
     is_moderator = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    background_hue = models.IntegerField(default=231) 
 
     def __str__(self):
         return f"{self.user.username}'s profile"

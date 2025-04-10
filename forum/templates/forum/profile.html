@@ -3,6 +3,8 @@
 {% block head %}
     {% load static %}
         <link rel="stylesheet" href="{% static 'forum/css/post-card.css' %}">
+        <link rel="stylesheet" href="{% static 'forum/css/profile.css' %}">
+
 {% endblock %}
 
 
@@ -51,6 +53,24 @@
                     <p><i class="bi bi-chat"></i> Solutions: {{solutions_count|default:"0"}}</p>
                 </div>
             </div>
+
+            {% if user == profile_user %}
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">Customize Background</h5>
+                </div>
+                <div class="card-body">
+                    <form method="post">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label for="background_hue" class="form-label">Background Color Hue</label>
+                            <input type="range" name="background_hue" id="background_hue" class="form-range background_hue_slider" min="0" max="360" value="{{ profile_user.userprofile.background_hue }}" oninput="updateBackground(this.value)">
+                        </div>
+                        <button type="submit" class="btn btn-primary">Save Changes</button>
+                    </form>
+                </div>
+            </div>
+            {% endif %}
 
             {% if user == profile_user %}
             <!--Edit Profile-->
@@ -205,4 +225,20 @@
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    function updateBackground(hue) {
+        // Adjust the inner color based on the hue value
+        document.body.style.background = `radial-gradient(circle, hsl(${hue}, 97.7%, 83.1%) 0%, rgba(255, 255, 255, 1) 100%)`;
+    }
+
+    // Initialize background on page load
+    document.addEventListener('DOMContentLoaded', function () {
+        const hueValue = {{ profile_user.userprofile.background_hue }};
+        updateBackground(hueValue);
+        console.log(hueValue);
+    });
+</script>
 {% endblock %}

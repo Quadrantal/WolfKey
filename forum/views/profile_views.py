@@ -31,7 +31,14 @@ def profile_view(request, username):
         request.user.personal_email = request.POST.get('personal_email', request.user.personal_email)
         request.user.phone_number = request.POST.get('phone_number', request.user.phone_number)
         request.user.save()
-        messages.success(request, 'Personal information updated successfully!')
+
+        # Update background hue
+        hue_value = request.POST.get('background_hue', profile_user.userprofile.background_hue)
+        profile_user.userprofile.background_hue = int(hue_value)
+        profile_user.userprofile.save()
+        print(hue_value)
+
+        messages.success(request, 'Profile updated successfully!')
         return redirect('profile', username=request.user.username)
 
     context = {
