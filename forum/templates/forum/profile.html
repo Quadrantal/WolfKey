@@ -123,14 +123,15 @@
                     {% endfor %}
                 </div>
             </div>
-            {% if user == profile_user %}
             <!-- Course Experience Section -->
             <div class="card mb-4 {% if not experienced_courses %}highlighted-card{% endif %}">
                 <div class="card-header d-flex justify-content-between align-items-center z-10">
                     <h5 class="mb-0">Experienced In</h5>
+                    {% if user == profile_user %}
                     <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#addExperienceModal">
                         <i class="bi bi-plus"></i> Add Course
                     </button>
+                    {% endif %}
                 </div>
                 <div class="card-body">
                     <div class="course-list">
@@ -151,6 +152,7 @@
                 </div>
             </div>
 
+            {% if user == profile_user %}
             <!-- Help Needed Section -->
             <div class="card mb-4 {% if not help_needed_courses %}highlighted-card{% endif %}" >
                 <div class="card-header d-flex justify-content-between align-items-center">
