@@ -45,7 +45,7 @@
                 <div class="author-avatar"></div>
                 <div>
                     <div class="text-muted">asked {{ post.created_at|date:"M d, Y" }}</div>
-                    <div class="fw-bold">{{ post.author.get_full_name }}</div>
+                    <div class="fw-bold"><a href = "{{post.author.get_absolute_url}}">{{ post.author.get_full_name }}</a></div>
                 </div>
             </div>
         </div>

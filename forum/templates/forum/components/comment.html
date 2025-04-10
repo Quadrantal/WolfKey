@@ -4,7 +4,7 @@
      data-depth="{{ comment.get_depth }}">
      <div class = "comment-header d-flex" >
         <div class="comment-info d-flex">
-            <span class="comment-author me-2">{{ comment.author.get_full_name }}</span>
+            <span class="comment-author me-2"><a href = "{{comment.author.get_absolute_url}}">{{ comment.author.get_full_name }}</a></span>
             <span class="comment-date me-5 text-muted">{{ comment.created_at|timesince }} ago</span>
         </div>
     

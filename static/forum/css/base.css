@@ -61,3 +61,7 @@ p { font-family: var(--font-secondary); }
 .text-muted {
   font-size: smaller;
 }
+
+a {
+  color: inherit;
+}
