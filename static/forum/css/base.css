@@ -27,7 +27,7 @@
 
 /* Global Reset & Base Styles */
 body {
-  background: radial-gradient(circle, rgba(170,183,254,1) 0%, rgba(255,255,255,1) 100%);
+  /* background: radial-gradient(circle, rgba(170,183,254,1) 0%, rgba(255,255,255,1) 100%); */
   transition: background 0.3s ease; 
 }
 
