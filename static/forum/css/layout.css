@@ -120,6 +120,10 @@ nav {
     transition: background-color 0.3s ease;
 }
 
+li {
+    list-style-type: none;
+}
+
 /* Dropdown styles */
 
 

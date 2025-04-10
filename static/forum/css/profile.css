@@ -19,3 +19,61 @@
 .course-item button {
     padding: 2px 8px;
 }
+.background_hue_slider::-webkit-slider-thumb {
+    background: linear-gradient(
+        to right,
+        hsl(0, 97.7%, 83.1%),
+        hsl(30, 97.7%, 83.1%),
+        hsl(60, 97.7%, 83.1%),
+        hsl(90, 97.7%, 83.1%),
+        hsl(120, 97.7%, 83.1%),
+        hsl(150, 97.7%, 83.1%),
+        hsl(180, 97.7%, 83.1%),
+        hsl(210, 97.7%, 83.1%),
+        hsl(240, 97.7%, 83.1%),
+        hsl(270, 97.7%, 83.1%),
+        hsl(300, 97.7%, 83.1%),
+        hsl(330, 97.7%, 83.1%),
+        hsl(360, 97.7%, 83.1%)
+      ) !important;      
+}
+
+
+.background_hue_slider::-moz-range-track {
+    background: linear-gradient(
+        to right,
+        hsl(0, 97.7%, 83.1%),
+        hsl(30, 97.7%, 83.1%),
+        hsl(60, 97.7%, 83.1%),
+        hsl(90, 97.7%, 83.1%),
+        hsl(120, 97.7%, 83.1%),
+        hsl(150, 97.7%, 83.1%),
+        hsl(180, 97.7%, 83.1%),
+        hsl(210, 97.7%, 83.1%),
+        hsl(240, 97.7%, 83.1%),
+        hsl(270, 97.7%, 83.1%),
+        hsl(300, 97.7%, 83.1%),
+        hsl(330, 97.7%, 83.1%),
+        hsl(360, 97.7%, 83.1%)
+
+      ) !important;  
+  }
+
+input[type="range"]::-webkit-slider-runnable-track {
+    background: linear-gradient(
+        to right,
+        hsl(0, 97.7%, 83.1%),
+        hsl(30, 97.7%, 83.1%),
+        hsl(60, 97.7%, 83.1%),
+        hsl(90, 97.7%, 83.1%),
+        hsl(120, 97.7%, 83.1%),
+        hsl(150, 97.7%, 83.1%),
+        hsl(180, 97.7%, 83.1%),
+        hsl(210, 97.7%, 83.1%),
+        hsl(240, 97.7%, 83.1%),
+        hsl(270, 97.7%, 83.1%),
+        hsl(300, 97.7%, 83.1%),
+        hsl(330, 97.7%, 83.1%),
+        hsl(360, 97.7%, 83.1%)
+      ) !important;  
+  }

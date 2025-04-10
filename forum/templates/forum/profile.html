@@ -3,6 +3,8 @@
 {% block head %}
     {% load static %}
         <link rel="stylesheet" href="{% static 'forum/css/post-card.css' %}">
+        <link rel="stylesheet" href="{% static 'forum/css/profile.css' %}">
+
 {% endblock %}
 
 
@@ -36,7 +38,18 @@
                     <h5 class="mb-0">About Me</h5>
                 </div>
                 <div class="card-body">
+                    {% if user == profile_user %}
+                    <form method="post">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <textarea name="bio" id="bio" class="form-control" maxlength="500" rows="4">{{ profile_user.userprofile.bio }}</textarea>
+                            <small class="text-muted">Max 500 characters. Avoid inappropriate language.</small>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Save Bio</button>
+                    </form>
+                    {% else %}
                     <p>{{ profile_user.userprofile.bio|default:"No bio provided." }}</p>
+                    {% endif %}
                 </div>
             </div>
 
@@ -51,6 +64,56 @@
                     <p><i class="bi bi-chat"></i> Solutions: {{solutions_count|default:"0"}}</p>
                 </div>
             </div>
+
+            {% if user == profile_user %}
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">Customize Background</h5>
+                </div>
+                <div class="card-body">
+                    <form method="post">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label for="background_hue" class="form-label">Background Color Hue</label>
+                            <input type="range" name="background_hue" id="background_hue" class="form-range background_hue_slider" min="0" max="360" value="{{ profile_user.userprofile.background_hue }}" oninput="updateBackground(this.value)">
+                        </div>
+                        <button type="submit" class="btn btn-primary">Save Changes</button>
+                    </form>
+                </div>
+            </div>
+            {% endif %}
+
+            {% if user == profile_user %}
+            <!--Edit Profile-->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">Update Personal Information</h5>
+                </div>
+                <div class="card-body">
+                    <form method="post">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label for="id_first_name" class="form-label">First Name</label>
+                            <input type="text" name="first_name" id="id_first_name" class="form-control" value="{{ request.user.first_name }}">
+                        </div>
+                        <div class="mb-3">
+                            <label for="id_last_name" class="form-label">Last Name</label>
+                            <input type="text" name="last_name" id="id_last_name" class="form-control" value="{{ request.user.last_name }}">
+                        </div>
+                        <div class="mb-3">
+                            <label for="id_personal_email" class="form-label">Personal Email</label>
+                            <input type="email" name="personal_email" id="id_personal_email" class="form-control" value="{{ request.user.personal_email }}">
+                        </div>
+                        <div class="mb-3">
+                            <label for="id_phone_number" class="form-label">Phone Number</label>
+                            <input type="text" name="phone_number" id="id_phone_number" class="form-control" value="{{ request.user.phone_number }}">
+                        </div>
+                        <button type="submit" class="btn btn-primary">Save Changes</button>
+                        <a href="{% url 'profile' request.user.username %}" class="btn btn-secondary">Cancel</a>
+                    </form>
+                </div>
+            </div>
+            {% endif %}
         </div>
 
         <!-- Right Column -->
@@ -71,14 +134,15 @@
                     {% endfor %}
                 </div>
             </div>
-
             <!-- Course Experience Section -->
             <div class="card mb-4 {% if not experienced_courses %}highlighted-card{% endif %}">
                 <div class="card-header d-flex justify-content-between align-items-center z-10">
                     <h5 class="mb-0">Experienced In</h5>
+                    {% if user == profile_user %}
                     <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#addExperienceModal">
                         <i class="bi bi-plus"></i> Add Course
                     </button>
+                    {% endif %}
                 </div>
                 <div class="card-body">
                     <div class="course-list">
@@ -99,6 +163,7 @@
                 </div>
             </div>
 
+            {% if user == profile_user %}
             <!-- Help Needed Section -->
             <div class="card mb-4 {% if not help_needed_courses %}highlighted-card{% endif %}" >
                 <div class="card-header d-flex justify-content-between align-items-center">
@@ -124,14 +189,6 @@
                         {% endfor %}
                     </div>
                 </div>
-            </div>
-
-            {% if user == profile_user %}
-            <!-- Edit Profile Button -->
-            <div class="text-end">
-                <a href="{% url 'edit_profile' %}" class="btn btn-primary">
-                    <i class="bi bi-pencil"></i> Edit Profile
-                </a>
             </div>
             {% endif %}
         </div>
@@ -181,4 +238,19 @@
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    function updateBackground(hue) {
+        // Adjust the inner color based on the hue value
+        document.body.style.background = `radial-gradient(circle, hsl(${hue}, 97.7%, 83.1%) 0%, rgba(255, 255, 255, 1) 100%)`;
+    }
+
+    // Initialize background on page load
+    document.addEventListener('DOMContentLoaded', function () {
+        const hueValue = {{ profile_user.userprofile.background_hue }};
+        updateBackground(hueValue);
+    });
+</script>
 {% endblock %}
