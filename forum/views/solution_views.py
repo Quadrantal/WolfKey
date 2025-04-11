@@ -25,6 +25,11 @@ def create_solution(request, post_id):
             try:
                 solution_json = request.POST.get('content')
                 solution_data = json.loads(solution_json) if solution_json else {}
+
+                blocks = solution_data.get('blocks', [])
+                if (len(blocks) == 1 and blocks[0].get('type') == 'paragraph' and not blocks[0].get('data', {}).get('text', '').strip()) or len(blocks) == 0:
+                    messages.error(request, 'Solution cannot be empty.')
+                    return redirect(post.get_absolute_url())
                 detect_bad_words(solution_data) 
                 solution = solution_form.save(commit=False)
                 solution.content = solution_data
@@ -50,6 +55,12 @@ def edit_solution(request, solution_id):
             try:
                 solution_json = request.POST.get('content')
                 solution_data = json.loads(solution_json) if solution_json else {}
+
+                blocks = solution_data.get('blocks', [])
+                if (len(blocks) == 1 and blocks[0].get('type') == 'paragraph' and not blocks[0].get('data', {}).get('text', '').strip()) or len(blocks == 0):
+                    messages.error(request, 'Solution cannot be empty.')
+                    return redirect('edit_solution', solution_id=solution.id)
+                
                 detect_bad_words(solution_data) 
                 solution = solution_form.save(commit=False)
                 solution.content = solution_data

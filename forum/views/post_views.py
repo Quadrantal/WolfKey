@@ -28,6 +28,13 @@ def create_post(request):
                 # Handle content
                 content_json = request.POST.get('content')
                 content_data = json.loads(content_json) if content_json else {}
+
+                # Validate post content
+                if isinstance(content_data, dict) and 'blocks' in content_data:
+                    blocks = content_data.get('blocks', [])
+                    if (len(blocks) == 1 and blocks[0].get('type') == 'paragraph' and not blocks[0].get('data', {}).get('text', '').strip()) or len(blocks) == 0:
+                        messages.error(request, 'Post content cannot be empty.')
+                        return redirect('create_post')
                 detect_bad_words(content_data) 
                 post.content = content_data
 

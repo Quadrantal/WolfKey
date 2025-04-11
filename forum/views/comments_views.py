@@ -19,6 +19,13 @@ def create_comment(request, solution_id):
         content = data.get('content')
         parent_id = data.get('parent_id') 
         try:
+
+            if isinstance(content, dict) and 'blocks' in content:
+                blocks = content.get('blocks', [])
+                if (len(blocks) == 1 and blocks[0].get('type') == 'paragraph' and not blocks[0].get('data', {}).get('text', '').strip()) or len(blocks) == 0:
+                    messages.error(request, 'Comment cannot be empty.')
+                    return JsonResponse({'status': 'error', 'messages': process_messages_to_json(request)}, status=400)
+                
             detect_bad_words(content)
         except Exception as e:
             messages.error(request,str(e))
