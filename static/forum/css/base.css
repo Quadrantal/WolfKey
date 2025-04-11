@@ -65,3 +65,7 @@ p { font-family: var(--font-secondary); }
 a {
   color: inherit;
 }
+
+html {
+  scroll-behavior: smooth;
+}
