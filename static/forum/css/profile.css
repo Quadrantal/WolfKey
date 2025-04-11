@@ -77,3 +77,25 @@ input[type="range"]::-webkit-slider-runnable-track {
         hsl(360, 97.7%, 83.1%)
       ) !important;  
   }
+
+  #profile-tab{
+    color: black;
+    border-top-left-radius: 6px;
+    border-top-right-radius: 6px;
+  }
+
+#preferences-tab{
+    color: black;
+
+}
+
+#profile-tab.active, #preferences-tab.active {
+    color: #0d6efd;
+}
+
+
+#profile-tab:hover,
+#preferences-tab:hover {
+    background-color: #f1f1f1;
+    transition: background-color 0.3s ease, color 0.3s ease;
+}

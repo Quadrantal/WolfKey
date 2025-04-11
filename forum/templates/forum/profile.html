@@ -2,11 +2,9 @@
 
 {% block head %}
     {% load static %}
-        <link rel="stylesheet" href="{% static 'forum/css/post-card.css' %}">
-        <link rel="stylesheet" href="{% static 'forum/css/profile.css' %}">
-
+    <link rel="stylesheet" href="{% static 'forum/css/post-card.css' %}">
+    <link rel="stylesheet" href="{% static 'forum/css/profile.css' %}">
 {% endblock %}
-
 
 {% block content %}
 <div class="container mt-4">
@@ -30,167 +28,196 @@
             </div>
         </div>
 
-        <!-- Left Column -->
-        <div class="col-md-4">
-            <!-- About Me -->
-            <div class="card mb-4">
-                <div class="card-header">
-                    <h5 class="mb-0">About Me</h5>
-                </div>
-                <div class="card-body">
-                    {% if user == profile_user %}
-                    <form method="post">
-                        {% csrf_token %}
-                        <div class="mb-3">
-                            <textarea name="bio" id="bio" class="form-control" maxlength="500" rows="4">{{ profile_user.userprofile.bio }}</textarea>
-                            <small class="text-muted">Max 500 characters. Avoid inappropriate language.</small>
-                        </div>
-                        <button type="submit" class="btn btn-primary">Save Bio</button>
-                    </form>
-                    {% else %}
-                    <p>{{ profile_user.userprofile.bio|default:"No bio provided." }}</p>
-                    {% endif %}
-                </div>
-            </div>
-
-            <!-- Stats -->
-            <div class="card mb-4">
-                <div class="card-header">
-                    <h5 class="mb-0">Stats</h5>
-                </div>
-                <div class="card-body">
-                    <p><i class="bi bi-star-fill text-warning"></i> Points: {{ profile_user.userprofile.points }}</p>
-                    <p><i class="bi bi-file-text"></i> Posts: {{posts_count|default:"0"}}</p>
-                    <p><i class="bi bi-chat"></i> Solutions: {{solutions_count|default:"0"}}</p>
-                </div>
-            </div>
+        <!-- Tabs Navigation -->
+        <ul class="nav nav-tabs mb-4" id="profileTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="profile-tab" data-bs-toggle="tab" data-bs-target="#profile" type="button" role="tab" aria-controls="profile" aria-selected="true">Profile</button>
+            </li>
 
             {% if user == profile_user %}
-            <div class="card mb-4">
-                <div class="card-header">
-                    <h5 class="mb-0">Customize Background</h5>
-                </div>
-                <div class="card-body">
-                    <form method="post">
-                        {% csrf_token %}
-                        <div class="mb-3">
-                            <label for="background_hue" class="form-label">Background Color Hue</label>
-                            <input type="range" name="background_hue" id="background_hue" class="form-range background_hue_slider" min="0" max="360" value="{{ profile_user.userprofile.background_hue }}" oninput="updateBackground(this.value)">
-                        </div>
-                        <button type="submit" class="btn btn-primary">Save Changes</button>
-                    </form>
-                </div>
-            </div>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="preferences-tab" data-bs-toggle="tab" data-bs-target="#preferences" type="button" role="tab" aria-controls="preferences" aria-selected="false">Preferences</button>
+            </li>
             {% endif %}
+        </ul>
 
-            {% if user == profile_user %}
-            <!--Edit Profile-->
-            <div class="card mb-4">
-                <div class="card-header">
-                    <h5 class="mb-0">Update Personal Information</h5>
-                </div>
-                <div class="card-body">
-                    <form method="post">
-                        {% csrf_token %}
-                        <div class="mb-3">
-                            <label for="id_first_name" class="form-label">First Name</label>
-                            <input type="text" name="first_name" id="id_first_name" class="form-control" value="{{ request.user.first_name }}">
+        <!-- Tabs Content -->
+        <div class="tab-content" id="profileTabsContent">
+            <!-- Profile Tab -->
+            <div class="tab-pane fade show active" id="profile" role="tabpanel" aria-labelledby="profile-tab">
+                <div class="row">
+                    <!-- Left Column -->
+                    <div class="col-md-4">
+                        <!-- About Me -->
+                        <div class="card mb-4">
+                            <div class="card-header">
+                                <h5 class="mb-0">About Me</h5>
+                            </div>
+                            <div class="card-body">
+                                {% if user == profile_user %}
+                                <form method="post">
+                                    {% csrf_token %}
+                                    <div class="mb-3">
+                                        <textarea name="bio" id="bio" class="form-control" maxlength="500" rows="4">{{ profile_user.userprofile.bio }}</textarea>
+                                        <small class="text-muted">Max 500 characters. Avoid inappropriate language.</small>
+                                    </div>
+                                    <button type="submit" class="btn btn-primary">Save Bio</button>
+                                </form>
+                                {% else %}
+                                <p>{{ profile_user.userprofile.bio|default:"No bio provided." }}</p>
+                                {% endif %}
+                            </div>
                         </div>
-                        <div class="mb-3">
-                            <label for="id_last_name" class="form-label">Last Name</label>
-                            <input type="text" name="last_name" id="id_last_name" class="form-control" value="{{ request.user.last_name }}">
-                        </div>
-                        <div class="mb-3">
-                            <label for="id_personal_email" class="form-label">Personal Email</label>
-                            <input type="email" name="personal_email" id="id_personal_email" class="form-control" value="{{ request.user.personal_email }}">
-                        </div>
-                        <div class="mb-3">
-                            <label for="id_phone_number" class="form-label">Phone Number</label>
-                            <input type="text" name="phone_number" id="id_phone_number" class="form-control" value="{{ request.user.phone_number }}">
-                        </div>
-                        <button type="submit" class="btn btn-primary">Save Changes</button>
-                        <a href="{% url 'profile' request.user.username %}" class="btn btn-secondary">Cancel</a>
-                    </form>
-                </div>
-            </div>
-            {% endif %}
-        </div>
 
-        <!-- Right Column -->
-        <div class="col-md-8">
-            <!-- Recent Activity -->
-            <div class="card mb-4">
-                <div class="card-header">
-                    <h5 class="mb-0">Recent Activity</h5>
-                </div>
-                <div class="card-body">
-                    {% for post in recent_posts %}
-                    <div class="mb-3">
-                        <h6><a href="{% url 'post_detail' post.id %}">{{ post.title }}</a></h6>
-                        <small class="text-muted">Posted {{ post.created_at|timesince }} ago</small>
+                        <!-- Stats -->
+                        <div class="card mb-4">
+                            <div class="card-header">
+                                <h5 class="mb-0">Stats</h5>
+                            </div>
+                            <div class="card-body">
+                                <p><i class="bi bi-star-fill text-warning"></i> Points: {{ profile_user.userprofile.points }}</p>
+                                <p><i class="bi bi-file-text"></i> Posts: {{posts_count|default:"0"}}</p>
+                                <p><i class="bi bi-chat"></i> Solutions: {{solutions_count|default:"0"}}</p>
+                            </div>
+                        </div>
+
+                        {% if user == profile_user %}
+                        <div class="card mb-4">
+                            <div class="card-header">
+                                <h5 class="mb-0">Customize Background</h5>
+                            </div>
+                            <div class="card-body">
+                                <form method="post">
+                                    {% csrf_token %}
+                                    <div class="mb-3">
+                                        <label for="background_hue" class="form-label">Background Color Hue</label>
+                                        <input type="range" name="background_hue" id="background_hue" class="form-range background_hue_slider" min="0" max="360" value="{{ profile_user.userprofile.background_hue }}" oninput="updateBackground(this.value)">
+                                    </div>
+                                    <button type="submit" class="btn btn-primary">Save Changes</button>
+                                </form>
+                            </div>
+                        </div>
+                        {% endif %}
                     </div>
-                    {% empty %}
-                    <p>No recent activity.</p>
-                    {% endfor %}
-                </div>
-            </div>
-            <!-- Course Experience Section -->
-            <div class="card mb-4 {% if not experienced_courses %}highlighted-card{% endif %}">
-                <div class="card-header d-flex justify-content-between align-items-center z-10">
-                    <h5 class="mb-0">Experienced In</h5>
-                    {% if user == profile_user %}
-                    <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#addExperienceModal">
-                        <i class="bi bi-plus"></i> Add Course
-                    </button>
-                    {% endif %}
-                </div>
-                <div class="card-body">
-                    <div class="course-list">
-                        {% for course in experienced_courses %}
-                        <div class="course-item d-flex justify-content-between align-items-center mb-2">
-                            <span>{{ course.course.code }} - {{ course.course.name }}</span>
-                            <form method="post" action="{% url 'remove_experience' course.id %}" class="d-inline">
-                                {% csrf_token %}
-                                <button type="submit" class="btn btn-sm btn-outline-danger">
-                                    <i class="bi bi-x"></i>
+
+                    <!-- Right Column -->
+                    <div class="col-md-8">
+                        <!-- Recent Activity -->
+                        <div class="card mb-4">
+                            <div class="card-header">
+                                <h5 class="mb-0">Recent Activity</h5>
+                            </div>
+                            <div class="card-body">
+                                {% for post in recent_posts %}
+                                <div class="mb-3">
+                                    <h6><a href="{% url 'post_detail' post.id %}">{{ post.title }}</a></h6>
+                                    <small class="text-muted">Posted {{ post.created_at|timesince }} ago</small>
+                                </div>
+                                {% empty %}
+                                <p>No recent activity.</p>
+                                {% endfor %}
+                            </div>
+                        </div>
+
+                        <!-- Course Experience Section -->
+                        <div class="card mb-4 {% if not experienced_courses %}highlighted-card{% endif %}">
+                            <div class="card-header d-flex justify-content-between align-items-center z-10">
+                                <h5 class="mb-0">Experienced In</h5>
+                                {% if user == profile_user %}
+                                <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#addExperienceModal">
+                                    <i class="bi bi-plus"></i> Add Course
                                 </button>
-                            </form>
+                                {% endif %}
+                            </div>
+                            <div class="card-body">
+                                <div class="course-list">
+                                    {% for course in experienced_courses %}
+                                    <div class="course-item d-flex justify-content-between align-items-center mb-2">
+                                        <span>{{ course.course.code }} - {{ course.course.name }}</span>
+                                        <form method="post" action="{% url 'remove_experience' course.id %}" class="d-inline">
+                                            {% csrf_token %}
+                                            <button type="submit" class="btn btn-sm btn-outline-danger">
+                                                <i class="bi bi-x"></i>
+                                            </button>
+                                        </form>
+                                    </div>
+                                    {% empty %}
+                                    <p><b>Please add some courses to improve your experience.</b></p>
+                                    {% endfor %}
+                                </div>
+                            </div>
                         </div>
-                        {% empty %}
-                        <p><b>Please add some courses to improve your experience.</b></p>
-                        {% endfor %}
-                    </div>
-                </div>
-            </div>
 
-            {% if user == profile_user %}
-            <!-- Help Needed Section -->
-            <div class="card mb-4 {% if not help_needed_courses %}highlighted-card{% endif %}" >
-                <div class="card-header d-flex justify-content-between align-items-center">
-                    <h5 class="mb-0">Need Help In</h5>
-                    <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#addHelpModal">
-                        <i class="bi bi-plus"></i> Add Course
-                    </button>
-                </div>
-                <div class="card-body">
-                    <div class="course-list">
-                        {% for course in help_needed_courses %}
-                        <div class="course-item d-flex justify-content-between align-items-center mb-2">
-                            <span>{{ course.course.code }} - {{ course.course.name }}</span>
-                            <form method="post" action="{% url 'remove_help_request' course.id %}" class="d-inline">
-                                {% csrf_token %}
-                                <button type="submit" class="btn btn-sm btn-outline-danger">
-                                    <i class="bi bi-x"></i>
+                        {% if user == profile_user %}
+                        <!-- Help Needed Section -->
+                        <div class="card mb-4 {% if not help_needed_courses %}highlighted-card{% endif %}">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <h5 class="mb-0">Need Help In</h5>
+                                {% if user == profile_user %}
+                                <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#addHelpModal">
+                                    <i class="bi bi-plus"></i> Add Course
                                 </button>
-                            </form>
+                                {% endif %}
+                            </div>
+                            <div class="card-body">
+                                <div class="course-list">
+                                    {% for course in help_needed_courses %}
+                                    <div class="course-item d-flex justify-content-between align-items-center mb-2">
+                                        <span>{{ course.course.code }} - {{ course.course.name }}</span>
+                                        <form method="post" action="{% url 'remove_help_request' course.id %}" class="d-inline">
+                                            {% csrf_token %}
+                                            <button type="submit" class="btn btn-sm btn-outline-danger">
+                                                <i class="bi bi-x"></i>
+                                            </button>
+                                        </form>
+                                    </div>
+                                    {% empty %}
+                                    <p><b>Please add some courses to improve your experience.</b></p>
+                                    {% endfor %}
+                                </div>
+                            </div>
                         </div>
-                        {% empty %}
-                        <p><b>Please add some courses to improve your experience.</b></p>
-                        {% endfor %}
+                        {% endif %}
+
                     </div>
                 </div>
             </div>
-            {% endif %}
+            
+            <!-- Preferences Tab -->
+            <div class="tab-pane fade" id="preferences" role="tabpanel" aria-labelledby="preferences-tab">
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="card mb-4">
+                            <div class="card-header">
+                                <h5 class="mb-0">Update Personal Information</h5>
+                            </div>
+                            <div class="card-body">
+                                <form method="post">
+                                    {% csrf_token %}
+                                    <div class="mb-3">
+                                        <label for="id_first_name" class="form-label">First Name</label>
+                                        <input type="text" name="first_name" id="id_first_name" class="form-control" value="{{ request.user.first_name }}">
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="id_last_name" class="form-label">Last Name</label>
+                                        <input type="text" name="last_name" id="id_last_name" class="form-control" value="{{ request.user.last_name }}">
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="id_personal_email" class="form-label">Personal Email</label>
+                                        <input type="email" name="personal_email" id="id_personal_email" class="form-control" value="{{ request.user.personal_email }}">
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="id_phone_number" class="form-label">Phone Number</label>
+                                        <input type="text" name="phone_number" id="id_phone_number" class="form-control" value="{{ request.user.phone_number }}">
+                                    </div>
+                                    <button type="submit" class="btn btn-primary">Save Changes</button>
+                                    <a href="{% url 'profile' request.user.username %}" class="btn btn-secondary">Cancel</a>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </div>
@@ -243,11 +270,9 @@
 {% block scripts %}
 <script>
     function updateBackground(hue) {
-        // Adjust the inner color based on the hue value
         document.body.style.background = `radial-gradient(circle, hsl(${hue}, 97.7%, 83.1%) 0%, rgba(255, 255, 255, 1) 100%)`;
     }
 
-    // Initialize background on page load
     document.addEventListener('DOMContentLoaded', function () {
         const hueValue = {{ profile_user.userprofile.background_hue }};
         updateBackground(hueValue);
