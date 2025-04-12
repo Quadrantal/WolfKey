@@ -99,3 +99,7 @@ input[type="range"]::-webkit-slider-runnable-track {
     background-color: #f1f1f1;
     transition: background-color 0.3s ease, color 0.3s ease;
 }
+
+#profileTabs {
+    border-bottom: 1px solid white;
+}
