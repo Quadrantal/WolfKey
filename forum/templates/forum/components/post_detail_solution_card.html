@@ -49,7 +49,7 @@
         <div class="author-info mt-3">
             <div class="author-avatar"></div>
             <div>
-                <div>{{ solution.author.get_full_name }}</div>
+                <div><a href = "{{solution.author.get_absolute_url}}">{{ solution.author.get_full_name }}</a></div>
                 <div class="text-muted">Answered {{ solution.created_at|date:"M d, Y" }}</div>
             </div>
         </div>

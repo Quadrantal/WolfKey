@@ -148,7 +148,7 @@ def detect_bad_words(content):
                     raise ValueError(f"Bad word detected in block of type '{block_type}'.")
             
             for item in items:
-                item_text = normalize_text(item)
+                item_text = normalize_text(item.get("content"))
                 if bad_word_pattern.search(item_text):
                     raise ValueError(f"Bad word detected in list item in block of type '{block_type}'.")
     else:

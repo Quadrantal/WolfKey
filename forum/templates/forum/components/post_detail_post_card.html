@@ -7,7 +7,9 @@
             <button class="button follow-button">
                 Follow<span class="follow-count">90</span>
             </button>
-            <button class="button add-answer-button">Add answer</button>
+            {% if not has_solution_from_user %}
+            <button class="button add-answer-button"><a href="#solution-form-container">Add answer</a></button>
+            {% endif %}
             {% if user.is_authenticated and post.author == user %}
             <a href="{% url 'edit_post' post.id %}" class="btn btn-primary btn-sm rounded-pill shadow-sm px-3">
                 <i class="fas fa-edit"></i> Edit
@@ -45,7 +47,7 @@
                 <div class="author-avatar"></div>
                 <div>
                     <div class="text-muted">asked {{ post.created_at|date:"M d, Y" }}</div>
-                    <div class="fw-bold">{{ post.author.get_full_name }}</div>
+                    <div class="fw-bold"><a href = "{{post.author.get_absolute_url}}">{{ post.author.get_full_name }}</a></div>
                 </div>
             </div>
         </div>

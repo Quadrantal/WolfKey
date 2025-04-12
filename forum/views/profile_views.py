@@ -2,6 +2,7 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib import messages
 from django.core.exceptions import ObjectDoesNotExist
+from forum.forms import UserUpdateForm
 
 from forum.models import User 
 from forum.models import Post, Solution 
@@ -17,20 +18,46 @@ from forum.forms import (
     UserProfileForm
 )
 
+from forum.views.utils import (
+    detect_bad_words
+)
+
 @login_required
 def profile_view(request, username):
     profile_user = get_object_or_404(User, username=username)
     recent_posts = Post.objects.filter(author=profile_user).order_by('-created_at')[:5]
     posts_count = Post.objects.filter(author=profile_user).count()
     solutions_count = Solution.objects.filter(author=profile_user).count()
-    
+
+    if request.method == 'POST':
+        request.user.first_name = request.POST.get('first_name', request.user.first_name)
+        request.user.last_name = request.POST.get('last_name', request.user.last_name)
+        request.user.personal_email = request.POST.get('personal_email', request.user.personal_email)
+        request.user.phone_number = request.POST.get('phone_number', request.user.phone_number)
+        request.user.save()
+
+        if 'bio' in request.POST:
+            bio = request.POST.get('bio', profile_user.userprofile.bio)
+            try:
+                detect_bad_words(bio)  # Check for bad words
+                profile_user.userprofile.bio = bio
+                profile_user.userprofile.save()
+            except ValueError as e:
+                messages.error(request, str(e))
+
+        # Update background hue
+        hue_value = request.POST.get('background_hue', profile_user.userprofile.background_hue)
+        profile_user.userprofile.background_hue = int(hue_value)
+        profile_user.userprofile.save()
+
+        messages.success(request, 'Profile updated successfully!')
+        return redirect('profile', username=request.user.username)
+
     context = {
         'profile_user': profile_user,
         'recent_posts': recent_posts,
         'posts_count': posts_count,
         'solutions_count': solutions_count,
-        'experience_form': UserCourseExperienceForm(user=profile_user),
-        'help_form': UserCourseHelpForm(user=profile_user),
         'experienced_courses': UserCourseExperience.objects.filter(user=profile_user),
         'help_needed_courses': UserCourseHelp.objects.filter(user=profile_user, active=True),
     }

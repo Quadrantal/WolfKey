@@ -14,10 +14,17 @@
     <link rel="stylesheet" href="{% static 'forum/css/layout.css' %}">
     <link rel="stylesheet" href="{% static 'forum/css/whats-new.css' %}">
 
+    <script>
+        function setBackground(hue) {
+            document.body.style.background = `radial-gradient(circle, hsl(${hue}, 97.7%, 83.1%) 0%, rgba(255, 255, 255, 1) 100%)`;
+            console.log(hue);
+        }
+    </script>
+
     {% block head %}
     {% endblock %}
 </head>
-<body>
+<body onload="setBackground({{ request.user.userprofile.background_hue|default:231 }})">
 
     {% if latest_update %}
     <div id="updateOverlay" class="update-overlay">
@@ -204,7 +211,7 @@
     <script>
     document.addEventListener('DOMContentLoaded', function() {
         initializeToasts();
-
+        setBackground({{ request.user.userprofile.background_hue }});
 
         const searchInput = document.getElementById('search-input');
         const searchForm = document.getElementById('search-form');

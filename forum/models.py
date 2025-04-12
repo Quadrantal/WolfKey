@@ -111,6 +111,9 @@ class User(AbstractUser):
     def get_full_name(self):
         return f"{self.first_name} {self.last_name}"
     
+    def get_absolute_url(self):
+        return reverse('profile', args=[str(self.username)]) 
+    
 
 
 class Course(models.Model):
@@ -270,6 +273,7 @@ class UserProfile(models.Model):
     is_moderator = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    background_hue = models.IntegerField(default=231) 
 
     def __str__(self):
         return f"{self.user.username}'s profile"
