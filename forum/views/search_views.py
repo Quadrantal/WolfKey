@@ -69,7 +69,12 @@ def search_results_new_page(request):
             posts = posts.annotate(
                 rank=SearchRank(F('search_vector'), search_query) + TrigramSimilarity('title', query)
             ).filter(rank__gte=0.3).order_by('-rank')
-
+        experienced_courses, help_needed_courses = get_user_courses(request.user)
+    
+        # Process posts
+        for post in posts:
+            post.preview_text = process_post_preview(post)
+            add_course_context(post, experienced_courses, help_needed_courses)
 
         return render(request, 'forum/search_results.html', {
                 'posts': posts,
