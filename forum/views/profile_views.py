@@ -56,6 +56,8 @@ def profile_view(request, username):
     context = {
         'profile_user': profile_user,
         'recent_posts': recent_posts,
+        'experience_form': UserCourseExperienceForm(user=profile_user),
+        'help_form': UserCourseHelpForm(user=profile_user),
         'posts_count': posts_count,
         'solutions_count': solutions_count,
         'experienced_courses': UserCourseExperience.objects.filter(user=profile_user),
