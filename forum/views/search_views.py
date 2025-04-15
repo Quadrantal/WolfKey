@@ -16,7 +16,7 @@ def for_you(request):
         
     experienced_courses, help_needed_courses = get_user_courses(request.user)
 
-    greeting = get_random_greeting(request.user.first_name)
+    greeting = get_random_greeting(request.user.first_name, user_timezone="America/Vancouver")
 
     # Get posts for both types of courses
     posts = Post.objects.filter(
