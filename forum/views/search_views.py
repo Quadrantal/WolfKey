@@ -5,6 +5,7 @@ from django.contrib.postgres.search import SearchQuery, SearchRank, SearchVector
 from django.contrib.postgres.search import TrigramSimilarity
 from forum.models import Post
 from forum.views.utils import process_post_preview, add_course_context
+from forum.views.greetings import get_random_greeting
 from forum.views.course_views import get_user_courses
 from django.db.models import F
 
@@ -14,6 +15,8 @@ def for_you(request):
         return redirect('login')
         
     experienced_courses, help_needed_courses = get_user_courses(request.user)
+
+    greeting = get_random_greeting(request.user.first_name)
 
     # Get posts for both types of courses
     posts = Post.objects.filter(
@@ -31,6 +34,7 @@ def for_you(request):
         'posts': posts,
         'experienced_courses': experienced_courses,
         'help_needed_courses': help_needed_courses,
+        'greeting' : greeting,
     })
 
 def all_posts(request):
