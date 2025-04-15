@@ -87,4 +87,10 @@ def search_results_new_page(request):
 @login_required
 def my_posts(request):
     posts = Post.objects.filter(author = request.user)
+    experienced_courses, help_needed_courses = get_user_courses(request.user)
+    
+    # Process posts
+    for post in posts:
+        post.preview_text = process_post_preview(post)
+        add_course_context(post, experienced_courses, help_needed_courses)
     return render(request,'forum/my_posts.html', {'posts': posts})
