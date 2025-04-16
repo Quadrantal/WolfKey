@@ -4,8 +4,10 @@ from django.contrib.auth.forms import AuthenticationForm
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from forum.models import User, Course, UserCourseHelp, UserCourseExperience
-from forum.forms import CustomUserCreationForm
+from forum.forms import CustomUserCreationForm, CustomPasswordResetForm
 import json
+from django.contrib.auth.views import PasswordResetView, PasswordResetDoneView, PasswordResetConfirmView, PasswordResetCompleteView
+from django.urls import reverse_lazy
 
 def register(request):
     if request.method == 'POST':
@@ -103,3 +105,20 @@ def logout_view(request):
     logout(request)
     messages.success(request, 'You have been logged out.')
     return redirect('all_posts')
+
+class CustomPasswordResetView(PasswordResetView):
+    template_name = 'forum/registration/password_reset.html'
+    email_template_name = 'forum/registration/password_reset_email.html'
+    html_email_template_name = 'forum/registration/password_reset_email.html'
+    success_url = reverse_lazy('password_reset_done')
+    form_class = CustomPasswordResetForm
+
+class CustomPasswordResetDoneView(PasswordResetDoneView):
+    template_name = 'forum/registration/password_reset_done.html'
+
+class CustomPasswordResetConfirmView(PasswordResetConfirmView):
+    template_name = 'forum/registration/password_reset_confirm.html'
+    success_url = reverse_lazy('password_reset_complete')
+
+class CustomPasswordResetCompleteView(PasswordResetCompleteView):
+    template_name = 'forum/registration/password_reset_complete.html'
