@@ -5,6 +5,7 @@ from django.contrib.postgres.search import SearchQuery, SearchRank, SearchVector
 from django.contrib.postgres.search import TrigramSimilarity
 from forum.models import Post
 from forum.views.utils import process_post_preview, add_course_context
+from forum.views.greetings import get_random_greeting
 from forum.views.course_views import get_user_courses
 from django.db.models import F
 
@@ -14,6 +15,8 @@ def for_you(request):
         return redirect('login')
         
     experienced_courses, help_needed_courses = get_user_courses(request.user)
+
+    greeting = get_random_greeting(request.user.first_name, user_timezone="America/Vancouver")
 
     # Get posts for both types of courses
     posts = Post.objects.filter(
@@ -31,6 +34,7 @@ def for_you(request):
         'posts': posts,
         'experienced_courses': experienced_courses,
         'help_needed_courses': help_needed_courses,
+        'greeting' : greeting,
     })
 
 def all_posts(request):
@@ -69,7 +73,12 @@ def search_results_new_page(request):
             posts = posts.annotate(
                 rank=SearchRank(F('search_vector'), search_query) + TrigramSimilarity('title', query)
             ).filter(rank__gte=0.3).order_by('-rank')
-
+        experienced_courses, help_needed_courses = get_user_courses(request.user)
+    
+        # Process posts
+        for post in posts:
+            post.preview_text = process_post_preview(post)
+            add_course_context(post, experienced_courses, help_needed_courses)
 
         return render(request, 'forum/search_results.html', {
                 'posts': posts,
@@ -82,4 +91,10 @@ def search_results_new_page(request):
 @login_required
 def my_posts(request):
     posts = Post.objects.filter(author = request.user)
+    experienced_courses, help_needed_courses = get_user_courses(request.user)
+    
+    # Process posts
+    for post in posts:
+        post.preview_text = process_post_preview(post)
+        add_course_context(post, experienced_courses, help_needed_courses)
     return render(request,'forum/my_posts.html', {'posts': posts})

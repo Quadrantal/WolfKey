@@ -21,6 +21,12 @@ from django.conf import settings
 from django.conf.urls.static import static
 from django.urls import re_path, include
 from forum.views.auth_views import register, login_view, logout_view
+from forum.views.auth_views import (
+    CustomPasswordResetView,
+    CustomPasswordResetDoneView,
+    CustomPasswordResetConfirmView,
+    CustomPasswordResetCompleteView,
+)
 from forum.views.post_views import (
     post_detail, 
     edit_post, 
@@ -135,6 +141,11 @@ urlpatterns = [
     
     # Admin URL
     path('admin/', admin.site.urls),
+
+    path('password_reset/', CustomPasswordResetView.as_view(), name='password_reset'),
+    path('password_reset/done/', CustomPasswordResetDoneView.as_view(), name='password_reset_done'),
+    path('reset/<uidb64>/<token>/', CustomPasswordResetConfirmView.as_view(), name='password_reset_confirm'),
+    path('reset/done/', CustomPasswordResetCompleteView.as_view(), name='password_reset_complete'),
 ]
 
 if settings.DEBUG:
