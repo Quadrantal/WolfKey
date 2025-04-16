@@ -4,6 +4,8 @@
     {% load static %}
     <link rel="stylesheet" href="{% static 'forum/css/post-card.css' %}">
     <link rel="stylesheet" href="{% static 'forum/css/profile.css' %}">
+    <link rel="stylesheet" href="{% static 'forum/css/course-selector.css' %}">
+
 {% endblock %}
 
 {% block content %}
@@ -179,6 +181,55 @@
                         </div>
                         {% endif %}
 
+                        <!-- Block Courses Section -->
+                        <div class="card mb-4">
+                            <div class="card-header">
+                                <h5 class="mb-0">Select Courses for Each Block</h5>
+                            </div>
+                            <div class="card-body">
+                                <form method="post" id="blockCoursesForm">
+                                    {% csrf_token %}
+                                    <div class="mb-3">
+                                        <label for="block_1A" class="form-label">Block 1A</label>
+                                        <div id="block_1A_selector"></div>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="block_1B" class="form-label">Block 1B</label>
+                                        <div id="block_1B_selector"></div>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="block_1D" class="form-label">Block 1D</label>
+                                        <div id="block_1D_selector"></div>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="block_1E" class="form-label">Block 1E</label>
+                                        <div id="block_1E_selector"></div>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="block_2A" class="form-label">Block 2A</label>
+                                        <div id="block_2A_selector"></div>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="block_2B" class="form-label">Block 2B</label>
+                                        <div id="block_2B_selector"></div>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="block_2C" class="form-label">Block 2C</label>
+                                        <div id="block_2C_selector"></div>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="block_2D" class="form-label">Block 2D</label>
+                                        <div id="block_2D_selector"></div>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="block_2E" class="form-label">Block 2E</label>
+                                        <div id="block_2E_selector"></div>
+                                    </div>
+                                    <button type="submit" class="btn btn-primary">Save Courses</button>
+                                </form>
+                            </div>
+                        </div>
+
                     </div>
                 </div>
             </div>
@@ -279,6 +330,25 @@
     document.addEventListener('DOMContentLoaded', function () {
         const hueValue = {{ profile_user.userprofile.background_hue }};
         updateBackground(hueValue);
+    });
+</script>
+<script type="module">
+    import { CourseSelector } from '{% static "forum/js/course-selector.js" %}';
+
+    document.addEventListener('DOMContentLoaded', () => {
+        const blocks = ['1A', '1B', '1D', '1E', '2A', '2B', '2C', '2D', '2E'];
+
+        blocks.forEach(block => {
+            new CourseSelector({
+                containerId: `block_${block}_selector`,
+                formName: 'blockCoursesForm',
+                maxCourses: 1, // Only one course per block
+                initialSelection: [], // Preload selected courses if needed
+                onSelectionChange: (selectedCourses) => {
+                    console.log(`Block ${block} selected courses:`, selectedCourses);
+                }
+            });
+        });
     });
 </script>
 {% endblock %}

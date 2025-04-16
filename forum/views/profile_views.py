@@ -4,7 +4,7 @@ from django.contrib import messages
 from django.core.exceptions import ObjectDoesNotExist
 from forum.forms import UserUpdateForm
 
-from forum.models import User 
+from forum.models import User, Course
 from forum.models import Post, Solution 
 from forum.models import ( 
     UserCourseExperience, 
@@ -133,3 +133,21 @@ def remove_help_request(request, help_id):
         help_request.delete()
         messages.success(request, 'Help request removed successfully!')
     return redirect('profile', username=request.user.username)
+
+
+@login_required
+def update_courses(request):
+    if request.method == 'POST':
+        profile = request.user.userprofile
+
+        # Update courses for each block
+        for block in ['1A', '1B', '1D', '1E', '2A', '2B', '2C', '2D', '2E']:
+            course_id = request.POST.get(f'block_{block}')
+            if course_id:
+                course = Course.objects.get(id=course_id)
+                setattr(profile, f'block_{block}', course)
+
+        profile.save()
+        return redirect('profile', request.user.username)
+
+    return render(request, 'forum/profile.html')
