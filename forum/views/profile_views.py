@@ -3,7 +3,7 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib import messages
 from django.core.exceptions import ObjectDoesNotExist
 from forum.forms import UserUpdateForm
-
+import json
 from forum.models import User, Course
 from forum.models import Post, Solution 
 from forum.models import ( 
@@ -28,6 +28,20 @@ def profile_view(request, username):
     recent_posts = Post.objects.filter(author=profile_user).order_by('-created_at')[:5]
     posts_count = Post.objects.filter(author=profile_user).count()
     solutions_count = Solution.objects.filter(author=profile_user).count()
+
+    # Preload courses for each block
+    initial_courses = {}
+    blocks = ['1A', '1B', '1D', '1E', '2A', '2B', '2C', '2D', '2E']
+    for block in blocks:
+        course = getattr(profile_user.userprofile, f'block_{block}', None)
+        if course:
+            initial_courses[f'block_{block}'] = {
+                'id': course.id,
+                'name': course.name,
+                'category': course.category,
+            }
+
+    initial_courses_json = json.dumps(initial_courses)
 
     if request.method == 'POST':
         request.user.first_name = request.POST.get('first_name', request.user.first_name)
@@ -62,6 +76,7 @@ def profile_view(request, username):
         'solutions_count': solutions_count,
         'experienced_courses': UserCourseExperience.objects.filter(user=profile_user),
         'help_needed_courses': UserCourseHelp.objects.filter(user=profile_user, active=True),
+        'initial_courses_json': initial_courses_json, 
     }
     return render(request, 'forum/profile.html', context)
 
@@ -140,14 +155,22 @@ def update_courses(request):
     if request.method == 'POST':
         profile = request.user.userprofile
 
-        # Update courses for each block
-        for block in ['1A', '1B', '1D', '1E', '2A', '2B', '2C', '2D', '2E']:
-            course_id = request.POST.get(f'block_{block}')
-            if course_id:
-                course = Course.objects.get(id=course_id)
-                setattr(profile, f'block_{block}', course)
+        for key, value in request.POST.items():
+            if key.startswith("block_"):
+                block = key.replace("block_", "")  # e.g., '1A'
+                course_id = value
+                try:
+                    if course_id == 'NOCOURSE':
+                        setattr(profile, f'block_{block}', None)
+                    else:
+                        course = Course.objects.get(id=course_id)
+                        setattr(profile, f'block_{block}', course)
+                except Course.DoesNotExist:
+                    messages.error(request, f"Course with ID {course_id} does not exist.")
 
-        profile.save()
-        return redirect('profile', request.user.username)
 
-    return render(request, 'forum/profile.html')
+        profile.save()  
+        messages.success(request, 'Courses updated successfully!')
+        return redirect('profile', username=request.user.username)
+
+    return redirect('profile', username=request.user.username)

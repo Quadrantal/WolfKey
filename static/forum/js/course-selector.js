@@ -1,11 +1,12 @@
 class CourseSelector {
     constructor(options) {
         this.containerId = options.containerId;
+        this.block = options.block || null; 
         this.maxCourses = options.maxCourses;
         this.onSelectionChange = options.onSelectionChange;
         this.selectedCourses = options.initialSelection || [];
         this.form = document.getElementById(options.formName);
-        
+
         this.init();
     }
 
@@ -123,10 +124,24 @@ class CourseSelector {
         this.selectedCourses.forEach(course => {
             const input = document.createElement('input');
             input.type = 'hidden';
-            input.name = 'courses';
+            if (this.block){
+                input.name = `block_${this.block}`;
+            }
+            else{
+                input.name = 'courses';
+            }
             input.value = course.id.toString();
+            input.setAttribute('block', this.block);
             this.form.appendChild(input);
         });
+
+        if (this.selectedCourses.length === 0 && this.block) {
+            const input = document.createElement('input');
+            input.type = 'hidden';
+            input.name = `block_${this.block}`;
+            input.value = 'NOCOURSE';
+            this.form.appendChild(input);
+        }
 
         if (this.onSelectionChange) {
             this.onSelectionChange(this.selectedCourses);
