@@ -114,8 +114,6 @@ class User(AbstractUser):
     def get_absolute_url(self):
         return reverse('profile', args=[str(self.username)]) 
     
-
-
 class Course(models.Model):
     code = models.CharField(max_length=10, unique=True)
     name = models.CharField(max_length=100)
@@ -288,9 +286,22 @@ class UserProfile(models.Model):
 
     def __str__(self):
         return f"{self.user.username}'s profile"
-    
 
+class DailySchedule(models.Model):
+    date = models.DateField(unique=True)
+    block_1 = models.CharField(max_length=100, blank=True, null=True)
+    block_1_time = models.CharField(max_length=50, blank=True, null=True) 
+    block_2 = models.CharField(max_length=100, blank=True, null=True)
+    block_2_time = models.CharField(max_length=50, blank=True, null=True)
+    block_3 = models.CharField(max_length=100, blank=True, null=True)
+    block_3_time = models.CharField(max_length=50, blank=True, null=True)
+    block_4 = models.CharField(max_length=100, blank=True, null=True)
+    block_4_time = models.CharField(max_length=50, blank=True, null=True)
+    block_5 = models.CharField(max_length=100, blank=True, null=True)
+    block_5_time = models.CharField(max_length=50, blank=True, null=True)
 
+    def __str__(self):
+        return f"Schedule for {self.date}"
 
 class UserCourseExperience(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='experienced_courses')
