@@ -21,7 +21,11 @@
                 <div class="flex-fill" style="min-width: 300px;">
                     <h2>Today's Schedule</h2>
                     <ul class="list-group shadow-sm rounded"id = "today-schedule">
-
+                        {% if ceremonial_required_today %}
+                        <li class="list-group-item">
+                            👔 Ceremonial Required
+                        </li>
+                        {% endif %}
                         {% for item in schedule_today %}
                         {% if item == "no school"  %}
                         <li class="list-group-item">
@@ -42,6 +46,11 @@
                 <div class="flex-fill" style="min-width: 300px;">
                     <h2>Tomorrow's Schedule</h2>
                     <ul class="list-group shadow-sm rounded" id = "tomorrow-schedule">
+                        {% if ceremonial_required_tomorrow %}
+                        <li class="list-group-item">
+                            👔 Ceremonial Required
+                        </li>
+                        {% endif %}
                         {% for item in schedule_tomorrow %}
                         {% if item == "no school"  %}
                         <li class="list-group-item">

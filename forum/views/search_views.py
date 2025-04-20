@@ -8,7 +8,7 @@ from forum.views.utils import process_post_preview, add_course_context
 from forum.views.greetings import get_random_greeting
 from forum.views.course_views import get_user_courses
 from django.db.models import F
-from forum.views.schedule_views import get_block_order_for_day, process_schedule_for_user
+from forum.views.schedule_views import get_block_order_for_day, process_schedule_for_user, is_ceremonial_uniform_required
 import datetime
 
 @login_required
@@ -23,8 +23,11 @@ def for_you(request):
     # Get today's and tomorrow's dates in the required format
     today = datetime.datetime.now().strftime("%a, %b %d")
     tomorrow = (datetime.datetime.now() + datetime.timedelta(days=1)).strftime("%a, %b %d")
-    # today = "Mon, Apr 7"
-    # tomorrow = "Tue, Apr 8"
+    today = "Mon, Apr 7"
+    tomorrow = "Tue, Apr 22"
+
+    ceremonial_required_today = is_ceremonial_uniform_required(request.user, today)
+    ceremonial_required_tomorrow = is_ceremonial_uniform_required(request.user, tomorrow)
 
     # Fetch raw schedules
     raw_schedule_today = get_block_order_for_day(today)
@@ -52,6 +55,8 @@ def for_you(request):
         'greeting': greeting,
         'schedule_today': processed_schedule_today,
         'schedule_tomorrow': processed_schedule_tomorrow,
+        'ceremonial_required_today': ceremonial_required_today, 
+        'ceremonial_required_tomorrow': ceremonial_required_tomorrow
     })
 
 def all_posts(request):

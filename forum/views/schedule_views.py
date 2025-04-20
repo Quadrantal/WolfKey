@@ -6,6 +6,7 @@ from forum.models import UserProfile, DailySchedule
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 import httpx
+import re
 
 # Initialize Google Sheets client
 scope = ['https://spreadsheets.google.com/feeds', 'https://www.googleapis.com/auth/drive']
@@ -60,29 +61,41 @@ def get_alt_day_event(target_date):
         print(f"An error occurred: {error}")
     return None
 
+
 def extract_block_times_from_description(description):
     """
-    Extract block times from the event description.
-    :param description: The description of the "alt day" event.
-    :return: A list of block times.
+    Extract instructional block time ranges from an alt schedule description,
+    excluding recess and lunch periods.
+
+    :param description: The event description string.
+    :return: A list of instructional block time ranges (e.g., '8:20-9:30').
     """
-    block_times = []
-    lines = description.splitlines()
-    for line in lines:
-        if "-" in line and ":" in line:
-            block_times.append(line.split("-")[0].strip())
-    return block_times
+    # Match pairs of "time range - label"
+    pattern = r'(\d{1,2}:\d{2}\s*-\s*\d{1,2}:\d{2})\s*-\s*([^\d]+?)(?=\d|$)'
+
+    matches = re.findall(pattern, description)
+
+    # Filter out blocks labeled 'Recess' or 'Lunch'
+    filtered_times = [
+        time_range.strip() for time_range, label in matches
+        if 'recess' not in label.lower() and 'lunch' not in label.lower()
+    ]
+
+    return filtered_times
+
 def get_block_order_for_day(target_date):
     """
     Retrieve the block order for a specific date, using the saved DailySchedule if it exists.
     Date format must match sheet, e.g., "Tue, Sep 3".
     """
     # Convert target_date to a date object
-    date_obj = datetime.datetime.strptime(target_date, "%a, %b %d").date()
+    current_year = datetime.datetime.now().year
+    date_obj = datetime.datetime.strptime(f"{target_date}, {current_year}", "%a, %b %d, %Y").date()
+
 
     # Check if a DailySchedule already exists for the date
     existing_schedule = DailySchedule.objects.filter(date=date_obj).first()
-    if existing_schedule:
+    if any([existing_schedule.block_1, existing_schedule.block_2, existing_schedule.block_3, existing_schedule.block_4, existing_schedule.block_5]):
         # Use the saved schedule
         return {
             'blocks': [
@@ -118,24 +131,38 @@ def get_block_order_for_day(target_date):
 
     for i, date_str in enumerate(date_column):
         if date_str.strip() == target_date.strip():
-            # Save the schedule to the database
-            schedule, created = DailySchedule.objects.get_or_create(
-                date=date_obj,
-                defaults={
-                    'block_1': rows[i][4] if rows[i][4] else None,
-                    'block_1_time': block_times[0] if len(block_times) > 0 else None,
-                    'block_2': rows[i][5] if rows[i][5] else None,
-                    'block_2_time': block_times[1] if len(block_times) > 1 else None,
-                    'block_3': rows[i][6] if rows[i][6] else None,
-                    'block_3_time': block_times[2] if len(block_times) > 2 else None,
-                    'block_4': rows[i][7] if rows[i][7] else None,
-                    'block_4_time': block_times[3] if len(block_times) > 3 else None,
-                    'block_5': rows[i][8] if rows[i][8] else None,
-                    'block_5_time': block_times[4] if len(block_times) > 4 else None,
-                }
-            )
+            schedule, created = DailySchedule.objects.get_or_create(date=date_obj)
+
+            # Update missing block data
+            updated = False
+            for block_index in range(5):
+                block_field = f'block_{block_index + 1}'
+                time_field = f'block_{block_index + 1}_time'
+
+                # Extract value safely
+                block_value = rows[i][4 + block_index] if len(rows[i]) > 4 + block_index else None
+                time_value = block_times[block_index] if len(block_times) > block_index else None
+
+                # Conditionally update block and time fields if they are not yet set
+                if getattr(schedule, block_field) in [None, ""] and block_value:
+                    setattr(schedule, block_field, block_value)
+                    updated = True
+
+                if getattr(schedule, time_field) in [None, ""] and time_value:
+                    setattr(schedule, time_field, time_value)
+                    updated = True
+
+            if updated:
+                schedule.save()
+
             return {
-                'blocks': [schedule.block_1, schedule.block_2, schedule.block_3, schedule.block_4, schedule.block_5],
+                'blocks': [
+                    schedule.block_1,
+                    schedule.block_2,
+                    schedule.block_3,
+                    schedule.block_4,
+                    schedule.block_5,
+                ],
                 'times': block_times,
             }
 
@@ -159,6 +186,57 @@ def interpret_block(block_code):
     if code == "1cap":
         return "Advisory"
     return block_code
+
+def is_ceremonial_uniform_required(user, target_date):
+    """
+    Check Google Calendar for a "Ceremonial Uniform Required" all-day event on the given date.
+    Date format must match sheet, e.g., "Tue, Sep 3".
+    :return: True if ceremonial uniform is required, otherwise False.
+    """
+    try:
+        current_year = datetime.datetime.now().year
+        date_obj = datetime.datetime.strptime(f"{target_date}, {current_year}", "%a, %b %d, %Y").date()
+
+        # Check if a DailySchedule already exists for the date
+        existing_schedule, created = DailySchedule.objects.get_or_create(date=date_obj)
+        if existing_schedule:
+            if existing_schedule.ceremonial_uniform:
+                print("A")
+                return True
+            elif existing_schedule.ceremonial_uniform == False:
+                print("B")
+                return False
+            
+
+        service = get_google_calendar_service()
+        calendar_id = 'nda09oameg390vndlulocmvt07u7c8h4@import.calendar.google.com'
+        time_min = datetime.datetime.combine(date_obj, datetime.time.min).isoformat() + 'Z'
+        time_max = datetime.datetime.combine(date_obj, datetime.time.max).isoformat() + 'Z'
+
+
+        events_result = service.events().list(
+            calendarId=calendar_id,
+            timeMin=time_min,
+            timeMax=time_max,
+            singleEvents=True,
+            orderBy='startTime'
+        ).execute()
+
+
+        for event in events_result.get('items', []):
+            if event.get('summary', '').lower() == "ceremonial uniform required for senior school students":
+                existing_schedule.ceremonial_uniform = True
+                existing_schedule.save()
+                return True
+            
+
+    except HttpError as error:
+        print(f"An error occurred: {error}")
+        return False
+
+    existing_schedule.ceremonial_uniform = False
+    existing_schedule.save()
+    return False
 
 def process_schedule_for_user(user, raw_schedule):
     """
@@ -193,5 +271,4 @@ def process_schedule_for_user(user, raw_schedule):
                 block_attr = f"block_{normalized.upper()}"
                 course = getattr(profile, block_attr, None)
                 processed_schedule.append({"block": course.name if course else f"{block}, Add your courses in profile to unlock this!", "time": time})
-
     return processed_schedule
