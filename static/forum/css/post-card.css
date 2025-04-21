@@ -118,6 +118,14 @@
     z-index: 1; 
 }
 
+.highlighted-card-blue{
+    padding-top: 12px;
+    border: 1px solid #4559cb;
+    background: linear-gradient(to bottom, #a3a5e6 -5%, #fff 6%, #fff 85%,#a9a3e6 120%);
+    box-shadow: 0 0px 20px rgba(14, 14, 234, 0.5);
+    z-index: 1; 
+}
+
 .card-header {
     position: relative;
     z-index: 2; 
