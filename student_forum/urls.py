@@ -78,6 +78,8 @@ from forum.views.comments_views import (
     get_comments
 )
 
+from forum.views.about_view import about_view
+
 urlpatterns = [
     # Post related URLs
     path('', for_you, name='for_you'),
@@ -96,6 +98,8 @@ urlpatterns = [
     path('comment/delete/<int:comment_id>/', delete_comment, name='delete_comment'),
 
     path('solution/<int:solution_id>/comments/', get_comments, name='get_solution_comments'),
+
+    path('about', about_view, name = 'site_info'),
     
     # Auth related URLs
     path('register/', register, name='register'),

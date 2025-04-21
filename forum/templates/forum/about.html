@@ -1,0 +1,161 @@
+{% extends 'forum/base.html' %}
+
+{% block head %}
+{% load static %}
+<link rel="stylesheet" href="{% static 'forum/css/post-card.css' %}">
+<style>
+    body {
+        background-color: #f5f5f5;
+    }
+
+    .info-grid {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 2rem;
+        justify-content: space-between;
+    }
+
+    .card-section {
+        flex: 1 1 48%;
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+
+    .card-title {
+        font-weight: 600;
+        font-size: 1.1rem;
+    }
+
+    .cta-section {
+        margin-top: 4rem;
+        text-align: center;
+    }
+
+    .screenshot-img {
+        width: 100%;
+        max-width: 400px;
+        height: auto;
+        margin: 0 auto;
+        display: block;
+        border-radius: 10px;
+        box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+    }
+
+    @media (max-width: 768px) {
+        .info-grid {
+            flex-direction: column;
+        }
+
+
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="card mb-4">
+        <div class="card-body text-center">
+            <h1 class="mb-2">Ask questions, get answers, no distractions</h1>
+            <p class="text-muted">This site is all about getting questions answers. Any question you might have. Answers
+                unobtainable from ChatGPT. </p>
+        </div>
+    </div>
+
+    <div class="info-grid">
+        <!-- Left Section: Features -->
+        <div class="card-section">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">🎯 Just questions...</h5>
+                    <p>Only focused inquiries. No long-winded tangents or distracting DMs. Precision is the objective.
+                    </p>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">✅ ...and answers.</h5>
+                    <p>Good answers rise to prominence through upvote and downvotes. The person who asked can mark one
+                        answer as "accepted".</p>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">🔔 You'll get notified on any updates</h5>
+                    <p>Know through email of any solutions, comments, and replies</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Section: Screenshot Preview -->
+        <div class="card-section">
+            <div class="card highlighted-card-green">
+                <div class="card-body">
+                    <img src="media/uploads/qnaImage1.png" alt="Q&A Interface Screenshot" class="screenshot-img">
+                </div>
+            </div>
+        </div>
+
+        <div class="row align-items-center my-5 flex-md-row-reverse">
+            <!-- Text on Right -->
+            <div class="col-md-6">
+                <div class="card mb-3">
+                  <div class="card-body">
+                    <h4 class="card-title">Personalize Your Presence 🎨</h4>
+                    <p>Make your profile distinctly yours — customize backgrounds, refine your bio, and (soon!) upload a profile picture that reflects your personality.</p>
+                  </div>
+                </div>
+                <div class="card">
+                  <div class="card-body">
+                    <h5 class="card-title">Showcase Your Impact 🌟</h5>
+                    <p>Share your profile with peers and let your contributions speak for themselves. Your helpfulness and activity are elegantly displayed.</p>
+                  </div>
+                </div>
+              </div>
+
+            <!-- Image on Left -->
+            <div class="col-md-6 text-center">
+                <div class="card highlighted-card-green">
+                    <div class="card-body">
+                        <img src="media/uploads/qnaImage2.png" class="screenshot-img" alt="Profile Page">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Left Section: Features -->
+        <div class="card-section">
+            <div class="card mb-3">
+                <div class="card-body">
+                    <h5 class="card-title">Glance at Your Day 🗓️</h5>
+                    <p>Stay focused with a streamlined view of relevant inquiries — no tangents, no clutter, just clarity and concision.</p>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Lightning-Fast Updates ⚡</h5>
+                    <p>Insightful responses ascend through community voting, and the original poster can mark the most helpful answer as “accepted.”</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Section: Screenshot Preview -->
+        <div class="card-section">
+            <div class="card highlighted-card-green">
+                <div class="card-body">
+                    <img src="media/uploads/qnaImage3.png" alt="Schedule screenshot" class="screenshot-img">
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+    <!-- CTA -->
+    <div class="cta-section">
+        <h2>Join the Community</h2>
+        <p class="text-muted">Start exploring, collaborating, and learning with WolfKey today!</p>
+        <a href="{% url 'register' %}" class="btn btn-primary">Get Started</a>
+    </div>
+</div>
+{% endblock %}
