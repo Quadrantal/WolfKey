@@ -21,18 +21,9 @@ export class MathLiveBlock {
       const mathField = document.createElement("math-field");
       mathField.setAttribute("style", "min-width: 100px; min-height: 30px;");
       mathField.value = this.data.content;
-  
-      // Event listener to save changes
-      mathField.addEventListener("input", () => {
-        console.log("chANGE Happened");
-        this.data.content = mathField.value;
-        console.log(this.data.content);
-        this.save();
-      });
-  
-      this.wrapper.appendChild(mathField);
 
-    mathField.addEventListener('keydown', (event) => {
+
+      mathField.addEventListener('keydown', (event) => {
         if(event.key === 'ArrowRight' || event.key === 'ArrowLeft'){
         event.preventDefault();
         event.stopPropagation();
@@ -46,9 +37,38 @@ export class MathLiveBlock {
     
             mathField.focus();
           }
-        });
-        
-      return this.wrapper;
+
+
+        console.log("Event: ", event);
+
+        if (event.code == "Backspace" || event.code == "Delete") {
+          console.log("Delete/Backspace pressed");
+          event.stopImmediatePropagation();
+          event.stopPropagation();
+          event.preventDefault();
+
+          mathField.focus();
+        }
+
+        if (event.code == "Enter") {
+          event.stopImmediatePropagation();
+          event.stopPropagation();
+          event.preventDefault();
+
+          mathField.focus();
+        }
+      });
+  
+      // Event listener to save changes
+      mathField.addEventListener("input", () => {
+        this.data.content = mathField.value;
+        console.log(this.data.content);
+        this.save();
+      });
+  
+      this.wrapper.appendChild(mathField);
+
+        return this.wrapper;
     }
   
     save() {

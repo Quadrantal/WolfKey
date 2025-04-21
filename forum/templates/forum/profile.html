@@ -122,7 +122,7 @@
                         </div>
 
                         <!-- Course Experience Section -->
-                        <div class="card mb-4 {% if not experienced_courses %}highlighted-card{% endif %}">
+                        <div class="card mb-4 {% if not experienced_courses %}highlighted-card-red{% endif %}">
                             <div class="card-header d-flex justify-content-between align-items-center z-10">
                                 <h5 class="mb-0">Experienced In</h5>
                                 {% if user == profile_user %}
@@ -152,7 +152,7 @@
 
                         {% if user == profile_user %}
                         <!-- Help Needed Section -->
-                        <div class="card mb-4 {% if not help_needed_courses %}highlighted-card{% endif %}">
+                        <div class="card mb-4 {% if not help_needed_courses %}highlighted-card-red{% endif %}">
                             <div class="card-header d-flex justify-content-between align-items-center">
                                 <h5 class="mb-0">Need Help In</h5>
                                 {% if user == profile_user %}
