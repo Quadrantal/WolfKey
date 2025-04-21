@@ -201,10 +201,8 @@ def is_ceremonial_uniform_required(user, target_date):
         existing_schedule, created = DailySchedule.objects.get_or_create(date=date_obj)
         if existing_schedule:
             if existing_schedule.ceremonial_uniform:
-                print("A")
                 return True
             elif existing_schedule.ceremonial_uniform == False:
-                print("B")
                 return False
             
 

@@ -22,6 +22,8 @@ from forum.views.utils import (
     detect_bad_words
 )
 
+from django.http import JsonResponse
+
 @login_required
 def profile_view(request, username):
     profile_user = get_object_or_404(User, username=username)
@@ -66,6 +68,15 @@ def profile_view(request, username):
 
         messages.success(request, 'Profile updated successfully!')
         return redirect('profile', username=request.user.username)
+    
+    experienced_courses = UserCourseExperience.objects.filter(user=profile_user)
+    print("EXP: ", experienced_courses)
+    help_needed_courses = UserCourseHelp.objects.filter(user=profile_user, active=True)    
+    initial_courses_json = json.dumps(initial_courses)
+    experienced_courses_json = json.dumps([experience.course.id for experience in experienced_courses])
+    help_needed_courses_json = json.dumps([help.course.id for help in help_needed_courses])
+
+    print(experienced_courses_json)
 
     context = {
         'profile_user': profile_user,
@@ -74,8 +85,10 @@ def profile_view(request, username):
         'help_form': UserCourseHelpForm(user=profile_user),
         'posts_count': posts_count,
         'solutions_count': solutions_count,
-        'experienced_courses': UserCourseExperience.objects.filter(user=profile_user),
-        'help_needed_courses': UserCourseHelp.objects.filter(user=profile_user, active=True),
+        'experienced_courses': experienced_courses,
+        'help_needed_courses': help_needed_courses,
+        'experienced_courses_json': experienced_courses_json,
+        'help_needed_courses_json': help_needed_courses_json,
         'initial_courses_json': initial_courses_json, 
     }
     return render(request, 'forum/profile.html', context)
@@ -107,23 +120,32 @@ def my_profile(request):
 def add_experience(request):
     if request.method == 'POST':
         form = UserCourseExperienceForm(request.POST, user=request.user) 
+        print(form)
+
         if form.is_valid():
             experience = form.save(commit=False)
             experience.user = request.user
             experience.save()
             messages.success(request, 'Course experience added successfully!')
-    return redirect('profile', username=request.user.username) 
+            return JsonResponse({'success': True})
+        else:
+            return JsonResponse({'success': False, 'error': 'Form is invalid.'})
+    return JsonResponse({'success': False, 'error': 'Invalid request method.'})
 
 @login_required
 def add_help_request(request):
     if request.method == 'POST':
-        form = UserCourseHelpForm(request.POST, user=request.user)  
+        form = UserCourseHelpForm(request.POST, user=request.user)
+        print(form)
         if form.is_valid():
             help_request = form.save(commit=False)
             help_request.user = request.user
             help_request.save()
             messages.success(request, 'Help request added successfully!')
-    return redirect('profile', username=request.user.username) 
+            return JsonResponse({'success': True})
+        else:
+            return JsonResponse({'success': False, 'error': 'Form is invalid.'})
+    return JsonResponse({'success': False, 'error': 'Invalid request method.'})
 
 @login_required
 def remove_experience(request, experience_id):
