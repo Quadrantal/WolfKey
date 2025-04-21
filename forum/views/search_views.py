@@ -23,8 +23,6 @@ def for_you(request):
     # Get today's and tomorrow's dates in the required format
     today = datetime.datetime.now().strftime("%a, %b %d")
     tomorrow = (datetime.datetime.now() + datetime.timedelta(days=1)).strftime("%a, %b %d")
-    today = "Mon, Apr 7"
-    tomorrow = "Tue, Apr 22"
 
     ceremonial_required_today = is_ceremonial_uniform_required(request.user, today)
     ceremonial_required_tomorrow = is_ceremonial_uniform_required(request.user, tomorrow)
