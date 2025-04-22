@@ -9,7 +9,8 @@ from forum.views.greetings import get_random_greeting
 from forum.views.course_views import get_user_courses
 from django.db.models import F
 from forum.views.schedule_views import get_block_order_for_day, process_schedule_for_user, is_ceremonial_uniform_required
-import datetime
+from datetime import datetime, timedelta
+from zoneinfo import ZoneInfo
 
 @login_required
 def for_you(request):
@@ -21,8 +22,10 @@ def for_you(request):
     greeting = get_random_greeting(request.user.first_name, user_timezone="America/Vancouver")
 
     # Get today's and tomorrow's dates in the required format
-    today = datetime.datetime.now().strftime("%a, %b %d")
-    tomorrow = (datetime.datetime.now() + datetime.timedelta(days=1)).strftime("%a, %b %d")
+    pst = ZoneInfo("America/Los_Angeles")
+    now_pst = datetime.now(pst)
+    today = now_pst.strftime("%a, %b %d")
+    tomorrow = (now_pst + timedelta(days=1)).strftime("%a, %b %d")
 
     ceremonial_required_today = is_ceremonial_uniform_required(request.user, today)
     ceremonial_required_tomorrow = is_ceremonial_uniform_required(request.user, tomorrow)
