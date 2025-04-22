@@ -3,7 +3,7 @@ from django.contrib.auth.decorators import login_required
 from django.db.models import Q
 from django.contrib.postgres.search import SearchQuery, SearchRank, SearchVector
 from django.contrib.postgres.search import TrigramSimilarity
-from forum.models import Post
+from forum.models import Post, User
 from forum.views.utils import process_post_preview, add_course_context
 from forum.views.greetings import get_random_greeting
 from forum.views.course_views import get_user_courses
@@ -86,27 +86,35 @@ def all_posts(request):
 
 
 def search_results_new_page(request):
-    # print("Enters view")
     query = request.GET.get('q', '')
     posts = Post.objects.all().order_by('-created_at')
+    users = User.objects.all()
 
     if query:
-        if query:
-            search_query = SearchQuery(query)
-            posts = posts.annotate(
-                rank=SearchRank(F('search_vector'), search_query) + TrigramSimilarity('title', query)
-            ).filter(rank__gte=0.3).order_by('-rank')
+        search_query = SearchQuery(query)
+
+        # Search in posts
+        posts = posts.annotate(
+            rank=SearchRank(F('search_vector'), search_query) + TrigramSimilarity('title', query)
+        ).filter(rank__gte=0.3).order_by('-rank')
+
+        # Search in users
+        users = users.annotate(
+            rank=SearchRank(F('search_vector'), search_query)
+        ).filter(rank__gte=0.3).order_by('-rank')
+
         experienced_courses, help_needed_courses = get_user_courses(request.user)
-    
+
         # Process posts
         for post in posts:
             post.preview_text = process_post_preview(post)
             add_course_context(post, experienced_courses, help_needed_courses)
 
         return render(request, 'forum/search_results.html', {
-                'posts': posts,
-                'query': query
-            })
+            'posts': posts,
+            'users': users,
+            'query': query
+        })
 
     return redirect('all_posts')
 

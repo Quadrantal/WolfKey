@@ -2,16 +2,60 @@
 <html lang="en">
 {% extends 'forum/base.html' %}
 
+{%block head %}
+{% load static %}
+<link rel="stylesheet" href="{% static 'forum/css/post-card.css' %}">
+{% endblock %}
+
 
 {% block content %}
 <div class="container mt-4">
     <h1>Search Results</h1>
-    <div class="row" id="post-list">
+    {% if users %}
+    <h2>Users</h2>
+    <div class="row">
+        {% for user in users %}
+        <div class="col-md-12 mb-3">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <!-- Profile Picture -->
+                        <div class="me-4">
+                            {% if user.userprofile.profile_picture %}
+                            <img src="{{ user.userprofile.profile_picture.url }}" alt="{{ user.get_full_name }}" class="rounded-circle" style="width: 100px; height: 100px; object-fit: cover;">
+                            {% else %}
+                            <div class="rounded-circle bg-secondary text-white d-flex align-items-center justify-content-center" style="width: 100px; height: 100px;">
+                                <span style="font-size: 24px;">{{ user.first_name|slice:":1" }}{{ user.last_name|slice:":1" }}</span>
+                            </div>
+                            {% endif %}
+                        </div>
+    
+                        <!-- User Info -->
+                        <div>
+                            <h5 class="card-title mb-1">{{ user.get_full_name }}</h5>
+                            <p class="card-text text-muted mb-2">{{ user.userprofile.bio|default:"No bio available." }}</p>
+                            <p class="card-text mb-2">
+                                <strong>Points:</strong> {{ user.userprofile.points }}
+                                <span class="ms-3"><strong>Role:</strong> {% if user.userprofile.is_moderator %}Moderator{% else %}User{% endif %}</span>
+                            </p>
+                            <a href="{% url 'profile' user.username %}" class="btn btn-primary btn-sm">View Profile</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+    
+    <h2>Posts</h2>
+    <div class = "row" id="post-list">
         {% for post in posts %}
             <div class="col-12 mb-4">
                 {% include 'forum/components/post_card.html' with post=post %}
             </div>
-
+        {% empty %}
+            <p>No posts found.</p>
         {% endfor %}
     </div>
 </div>
