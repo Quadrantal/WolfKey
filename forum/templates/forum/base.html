@@ -23,8 +23,8 @@
     {% block head %}
     {% endblock %}
 </head>
-<body onload="setBackground({{ request.user.userprofile.background_hue|default:231 }})">
-
+<body class="{% block body_class %}{% endblock %}">
+    
     {% if latest_update %}
     <div id="updateOverlay" class="update-overlay">
         <div class="update-modal">
@@ -214,7 +214,16 @@
     <script>
     document.addEventListener('DOMContentLoaded', function() {
         initializeToasts();
-        setBackground({{ request.user.userprofile.background_hue }});
+        const isProfilePage = document.body.classList.contains('profile-page');
+        if (!isProfilePage) {
+            const hue =         
+            {% if request.user.is_authenticated %}
+                setBackground({{ request.user.userprofile.background_hue|default:231 }});
+            {% else %}
+                setBackground(231);
+            {% endif %};
+                setBackground(hue);
+        }
 
         const searchInput = document.getElementById('search-input');
         const searchForm = document.getElementById('search-form');
@@ -237,7 +246,6 @@
                         try {
                             // console.log(text);
                             const data = JSON.parse(text);
-                            console.log(text);
                             searchResults.innerHTML = '';
                             postList.style.display = 'none';
 
