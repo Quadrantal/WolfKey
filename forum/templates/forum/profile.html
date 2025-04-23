@@ -477,12 +477,13 @@
             const buttonsContainer = document.getElementById(`${blockId}_buttons`);
             if (buttonsContainer && course) {
                 buttonsContainer.style.display = 'flex';
-
                 // Check if the course is already in either the "Experienced" or "Help Needed" lists
                 if (isCourseInList(course.id, experiencedCourses) || isCourseInList(course.id, helpNeededCourses)) {
                     // Hide buttons if the course is in one of the lists
                     buttonsContainer.style.display = 'none';
                 }
+            }else if (!course) {
+                buttonsContainer.style.display = 'none';
             }
 
             // Add course selection handler to toggle visibility of buttons
