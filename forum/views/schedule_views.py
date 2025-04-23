@@ -268,5 +268,5 @@ def process_schedule_for_user(user, raw_schedule):
                 # Try fetching course based on block naming convention
                 block_attr = f"block_{normalized.upper()}"
                 course = getattr(profile, block_attr, None)
-                processed_schedule.append({"block": course.name if course else f"{block}, Add your courses in profile to unlock this!", "time": time})
+                processed_schedule.append({"block": course.name if course else f"Add your courses in profile/preferences to unlock this!", "time": time})
     return processed_schedule
