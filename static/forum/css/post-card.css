@@ -7,6 +7,7 @@
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     position: relative;
     overflow: visible;
+    border-width: 0px !important;
 }
   
 .card-body{
@@ -106,7 +107,7 @@
     padding-top: 12px;
     border: 2px solid #e25a5a;
     background: linear-gradient(to bottom, #e25a5a -5%, #fff 6%, #fff 85%,#e25a5a 120%);
-    box-shadow: 0 0px 20px rgba(255, 131, 6, 0.812);
+    box-shadow: 0 0px 20px rgba(255, 131, 6, 0.9) !important;
     z-index: 1; 
 }
 
@@ -114,7 +115,7 @@
     padding-top: 12px;
     border: 1px solid #45cb7d;
     background: linear-gradient(to bottom, #aae6a3 -5%, #fff 6%, #fff 85%,#aae6a3 120%);
-    box-shadow: 0 0px 20px rgba(41, 234, 14, 0.5);
+    box-shadow: 0 0px 20px rgba(41, 234, 14, 0.9) !important;
     z-index: 1; 
 }
 
@@ -122,7 +123,7 @@
     padding-top: 12px;
     border: 1px solid #4559cb;
     background: linear-gradient(to bottom, #a3a5e6 -5%, #fff 6%, #fff 85%,#a9a3e6 120%);
-    box-shadow: 0 0px 20px rgba(14, 14, 234, 0.5);
+    box-shadow: 0 0px 20px rgba(14, 14, 234, 0.9) !important;
     z-index: 1; 
 }
 

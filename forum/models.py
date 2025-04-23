@@ -114,6 +114,16 @@ class User(AbstractUser):
     def get_absolute_url(self):
         return reverse('profile', args=[str(self.username)]) 
     
+    search_vector = SearchVectorField(null=True, blank=True)
+
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+        search_vector = (
+            SearchVector('first_name', weight='A') +
+            SearchVector('last_name', weight='A')
+        )
+        User.objects.filter(id=self.id).update(search_vector=search_vector)
+    
 class Course(models.Model):
     code = models.CharField(max_length=10, unique=True)
     name = models.CharField(max_length=100)

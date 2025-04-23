@@ -70,7 +70,6 @@ def profile_view(request, username):
         return redirect('profile', username=request.user.username)
     
     experienced_courses = UserCourseExperience.objects.filter(user=profile_user)
-    print("EXP: ", experienced_courses)
     help_needed_courses = UserCourseHelp.objects.filter(user=profile_user, active=True)    
     initial_courses_json = json.dumps(initial_courses)
     experienced_courses_json = json.dumps([experience.course.id for experience in experienced_courses])

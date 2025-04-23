@@ -6,6 +6,38 @@
     margin-top: 0;
     position: relative;
 }
+.ask-button {
+    z-index: 1;
+    position: relative;
+    overflow: hidden;
+    border: none !important;
+    border-radius: 6px;
+    line-height: 2rem;
+}
+
+.ask-button::before {
+    content: "";
+    position: absolute;
+    top: -3px;
+    left: -3px;
+    right: -3px;
+    bottom: -3px;
+    background: linear-gradient(45deg, #ffd800, #ff5520, #750cf2, #0cbcf2);
+    z-index: -2;
+    border-radius: inherit;
+}
+
+.ask-button::after{
+    content: "";
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    right: 3px;
+    bottom: 3px;
+    background-color: #310599;
+    z-index: -1;
+    border-radius: 6px;
+}
 
 /* Sidebar */
 .sidebar {
@@ -225,3 +257,23 @@ li {
 .toast.fade-out {
     animation: toastFadeOut 0.5s ease-out forwards;
 }
+
+.fade-text {
+    display: inline-block;
+    overflow: hidden;
+  }
+  
+  .fade-text span {
+    opacity: 0;
+    display: inline-block;
+    animation: fadeIn 0.05s forwards;
+  }
+  
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }

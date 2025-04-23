@@ -92,12 +92,6 @@
                         formData.append('courses', course.id);
                     });
     
-                    // Debug log
-                    console.log('Submitting form data:');
-                    for (let pair of formData.entries()) {
-                        console.log(pair[0] + ': ' + pair[1]);
-                    }
-    
                     // Send form data using fetch
                     const response = await fetch(form.action, {
                         method: 'POST',

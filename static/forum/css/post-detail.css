@@ -17,6 +17,7 @@
   border-radius: 12px;
   padding: 20px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+  border-width: 0px !important;
 }
 .post-header {
   padding: 20px;
@@ -194,7 +195,7 @@
     padding-top: 12px;
     border: 1px solid #45cb7d;
     background: linear-gradient(to bottom, #aae6a3 -5%, #fff 6%, #fff 85%,#aae6a3 120%);
-    box-shadow: 0 0px 20px rgba(41, 234, 14, 0.5);
+    box-shadow: 0 0px 20px rgba(41, 234, 14, 0.9);
 }
 
 .accept-button-accepted path{

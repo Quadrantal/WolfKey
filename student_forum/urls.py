@@ -78,10 +78,13 @@ from forum.views.comments_views import (
     delete_comment,
     get_comments
 )
+from django.views.generic import RedirectView
 
 from forum.views.about_view import about_view
 
 urlpatterns = [
+
+    path('favicon.ico', RedirectView.as_view(url=settings.STATIC_URL + 'forum/images/WolfkeyLogo.ico')),
     # Post related URLs
     path('', for_you, name='for_you'),
     path('all-posts/', all_posts, name='all_posts'),

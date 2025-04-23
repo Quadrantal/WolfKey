@@ -7,7 +7,7 @@
     <link rel="stylesheet" href="{% static 'forum/css/course-selector.css' %}">
 
 {% endblock %}
-
+{% block body_class %}profile-page{% endblock %}
 {% block content %}
 <div class="container mt-4">
     <div class="row">
@@ -425,7 +425,7 @@
 {% block scripts %}
 <script>
     function updateBackground(hue) {
-        document.body.style.background = `radial-gradient(circle, hsl(${hue}, 97.7%, 83.1%) 0%, rgba(255, 255, 255, 1) 100%)`;
+        document.body.style.background = `radial-gradient(circle, hsl(${hue}, 100%, 77%) 0%, rgba(255, 255, 255, 1) 100%)`;
     }
 
     document.addEventListener('DOMContentLoaded', function () {
@@ -463,13 +463,10 @@
 
         // Function to check if a course is in the experienced or help-needed list
         function isCourseInList(courseId, list) {
-            console.log("Course id" , courseId);
-            console.log("List", list);
             return list.includes(courseId);
         }
 
         blocks.forEach(block => {
-            console.log("Block: ", block);
             const blockId = `block_${block}`;
             const course = initialCourses[blockId];
 
@@ -477,12 +474,13 @@
             const buttonsContainer = document.getElementById(`${blockId}_buttons`);
             if (buttonsContainer && course) {
                 buttonsContainer.style.display = 'flex';
-
                 // Check if the course is already in either the "Experienced" or "Help Needed" lists
                 if (isCourseInList(course.id, experiencedCourses) || isCourseInList(course.id, helpNeededCourses)) {
                     // Hide buttons if the course is in one of the lists
                     buttonsContainer.style.display = 'none';
                 }
+            }else if (!course) {
+                buttonsContainer.style.display = 'none';
             }
 
             // Add course selection handler to toggle visibility of buttons
