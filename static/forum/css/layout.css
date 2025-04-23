@@ -256,3 +256,23 @@ li {
 .toast.fade-out {
     animation: toastFadeOut 0.5s ease-out forwards;
 }
+
+.fade-text {
+    display: inline-block;
+    overflow: hidden;
+  }
+  
+  .fade-text span {
+    opacity: 0;
+    display: inline-block;
+    animation: fadeIn 0.05s forwards;
+  }
+  
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
