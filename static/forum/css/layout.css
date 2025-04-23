@@ -12,6 +12,7 @@
     overflow: hidden;
     border: none !important;
     border-radius: 6px;
+    line-height: 2rem;
 }
 
 .ask-button::before {
