@@ -3,7 +3,7 @@
         <link rel="stylesheet" href="{% static 'forum/css/post-card.css' %}">
 </head>
 
-    <div class="card clickable post hidden">
+    <div class="card clickable post hidden {% if post.accepted_solution%}highlighted-card-green{% endif %}">
         {% if post.accepted_solution %}
             <div class="banner">Solved</div>    
         {% endif %}
