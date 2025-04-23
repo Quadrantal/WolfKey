@@ -463,13 +463,10 @@
 
         // Function to check if a course is in the experienced or help-needed list
         function isCourseInList(courseId, list) {
-            console.log("Course id" , courseId);
-            console.log("List", list);
             return list.includes(courseId);
         }
 
         blocks.forEach(block => {
-            console.log("Block: ", block);
             const blockId = `block_${block}`;
             const course = initialCourses[blockId];
 
