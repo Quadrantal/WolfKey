@@ -6,11 +6,11 @@ import json
 import logging
 from django.http import JsonResponse
 from django.utils.html import escape
-from forum.models import Post, Solution, Comment, Course
+from forum.models import Post, Solution, Comment, Course, FollowedPost, SavedSolution
 from forum.forms import SolutionForm, CommentForm, PostForm
 from .utils import selective_quote_replace
 from django.contrib import messages
-from .notification_views import send_course_notifications
+from .notification_views import send_course_notifications, send_solution_notification
 from django.http import HttpResponseForbidden
 
 
@@ -83,24 +83,115 @@ def post_detail(request, post_id):
         '-vote_score',
         '-created_at'
     )
+    solution_form = SolutionForm()
+    comment_form = CommentForm()
     
     has_solution = Solution.objects.filter(post=post, author=request.user).exists()
+
+    if request.method == 'POST':
+        if not request.user.is_authenticated: 
+            return redirect('login')
+
+        action = request.POST.get('action')
+        
+        if has_solution and action != 'delete_solution' and action != 'edit_solution':
+            return redirect('post_detail', post_id=post.id)
+
+        if action == 'create_solution':
+            solution_form = SolutionForm(request.POST)
+            if solution_form.is_valid():
+                solution_json = request.POST.get('content')
+                solution_data = json.loads(solution_json) if solution_json else {}
+                solution = solution_form.save(commit=False)
+                solution.content = solution_data
+                solution.post = post
+                solution.author = request.user
+                solution.save()
+                messages.success(request, 'Solution added successfully!')
+
+            if solution.author != post.author:
+                send_solution_notification(solution)
+
+        elif action == 'edit_solution':
+            solution_id = request.POST.get('solution_id')
+            solution = get_object_or_404(Solution, id=solution_id, author=request.user)
+            solution_form = SolutionForm(request.POST, instance=solution)
+            if solution_form.is_valid():
+                solution_json = request.POST.get('content')
+                solution_data = json.loads(solution_json) if solution_json else {}
+                solution = solution_form.save(commit=False)
+                solution.content = solution_data
+                solution.post = post
+                solution.author = request.user
+                solution.save()
+                messages.success(request, 'Solution updated successfully!')
+
+        elif action == 'delete_solution':
+            solution_id = request.POST.get('solution_id')
+            solution = get_object_or_404(Solution, id=solution_id, author=request.user)
+            solution.delete()
+            messages.success(request, 'Solution deleted successfully!')
+
+        elif action == 'create_comment':
+            comment_form = CommentForm(request.POST)
+            solution_id = request.POST.get('solution_id')
+            solution = get_object_or_404(Solution, id=solution_id)
+            parent_id = request.POST.get('parent_id')
+
+            if comment_form.is_valid():
+                comment = comment_form.save(commit=False)
+                comment.solution = solution
+                comment.author = request.user
+                if parent_id:
+                    parent_comment = get_object_or_404(Comment, id=parent_id)
+                    comment.parent = parent_comment
+                comment.save()
+                messages.success(request, 'Comment added successfully!')
+
+        elif action == 'edit_comment':
+            comment_id = request.POST.get('comment_id')
+            comment = get_object_or_404(Comment, id=comment_id, author=request.user)
+            comment.content = comment_form.cleaned_data['content']
+            comment.save()
+            messages.success(request, 'Comment updated successfully!')
+
+        elif action == 'delete_comment':
+            comment_id = request.POST.get('comment_id')
+            comment = get_object_or_404(Comment, id=comment_id, author=request.user)
+            comment.delete()
+            messages.success(request, 'Comment deleted successfully!')
+
+        return redirect('post_detail', post_id=post.id)
+    
     # Process post content
-    content_json = json.dumps(post.content, cls=DjangoJSONEncoder)
+    try:
+        content_json = json.dumps(post.content, cls=DjangoJSONEncoder)
+    except (TypeError, ValueError) as e:
+        logger.error(f"Error serializing post content: {e}")
+        content_json = json.dumps({
+            "blocks": [{"type": "paragraph", "data": {"text": "Error displaying content"}}]
+        })
     
     processed_solutions = []
     for solution in solutions:
-        # print("Solution: ", solution.content)
         try:
             solution_content = solution.content
             # If content is a string, convert to object
-            # print(type(solution_content))
             if isinstance(solution_content, str):
-                solution_content = selective_quote_replace(solution_content)
-                solution_content = json.loads(solution_content)
-
-            # print("Solution: ", solution_content)
+                try:
+                    solution_content = selective_quote_replace(solution_content)
+                    solution_content = json.loads(solution_content)
+                except json.JSONDecodeError:
+                    logger.error(f"Invalid JSON in solution {solution.id}")
+                    solution_content = {
+                        "blocks": [{"type": "paragraph", "data": {"text": "Error parsing solution content"}}]
+                    }
                 
+            # Check if the solution is saved by the current user
+            is_saved = False
+            if request.user.is_authenticated:
+                is_saved = SavedSolution.objects.filter(user=request.user, solution=solution).exists()
+            
             processed_solutions.append({
                 'id': solution.id,
                 'content': solution_content,  
@@ -108,6 +199,7 @@ def post_detail(request, post_id):
                 'created_at': solution.created_at.strftime("%Y-%m-%d %H:%M:%S"),
                 'upvotes': solution.upvotes,
                 'downvotes': solution.downvotes,
+                'is_saved': is_saved
             })
         except Exception as e:
             logger.error(f"Error processing solution {solution.id}: {e}")
@@ -121,14 +213,22 @@ def post_detail(request, post_id):
                 'upvotes': solution.upvotes,
                 'downvotes': solution.downvotes,
             })
-    # print("Author", post.author.get_full_name())
+    
+    # Check if the current user is following this post
+    is_following = False
+    if request.user.is_authenticated:
+        is_following = FollowedPost.objects.filter(user=request.user, post=post).exists()
+    
     context = {
         'post': post,
         'solutions': solutions,
         'content_json': content_json,
         'processed_solutions_json': json.dumps(processed_solutions),
         'courses': post.courses.all(),
-        'has_solution_from_user': has_solution, 
+        'has_solution_from_user': has_solution,
+        'solution_form': solution_form,
+        'comment_form': comment_form,
+        'is_following': is_following
     }
 
     return render(request, 'forum/post_detail.html', context)

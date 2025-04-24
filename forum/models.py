@@ -174,6 +174,17 @@ class SavedPost(models.Model):
     def __str__(self):
         return f"{self.user.username} saved {self.post.title}"
 
+class FollowedPost(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="followed_posts")
+    post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name="followers")
+    followed_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('user', 'post')  # Ensure users can't follow the same post twice.
+
+    def __str__(self):
+        return f"{self.user.username} follows {self.post.title}"
+
 class File(models.Model):
     post = models.ForeignKey('Post', related_name='files', on_delete=models.CASCADE, null=True, blank=True)
     file = models.FileField(upload_to='uploads/')
@@ -205,6 +216,17 @@ class Solution(models.Model):
 
     def __str__(self):
         return f'Solution by {self.author.username} for {self.post.title}'
+
+class SavedSolution(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="saved_solutions")
+    solution = models.ForeignKey(Solution, on_delete=models.CASCADE, related_name="saves")
+    saved_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('user', 'solution')  # Ensure users can't save the same solution twice.
+
+    def __str__(self):
+        return f"{self.user.username} saved solution for {self.solution.post.title}"
 
 class Comment(models.Model):
     solution = models.ForeignKey(Solution, on_delete=models.CASCADE, related_name='comments')
@@ -290,6 +312,8 @@ class Notification(models.Model):
     NOTIFICATION_TYPES = (
         ('post', 'New Post'),
         ('solution', 'New Solution'),
+        ('comment', 'New Comment'),
+        ('edit', 'Post Edit'),
     )
     
     recipient = models.ForeignKey(User, on_delete=models.CASCADE, related_name='notifications')
@@ -297,6 +321,7 @@ class Notification(models.Model):
     notification_type = models.CharField(max_length=20, choices=NOTIFICATION_TYPES)
     post = models.ForeignKey(Post, on_delete=models.CASCADE, null=True, blank=True)
     solution = models.ForeignKey(Solution, on_delete=models.CASCADE, null=True, blank=True)
+    comment = models.ForeignKey(Comment, on_delete=models.CASCADE, null=True, blank=True)
     message = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
     is_read = models.BooleanField(default=False)

@@ -9,6 +9,20 @@
     <link rel="stylesheet" href="{% static 'forum/css/post-detail.css' %}">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.19/dist/katex.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/default.min.css">
+    <style>
+        .custom-save-position {
+            display: inline-flex;
+            align-items: center;
+            vertical-align: middle;
+        }
+        .solution-actions {
+            display: flex;
+            align-items: center;
+        }
+        .solution-actions button {
+            margin-right: 5px;
+        }
+    </style>
     {% endblock %}
 </head>
 {% block content %}
@@ -17,9 +31,23 @@
     <div class="question-header">
         <h1>{{ post.title }}</h1>
         <div class="actions">
-            <button class="button follow-button">
-                Follow<span class="follow-count">90</span>
+            {% if user.is_authenticated %}
+                {% if is_following %}
+                <form method="post" action="{% url 'unfollow_post' post.id %}" class="d-inline follow-form">
+                    {% csrf_token %}
+                    <button type="submit" class="button follow-button active">
+                        <i class="fas fa-bell-slash me-1"></i> Unfollow<span class="follow-count">{{ post.followers.count }}</span>
+                    </button>
+                </form>
+                {% else %}
+                <form method="post" action="{% url 'follow_post' post.id %}" class="d-inline follow-form">
+                    {% csrf_token %}
+                    <button type="submit" class="button follow-button">
+                        <i class="fas fa-bell me-1"></i> Follow<span class="follow-count">{{ post.followers.count }}</span>
             </button>
+                </form>
+                {% endif %}
+            {% endif %}
             <button class="button add-answer-button">Add answer</button>
             {% if user.is_authenticated and post.author == user %}
             <a href="{% url 'edit_post' post.id %}" class="btn btn-primary btn-sm rounded-pill shadow-sm px-3">
@@ -122,6 +150,25 @@
                 </button>
             </form>
             {% endif %}
+            
+            {% if user.is_authenticated %}
+            <!-- Add solution save/unsave button (hollow bookmark) -->
+            {% if accepted|is_saved_solution:user %}
+            <form method="post" action="{% url 'unsave_solution' accepted.id %}" class="d-inline save-solution-form">
+                {% csrf_token %}
+                <button type="submit" class="bookmark-button active" title="Unsave">
+                    <i class="fas fa-bookmark"></i>
+                </button>
+            </form>
+            {% else %}
+            <form method="post" action="{% url 'save_solution' accepted.id %}" class="d-inline save-solution-form">
+                {% csrf_token %}
+                <button type="submit" class="bookmark-button" title="Save">
+                    <i class="far fa-bookmark"></i>
+                </button>
+            </form>
+            {% endif %}
+            {% endif %}
         </div>
 
         <div class="post-content-cell">
@@ -143,8 +190,9 @@
                 <div class="default-actions">
                     <button class="btn btn-outline-secondary btn-sm"
                         onclick="showEditSolutionForm('{{ accepted.id }}')">Edit</button>
-                    <form id="delete-solution-form" method="post" action="{% url 'delete_solution' accepted.id %}" class="d-inline">
+                    <form method="post" action="{% url 'post_detail' post.id %}" class="d-inline">
                         {% csrf_token %}
+                        <input type="hidden" name="action" value="delete_solution">
                         <input type="hidden" name="solution_id" value="{{ accepted.id }}">
                         <button type="submit" class="btn btn-outline-danger btn-sm">Delete</button>
                     </form>
@@ -153,6 +201,10 @@
                     <button class="btn btn-primary btn-sm" onclick="saveSolutionEdit('{{ accepted.id }}')">Save</button>
                     <button class="btn btn-secondary btn-sm"
                         onclick="cancelSolutionEdit('{{ accepted.id }}')">Cancel</button>
+                </div>
+                {% else %}
+                <div class="default-actions">
+                    <!-- Non-author actions if needed -->
                 </div>
                 {% endif %}
             </div>
@@ -203,6 +255,25 @@
                 </button>
             </form>
             {% endif %}
+            
+            {% if user.is_authenticated %}
+            <!-- Add solution save/unsave button (hollow bookmark) -->
+            {% if solution|is_saved_solution:user %}
+            <form method="post" action="{% url 'unsave_solution' solution.id %}" class="d-inline save-solution-form">
+                {% csrf_token %}
+                <button type="submit" class="bookmark-button active" title="Unsave">
+                    <i class="fas fa-bookmark"></i>
+                </button>
+            </form>
+            {% else %}
+            <form method="post" action="{% url 'save_solution' solution.id %}" class="d-inline save-solution-form">
+                {% csrf_token %}
+                <button type="submit" class="bookmark-button" title="Save">
+                    <i class="far fa-bookmark"></i>
+                </button>
+            </form>
+            {% endif %}
+            {% endif %}
         </div>
 
         <!-- Solution Content -->
@@ -225,8 +296,9 @@
                 <div class="default-actions">
                     <button class="btn btn-outline-secondary btn-sm"
                         onclick="showEditSolutionForm('{{ solution.id }}')">Edit</button>
-                    <form method="post" action="{% url 'delete_solution' solution.id %}" class="d-inline" id="delete-solution-form">
+                    <form method="post" action="{% url 'post_detail' post.id %}" class="d-inline">
                         {% csrf_token %}
+                        <input type="hidden" name="action" value="delete_solution">
                         <input type="hidden" name="solution_id" value="{{ solution.id }}">
                         <button type="submit" class="btn btn-outline-danger btn-sm">Delete</button>
                     </form>
@@ -235,6 +307,10 @@
                     <button class="btn btn-primary btn-sm" onclick="saveSolutionEdit('{{ solution.id }}')">Save</button>
                     <button class="btn btn-secondary btn-sm"
                         onclick="cancelSolutionEdit('{{ solution.id }}')">Cancel</button>
+                </div>
+                {% else %}
+                <div class="default-actions">
+                    <!-- Non-author actions if needed -->
                 </div>
                 {% endif %}
             </div>
@@ -703,6 +779,112 @@
 
     }
 
+    // Add event listener for follow/unfollow buttons
+    document.addEventListener('DOMContentLoaded', function() {
+        // Post follow/unfollow AJAX
+        const followForms = document.querySelectorAll('.follow-form');
+        followForms.forEach(form => {
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const url = this.getAttribute('action');
+                const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+                
+                fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'X-CSRFToken': csrfToken,
+                        'Content-Type': 'application/json',
+                    },
+                    credentials: 'same-origin'
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Update UI
+                        const followCount = document.querySelectorAll('.follow-count');
+                        followCount.forEach(count => {
+                            count.textContent = data.followers_count;
+                        });
+                        
+                        // Swap forms
+                        if (data.followed) {
+                            // Change to unfollow
+                            this.setAttribute('action', '{% url "unfollow_post" post.id %}');
+                            const button = this.querySelector('button');
+                            button.innerHTML = '<i class="fas fa-bell-slash me-1"></i> Unfollow<span class="follow-count">' + data.followers_count + '</span>';
+                            button.classList.add('active');
+                        } else {
+                            // Change to follow
+                            this.setAttribute('action', '{% url "follow_post" post.id %}');
+                            const button = this.querySelector('button');
+                            button.innerHTML = '<i class="fas fa-bell me-1"></i> Follow<span class="follow-count">' + data.followers_count + '</span>';
+                            button.classList.remove('active');
+                        }
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                });
+            });
+        });
+        
+        // Solution save/unsave AJAX
+        const saveSolutionForms = document.querySelectorAll('.save-solution-form');
+        saveSolutionForms.forEach(form => {
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const url = this.getAttribute('action');
+                const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+                
+                fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'X-CSRFToken': csrfToken,
+                        'Content-Type': 'application/json',
+                    },
+                    credentials: 'same-origin'
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Get solution ID from URL
+                        const solutionId = url.split('/').slice(-2)[0];
+                        
+                        if (data.saved) {
+                            this.setAttribute('action', '/unsave-solution/' + solutionId + '/');
+                            const button = this.querySelector('button');
+                            button.classList.add('active');
+                            button.innerHTML = '<i class="fas fa-bookmark"></i>';
+                            button.title = "Unsave";
+                        } else {
+                            this.setAttribute('action', '/save-solution/' + solutionId + '/');
+                            const button = this.querySelector('button');
+                            button.classList.remove('active');
+                            button.innerHTML = '<i class="far fa-bookmark"></i>';
+                            button.title = "Save";
+                        }
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                });
+            });
+        });
+    });
+
+    function showReplyForm(commentId) {
+        document.getElementById('reply-form-' + commentId).style.display = 'block';
+        console.log('Showing reply form for comment: ' + commentId);
+    }
+
+    function hideReplyForm(commentId) {
+        document.getElementById('reply-form-' + commentId).style.display = 'none';
+        console.log('Hiding reply form for comment: ' + commentId);
+    }
 </script>
 
 {% endblock %}

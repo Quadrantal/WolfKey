@@ -2,6 +2,7 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib import messages
 from django.core.exceptions import ObjectDoesNotExist
+from django.http import Http404
 
 from forum.models import User 
 from forum.models import Post, Solution 
@@ -19,7 +20,22 @@ from forum.forms import (
 
 @login_required
 def profile_view(request, username):
-    profile_user = get_object_or_404(User, username=username)
+    # Try to find user by username first, if not found, try by school_email
+    try:
+        # First try to find by username (which might be null for some users)
+        profile_user = User.objects.filter(username=username).first()
+        
+        # If not found by username, try by school_email
+        if profile_user is None:
+            profile_user = User.objects.filter(school_email=username).first()
+            
+        # If still not found, raise 404
+        if profile_user is None:
+            raise User.DoesNotExist
+            
+    except User.DoesNotExist:
+        raise Http404("User not found")
+        
     recent_posts = Post.objects.filter(author=profile_user).order_by('-created_at')[:5]
     posts_count = Post.objects.filter(author=profile_user).count()
     solutions_count = Solution.objects.filter(author=profile_user).count()
@@ -56,7 +72,9 @@ def edit_profile(request):
 
 @login_required
 def my_profile(request):
-    return redirect('profile', username=request.user.username)
+    # Use the username if it exists, otherwise use school_email
+    identifier = request.user.username if request.user.username else request.user.school_email
+    return redirect('profile', username=identifier)
 
 
 @login_required
