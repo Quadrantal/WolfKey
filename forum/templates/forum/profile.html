@@ -19,7 +19,7 @@
                     <div class="profile-header d-flex align-items-center" style="flex: 1;">
                         <div class="position-relative">
                             <img 
-                                src="{{ user.userprofile.profile_picture.url }}" 
+                                src="{{ profile_user.userprofile.profile_picture.url }}" 
                                 alt="Profile Picture" 
                                 class="profile-picture"
                                 style="width: 100px; height: 100px; border-radius: 50%; object-fit: cover; cursor: pointer;"
@@ -38,6 +38,7 @@
                         <!-- Name and Bio Section -->
                         <div class="ms-4">
                             <h2>{{ profile_user.get_full_name }}</h2>
+                            <span class="text-muted">Joined: {{ profile_user.date_joined|date:"F j, Y" }}</span>
                             <p>{{ profile_user.userprofile.bio }}</p>
                         </div>
                     </div>
@@ -65,6 +66,7 @@
                 <div class="row">
                     <!-- Left Column -->
                     <div class="col-md-4">
+                        {% if user == profile_user %}
                         <!-- About Me -->
                         <div class="card mb-4">
                             <div class="card-header">
@@ -85,6 +87,7 @@
                                 {% endif %}
                             </div>
                         </div>
+                        {% endif %}
 
                         <!-- Stats -->
                         <div class="card mb-4">
