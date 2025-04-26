@@ -55,7 +55,8 @@ from forum.views.profile_views import (
     edit_profile,
     my_profile,
     profile_view,
-    update_courses
+    update_courses,
+    upload_profile_picture
 )
 from forum.views.course_views import (
     course_search
@@ -123,6 +124,7 @@ urlpatterns = [
     path('upload-image/', upload_image, name='upload_image'),
     
     # Profile URLs
+    path('profile/upload-picture/', upload_profile_picture, name='upload_profile_picture'),
     path('profile/edit/', edit_profile, name='edit_profile'),
     path('my-profile/', my_profile, name='my_profile'),
     path('profile/<str:username>/', profile_view, name='profile'),

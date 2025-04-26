@@ -75,8 +75,6 @@ def profile_view(request, username):
     experienced_courses_json = json.dumps([experience.course.id for experience in experienced_courses])
     help_needed_courses_json = json.dumps([help.course.id for help in help_needed_courses])
 
-    print(experienced_courses_json)
-
     context = {
         'profile_user': profile_user,
         'recent_posts': recent_posts,
@@ -91,6 +89,15 @@ def profile_view(request, username):
         'initial_courses_json': initial_courses_json, 
     }
     return render(request, 'forum/profile.html', context)
+
+@login_required
+def upload_profile_picture(request):
+    if request.method == 'POST' and request.FILES.get('profile_picture'):
+        profile = request.user.userprofile
+        profile.profile_picture = request.FILES['profile_picture']
+        profile.save()
+        return redirect('my_profile')  # Redirect to the user's profile page
+    return render(request, 'forum/upload_profile_picture.html')
 
 @login_required
 def edit_profile(request):
