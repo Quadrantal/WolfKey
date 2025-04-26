@@ -117,7 +117,7 @@
                                     {% csrf_token %}
                                     <div class="mb-3">
                                         <label for="background_hue" class="form-label">Background Color Hue</label>
-                                        <input type="range" name="background_hue" id="background_hue" class="form-range background_hue_slider" min="0" max="360" value="{{ profile_user.userprofile.background_hue }}" oninput="updateBackground(this.value)">
+                                        <input type="range" name="background_hue" id="background_hue" class="form-range background_hue_slider" min="0" max="360" value="{{ profile_user.userprofile.background_hue }}" oninput="setBackground(this.value)">
                                     </div>
                                     <button type="submit" class="btn btn-primary">Save Changes</button>
                                 </form>
@@ -448,13 +448,10 @@
 
 {% block scripts %}
 <script>
-    function updateBackground(hue) {
-        document.body.style.background = `radial-gradient(circle, hsl(${hue}, 100%, 77%) 0%, rgba(255, 255, 255, 1) 100%)`;
-    }
-
+    
     document.addEventListener('DOMContentLoaded', function () {
         const hueValue = {{ profile_user.userprofile.background_hue }};
-        updateBackground(hueValue);
+        setBackground(hueValue);
         const personalInfoForm = document.getElementById('personalInfoForm');
     
         // Prevent Enter key from submitting the form
