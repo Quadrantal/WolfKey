@@ -124,7 +124,12 @@
                             </li>
                             <div class="dropdown">
                                 <button class="btn btn-link text-secondary p-2" type="button" data-bs-toggle="dropdown">
-                                    <i class="bi bi-person-circle fs-5"></i>
+                                    <img 
+                                    src="{{ user.userprofile.profile_picture.url }}" 
+                                    alt="Profile Picture" 
+                                    class="profile-picture"
+                                    style="width: 30px; height: 30px; border-radius: 50%;"
+                                    >
                                 </button>
                                 <ul class="dropdown-menu dropdown-menu-end">
                                     <li><a class="dropdown-item" href="{% url 'profile' user.username%}">Profile</a></li>
