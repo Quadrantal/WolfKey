@@ -21,10 +21,16 @@
                             <img 
                                 src="{{ profile_user.userprofile.profile_picture.url }}" 
                                 alt="Profile Picture" 
-                                class="profile-picture"
+                                class="profile-picture changeablePfp"
                                 style="width: 100px; height: 100px; border-radius: 50%; object-fit: cover; cursor: pointer;"
                                 id="profilePicture"
                             >
+                            {% if user == profile_user %}
+                            <!-- Hover Text -->
+                            <div class="hover-text" id="hoverText" style="display: none;">
+                                Click to change
+                            </div>
+                            {% endif %}
                             <!-- Dropdown Menu -->
                             <div class="dropdown-menu" id="profilePictureMenu">
                                 <form action="{% url 'upload_profile_picture' %}" method="post" enctype="multipart/form-data" class="p-2">
