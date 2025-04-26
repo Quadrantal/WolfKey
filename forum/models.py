@@ -283,7 +283,14 @@ class UserProfile(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
     background_hue = models.IntegerField(default=231)
 
-    # Add fields for course blocks
+    profile_picture = models.ImageField(
+        upload_to='profile_pictures/',
+        default='profile_pictures/default.jpg',
+        blank=True,
+        null=True
+    )
+
+    #Fields for course blocks
     block_1A = models.ForeignKey(Course, on_delete=models.SET_NULL, null=True, blank=True, related_name="block_1A")
     block_1B = models.ForeignKey(Course, on_delete=models.SET_NULL, null=True, blank=True, related_name="block_1B")
     block_1D = models.ForeignKey(Course, on_delete=models.SET_NULL, null=True, blank=True, related_name="block_1D")
