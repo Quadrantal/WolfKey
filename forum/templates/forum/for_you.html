@@ -8,7 +8,7 @@
 
 {% endblock %}
 {% block content %}
-    <div class="d-flex justify-content-between align-items-center mb-4">
+    <div class="d-flex justify-content-center align-items-center mb-2">
         <h1 class="fade-text" id="animated-text">{{ greeting }}</h1>
     </div>
 
@@ -34,7 +34,7 @@
                             {% for item in schedule_today %}
                             {% if item == "no school"  %}
                             <li class="list-group-item">
-                                No School
+                                <p style = "margin-bottom: 0px;">No School</p>
                             </li>
                             {% else %}
                                 {% if item.block != "No Block" %}
@@ -70,7 +70,7 @@
                         {% for item in schedule_tomorrow %}
                         {% if item == "no school"  %}
                         <li class="list-group-item">
-                            No School
+                            <p style = "margin-bottom: 0px;">No School</p>
                         </li>
                         {% else %}
                         <li class="list-group-item">
@@ -95,7 +95,7 @@
     <!-- Display the posts -->
     <div class="row" id="post-list">
         {% for post in posts %}
-            <div class="col-12 col-sm-12 col-md-6 mb-4">
+            <div class="mb-3 post-card-container" style = "max-width: 800px; margin: 0 auto; margin-bottom: .75rem;" data-animate>
                 {% include 'forum/components/post_card.html' with post=post %}
             </div>
         {% endfor %}
@@ -105,23 +105,23 @@
 {% endblock %}
 
 {% block scripts %}
-<script async>
-    document.addEventListener('DOMContentLoaded', function() {
-        const textElement = document.getElementById('animated-text');
-        const text = textElement.textContent;
-        textElement.textContent = '';
-        
-        // Split text into individual characters
-        for (let i = 0; i < text.length; i++) {
-            const span = document.createElement('span');
-            if (text[i] === ' ') {
-                span.innerHTML = '&nbsp;';
-            } else {
-                span.textContent = text[i];
-            }
-            span.style.animationDelay = (i * 45) + 'ms'; // Adjust timing
-            textElement.appendChild(span);
-        }
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const postCards = document.querySelectorAll('[data-animate]');
+
+        const observer = new IntersectionObserver((entries, observer) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    // Add animation class when the card is visible
+                    entry.target.classList.add('animate-visible');
+                    observer.unobserve(entry.target); // Stop observing once animated
+                }
+            });
+        }, {
+            threshold: 0.02 // Trigger when 2% of the card is visible
+        });
+
+        postCards.forEach(card => observer.observe(card));
     });
 </script>
 {% endblock %}

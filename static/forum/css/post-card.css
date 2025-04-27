@@ -112,7 +112,7 @@
 
 .highlighted-card-red {
     padding-top: 12px;
-    border: 2px solid #e25a5a;
+    border: 2px solid #e25a5a !important;
     background: linear-gradient(to bottom, #e25a5a -5%, #fff 6%, #fff 85%,#e25a5a 120%);
     box-shadow: 0 0px 20px rgba(255, 131, 6, 0.9) !important;
     z-index: 1; 
@@ -120,7 +120,7 @@
 
 .highlighted-card-green{
     padding-top: 12px;
-    border: 1px solid #45cb7d;
+    border: 1px solid #45cb7d !important;
     background: linear-gradient(to bottom, #aae6a3 -5%, #fff 6%, #fff 85%,#aae6a3 120%);
     box-shadow: 0 0px 20px rgba(41, 234, 14, 0.9) !important;
     z-index: 1; 
@@ -128,7 +128,7 @@
 
 .highlighted-card-blue{
     padding-top: 12px;
-    border: 1px solid #4559cb;
+    border: 1px solid #4559cb !important;
     background: linear-gradient(to bottom, #a3a5e6 -5%, #fff 6%, #fff 85%,#a9a3e6 120%);
     box-shadow: 0 0px 20px rgba(14, 14, 234, 0.9) !important;
     z-index: 1; 
@@ -154,4 +154,22 @@
 
 .card-footer .text-muted{
     font-size: smaller;
+}
+
+#post-list .card{
+    border-bottom-color: #808080 !important;
+    border-bottom-width: 4px !important;
+}
+
+/* Initial state: hidden and slightly translated */
+.post-card-container {
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.6s ease, transform 0.6s ease;
+}
+
+/* Visible state: fully visible and in place */
+.post-card-container.animate-visible {
+    opacity: 1;
+    transform: translateY(0);
 }
