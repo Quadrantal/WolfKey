@@ -3,32 +3,51 @@
         <link rel="stylesheet" href="{% static 'forum/css/post-card.css' %}">
 </head>
 
-    <div class="card clickable post hidden {% if post.accepted_solution%}highlighted-card-green{% endif %}">
-        {% if post.accepted_solution %}
-            <div class="banner">Solved</div>    
-        {% endif %}
-        <div class="card-body">
-            <h4 class="card-title">{{ post.title }}</h4>
-            <p class="card-text">{{ post.preview_text|truncatewords:30 }}</p>
-            <div class="recommendation-context mb-2">
-                {% for course in post.course_context %}
-                    <span class="badge {% if course.is_experienced %} bg-success {% elif course.needs_help %} bg-info {% else %} bg-secondary {% endif %} me-2">
-                        {{ course.name }}
-                        {% if course.is_experienced %}
-                            (You're experienced)
-                        {% elif course.needs_help %}
-                            (You need help)
-                        {% endif %}
-                    </span>
-                {% endfor %}
+<div class="card clickable post hidden {% if post.accepted_solution %}highlighted-card-green{% endif %}">
+    {% if post.accepted_solution %}
+        <div class="banner">Solved</div>
+    {% endif %}
+    <div class="card-body">
+        <!-- Author and Date Section -->
+        <div class="d-flex justify-content-between align-items-start mb-3">
+            <!-- Left: Content -->
+            <div style = "margin-right: 5px;">
+                <img 
+                    src="{{ post.author.userprofile.profile_picture.url }}" 
+                    alt="Profile Picture" 
+                    class="rounded-circle" 
+                    style="width: 35px; height: 35px; object-fit: cover;"
+                >
             </div>
-            <a href="{% url 'post_detail' post.id %}" class="btn btn-primary">Read More</a>
-        </div>
-        <div class="card-footer text-muted">
-            Posted by {{ post.author.first_name }} {{ post.author.last_name }} on {{ post.created_at|date:"F d, Y" }}
-        </div>
-    </div>
+            <div class="flex-grow-1">
+                <p class="mb-0">
+                    <strong>{{ post.author.first_name }} {{ post.author.last_name }}</strong>
+                    <span class="text-muted">{{ post.created_at|date:"F d, Y" }}</span>
+                </p>
+                <p class="card-text mt-2">{{ post.preview_text|truncatewords:250 }}</p>
+            </div>
+            <!-- Right: Profile Picture -->
 
+        </div>
+
+        <!-- Recommendation Context -->
+        <div class="recommendation-context mb-2">
+            {% for course in post.course_context %}
+                <span class="badge {% if course.is_experienced %} bg-success {% elif course.needs_help %} bg-info {% else %} bg-secondary {% endif %} me-2">
+                    {{ course.name }}
+                    {% if course.is_experienced %}
+                        (You're experienced)
+                    {% elif course.needs_help %}
+                        (You need help)
+                    {% endif %}
+                </span>
+            {% endfor %}
+        </div>
+
+        <!-- Read More Button -->
+        <a href="{% url 'post_detail' post.id %}" class="btn btn-primary">Read More</a>
+    </div>
+</div>
     <script>
         document.addEventListener("DOMContentLoaded", function () {
             const posts = document.querySelectorAll("#post-list .post");

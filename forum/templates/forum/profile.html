@@ -12,19 +12,41 @@
 <div class="container mt-4">
     <div class="row">
         <!-- Profile Header -->
-        <div class="col-md-12 mb-4">
+        <div class="col-md-12 mb-4" style="z-index: 3;">
             <div class="card">
                 <div class="card-body d-flex align-items-center">
-                    <img src="{{ user.profile.avatar.url|default:'/static/images/default-avatar.png' }}" 
-                         class="rounded-circle me-3" 
-                         alt="Profile Picture" 
-                         style="width: 100px; height: 100px; object-fit: cover;">
-                    <div>
-                        <h2 class="mb-0">{{ profile_user.get_full_name }}</h2>
-                        <span class="text-muted">Joined: {{ profile_user.date_joined|date:"F j, Y" }}</span>
-                        {% if profile_user.userprofile.is_moderator %}
-                            <span class="badge bg-primary ms-2">Moderator</span>
-                        {% endif %}
+                    <!-- Profile Picture Section -->
+                    <div class="profile-header d-flex align-items-center" style="flex: 1;">
+                        <div class="position-relative">
+                            <img 
+                                src="{{ profile_user.userprofile.profile_picture.url }}" 
+                                alt="Profile Picture" 
+                                class="profile-picture changeablePfp"
+                                style="width: 100px; height: 100px; border-radius: 50%; object-fit: cover; cursor: pointer;"
+                                id="profilePicture"
+                            >
+                            {% if user == profile_user %}
+                            <!-- Hover Text -->
+                            <div class="hover-text" id="hoverText" style="display: none;">
+                                Click to change
+                            </div>
+                            {% endif %}
+                            <!-- Dropdown Menu -->
+                            <div class="dropdown-menu" id="profilePictureMenu">
+                                <form action="{% url 'upload_profile_picture' %}" method="post" enctype="multipart/form-data" class="p-2">
+                                    {% csrf_token %}
+                                    <label for="profile_picture" class="form-label">Upload New Profile Picture:</label>
+                                    <input type="file" name="profile_picture" id="profile_picture" class="form-control mb-2">
+                                    <button type="submit" class="btn btn-primary btn-sm">Upload</button>
+                                </form>
+                            </div>
+                        </div>
+                        <!-- Name and Bio Section -->
+                        <div class="ms-4">
+                            <h2>{{ profile_user.get_full_name }}</h2>
+                            <span class="text-muted">Joined: {{ profile_user.date_joined|date:"F j, Y" }}</span>
+                            <p>{{ profile_user.userprofile.bio }}</p>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -50,6 +72,7 @@
                 <div class="row">
                     <!-- Left Column -->
                     <div class="col-md-4">
+                        {% if user == profile_user %}
                         <!-- About Me -->
                         <div class="card mb-4">
                             <div class="card-header">
@@ -70,6 +93,7 @@
                                 {% endif %}
                             </div>
                         </div>
+                        {% endif %}
 
                         <!-- Stats -->
                         <div class="card mb-4">
@@ -93,7 +117,7 @@
                                     {% csrf_token %}
                                     <div class="mb-3">
                                         <label for="background_hue" class="form-label">Background Color Hue</label>
-                                        <input type="range" name="background_hue" id="background_hue" class="form-range background_hue_slider" min="0" max="360" value="{{ profile_user.userprofile.background_hue }}" oninput="updateBackground(this.value)">
+                                        <input type="range" name="background_hue" id="background_hue" class="form-range background_hue_slider" min="0" max="360" value="{{ profile_user.userprofile.background_hue }}" oninput="setBackground(this.value)">
                                     </div>
                                     <button type="submit" class="btn btn-primary">Save Changes</button>
                                 </form>
@@ -424,13 +448,10 @@
 
 {% block scripts %}
 <script>
-    function updateBackground(hue) {
-        document.body.style.background = `radial-gradient(circle, hsl(${hue}, 100%, 77%) 0%, rgba(255, 255, 255, 1) 100%)`;
-    }
-
+    
     document.addEventListener('DOMContentLoaded', function () {
         const hueValue = {{ profile_user.userprofile.background_hue }};
-        updateBackground(hueValue);
+        setBackground(hueValue);
         const personalInfoForm = document.getElementById('personalInfoForm');
     
         // Prevent Enter key from submitting the form
@@ -448,6 +469,29 @@
             }
         });
     });
+
+</script>
+
+<script>
+    {% if user == profile_user %}
+        document.addEventListener('DOMContentLoaded', function () {
+        const profilePicture = document.getElementById('profilePicture');
+        const profilePictureMenu = document.getElementById('profilePictureMenu');
+
+        // Toggle the dropdown menu when the profile picture is clicked
+        profilePicture.addEventListener('click', function () {
+            const isMenuVisible = profilePictureMenu.style.display === 'block';
+            profilePictureMenu.style.display = isMenuVisible ? 'none' : 'block';
+        });
+
+        // Close the menu if clicked outside
+        document.addEventListener('click', function (event) {
+            if (!profilePicture.contains(event.target) && !profilePictureMenu.contains(event.target)) {
+                profilePictureMenu.style.display = 'none';
+            }
+        });
+    });
+    {% endif %}
 
 </script>
 

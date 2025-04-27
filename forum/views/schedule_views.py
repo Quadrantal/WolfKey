@@ -113,6 +113,11 @@ def get_block_order_for_day(target_date):
                 existing_schedule.block_5_time,
             ],
         }
+    elif not existing_schedule.is_school and existing_schedule.is_school != None:
+        return {
+            'blocks': [None, None, None, None, None],
+            'times': [None,None, None, None, None],
+        }
 
     # If no saved schedule exists, proceed to fetch from external sources
     # Check for an "alt day" event in Google Calendar
@@ -129,10 +134,12 @@ def get_block_order_for_day(target_date):
     date_column = sheet.col_values(4)[6:]  # Column D, starting from row 7
     rows = sheet.get_all_values()[6:]      # Skip header rows
 
+    foundDate = False
+
     for i, date_str in enumerate(date_column):
         if date_str.strip() == target_date.strip():
             schedule, created = DailySchedule.objects.get_or_create(date=date_obj)
-
+            foundDate = True
             # Update missing block data
             updated = False
             for block_index in range(5):
@@ -165,6 +172,11 @@ def get_block_order_for_day(target_date):
                 ],
                 'times': block_times,
             }
+
+    if(not foundDate):
+       schedule, created = DailySchedule.objects.get_or_create(date=date_obj)
+       schedule.is_school = False
+       schedule.save()
 
     return {
         'blocks': [None, None, None, None, None],
@@ -203,6 +215,8 @@ def is_ceremonial_uniform_required(user, target_date):
             if existing_schedule.ceremonial_uniform:
                 return True
             elif existing_schedule.ceremonial_uniform == False:
+                return False
+            elif existing_schedule.is_school == False:
                 return False
             
 
@@ -268,5 +282,5 @@ def process_schedule_for_user(user, raw_schedule):
                 # Try fetching course based on block naming convention
                 block_attr = f"block_{normalized.upper()}"
                 course = getattr(profile, block_attr, None)
-                processed_schedule.append({"block": course.name if course else f"{block}, Add your courses in profile to unlock this!", "time": time})
+                processed_schedule.append({"block": course.name if course else f"Add your courses in profile/preferences to unlock this!", "time": time})
     return processed_schedule
