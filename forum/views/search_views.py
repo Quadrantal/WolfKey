@@ -54,6 +54,8 @@ def for_you(request):
         'experienced_courses': experienced_courses,
         'help_needed_courses': help_needed_courses,
         'greeting': greeting,
+        'current_date': today,
+        'tomorrow_date': tomorrow,
         'schedule_today': processed_schedule_today,
         'schedule_tomorrow': processed_schedule_tomorrow,
         'ceremonial_required_today': ceremonial_required_today, 

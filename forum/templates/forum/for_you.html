@@ -3,6 +3,8 @@
 {% block head %}
 {%load static %}
     <link rel="stylesheet" href="{% static 'forum/css/schedule.css' %}"> 
+    <link rel="stylesheet" href="{% static 'forum/css/post_card.css' %}"> 
+
 
 {% endblock %}
 {% block content %}
@@ -11,37 +13,54 @@
     </div>
 
     <!-- Schedule-->
-    <div class="row mb-4">
+    <div class="row" style = "margin-bottom: 3rem;">
         <div class="col-md-8">
             <div class="d-flex flex-wrap gap-4">
                 <!-- Today's Schedule -->
                 <div class="flex-fill">
-                    <h2>Today's Schedule</h2>
-                    <ul class="list-group shadow-sm rounded"id = "today-schedule">
-                        {% if ceremonial_required_today %}
-                        <li class="list-group-item">
-                            👔 Ceremonial Required
-                        </li>
-                        {% endif %}
-                        {% for item in schedule_today %}
-                        {% if item == "no school"  %}
-                        <li class="list-group-item">
-                            No School
-                        </li>
-                        {% else %}
-                            {% if item.block != "No Block" %}
+                    <div class = "card">
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <h3 style = "font-size: 1.5rem;">Today's Schedule</h3>
+                            <span class="text-muted" id="current-date">
+                                {{ current_date}}
+                            </span>
+                        </div>
+                        <ul class="list-group shadow-sm rounded"id = "today-schedule">
+                            {% if ceremonial_required_today %}
                             <li class="list-group-item">
-                                <strong>{{ item.time }}</strong>: {{ item.block }}
+                                👔 Ceremonial Required
                             </li>
                             {% endif %}
-                        {% endif %}
-                        {% endfor %}
-                    </ul>
+                            {% for item in schedule_today %}
+                            {% if item == "no school"  %}
+                            <li class="list-group-item">
+                                No School
+                            </li>
+                            {% else %}
+                                {% if item.block != "No Block" %}
+                                <li class="list-group-item">
+                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                        <p style = "margin-bottom: 0px;">{{ item.block }}</p>
+                                        <p style = "margin-bottom: 0px;">{{ item.time }} </p>
+                                    </div>
+                                </li>
+                                {% endif %}
+                            {% endif %}
+                            {% endfor %}
+                        </ul>
+                    </div>
+
                 </div>
     
                 <!-- Tomorrow's Schedule -->
                 <div class="flex-fill">
-                    <h2>Tomorrow's Schedule</h2>
+                    <div class = "card">
+                    <div class="d-flex justify-content-between align-items-center mb-1">
+                        <h3 style = "font-size: 1.5rem;">Tomorrow's Schedule</h3>
+                        <span class="text-muted" id="tomorrow-date">
+                            {{ tomorrow_date}}
+                        </span>
+                    </div>
                     <ul class="list-group shadow-sm rounded" id = "tomorrow-schedule">
                         {% if ceremonial_required_tomorrow %}
                         <li class="list-group-item">
@@ -54,12 +73,16 @@
                             No School
                         </li>
                         {% else %}
-                            <li class="list-group-item">
-                                <strong>{{ item.time }}</strong>: {{ item.block }}
-                            </li>
+                        <li class="list-group-item">
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <p style = "margin-bottom: 0px;">{{ item.block }}</p>
+                                <p style = "margin-bottom: 0px;">{{ item.time }} </p>
+                            </div>
+                        </li>
                         {% endif %}
                         {% endfor %}
                     </ul>
+                    </div>
                 </div>
             </div>
         </div>
