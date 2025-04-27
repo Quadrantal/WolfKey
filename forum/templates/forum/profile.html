@@ -498,6 +498,9 @@
 <script type="module">
     import { CourseSelector } from '{% static "forum/js/course-selector.js" %}';
     document.addEventListener('DOMContentLoaded', () => {
+        const hueValue = {{ profile_user.userprofile.background_hue }};
+        setBackground(hueValue);
+
         const blocks = ['1A', '1B', '1D', '1E', '2A', '2B', '2C', '2D', '2E'];
 
         // Parse initial courses from JSON
