@@ -285,3 +285,13 @@ li {
       opacity: 1;
     }
   }
+
+  #post-list {
+    display: block;
+  }
+
+  #search-bar {
+    border-radius: 9999px;
+    border: none;
+    font-size: 14px;
+  }
