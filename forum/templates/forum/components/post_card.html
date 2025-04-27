@@ -24,6 +24,7 @@
                     <strong>{{ post.author.first_name }} {{ post.author.last_name }}</strong>
                     <span class="text-muted">{{ post.created_at|date:"F d, Y" }}</span>
                 </p>
+                <h4 class="card-title">{{ post.title }}</h4>
                 <p class="card-text mt-2">{{ post.preview_text|truncatewords:250 }}</p>
             </div>
             <!-- Right: Profile Picture -->
