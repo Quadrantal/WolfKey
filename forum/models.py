@@ -317,6 +317,7 @@ class DailySchedule(models.Model):
     block_5 = models.CharField(max_length=100, blank=True, null=True)
     block_5_time = models.CharField(max_length=50, blank=True, null=True)
     ceremonial_uniform = models.BooleanField(null = True)
+    is_school = models.BooleanField(null = True)
 
     def __str__(self):
         return f"Schedule for {self.date}"
