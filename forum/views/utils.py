@@ -16,6 +16,7 @@ def process_post_preview(post):
                 text = re.sub(r'<br\s*/?>', ' ', text)
                 text = re.sub(r'<i\s*/?>', ' ', text)
                 text = re.sub(r'<em\s*/?>', ' ', text)
+                text = text.replace('&nbsp;', ' ') 
                 text = strip_tags(text)
                 text = ' '.join(text.split())
                 if text:
