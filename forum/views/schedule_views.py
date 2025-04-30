@@ -198,7 +198,7 @@ def get_block_order_for_day(target_date):
 
     return {
         'blocks': [None, None, None, None, None],
-        'times': [block_times.get(i+1) for i in range(5)],
+        'times': [block_times.get(i+1) for i in range(0, 5)],
     }
 
 def interpret_block(block_code):

@@ -37,7 +37,6 @@
                                 <p style = "margin-bottom: 0px;">No School</p>
                             </li>
                             {% else %}
-                                {% if item.block != "No Block" %}
                                 <li class="list-group-item">
                                     <div class="d-flex justify-content-between align-items-center mb-1">
                                         <p style = "margin-bottom: 0px;">{{ item.block }}</p>
@@ -46,7 +45,6 @@
                                         {% endif %}
                                     </div>
                                 </li>
-                                {% endif %}
                             {% endif %}
                             {% endfor %}
                         </ul>
