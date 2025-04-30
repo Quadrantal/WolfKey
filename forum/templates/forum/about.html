@@ -55,10 +55,11 @@
 {% block content %}
 <div class="container mt-5">
     <div class="card mb-4">
-        <div class="card-body text-center">
+        <div class="card-body text-center justify-content-center">
             <h1 class="mb-2">Ask questions, get answers, no distractions</h1>
             <p class="text-muted">Any question you might have. Answers
                 unobtainable from ChatGPT. </p>
+            <a href="{% url 'register' %}" class="btn btn-primary ask-button" style = "max-width: 200px;">Join Now</a>
         </div>
     </div>
 
@@ -160,8 +161,6 @@
         <h2>Join the Community</h2>
         <p class="text-muted" style = "color: black !important;">Start exploring, collaborating, and learning with WolfKey today!</p>
         <p class="text-muted" style = "color: black !important;">Contact chunghugo99994@gmail.com for any questions concerns</p>
-
-        <a href="{% url 'register' %}" class="btn btn-primary">Get Started</a>
     </div>
 </div>
 {% endblock %}
