@@ -65,23 +65,35 @@ def get_alt_day_event(target_date):
 def extract_block_times_from_description(description):
     """
     Extract instructional block time ranges from an alt schedule description,
-    excluding recess and lunch periods.
+    mapping them to block numbers (e.g., '1A' -> '1', '1B' -> '2').
 
     :param description: The event description string.
-    :return: A list of instructional block time ranges (e.g., '8:20-9:30').
+    :return: A dictionary mapping block numbers to time ranges (e.g., {1: '9:35-10:45'}).
     """
-    # Match pairs of "time range - label"
-    pattern = r'(\d{1,2}:\d{2}\s*-\s*\d{1,2}:\d{2})\s*-\s*([^\d]+?)(?=\d|$)'
+    # Match pairs of "time range - block label"
+    pattern = r'(\d{1,2}:\d{2}\s*-\s*\d{1,2}:\d{2})\s*-\s*Block\s*(\d[A-E])'
 
     matches = re.findall(pattern, description)
 
-    # Filter out blocks labeled 'Recess' or 'Lunch'
-    filtered_times = [
-        time_range.strip() for time_range, label in matches
-        if 'recess' not in label.lower() and 'lunch' not in label.lower()
-    ]
+    # Map block labels (e.g., '1A') to block numbers (e.g., '1', '2', etc.)
+    block_times = {}
 
-    return filtered_times
+    if "late start" in description.lower():
+        slot = 2  # Start with block slot 1
+        block_times[1] = None
+        for time_range, block_label in matches:
+            if 'recess' not in block_label.lower() and 'lunch' not in block_label.lower():
+                block_times[slot] = time_range.strip()
+                slot += 1  # Increment the block slot for the next time range
+
+    else:
+        slot = 1  # Start with block slot 1
+        for time_range, block_label in matches:
+            if 'recess' not in block_label.lower() and 'lunch' not in block_label.lower():
+                block_times[slot] = time_range.strip()
+                slot += 1  # Increment the block slot for the next time range
+
+    return block_times
 
 def get_block_order_for_day(target_date):
     """
@@ -128,7 +140,7 @@ def get_block_order_for_day(target_date):
         block_times = extract_block_times_from_description(alt_day_description)
     else:
         # Use default block times
-        block_times = DEFAULT_BLOCK_TIMES
+        block_times = {i + 1: DEFAULT_BLOCK_TIMES[i] for i in range(5)}
 
     # Fetch the raw block order from Google Sheets
     date_column = sheet.col_values(4)[6:]  # Column D, starting from row 7
@@ -148,7 +160,7 @@ def get_block_order_for_day(target_date):
 
                 # Extract value safely
                 block_value = rows[i][4 + block_index] if len(rows[i]) > 4 + block_index else None
-                time_value = block_times[block_index] if len(block_times) > block_index else None
+                time_value = block_times.get(block_index + 1)  # Get time for the block number
 
                 # Conditionally update block and time fields if they are not yet set
                 if getattr(schedule, block_field) in [None, ""] and block_value:
@@ -170,7 +182,13 @@ def get_block_order_for_day(target_date):
                     schedule.block_4,
                     schedule.block_5,
                 ],
-                'times': block_times,
+                'times': [
+                    schedule.block_1_time,
+                    schedule.block_2_time,
+                    schedule.block_3_time,
+                    schedule.block_4_time,
+                    schedule.block_5_time,
+                ],
             }
 
     if(not foundDate):
@@ -180,7 +198,7 @@ def get_block_order_for_day(target_date):
 
     return {
         'blocks': [None, None, None, None, None],
-        'times': block_times,
+        'times': [block_times.get(i+1) for i in range(5)],
     }
 
 def interpret_block(block_code):
