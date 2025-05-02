@@ -37,7 +37,7 @@ def send_course_notifications(post, courses):
         {settings.SITE_URL}{url}
         
         Best regards,
-        School Forum Team
+        WolfKey Team
         """
 
         # Send notification
@@ -72,7 +72,7 @@ def send_solution_notification(solution):
     {settings.SITE_URL}{url}
     
     Best regards,
-    School Forum Team
+    WolfKey Team
     """
 
     # Send notification
@@ -122,7 +122,7 @@ def send_comment_notifications(comment, solution, parent_comment=None):
         {settings.SITE_URL}{solution.get_absolute_url()}
         
         Best regards,
-        School Forum Team
+        WolfKey Team
         """
         send_notification(
             recipient=solution.author,
@@ -150,7 +150,7 @@ def send_comment_notifications(comment, solution, parent_comment=None):
         {settings.SITE_URL}{comment.get_absolute_url()}
         
         Best regards,
-        School Forum Team
+        WolfKey Team
         """
         send_notification(
             recipient=parent_comment.author,
@@ -205,3 +205,22 @@ def send_notification(
         except Exception as e:
             logger.error(f"Failed to send notification email to {recipient.personal_email}: {e}")
 
+
+from django.template.loader import render_to_string
+from django.core.mail import EmailMessage
+
+
+def get_recipient_list():
+
+    recipient_list = User.objects.values_list('personal_email', flat=True).exclude(personal_email__isnull=True).exclude(personal_email__exact='')
+    return list(recipient_list)
+
+def send_promotion_email():
+    subject = "WolfKey Updates - 40 Users!"
+    html_content = render_to_string('forum/newsletters/Promotion1.html') 
+    recipient_list = get_recipient_list()
+    email = EmailMessage(subject, html_content, 'chunghugo99994@gmail.com', recipient_list)
+    email.content_subtype = "html" 
+    email.send()
+
+send_promotion_email()
