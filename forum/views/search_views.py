@@ -41,7 +41,7 @@ def for_you(request):
     # Get posts for both types of courses
     posts = Post.objects.filter(
         Q(courses__in=experienced_courses) | 
-        Q(courses__in=help_needed_courses)
+        Q(courses__in=help_needed_courses) | Q(author = request.user)
     ).distinct().order_by('-created_at')
 
     # Process posts
