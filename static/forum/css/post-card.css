@@ -173,3 +173,30 @@
     opacity: 1;
     transform: translateY(0);
 }
+.share-container {
+    position: relative;
+    display: inline-block;
+}
+
+.share-menu {
+    position: absolute;
+    bottom: 100%;
+    right: 0;
+    background-color: white;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    padding: 10px;
+    z-index: 100;
+    min-width: 250px;
+    display: none;
+    transition: opacity 0.3s ease;
+}
+
+.share-container:hover .share-menu {
+    display: block;
+}
+
+.share-menu-content {
+    padding: 8px;
+}

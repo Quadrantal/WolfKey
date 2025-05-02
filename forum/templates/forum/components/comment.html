@@ -8,42 +8,50 @@
             <span class="comment-date me-5 text-muted">{{ comment.created_at|timesince }} ago</span>
         </div>
     
-        <div class="comment-metadata d-flex align-items-end justify-content-between">
-            
-            <div class="comment-actions">
-                <div class="default-actions" style="display: block;">
-                    {% if user == comment.author %}
-                    <button class="edit-comment btn btn-link btn-sm" data-comment-id="{{ comment.id }}">
-                        <i class="bi bi-pencil"></i> <!-- Bootstrap icon for edit -->
-                    </button>
-                    <button class="delete-comment btn btn-link btn-sm" data-comment-id="{{ comment.id }}">
-                        <i class="bi bi-trash"></i> <!-- Bootstrap icon for delete -->
-                    </button>
-                    {% endif %}
-                    {% if user.is_authenticated %}
-                    <button class="reply-button btn btn-link btn-sm" 
-                            data-solution-id="{{ comment.solution.id }}"
-                            data-parent-id="{{ comment.id }}">
-                        <i class="bi bi-reply"></i> <!-- Bootstrap icon for reply -->
-                    </button>
-                    {% endif %}
-                </div>
-                {% if user == comment.author %}
-                <div class="edit-actions" style="display: none;">
-                    <button class="save-comment btn btn-link btn-sm" data-comment-id="{{ comment.id }}">
-                        <i class="bi bi-check-lg"></i> <!-- Bootstrap icon for save -->
-                    </button>
-                    <button class="cancel-comment btn btn-link btn-sm" data-comment-id="{{ comment.id }}">
-                        <i class="bi bi-x-lg"></i> <!-- Bootstrap icon for cancel -->
-                    </button>
-                </div>
-                {% endif %}
-            </div>
-        </div>
      </div>
 
     <div class="comment-content">
         <div id="editorjs-comment-{{ comment.id }}"></div>
+    </div>
+
+    <div class="comment-metadata d-flex align-items-end justify-content-between">
+            
+        <div class="comment-actions">
+            <div class="default-actions" style="display: block;">
+                <!-- Reply to comment-->
+                {% if user.is_authenticated %}
+                <button class="reply-button btn btn-link btn-sm" 
+                        data-solution-id="{{ comment.solution.id }}"
+                        data-parent-id="{{ comment.id }}">
+                    <i class="bi bi-reply"></i> 
+                </button>
+                {% endif %}
+                <!-- Edit comment-->
+                {% if user == comment.author %}
+                <button class="edit-comment btn btn-link btn-sm" data-comment-id="{{ comment.id }}">
+                    <i class="bi bi-pencil"></i> 
+                </button>
+                {% endif %}
+                <!-- Delete comment-->
+                {% if user == comment.author %}
+                <button class="delete-comment btn btn-link btn-sm" data-comment-id="{{ comment.id }}">
+                    <i class="bi bi-trash"></i> 
+                </button>
+                {% endif %}
+
+            </div>
+            {% if user == comment.author %}
+            <!-- Icons for when editing comment-->
+            <div class="edit-actions" style="display: none;">
+                <button class="save-comment btn btn-link btn-sm" data-comment-id="{{ comment.id }}">
+                    <i class="bi bi-check-lg"></i> 
+                </button>
+                <button class="cancel-comment btn btn-link btn-sm" data-comment-id="{{ comment.id }}">
+                    <i class="bi bi-x-lg"></i> 
+                </button>
+            </div>
+            {% endif %}
+        </div>
     </div>
     <div class="replies">
         {% for reply in comment.replies.all %}
