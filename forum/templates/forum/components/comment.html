@@ -4,8 +4,13 @@
      data-depth="{{ comment.get_depth }}">
      <div class = "comment-header d-flex" >
         <div class="comment-info d-flex">
-            <span class="comment-author me-2"><a href = "{{comment.author.get_absolute_url}}">{{ comment.author.get_full_name }}</a></span>
-            <span class="comment-date me-5 text-muted">{{ comment.created_at|timesince }} ago</span>
+            <div class="d-flex align-items-center">
+                <a href="{{ comment.author.get_absolute_url }}">{{ comment.author.get_full_name }}</a>
+                {% if comment.author == post.author %}
+                    <span class="badge bg-primary ms-2">OP</span>
+                {% endif %}
+            </div>
+            <span class="comment-date me-5 ml-2 text-muted" style = "margin-left: 8px;">{{ comment.created_at|timesince }} ago</span>
         </div>
     
      </div>
