@@ -83,3 +83,9 @@ body, html {
   height: 100%;
   z-index: -1;
 }
+
+.notification-circle {
+  position: relative;
+  border-radius: 999px;
+  right: 12px;
+}

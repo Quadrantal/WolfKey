@@ -163,12 +163,14 @@
                                     {% for course in experienced_courses %}
                                     <div class="course-item d-flex justify-content-between align-items-center mb-2">
                                         <span>{{ course.course.code }} - {{ course.course.name }}</span>
+                                        {% if user == profile_user %}
                                         <form method="post" action="{% url 'remove_experience' course.id %}" class="d-inline">
                                             {% csrf_token %}
                                             <button type="submit" class="btn btn-sm btn-outline-danger">
                                                 <i class="bi bi-x"></i>
                                             </button>
                                         </form>
+                                        {% endif %}
                                     </div>
                                     {% empty %}
                                     <p><b>Please add some courses to improve your experience.</b></p>

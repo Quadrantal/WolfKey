@@ -15,7 +15,7 @@ def send_course_notifications(post, courses):
     experienced_users = UserCourseExperience.objects.filter(
         course__in=courses
     ).select_related('user').distinct('user')
-    
+
     experienced_users = experienced_users.exclude(user=post.author) 
     
     for exp_user in experienced_users:
@@ -204,23 +204,3 @@ def send_notification(
             )
         except Exception as e:
             logger.error(f"Failed to send notification email to {recipient.personal_email}: {e}")
-
-
-from django.template.loader import render_to_string
-from django.core.mail import EmailMessage
-
-
-def get_recipient_list():
-
-    recipient_list = User.objects.values_list('personal_email', flat=True).exclude(personal_email__isnull=True).exclude(personal_email__exact='')
-    return list(recipient_list)
-
-def send_promotion_email():
-    subject = "WolfKey Updates - 40 Users!"
-    html_content = render_to_string('forum/newsletters/Promotion1.html') 
-    recipient_list = get_recipient_list()
-    email = EmailMessage(subject, html_content, 'chunghugo99994@gmail.com', recipient_list)
-    email.content_subtype = "html" 
-    email.send()
-
-send_promotion_email()
