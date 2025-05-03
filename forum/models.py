@@ -232,7 +232,7 @@ class Comment(models.Model):
     parent = models.ForeignKey('self', null=True, blank=True, on_delete=models.CASCADE, related_name='replies') 
 
     class Meta:
-        ordering = ['-created_at']
+        ordering = ['created_at']
 
     def __str__(self):
         return f'Comment by {self.author.username}'

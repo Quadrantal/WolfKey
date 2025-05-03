@@ -60,6 +60,9 @@
 
             {% if user == profile_user %}
             <li class="nav-item" role="presentation">
+                <button class="nav-link" id="schedule-tab" data-bs-toggle="tab" data-bs-target="#schedule" type="button" role="tab" aria-controls="schedule" aria-selected="false">Schedule</button>
+            </li>
+            <li class="nav-item" role="presentation">
                 <button class="nav-link" id="preferences-tab" data-bs-toggle="tab" data-bs-target="#preferences" type="button" role="tab" aria-controls="preferences" aria-selected="false">Preferences</button>
             </li>
             {% endif %}
@@ -148,7 +151,7 @@
                         <!-- Course Experience Section -->
                         <div class="card mb-4 {% if not experienced_courses %}highlighted-card-red{% endif %}">
                             <div class="card-header d-flex justify-content-between align-items-center z-10">
-                                <h5 class="mb-0">Experienced In</h5>
+                                <h5 class="mb-0">Proficient In</h5>
                                 {% if user == profile_user %}
                                 <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#addExperienceModal">
                                     <i class="bi bi-plus"></i> Add Course
@@ -160,12 +163,14 @@
                                     {% for course in experienced_courses %}
                                     <div class="course-item d-flex justify-content-between align-items-center mb-2">
                                         <span>{{ course.course.code }} - {{ course.course.name }}</span>
+                                        {% if user == profile_user %}
                                         <form method="post" action="{% url 'remove_experience' course.id %}" class="d-inline">
                                             {% csrf_token %}
                                             <button type="submit" class="btn btn-sm btn-outline-danger">
                                                 <i class="bi bi-x"></i>
                                             </button>
                                         </form>
+                                        {% endif %}
                                     </div>
                                     {% empty %}
                                     <p><b>Please add some courses to improve your experience.</b></p>
@@ -208,11 +213,12 @@
                     </div>
                 </div>
             </div>
-            
-            <!-- Preferences Tab -->
-            <div class="tab-pane fade" id="preferences" role="tabpanel" aria-labelledby="preferences-tab">
+
+            <!-- Schedule Tab -->
+            <div class="tab-pane fade" id="schedule" role="tabpanel" aria-labelledby="schedule-tab">
                 <div class="row">
-                    <div class="col-md-16">
+                    <div class="col-md-12">
+
                         <!-- Block Courses Section -->
                         <div class="card mb-4">
                             <div class="card-header">
@@ -230,8 +236,8 @@
                                                 <div class="block-content">
                                                     <div class="course-selector" id="block_1A_selector"></div>
                                                     <div class="block-buttons" id="block_1A_buttons">
-                                                        <button type="button" class="btn btn-sm btn-warning add-help-btn" data-block="1A">Add to Need Help</button>
-                                                        <button type="button" class="btn btn-sm btn-success add-experience-btn" data-block="1A">Add to Experienced</button>
+                                                        <button type="button" class="btn btn-sm btn-warning add-help-btn" data-block="1A">Need Help</button>
+                                                        <button type="button" class="btn btn-sm btn-success add-experience-btn" data-block="1A">Proficient </button>
                                                     </div>
                                                 </div>
                                             </div>
@@ -244,8 +250,8 @@
                                                 <div class="block-content">
                                                     <div class="course-selector" id="block_2A_selector"></div>
                                                     <div class="block-buttons" id="block_2A_buttons">
-                                                        <button type="button" class="btn btn-sm btn-warning add-help-btn" data-block="2A">Add to Need Help</button>
-                                                        <button type="button" class="btn btn-sm btn-success add-experience-btn" data-block="2A">Add to Experienced</button>
+                                                        <button type="button" class="btn btn-sm btn-warning add-help-btn" data-block="2A">Need Help</button>
+                                                        <button type="button" class="btn btn-sm btn-success add-experience-btn" data-block="2A">Proficient </button>
                                                     </div>
                                                 </div>
                                             </div>
@@ -259,8 +265,8 @@
                                                 <div class="block-content">
                                                     <div class="course-selector" id="block_1B_selector"></div>
                                                     <div class="block-buttons" id="block_1B_buttons">
-                                                        <button type="button" class="btn btn-sm btn-warning add-help-btn" data-block="1B">Add to Need Help</button>
-                                                        <button type="button" class="btn btn-sm btn-success add-experience-btn" data-block="1B">Add to Experienced</button>
+                                                        <button type="button" class="btn btn-sm btn-warning add-help-btn" data-block="1B">Need Help</button>
+                                                        <button type="button" class="btn btn-sm btn-success add-experience-btn" data-block="1B">Proficient </button>
                                                     </div>
                                                 </div>
                                             </div>
@@ -274,8 +280,8 @@
                                                 <div class="block-content">
                                                     <div class="course-selector" id="block_2B_selector"></div>
                                                     <div class="block-buttons" id="block_2B_buttons">
-                                                        <button type="button" class="btn btn-sm btn-warning add-help-btn" data-block="2B">Add to Need Help</button>
-                                                        <button type="button" class="btn btn-sm btn-success add-experience-btn" data-block="2B">Add to Experienced</button>
+                                                        <button type="button" class="btn btn-sm btn-warning add-help-btn" data-block="2B">Need Help</button>
+                                                        <button type="button" class="btn btn-sm btn-success add-experience-btn" data-block="2B">Proficient </button>
                                                     </div>
                                                 </div>
                                             </div>
@@ -289,8 +295,8 @@
                                                 <div class="block-content">
                                                     <div class="course-selector" id="block_1D_selector"></div>
                                                     <div class="block-buttons" id="block_1D_buttons">
-                                                        <button type="button" class="btn btn-sm btn-warning add-help-btn" data-block="1D">Add to Need Help</button>
-                                                        <button type="button" class="btn btn-sm btn-success add-experience-btn" data-block="1D">Add to Experienced</button>
+                                                        <button type="button" class="btn btn-sm btn-warning add-help-btn" data-block="1D">Need Help</button>
+                                                        <button type="button" class="btn btn-sm btn-success add-experience-btn" data-block="1D">Proficient </button>
                                                     </div>
                                                 </div>
                                             </div>
@@ -304,8 +310,8 @@
                                                 <div class="block-content">
                                                     <div class="course-selector" id="block_2C_selector"></div>
                                                     <div class="block-buttons" id="block_2C_buttons">
-                                                        <button type="button" class="btn btn-sm btn-warning add-help-btn" data-block="2C">Add to Need Help</button>
-                                                        <button type="button" class="btn btn-sm btn-success add-experience-btn" data-block="2C">Add to Experienced</button>
+                                                        <button type="button" class="btn btn-sm btn-warning add-help-btn" data-block="2C">Need Help</button>
+                                                        <button type="button" class="btn btn-sm btn-success add-experience-btn" data-block="2C">Proficient </button>
                                                     </div>
                                                 </div>
                                             </div>
@@ -319,8 +325,8 @@
                                                 <div class="block-content">
                                                     <div class="course-selector" id="block_1E_selector"></div>
                                                     <div class="block-buttons" id="block_1E_buttons">
-                                                        <button type="button" class="btn btn-sm btn-warning add-help-btn" data-block="1E">Add to Need Help</button>
-                                                        <button type="button" class="btn btn-sm btn-success add-experience-btn" data-block="1E">Add to Experienced</button>
+                                                        <button type="button" class="btn btn-sm btn-warning add-help-btn" data-block="1E">Need Help</button>
+                                                        <button type="button" class="btn btn-sm btn-success add-experience-btn" data-block="1E">Proficient </button>
                                                     </div>
                                                 </div>
                                             </div>
@@ -334,8 +340,8 @@
                                                 <div class="block-content">
                                                     <div class="course-selector" id="block_2D_selector"></div>
                                                     <div class="block-buttons" id="block_2D_buttons">
-                                                        <button type="button" class="btn btn-sm btn-warning add-help-btn" data-block="2D">Add to Need Help</button>
-                                                        <button type="button" class="btn btn-sm btn-success add-experience-btn" data-block="2D">Add to Experienced</button>
+                                                        <button type="button" class="btn btn-sm btn-warning add-help-btn" data-block="2D">Need Help</button>
+                                                        <button type="button" class="btn btn-sm btn-success add-experience-btn" data-block="2D">Proficient </button>
                                                     </div>
                                                 </div>
                                             </div>
@@ -352,8 +358,8 @@
                                                 <div class="block-content">
                                                     <div class="course-selector" id="block_2E_selector"></div>
                                                     <div class="block-buttons" id="block_2E_buttons">
-                                                        <button type="button" class="btn btn-sm btn-warning add-help-btn" data-block="2E">Add to Need Help</button>
-                                                        <button type="button" class="btn btn-sm btn-success add-experience-btn" data-block="2E">Add to Experienced</button>
+                                                        <button type="button" class="btn btn-sm btn-warning add-help-btn" data-block="2E">Need Help</button>
+                                                        <button type="button" class="btn btn-sm btn-success add-experience-btn" data-block="2E">Proficient </button>
                                                     </div>
                                                 </div>
                                             </div>
@@ -363,6 +369,14 @@
                                 </form>
                             </div>
                         </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Preferences Tab -->
+            <div class="tab-pane fade" id="preferences" role="tabpanel" aria-labelledby="preferences-tab">
+                <div class="row">
+                    <div class="col-md-16">
                         <div class="card mb-4">
                             <div class="card-header">
                                 <h5 class="mb-0">Update Personal Information</h5>

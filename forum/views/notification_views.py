@@ -15,7 +15,7 @@ def send_course_notifications(post, courses):
     experienced_users = UserCourseExperience.objects.filter(
         course__in=courses
     ).select_related('user').distinct('user')
-    
+
     experienced_users = experienced_users.exclude(user=post.author) 
     
     for exp_user in experienced_users:
@@ -37,7 +37,7 @@ def send_course_notifications(post, courses):
         {settings.SITE_URL}{url}
         
         Best regards,
-        School Forum Team
+        WolfKey Team
         """
 
         # Send notification
@@ -72,7 +72,7 @@ def send_solution_notification(solution):
     {settings.SITE_URL}{url}
     
     Best regards,
-    School Forum Team
+    WolfKey Team
     """
 
     # Send notification
@@ -122,7 +122,7 @@ def send_comment_notifications(comment, solution, parent_comment=None):
         {settings.SITE_URL}{solution.get_absolute_url()}
         
         Best regards,
-        School Forum Team
+        WolfKey Team
         """
         send_notification(
             recipient=solution.author,
@@ -150,7 +150,7 @@ def send_comment_notifications(comment, solution, parent_comment=None):
         {settings.SITE_URL}{comment.get_absolute_url()}
         
         Best regards,
-        School Forum Team
+        WolfKey Team
         """
         send_notification(
             recipient=parent_comment.author,
@@ -204,4 +204,3 @@ def send_notification(
             )
         except Exception as e:
             logger.error(f"Failed to send notification email to {recipient.personal_email}: {e}")
-

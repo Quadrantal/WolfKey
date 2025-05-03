@@ -57,7 +57,7 @@ def edit_solution(request, solution_id):
                 solution_data = json.loads(solution_json) if solution_json else {}
 
                 blocks = solution_data.get('blocks', [])
-                if (len(blocks) == 1 and blocks[0].get('type') == 'paragraph' and not blocks[0].get('data', {}).get('text', '').strip()) or len(blocks == 0):
+                if (len(blocks) == 1 and blocks[0].get('type') == 'paragraph' and not blocks[0].get('data', {}).get('text', '').strip()) or len(blocks) == 0:
                     messages.error(request, 'Solution cannot be empty.')
                     return redirect('edit_solution', solution_id=solution.id)
                 
@@ -69,6 +69,7 @@ def edit_solution(request, solution_id):
                 messages_data = process_messages_to_json(request)
                 return JsonResponse({'status': 'success','messages': messages_data}, status=200)
             except ValueError as e:
+                print(e)
                 messages.error(request,str(e))
                 messages_data = process_messages_to_json(request)
                 return JsonResponse({'status': 'error','messages': messages_data}, status=200)

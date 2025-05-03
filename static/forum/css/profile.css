@@ -144,6 +144,12 @@ input[type="range"]::-webkit-slider-runnable-track {
 
 .add-experience-btn{
     background-color: #10B981;
+    border-radius: 999px !important; 
+    border-width: 0px !important;
+}
+
+.add-help-btn{
+    border-radius: 999px !important;
 }
 
 #profilePictureMenu {
