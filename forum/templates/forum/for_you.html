@@ -124,6 +124,22 @@
         });
 
         postCards.forEach(card => observer.observe(card));
+
+        const textElement = document.getElementById('animated-text');
+        const text = textElement.textContent;
+        textElement.textContent = '';
+        
+        // Split text into individual characters
+        for (let i = 0; i < text.length; i++) {
+            const span = document.createElement('span');
+            if (text[i] === ' ') {
+                span.innerHTML = '&nbsp;';
+            } else {
+                span.textContent = text[i];
+            }
+            span.style.animationDelay = (i * 20) + 'ms'; // Adjust timing
+            textElement.appendChild(span);
+        }
     });
 </script>
 {% endblock %}
