@@ -24,8 +24,8 @@ def for_you(request):
     # Get today's and tomorrow's dates in the required format
     pst = ZoneInfo("America/Los_Angeles")
     now_pst = datetime.now(pst)
-    today = now_pst.strftime("%a, %b %-d") 
-    tomorrow = (now_pst + timedelta(days=1)).strftime("%a, %b %-d")  
+    today = now_pst.strftime("%a, %b %d").lstrip("0").replace(" 0", " ")
+    tomorrow = (now_pst + timedelta(days=1)).strftime("%a, %b %d").lstrip("0").replace(" 0", " ")
 
     ceremonial_required_today = is_ceremonial_uniform_required(request.user, today)
     ceremonial_required_tomorrow = is_ceremonial_uniform_required(request.user, tomorrow)
