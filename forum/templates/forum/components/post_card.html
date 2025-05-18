@@ -49,7 +49,7 @@
         <!-- Post Footer -->
         <div class="card-footer d-flex justify-content-between align-items-center">
             <div class="d-flex align-items-center">
-                <i class="bi bi-chat me-2"></i> <span>{{ post.solutions.count }}</span>
+                <i class="bi bi-chat me-2"></i> <span>{{ post.total_response_count }}</span>
             </div>
             <div class="d-flex align-items-center share-container">
                 <i class="bi bi-share me-2" data-post-url="{% url 'post_detail' post.id %}"></i>
