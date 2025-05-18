@@ -313,7 +313,6 @@ def get_daily_schedule(request, target_date):
     try:
         date_obj = datetime.datetime.strptime(target_date, '%Y-%m-%d')
         formatted_date = date_obj.strftime('%a, %b %-d')  # e.g., "Tue, Sep 3"
-        formatted_date = "Wed, Apr 16"
         schedule = get_block_order_for_day(formatted_date)
         
         return JsonResponse({

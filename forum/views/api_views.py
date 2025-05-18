@@ -1,4 +1,4 @@
-from django.contrib.auth import authenticate, login
+from django.contrib.auth import authenticate, login, logout
 from django.http import JsonResponse
 from django.views.decorators.csrf import ensure_csrf_cookie
 from django.views.decorators.http import require_http_methods
@@ -42,11 +42,14 @@ def api_login(request):
                 return JsonResponse({
                     'user': {
                         'id': user.id,
+                        'first_name' : user.first_name,
+                        'last_name' : user.last_name,
                         'name': user.get_full_name(),
                         'school_email': user.school_email,
                         'is_moderator': profile.is_moderator,
                         'points': profile.points,
                         'profile_picture': profile.profile_picture.url if profile.profile_picture else None,
+                        'background_hue' : profile.background_hue,
                         'courses': {
                             f'block_{block}': getattr(profile, f'block_{block}').name 
                             for block in ['1A', '1B', '1D', '1E', '2A', '2B', '2C', '2D', '2E']
@@ -72,6 +75,11 @@ def api_login(request):
         return JsonResponse({
             'error': str(e)
         }, status=500)
+    
+@login_required
+def api_logout(request):
+    logout(request)
+    return JsonResponse({'success': 'Logged out succesfully'})
     
 from django.core.paginator import Paginator
 from django.http import JsonResponse
