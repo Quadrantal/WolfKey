@@ -3,7 +3,7 @@
         <link rel="stylesheet" href="{% static 'forum/css/post-card.css' %}">
 </head>
 
-<div class="card clickable post hidden {% if post.accepted_solution %}highlighted-card-green{% endif %}">
+<div class="card clickable post {% if post.accepted_solution %}highlighted-card-green{% endif %}">
     {% if post.accepted_solution %}
         <div class="banner">Solved</div>
     {% endif %}
@@ -69,12 +69,6 @@
 
 <script>
     document.addEventListener("DOMContentLoaded", function () {
-        const posts = document.querySelectorAll("#post-list .post");
-        posts.forEach((post, index) => {
-            setTimeout(() => {
-                post.classList.remove("hidden");
-            }, index * 125); // Delay each post by 125ms
-        });
 
         // Handle copy functionality
         document.querySelectorAll('.copy-link-button').forEach(button => {

@@ -12,7 +12,8 @@ from forum.views.schedule_views import get_block_order_for_day, process_schedule
 from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo
 from django.db.models import Count
-
+from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
+from django.http import HttpResponse
 
 
 @login_required
@@ -73,12 +74,24 @@ def for_you(request):
         post.preview_text = process_post_preview(post)
         add_course_context(post, experienced_courses, help_needed_courses)
 
+    print(len(posts))
+
+    # Pagination
+    paginator = Paginator(posts, 10)
+    page = request.GET.get('page')
+    try:
+        posts = paginator.page(page)
+    except PageNotAnInteger:
+        posts = paginator.page(1)
+    except EmptyPage:
+        return HttpResponse('')  # Return empty response when no more posts
     
+
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        return render(request, 'forum/components/post_list.html', {'posts': posts})
 
     return render(request, 'forum/for_you.html', {
         'posts': posts,
-        'experienced_courses': experienced_courses,
-        'help_needed_courses': help_needed_courses,
         'greeting': greeting,
         'current_date': today,
         'tomorrow_date': tomorrow,
@@ -112,6 +125,17 @@ def all_posts(request):
         post.preview_text = process_post_preview(post)
         add_course_context(post, experienced_courses, help_needed_courses)
 
+    paginator = Paginator(posts, 10)
+    page = request.GET.get('page')
+    try:
+        posts = paginator.page(page)
+    except PageNotAnInteger:
+        posts = paginator.page(1)
+    except EmptyPage:
+        return HttpResponse('')  # Return empty response when no more posts
+
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        return render(request, 'forum/components/post_list.html', {'posts': posts})
 
     return render(request, 'forum/all_posts.html', {
         'posts': posts,

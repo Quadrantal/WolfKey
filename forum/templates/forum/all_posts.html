@@ -8,37 +8,105 @@
     <div id="search-results" class="row"></div>
 
     <div class="row" id="post-list">
-        {% for post in posts %}
-        <div style = "max-width: 800px; margin: 0 auto; margin-bottom: .75rem;" class = "post-card-container" data-animate>
-            {% include 'forum/components/post_card.html' with post=post %}
-        </div>
+        {% include 'forum/components/post_list.html' %}
+    </div>
 
-        {% empty %}
-            <div class="col-12">
-                <p>No posts found.</p>
-            </div>
-        {% endfor %}
+   <div id="loading-spinner" class="text-center">
+        <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Loading...</span>
+        </div>
     </div>
 {% endblock %}
 
 {% block scripts %}
 <script>
     document.addEventListener('DOMContentLoaded', function () {
-        const postCards = document.querySelectorAll('[data-animate]');
-
-        const observer = new IntersectionObserver((entries, observer) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    // Add animation class when the card is visible
-                    entry.target.classList.add('animate-visible');
-                    observer.unobserve(entry.target); // Stop observing once animated
-                }
+        function createAnimationObserver() {
+            return new IntersectionObserver((entries, observer) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('animate-visible');
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, {
+                threshold: 0.02
             });
+        }
+
+        // Initialize animation observer
+        const animationObserver = createAnimationObserver();
+
+        // Observe initial posts
+        const postCards = document.querySelectorAll('[data-animate]');
+        postCards.forEach(card => animationObserver.observe(card));
+
+
+        // Infinite scroll implementation
+        let page = 1;
+        let loading = false;
+        let hasMore = true;
+        const postList = document.getElementById('post-list');
+        const loadingSpinner = document.getElementById('loading-spinner');
+
+        function loadMorePosts() {
+            if (loading || !hasMore) return;
+            
+            loading = true;
+            loadingSpinner.classList.remove('d-none');
+            
+            page++;
+            fetch(`${window.location.pathname}?page=${page}`, {
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(response => response.text())
+            .then(html => {
+                if (html.trim()) {
+                    const parser = new DOMParser();
+                    const doc = parser.parseFromString(html, 'text/html');
+                    const newPosts = doc.querySelectorAll('.post-card-container');
+                    
+                    if (newPosts.length === 0) {
+                        hasMore = false;
+                        loadingSpinner.style.display = 'none';
+                        return;
+                    }
+
+                    newPosts.forEach(post => {
+                        postList.appendChild(post);
+                        if (post.hasAttribute('data-animate')) {
+                            animationObserver.observe(post);
+                        }
+                    });
+                } else {
+                    hasMore = false;
+                    loadingSpinner.style.display = 'none';
+                }
+                loading = false;
+            })
+            .catch(error => {
+                console.error('Error loading posts:', error);
+                loading = false;
+                loadingSpinner.classList.add('d-none');
+            });
+        }
+
+        // Intersection Observer for infinite scroll
+        const scrollObserver = new IntersectionObserver((entries) => {
+            if (entries[0].isIntersecting && !loading && hasMore) {
+                loadMorePosts();
+            }
         }, {
-            threshold: 0.02 // Trigger when 2% of the card is visible
+            root: null,
+            rootMargin: '1000px',
+            threshold: 0.1
         });
 
-        postCards.forEach(card => observer.observe(card));
+        if (loadingSpinner) {
+            scrollObserver.observe(loadingSpinner);
+        }
     });
 </script>
 {% endblock %}
