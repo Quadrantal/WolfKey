@@ -56,7 +56,9 @@
                 <div class="share-menu">
                     <div class="share-menu-content">
                         <p>Share this post:</p>
-                        <input type="text" class="share-link form-control mb-2" value="{{ request.build_absolute_uri }}{% url 'post_detail' post.id %}" readonly>
+                        <input type="text" class="share-link form-control mb-2"
+                            value="{{ request.build_absolute_uri|cut:request.get_full_path }}{% url 'post_detail' post.id %}">
+
                         <button class="copy-link-button btn btn-primary btn-sm">Copy Link</button>
                     </div>
                 </div>
