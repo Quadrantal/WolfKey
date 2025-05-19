@@ -107,7 +107,6 @@
 
 .post-content-cell {
   flex-grow: 1;
-  padding: 10px 0;
 }
 
 .solution-container {
@@ -124,7 +123,6 @@
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  margin-bottom: 10px;
 }
 
 .question-header h1 {
@@ -238,8 +236,8 @@
   .sort-dropdown-button {
     background-color: #f8f9fa;
     color: #2c5282;
-    border: 1px solid #cbd5e0;
-    border-radius: 4px;
+    border: none !important;
+    border-radius: 12px;
     padding: 6px 12px;
     font-size: 14px;
     cursor: pointer;
@@ -272,7 +270,7 @@
     top: 100%;
     background-color: white;
     min-width: 120px;
-    border-radius: 4px;
+    border-radius: 12px;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
     z-index: 1000;
     border: 1px solid #e2e8f0;
@@ -295,6 +293,7 @@
     display: block;
     text-decoration: none;
     transition: background-color 0.2s ease;
+    border-radius: 6px;
   }
   
   .sort-option:hover {
@@ -433,4 +432,19 @@
 
 div[id^="comment-form-"][id$="-root"] {
   border-top: 2px solid #e1e4e8;
+}
+
+#editorjs-solution-form{
+  background-color: #f9f9f9;
+  border-radius: 12px;
+}
+
+
+.post-form-editor {
+    background-color: #f9f9f9;
+    border-radius: 12px;
+}
+
+.form-control{
+    border-radius: 12px;
 }

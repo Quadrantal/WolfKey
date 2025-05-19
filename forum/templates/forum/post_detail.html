@@ -48,13 +48,13 @@
 {% if user.is_authenticated and not has_solution_from_user%}
 <div id="solution-form-container" class="card mt-4">
     <div class="card-body">
-        <h4>Your Solution</h4>
+        <h4>Write another solution</h4>
         <form method="post" action="{% url 'create_solution' post.id %}" id="solutionForm">
             {% csrf_token %}
             <input type="hidden" name="action" value="create_solution">
             <input type="hidden" id="solution-content" name="content">
             <div id="editorjs-solution-form"></div>
-            <button type="submit" class="btn btn-primary mt-3">Post Your Solution</button>
+            <button type="submit" class="btn btn-primary mt-3" style = "border-radius: 12px;">Submit Your Solution</button>
         </form>
     </div>
 </div>
