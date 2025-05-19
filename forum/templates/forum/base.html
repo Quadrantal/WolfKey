@@ -129,12 +129,13 @@
                             <a href="{% url 'site_info' %}" class="nav-link text-secondary p-2" title="Site Info">
                                 <i class="bi bi-info-circle"></i>
                             </a>
-                            
-                            <!-- Main navigation -->
+
                             <div class="d-none d-md-flex align-items-center gap-4">
-                                <a href="" class="d-flex align-items-center text-decoration-none {% if request.resolver_match.url_name == 'subjects' %}text-primary fw-medium{% else %}text-secondary{% endif %}">
-                                    <i class="bi bi-people me-2"></i>
-                                    Subjects
+                                <a href="" class="d-flex align-items-center text-decoration-none" style="color: black;">
+                                    <span class="position-relative">
+                                        <span class="d-inline-block rounded-circle" style="width: 10px; height: 10px; margin-right: 5px;background-color: rgb(36, 231, 82);"></span>
+                                    </span>
+                                    {{ user_count|add:"10"}} Users
                                 </a>
                             </div>
                         </div>

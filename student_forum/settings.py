@@ -81,6 +81,7 @@ TEMPLATES = [
                 'forum.context_processors.notifications',
                 'forum.context_processors.latest_update',
                 'forum.context_processors.user_background_slider',
+                'forum.context_processors.user_count',
             ],
         },
     },
