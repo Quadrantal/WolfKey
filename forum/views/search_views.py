@@ -42,10 +42,26 @@ def for_you(request):
     processed_schedule_tomorrow = process_schedule_for_user(request.user, raw_schedule_tomorrow)
 
 
-    # Get posts for both types of courses
+    # Get posts that the user needs help or is expierenced in, taking currently, or posts posted by user
+    user_profile = request.user.userprofile
+
+    current_courses = list(filter(None, [
+        user_profile.block_1A,
+        user_profile.block_1B,
+        user_profile.block_1D,
+        user_profile.block_1E,
+        user_profile.block_2A,
+        user_profile.block_2B,
+        user_profile.block_2C,
+        user_profile.block_2D,
+        user_profile.block_2E
+    ]))
+
     posts = Post.objects.filter(
         Q(courses__in=experienced_courses) | 
-        Q(courses__in=help_needed_courses) | Q(author = request.user)
+        Q(courses__in=help_needed_courses) | 
+        Q(author=request.user) |
+        Q(courses__in=current_courses)
     ).annotate(
         solution_count=Count('solutions', distinct=True),
         comment_count=Count('solutions__comments', distinct=True),
