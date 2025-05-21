@@ -2,138 +2,415 @@
 
 {% block head %}
     {% load static %}
-        <link rel="stylesheet" href="{% static 'forum/css/post-card.css' %}">
+    <link rel="stylesheet" href="{% static 'forum/css/post-card.css' %}">
+    <link rel="stylesheet" href="{% static 'forum/css/profile.css' %}">
+    <link rel="stylesheet" href="{% static 'forum/css/course-selector.css' %}">
+
 {% endblock %}
-
-
+{% block body_class %}profile-page{% endblock %}
 {% block content %}
 <div class="container mt-4">
     <div class="row">
         <!-- Profile Header -->
-        <div class="col-md-12 mb-4">
+        <div class="col-md-12 mb-4" style="z-index: 3;">
             <div class="card">
                 <div class="card-body d-flex align-items-center">
-                    <img src="{{ user.profile.avatar.url|default:'/static/images/default-avatar.png' }}" 
-                         class="rounded-circle me-3" 
-                         alt="Profile Picture" 
-                         style="width: 100px; height: 100px; object-fit: cover;">
-                    <div>
-                        <h2 class="mb-0">{{ profile_user.get_full_name }}</h2>
-                        <span class="text-muted">Joined: {{ profile_user.date_joined|date:"F Y" }}</span>
-                        {% if profile_user.userprofile.is_moderator %}
-                            <span class="badge bg-primary ms-2">Moderator</span>
-                        {% endif %}
+                    <!-- Profile Picture Section -->
+                    <div class="profile-header d-flex align-items-center" style="flex: 1;">
+                        <div class="position-relative">
+                            <img 
+                                src="{{ profile_user.userprofile.profile_picture.url }}" 
+                                alt="Profile Picture" 
+                                class="profile-picture changeablePfp"
+                                style="width: 100px; height: 100px; border-radius: 50%; object-fit: cover; cursor: pointer;"
+                                id="profilePicture"
+                            >
+                            {% if user == profile_user %}
+                            <!-- Hover Text -->
+                            <div class="hover-text" id="hoverText" style="display: none;">
+                                Click to change
+                            </div>
+                            {% endif %}
+                            <!-- Dropdown Menu -->
+                            <div class="dropdown-menu" id="profilePictureMenu">
+                                <form action="{% url 'upload_profile_picture' %}" method="post" enctype="multipart/form-data" class="p-2">
+                                    {% csrf_token %}
+                                    <label for="profile_picture" class="form-label">Upload New Profile Picture:</label>
+                                    <input type="file" name="profile_picture" id="profile_picture" class="form-control mb-2">
+                                    <button type="submit" class="btn btn-primary btn-sm">Upload</button>
+                                </form>
+                            </div>
+                        </div>
+                        <!-- Name and Bio Section -->
+                        <div class="ms-4">
+                            <h2>{{ profile_user.get_full_name }}</h2>
+                            <span class="text-muted">Joined: {{ profile_user.date_joined|date:"F j, Y" }}</span>
+                            <p>{{ profile_user.userprofile.bio }}</p>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Left Column -->
-        <div class="col-md-4">
-            <!-- About Me -->
-            <div class="card mb-4">
-                <div class="card-header">
-                    <h5 class="mb-0">About Me</h5>
-                </div>
-                <div class="card-body">
-                    <p>{{ profile_user.userprofile.bio|default:"No bio provided." }}</p>
-                </div>
-            </div>
-
-            <!-- Stats -->
-            <div class="card mb-4">
-                <div class="card-header">
-                    <h5 class="mb-0">Stats</h5>
-                </div>
-                <div class="card-body">
-                    <p><i class="bi bi-star-fill text-warning"></i> Points: {{ profile_user.userprofile.points }}</p>
-                    <p><i class="bi bi-file-text"></i> Posts: {{posts_count|default:"0"}}</p>
-                    <p><i class="bi bi-chat"></i> Solutions: {{solutions_count|default:"0"}}</p>
-                </div>
-            </div>
-        </div>
-
-        <!-- Right Column -->
-        <div class="col-md-8">
-            <!-- Recent Activity -->
-            <div class="card mb-4">
-                <div class="card-header">
-                    <h5 class="mb-0">Recent Activity</h5>
-                </div>
-                <div class="card-body">
-                    {% for post in recent_posts %}
-                    <div class="mb-3">
-                        <h6><a href="{% url 'post_detail' post.id %}">{{ post.title }}</a></h6>
-                        <small class="text-muted">Posted {{ post.created_at|timesince }} ago</small>
-                    </div>
-                    {% empty %}
-                    <p>No recent activity.</p>
-                    {% endfor %}
-                </div>
-            </div>
-
-            <!-- Course Experience Section -->
-            <div class="card mb-4 {% if not experienced_courses %}highlighted-card{% endif %}">
-                <div class="card-header d-flex justify-content-between align-items-center z-10">
-                    <h5 class="mb-0">Experienced In</h5>
-                    <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#addExperienceModal">
-                        <i class="bi bi-plus"></i> Add Course
-                    </button>
-                </div>
-                <div class="card-body">
-                    <div class="course-list">
-                        {% for course in experienced_courses %}
-                        <div class="course-item d-flex justify-content-between align-items-center mb-2">
-                            <span>{{ course.course.code }} - {{ course.course.name }}</span>
-                            <form method="post" action="{% url 'remove_experience' course.id %}" class="d-inline">
-                                {% csrf_token %}
-                                <button type="submit" class="btn btn-sm btn-outline-danger">
-                                    <i class="bi bi-x"></i>
-                                </button>
-                            </form>
-                        </div>
-                        {% empty %}
-                        <p><b>Please add some courses to improve your experience.</b></p>
-                        {% endfor %}
-                    </div>
-                </div>
-            </div>
-
-            <!-- Help Needed Section -->
-            <div class="card mb-4 {% if not help_needed_courses %}highlighted-card{% endif %}" >
-                <div class="card-header d-flex justify-content-between align-items-center">
-                    <h5 class="mb-0">Need Help In</h5>
-                    <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#addHelpModal">
-                        <i class="bi bi-plus"></i> Add Course
-                    </button>
-                </div>
-                <div class="card-body">
-                    <div class="course-list">
-                        {% for course in help_needed_courses %}
-                        <div class="course-item d-flex justify-content-between align-items-center mb-2">
-                            <span>{{ course.course.code }} - {{ course.course.name }}</span>
-                            <form method="post" action="{% url 'remove_help_request' course.id %}" class="d-inline">
-                                {% csrf_token %}
-                                <button type="submit" class="btn btn-sm btn-outline-danger">
-                                    <i class="bi bi-x"></i>
-                                </button>
-                            </form>
-                        </div>
-                        {% empty %}
-                        <p><b>Please add some courses to improve your experience.</b></p>
-                        {% endfor %}
-                    </div>
-                </div>
-            </div>
+        <!-- Tabs Navigation -->
+        <ul class="nav nav-tabs mb-4" id="profileTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="profile-tab" data-bs-toggle="tab" data-bs-target="#profile" type="button" role="tab" aria-controls="profile" aria-selected="true">Profile</button>
+            </li>
 
             {% if user == profile_user %}
-            <!-- Edit Profile Button -->
-            <div class="text-end">
-                <a href="{% url 'edit_profile' %}" class="btn btn-primary">
-                    <i class="bi bi-pencil"></i> Edit Profile
-                </a>
-            </div>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="schedule-tab" data-bs-toggle="tab" data-bs-target="#schedule" type="button" role="tab" aria-controls="schedule" aria-selected="false">Schedule</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="preferences-tab" data-bs-toggle="tab" data-bs-target="#preferences" type="button" role="tab" aria-controls="preferences" aria-selected="false">Preferences</button>
+            </li>
             {% endif %}
+        </ul>
+
+        <!-- Tabs Content -->
+        <div class="tab-content" id="profileTabsContent">
+            <!-- Profile Tab -->
+            <div class="tab-pane fade show active" id="profile" role="tabpanel" aria-labelledby="profile-tab">
+                <div class="row">
+                    <!-- Left Column -->
+                    <div class="col-md-4">
+                        {% if user == profile_user %}
+                        <!-- About Me -->
+                        <div class="card mb-4">
+                            <div class="card-header">
+                                <h5 class="mb-0">About Me</h5>
+                            </div>
+                            <div class="card-body">
+                                {% if user == profile_user %}
+                                <form method="post">
+                                    {% csrf_token %}
+                                    <div class="mb-3">
+                                        <textarea name="bio" id="bio" class="form-control" maxlength="500" rows="4">{{ profile_user.userprofile.bio }}</textarea>
+                                        <small class="text-muted">Max 500 characters. Avoid inappropriate language.</small>
+                                    </div>
+                                    <button type="submit" class="btn btn-primary">Save Bio</button>
+                                </form>
+                                {% else %}
+                                <p>{{ profile_user.userprofile.bio|default:"No bio provided." }}</p>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% endif %}
+
+                        <!-- Stats -->
+                        <div class="card mb-4">
+                            <div class="card-header">
+                                <h5 class="mb-0">Stats</h5>
+                            </div>
+                            <div class="card-body">
+                                <p><i class="bi bi-star-fill text-warning"></i> Points: {{ profile_user.userprofile.points }}</p>
+                                <p><i class="bi bi-file-text"></i> Posts: {{posts_count|default:"0"}}</p>
+                                <p><i class="bi bi-chat"></i> Solutions: {{solutions_count|default:"0"}}</p>
+                            </div>
+                        </div>
+
+                        {% if user == profile_user %}
+                        <div class="card mb-4">
+                            <div class="card-header">
+                                <h5 class="mb-0">Customize Background</h5>
+                            </div>
+                            <div class="card-body">
+                                <form method="post">
+                                    {% csrf_token %}
+                                    <div class="mb-3">
+                                        <label for="background_hue" class="form-label">Background Color Hue</label>
+                                        <input type="range" name="background_hue" id="background_hue" class="form-range background_hue_slider" min="0" max="360" value="{{ profile_user.userprofile.background_hue }}" oninput="setBackground(this.value)">
+                                    </div>
+                                    <button type="submit" class="btn btn-primary">Save Changes</button>
+                                </form>
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Right Column -->
+                    <div class="col-md-8">
+                        <!-- Recent Activity -->
+                        <div class="card mb-4">
+                            <div class="card-header">
+                                <h5 class="mb-0">Recent Activity</h5>
+                            </div>
+                            <div class="card-body">
+                                {% for post in recent_posts %}
+                                <div class="mb-3">
+                                    <h6><a href="{% url 'post_detail' post.id %}">{{ post.title }}</a></h6>
+                                    <small class="text-muted">Posted {{ post.created_at|timesince }} ago</small>
+                                </div>
+                                {% empty %}
+                                <p>No recent activity.</p>
+                                {% endfor %}
+                            </div>
+                        </div>
+
+                        <!-- Course Experience Section -->
+                        <div class="card mb-4 {% if not experienced_courses %}highlighted-card-red{% endif %}">
+                            <div class="card-header d-flex justify-content-between align-items-center z-10">
+                                <h5 class="mb-0">Proficient In</h5>
+                                {% if user == profile_user %}
+                                <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#addExperienceModal">
+                                    <i class="bi bi-plus"></i> Add Course
+                                </button>
+                                {% endif %}
+                            </div>
+                            <div class="card-body">
+                                <div class="course-list">
+                                    {% for course in experienced_courses %}
+                                    <div class="course-item d-flex justify-content-between align-items-center mb-2">
+                                        <span>{{ course.course.code }} - {{ course.course.name }}</span>
+                                        {% if user == profile_user %}
+                                        <form method="post" action="{% url 'remove_experience' course.id %}" class="d-inline">
+                                            {% csrf_token %}
+                                            <button type="submit" class="btn btn-sm btn-outline-danger">
+                                                <i class="bi bi-x"></i>
+                                            </button>
+                                        </form>
+                                        {% endif %}
+                                    </div>
+                                    {% empty %}
+                                    <p><b>Please add some courses to improve your experience.</b></p>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+
+                        {% if user == profile_user %}
+                        <!-- Help Needed Section -->
+                        <div class="card mb-4 {% if not help_needed_courses %}highlighted-card-red{% endif %}">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <h5 class="mb-0">Need Help In</h5>
+                                {% if user == profile_user %}
+                                <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#addHelpModal">
+                                    <i class="bi bi-plus"></i> Add Course
+                                </button>
+                                {% endif %}
+                            </div>
+                            <div class="card-body">
+                                <div class="course-list">
+                                    {% for course in help_needed_courses %}
+                                    <div class="course-item d-flex justify-content-between align-items-center mb-2">
+                                        <span>{{ course.course.code }} - {{ course.course.name }}</span>
+                                        <form method="post" action="{% url 'remove_help_request' course.id %}" class="d-inline">
+                                            {% csrf_token %}
+                                            <button type="submit" class="btn btn-sm btn-outline-danger">
+                                                <i class="bi bi-x"></i>
+                                            </button>
+                                        </form>
+                                    </div>
+                                    {% empty %}
+                                    <p><b>Please add some courses to improve your experience.</b></p>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
+
+                    </div>
+                </div>
+            </div>
+
+            <!-- Schedule Tab -->
+            <div class="tab-pane fade" id="schedule" role="tabpanel" aria-labelledby="schedule-tab">
+                <div class="row">
+                    <div class="col-md-12">
+
+                        <!-- Block Courses Section -->
+                        <div class="card mb-4">
+                            <div class="card-header">
+                                <h5 class="mb-0">Select Courses for Each Block</h5>
+                            </div>
+                            <div class="card-body">
+                                <form method="post" action="{% url 'update_courses' %}" id="blockCoursesForm">
+                                    {% csrf_token %}
+                                    <div class="row">
+                                        <div class="col-md-6 mb-1">
+                                            <div class="block-container">
+                                                <div class="block-header">
+                                                    <label for="block_1A" class="form-label mb-0">Block 1A</label>
+                                                </div>
+                                                <div class="block-content">
+                                                    <div class="course-selector" id="block_1A_selector"></div>
+                                                    <div class="block-buttons" id="block_1A_buttons">
+                                                        <button type="button" class="btn btn-sm btn-warning add-help-btn" data-block="1A">Need Help</button>
+                                                        <button type="button" class="btn btn-sm btn-success add-experience-btn" data-block="1A">Proficient </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6 mb-1">
+                                            <div class="block-container">
+                                                <div class="block-header">
+                                                    <label for="block_2A" class="form-label mb-0">Block 2A</label>
+                                                </div>
+                                                <div class="block-content">
+                                                    <div class="course-selector" id="block_2A_selector"></div>
+                                                    <div class="block-buttons" id="block_2A_buttons">
+                                                        <button type="button" class="btn btn-sm btn-warning add-help-btn" data-block="2A">Need Help</button>
+                                                        <button type="button" class="btn btn-sm btn-success add-experience-btn" data-block="2A">Proficient </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="col-md-6 mb-1">
+                                            <div class="block-container">
+                                                <div class="block-header">
+                                                    <label for="block_1B" class="form-label mb-0">Block 1B</label>
+                                                </div>
+                                                <div class="block-content">
+                                                    <div class="course-selector" id="block_1B_selector"></div>
+                                                    <div class="block-buttons" id="block_1B_buttons">
+                                                        <button type="button" class="btn btn-sm btn-warning add-help-btn" data-block="1B">Need Help</button>
+                                                        <button type="button" class="btn btn-sm btn-success add-experience-btn" data-block="1B">Proficient </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="col-md-6 mb-1">
+                                            <div class="block-container">
+                                                <div class="block-header">
+                                                    <label for="block_2B" class="form-label mb-0">Block 2B</label>
+                                                </div>
+                                                <div class="block-content">
+                                                    <div class="course-selector" id="block_2B_selector"></div>
+                                                    <div class="block-buttons" id="block_2B_buttons">
+                                                        <button type="button" class="btn btn-sm btn-warning add-help-btn" data-block="2B">Need Help</button>
+                                                        <button type="button" class="btn btn-sm btn-success add-experience-btn" data-block="2B">Proficient </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="col-md-6 mb-1">
+                                            <div class="block-container">
+                                                <div class="block-header">
+                                                    <label for="block_1D" class="form-label mb-0">Block 1D</label>
+                                                </div>
+                                                <div class="block-content">
+                                                    <div class="course-selector" id="block_1D_selector"></div>
+                                                    <div class="block-buttons" id="block_1D_buttons">
+                                                        <button type="button" class="btn btn-sm btn-warning add-help-btn" data-block="1D">Need Help</button>
+                                                        <button type="button" class="btn btn-sm btn-success add-experience-btn" data-block="1D">Proficient </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="col-md-6 mb-1">
+                                            <div class="block-container">
+                                                <div class="block-header">
+                                                    <label for="block_2C" class="form-label mb-0">Block 2C</label>
+                                                </div>
+                                                <div class="block-content">
+                                                    <div class="course-selector" id="block_2C_selector"></div>
+                                                    <div class="block-buttons" id="block_2C_buttons">
+                                                        <button type="button" class="btn btn-sm btn-warning add-help-btn" data-block="2C">Need Help</button>
+                                                        <button type="button" class="btn btn-sm btn-success add-experience-btn" data-block="2C">Proficient </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="col-md-6 mb-1">
+                                            <div class="block-container">
+                                                <div class="block-header">
+                                                    <label for="block_1E" class="form-label mb-0">Block 1E</label>
+                                                </div>
+                                                <div class="block-content">
+                                                    <div class="course-selector" id="block_1E_selector"></div>
+                                                    <div class="block-buttons" id="block_1E_buttons">
+                                                        <button type="button" class="btn btn-sm btn-warning add-help-btn" data-block="1E">Need Help</button>
+                                                        <button type="button" class="btn btn-sm btn-success add-experience-btn" data-block="1E">Proficient </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="col-md-6 mb-1">
+                                            <div class="block-container">
+                                                <div class="block-header">
+                                                    <label for="block_2D" class="form-label mb-0">Block 2D</label>
+                                                </div>
+                                                <div class="block-content">
+                                                    <div class="course-selector" id="block_2D_selector"></div>
+                                                    <div class="block-buttons" id="block_2D_buttons">
+                                                        <button type="button" class="btn btn-sm btn-warning add-help-btn" data-block="2D">Need Help</button>
+                                                        <button type="button" class="btn btn-sm btn-success add-experience-btn" data-block="2D">Proficient </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="col-md-6 mb-1">
+                                            <button type="submit" class="btn btn-primary">Save Courses</button>
+                                        </div>                                        
+                                        <div class="col-md-6 mb-1">
+                                            <div class="block-container">
+                                                <div class="block-header">
+                                                    <label for="block_2E" class="form-label mb-0">Block 2E</label>
+                                                </div>
+                                                <div class="block-content">
+                                                    <div class="course-selector" id="block_2E_selector"></div>
+                                                    <div class="block-buttons" id="block_2E_buttons">
+                                                        <button type="button" class="btn btn-sm btn-warning add-help-btn" data-block="2E">Need Help</button>
+                                                        <button type="button" class="btn btn-sm btn-success add-experience-btn" data-block="2E">Proficient </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Preferences Tab -->
+            <div class="tab-pane fade" id="preferences" role="tabpanel" aria-labelledby="preferences-tab">
+                <div class="row">
+                    <div class="col-md-16">
+                        <div class="card mb-4">
+                            <div class="card-header">
+                                <h5 class="mb-0">Update Personal Information</h5>
+                            </div>
+                            <div class="card-body">
+                                <form method="post" id="personalInfoForm">
+                                    {% csrf_token %}
+                                    <div class="mb-3">
+                                        <label for="id_first_name" class="form-label">First Name</label>
+                                        <input type="text" name="first_name" id="id_first_name" class="form-control" value="{{ request.user.first_name }}">
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="id_last_name" class="form-label">Last Name</label>
+                                        <input type="text" name="last_name" id="id_last_name" class="form-control" value="{{ request.user.last_name }}">
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="id_personal_email" class="form-label">Personal Email</label>
+                                        <input type="email" name="personal_email" id="id_personal_email" class="form-control" value="{{ request.user.personal_email }}">
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="id_phone_number" class="form-label">Phone Number</label>
+                                        <input type="text" name="phone_number" id="id_phone_number" class="form-control" value="{{ request.user.phone_number }}">
+                                    </div>
+                                    <button type="submit" class="btn btn-primary">Save Info</button>
+                                </form>
+                            </div>
+                        </div>
+    
+                        <div class="card mb-4" style = "overflow: hidden;">
+                            <a href="{% url 'password_reset' %}" class="btn btn-secondary" style = "z-index: 2;">Reset Password</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </div>
@@ -146,7 +423,7 @@
                 <h5 class="modal-title">Add Course Experience</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
-            <form method="post" action="{% url 'add_experience' %}">
+            <form id="addExperienceForm" method="post" action="{% url 'add_experience' %}">
                 <div class="modal-body">
                     {% csrf_token %}
                     {{ experience_form.as_p }}
@@ -168,7 +445,7 @@
                 <h5 class="modal-title">Add Help Request</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
-            <form method="post" action="{% url 'add_help_request' %}">
+            <form id="addHelpForm" method="post" action="{% url 'add_help_request' %}">
                 <div class="modal-body">
                     {% csrf_token %}
                     {{ help_form.as_p }}
@@ -181,4 +458,228 @@
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    
+    document.addEventListener('DOMContentLoaded', function () {
+        const hueValue = {{ profile_user.userprofile.background_hue }};
+        setBackground(hueValue);
+        const personalInfoForm = document.getElementById('personalInfoForm');
+    
+        // Prevent Enter key from submitting the form
+        personalInfoForm.addEventListener('keydown', (event) => {
+            if (event.key === 'Enter') {
+                event.preventDefault();
+            }
+        });
+    
+        // Prevent form submission on Enter key press
+        personalInfoForm.addEventListener('submit', (event) => {
+            const activeElement = document.activeElement;
+            if (activeElement.tagName === 'INPUT' && activeElement.type !== 'submit') {
+                event.preventDefault();
+            }
+        });
+    });
+
+</script>
+
+<script>
+    {% if user == profile_user %}
+        document.addEventListener('DOMContentLoaded', function () {
+        const profilePicture = document.getElementById('profilePicture');
+        const profilePictureMenu = document.getElementById('profilePictureMenu');
+
+        // Toggle the dropdown menu when the profile picture is clicked
+        profilePicture.addEventListener('click', function () {
+            const isMenuVisible = profilePictureMenu.style.display === 'block';
+            profilePictureMenu.style.display = isMenuVisible ? 'none' : 'block';
+        });
+
+        // Close the menu if clicked outside
+        document.addEventListener('click', function (event) {
+            if (!profilePicture.contains(event.target) && !profilePictureMenu.contains(event.target)) {
+                profilePictureMenu.style.display = 'none';
+            }
+        });
+    });
+    {% endif %}
+
+</script>
+
+<script type="module">
+    import { CourseSelector } from '{% static "forum/js/course-selector.js" %}';
+    document.addEventListener('DOMContentLoaded', () => {
+        const hueValue = {{ profile_user.userprofile.background_hue }};
+        setBackground(hueValue);
+
+        const blocks = ['1A', '1B', '1D', '1E', '2A', '2B', '2C', '2D', '2E'];
+
+        // Parse initial courses from JSON
+        const initialCourses = JSON.parse('{{ initial_courses_json|escapejs }}');
+        const experiencedCourses = JSON.parse('{{ experienced_courses_json|escapejs }}');
+        const helpNeededCourses = JSON.parse('{{ help_needed_courses_json|escapejs }}');
+
+        // Function to check if a course is in the experienced or help-needed list
+        function isCourseInList(courseId, list) {
+            return list.includes(courseId);
+        }
+
+        blocks.forEach(block => {
+            const blockId = `block_${block}`;
+            const course = initialCourses[blockId];
+
+            // Show the button container initially
+            const buttonsContainer = document.getElementById(`${blockId}_buttons`);
+            if (buttonsContainer && course) {
+                buttonsContainer.style.display = 'flex';
+                // Check if the course is already in either the "Experienced" or "Help Needed" lists
+                if (isCourseInList(course.id, experiencedCourses) || isCourseInList(course.id, helpNeededCourses)) {
+                    // Hide buttons if the course is in one of the lists
+                    buttonsContainer.style.display = 'none';
+                }
+            }else if (!course) {
+                buttonsContainer.style.display = 'none';
+            }
+
+            // Add course selection handler to toggle visibility of buttons
+            new CourseSelector({
+                containerId: `block_${block}_selector`,
+                formName: 'blockCoursesForm',
+                maxCourses: 1, // Only one course per block
+                initialSelection: course ? [course] : [], // Initialize with the selected course, if any
+                block: block,
+                onSelectionChange: (selectedCourses) => {
+                    console.log(`Block ${block} selected courses:`, selectedCourses);
+
+                    // Show or hide the buttons based on course selection
+                    if (selectedCourses.length > 0) {
+                        buttonsContainer.style.display = 'flex';
+                    } else {
+                        buttonsContainer.style.display = 'none';
+                    }
+                }
+            });
+        });
+
+        // Attach click event listeners to the buttons
+        blocks.forEach(block => {
+            const buttonsContainer = document.getElementById(`block_${block}_buttons`);
+            if (buttonsContainer) {
+                buttonsContainer.addEventListener('click', (event) => {
+                    const target = event.target;
+                    const blockId = target.getAttribute('data-block');
+                    const courseId = initialCourses[`block_${blockId}`]?.id;
+
+                    if (courseId) {
+                        let url, formData;
+                        if (target.classList.contains('add-help-btn')) {
+                            url = '{% url "add_help_request" %}';
+                            formData = new FormData();
+                            formData.append('course', courseId);
+                        } else if (target.classList.contains('add-experience-btn')) {
+                            url = '{% url "add_experience" %}';
+                            formData = new FormData();
+                            formData.append('course', courseId);
+                        }
+
+                        fetch(url, {
+                            method: 'POST',
+                            body: formData,
+                            headers: {
+                                'X-CSRFToken': '{{ csrf_token }}'
+                            }
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                // Hide the button after it's clicked
+                                target.style.display = 'none';
+                                buttonsContainer.style.display = 'none'; // Hide the button container as well
+                            } else {
+                                console.log(data);
+                                alert('There was an issue with the request.');
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
+                            alert('There was an error with the request.');
+                        });
+                    }
+                });
+            }
+        });
+
+        const addExperienceForm = document.getElementById('addExperienceForm');
+        const addHelpForm = document.getElementById('addHelpForm');
+
+        console.log(addExperienceForm, addHelpForm);
+
+        if (addExperienceForm) {
+            addExperienceForm.addEventListener('submit', (event) => {
+                event.preventDefault();  // Prevent the default form submission behavior
+
+                const formData = new FormData(addExperienceForm);
+                console.log(formData);
+                fetch(addExperienceForm.action, {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-CSRFToken': '{{ csrf_token }}',
+                    },
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Hide modal and reload the page
+                        const addExperienceModal = new bootstrap.Modal(document.getElementById('addExperienceModal'));
+                        addExperienceModal.hide();
+                        location.reload();
+                    } else {
+                        alert('There was an issue with adding the experience.');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('There was an error processing the request.');
+                });
+            });
+        }
+
+        if (addHelpForm) {
+            addHelpForm.addEventListener('submit', (event) => {
+                event.preventDefault();  // Prevent the default form submission behavior
+
+                const formData = new FormData(addHelpForm);
+                console.log(formData);
+
+                fetch(addHelpForm.action, {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-CSRFToken': '{{ csrf_token }}',
+                    },
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Hide modal and reload the page
+                        const addHelpModal = new bootstrap.Modal(document.getElementById('addHelpModal'));
+                        addHelpModal.hide();
+                        location.reload();
+                    } else {
+                        alert('There was an issue with adding the help request.');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('There was an error processing the request.');
+                });
+            });
+        }
+    });
+
+</script>
 {% endblock %}

@@ -1,0 +1,63 @@
+
+<div class="container py-4" id="main-section">
+    <!-- Question Header -->
+    <div class="question-header">
+        <h1>{{ post.title }}</h1>
+        <div class="actions">
+            <button class="button follow-button">
+                Follow<span class="follow-count">90</span>
+            </button>
+            {% if not has_solution_from_user %}
+            <button class="button add-answer-button"><a href="#solution-form-container">Add answer</a></button>
+            {% endif %}
+            {% if user.is_authenticated and post.author == user %}
+            <a href="{% url 'edit_post' post.id %}" class="btn btn-primary btn-sm rounded-pill shadow-sm px-3">
+                <i class="fas fa-edit"></i> Edit
+            </a>
+            {% endif %}
+        </div>
+
+    </div>
+
+    <!-- Question Content with Voting -->
+    <div class="post-container">
+        <!-- Post Content -->
+        <div class="post-content-cell">
+            <div id="editorjs"></div>
+        </div>
+
+
+        <!-- Courses -->
+        {% if post.courses.all %}
+        <div class="courses-section">
+            <h6 class="text-muted mb-2">Related Courses:</h6>
+            <div class="d-flex flex-wrap gap-2">
+                {% for course in post.courses.all %}
+                <span class="badge bg-light text-dark border">
+                    {{ course.code }} - {{ course.name }}
+                </span>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Author Card -->
+        <div class="author-card">
+            <div class="author-info">
+                <div class="position-relative">
+                    <img 
+                        src="{{ post.author.userprofile.profile_picture.url }}" 
+                        alt="Profile Picture" 
+                        class="profile-picture"
+                        style="width: 30px; height: 30px; border-radius: 50%; object-fit: cover; cursor: pointer;"
+                        id="profilePicture"
+                    >
+                </div>
+                <div>
+                    <div class="text-muted">asked {{ post.created_at|date:"M d, Y" }}</div>
+                    <div class="fw-bold"><a href = "{{post.author.get_absolute_url}}">{{ post.author.get_full_name }}</a></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

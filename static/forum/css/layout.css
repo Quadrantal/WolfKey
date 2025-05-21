@@ -6,6 +6,38 @@
     margin-top: 0;
     position: relative;
 }
+.ask-button {
+    z-index: 1;
+    position: relative;
+    overflow: hidden;
+    border: none !important;
+    border-radius: 6px;
+    line-height: 2rem;
+}
+
+.ask-button::before {
+    content: "";
+    position: absolute;
+    top: -3px;
+    left: -3px;
+    right: -3px;
+    bottom: -3px;
+    background: linear-gradient(45deg, #ffd800, #ff5520, #750cf2, #0cbcf2);
+    z-index: -2;
+    border-radius: inherit;
+}
+
+.ask-button::after{
+    content: "";
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    right: 3px;
+    bottom: 3px;
+    background-color: #310599;
+    z-index: -1;
+    border-radius: 6px;
+}
 
 /* Sidebar */
 .sidebar {
@@ -106,7 +138,7 @@
 
 /* Navbar Styles */
 nav {
-    background-color: rgba(255, 255, 255, 0.6) !important;
+    background-color: rgba(255, 255, 255, 0.1) !important;
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px); /* for Safari */
     position: sticky;
@@ -118,6 +150,18 @@ nav {
 
 nav {
     transition: background-color 0.3s ease;
+}
+
+.nav-link {
+    color: black !important;
+}
+
+#profile-expander-button{
+    color: black !important;
+}
+
+li {
+    list-style-type: none;
 }
 
 /* Dropdown styles */
@@ -220,4 +264,39 @@ nav {
 
 .toast.fade-out {
     animation: toastFadeOut 0.5s ease-out forwards;
+}
+
+.fade-text {
+    display: inline-block;
+    overflow: hidden;
+  }
+  
+  .fade-text span {
+    opacity: 0;
+    display: inline-block;
+    animation: fadeIn 0.05s forwards;
+  }
+  
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  #post-list {
+    display: block;
+  }
+
+  #search-bar {
+    border-radius: 9999px;
+    border: none;
+    font-size: 14px;
+  }
+
+  #loading-spinner {
+    padding: 20px;
+    margin-bottom: 20px;
 }

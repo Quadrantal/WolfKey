@@ -111,8 +111,19 @@ class User(AbstractUser):
     def get_full_name(self):
         return f"{self.first_name} {self.last_name}"
     
+    def get_absolute_url(self):
+        return reverse('profile', args=[str(self.username)]) 
+    
+    search_vector = SearchVectorField(null=True, blank=True)
 
-
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+        search_vector = (
+            SearchVector('first_name', weight='A') +
+            SearchVector('last_name', weight='A')
+        )
+        User.objects.filter(id=self.id).update(search_vector=search_vector)
+    
 class Course(models.Model):
     code = models.CharField(max_length=10, unique=True)
     name = models.CharField(max_length=100)
@@ -216,6 +227,13 @@ class Solution(models.Model):
 
     def __str__(self):
         return f'Solution by {self.author.username} for {self.post.title}'
+    
+    def get_absolute_url(self):
+        """
+        Returns the URL to the specific solution element on the post detail page.
+        """
+        return f"{self.post.get_absolute_url()}#solution-{self.id}"
+        
 
 class SavedSolution(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="saved_solutions")
@@ -231,15 +249,31 @@ class SavedSolution(models.Model):
 class Comment(models.Model):
     solution = models.ForeignKey(Solution, on_delete=models.CASCADE, related_name='comments')
     author = models.ForeignKey(User, on_delete=models.CASCADE)
-    content = models.TextField()
+    content = models.JSONField() 
     created_at = models.DateTimeField(auto_now_add=True)
-    upvotes = models.IntegerField(default=0)
+    parent = models.ForeignKey('self', null=True, blank=True, on_delete=models.CASCADE, related_name='replies') 
 
     class Meta:
-        ordering = ['-created_at']
+        ordering = ['created_at']
 
     def __str__(self):
         return f'Comment by {self.author.username}'
+    
+    @property
+    def replies(self):
+        return Comment.objects.filter(parent=self).order_by('created_at')
+    
+    def get_absolute_url(self):
+        return f'#comment-{self.id}'
+    
+    def get_depth(self):
+        """Calculate the nesting depth of this comment"""
+        depth = 0
+        parent = self.parent
+        while parent:
+            depth += 1
+            parent = parent.parent
+        return min(depth, 5)  # Limit maximum nesting depth to 5
 
 class SolutionUpvote(models.Model):
     solution = models.ForeignKey(Solution, on_delete=models.CASCADE)
@@ -269,12 +303,46 @@ class UserProfile(models.Model):
     is_moderator = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    background_hue = models.IntegerField(default=231)
+
+    profile_picture = models.ImageField(
+        upload_to='profile_pictures/',
+        default='profile_pictures/default.png',
+        blank=True,
+        null=True
+    )
+
+    #Fields for course blocks
+    block_1A = models.ForeignKey(Course, on_delete=models.SET_NULL, null=True, blank=True, related_name="block_1A")
+    block_1B = models.ForeignKey(Course, on_delete=models.SET_NULL, null=True, blank=True, related_name="block_1B")
+    block_1D = models.ForeignKey(Course, on_delete=models.SET_NULL, null=True, blank=True, related_name="block_1D")
+    block_1E = models.ForeignKey(Course, on_delete=models.SET_NULL, null=True, blank=True, related_name="block_1E")
+    block_2A = models.ForeignKey(Course, on_delete=models.SET_NULL, null=True, blank=True, related_name="block_2A")
+    block_2B = models.ForeignKey(Course, on_delete=models.SET_NULL, null=True, blank=True, related_name="block_2B")
+    block_2C = models.ForeignKey(Course, on_delete=models.SET_NULL, null=True, blank=True, related_name="block_2C")
+    block_2D = models.ForeignKey(Course, on_delete=models.SET_NULL, null=True, blank=True, related_name="block_2D")
+    block_2E = models.ForeignKey(Course, on_delete=models.SET_NULL, null=True, blank=True, related_name="block_2E")
 
     def __str__(self):
         return f"{self.user.username}'s profile"
-    
 
+class DailySchedule(models.Model):
+    date = models.DateField(unique=True)
+    block_1 = models.CharField(max_length=100, blank=True, null=True)
+    block_1_time = models.CharField(max_length=50, blank=True, null=True) 
+    block_2 = models.CharField(max_length=100, blank=True, null=True)
+    block_2_time = models.CharField(max_length=50, blank=True, null=True)
+    block_3 = models.CharField(max_length=100, blank=True, null=True)
+    block_3_time = models.CharField(max_length=50, blank=True, null=True)
+    block_4 = models.CharField(max_length=100, blank=True, null=True)
+    block_4_time = models.CharField(max_length=50, blank=True, null=True)
+    block_5 = models.CharField(max_length=100, blank=True, null=True)
+    block_5_time = models.CharField(max_length=50, blank=True, null=True)
+    ceremonial_uniform = models.BooleanField(null = True)
+    is_school = models.BooleanField(null = True)
 
+    def __str__(self):
+        return f"Schedule for {self.date}"
 
 class UserCourseExperience(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='experienced_courses')

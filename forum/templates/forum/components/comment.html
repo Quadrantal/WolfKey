@@ -1,0 +1,91 @@
+<div class="comment {% if comment.parent %}comment-reply{% endif %}" 
+     id="comment-{{ comment.id }}" 
+     data-comment-id="{{ comment.id }}"
+     data-depth="{{ comment.get_depth }}">
+    <div class="author-info mt-3">
+        <div class="position-relative" style = "margin-left: 3px;">
+            <img 
+                src="{{ comment.author.userprofile.profile_picture.url }}" 
+                alt="Profile Picture" 
+                class="profile-picture"
+                style="width: 30px; height: 30px; border-radius: 50%; object-fit: cover; cursor: pointer;"
+                id="profilePicture"
+            >
+        </div>
+        <div>
+            <div class="d-flex align-items-center">
+                <a href="{{ comment.author.get_absolute_url }}">{{ comment.author.get_full_name }}</a>
+                {% if comment.author == post.author %}
+                    <span class="badge bg-primary ms-2">OP</span>
+                {% endif %}
+                <div class="comment-date text-muted" style = "margin-left: 8px;">{{ comment.created_at|timesince }} ago</div>
+            </div>
+
+        </div>
+    </div>
+
+    <div class="comment-content">
+        <div id="editorjs-comment-{{ comment.id }}"></div>
+    </div>
+
+    <div class="comment-metadata d-flex align-items-end justify-content-between">
+            
+        <div class="comment-actions">
+            <div class="default-actions" style="display: block;">
+                <!-- Reply to comment-->
+                {% if user.is_authenticated %}
+                <button class="reply-button btn btn-link btn-sm" 
+                        data-solution-id="{{ comment.solution.id }}"
+                        data-parent-id="{{ comment.id }}">
+                    <i class="bi bi-reply"></i> 
+                </button>
+                {% endif %}
+                <!-- Edit comment-->
+                {% if user == comment.author %}
+                <button class="edit-comment btn btn-link btn-sm" data-comment-id="{{ comment.id }}">
+                    <i class="bi bi-pencil"></i> 
+                </button>
+                {% endif %}
+                <!-- Delete comment-->
+                {% if user == comment.author %}
+                <button class="delete-comment btn btn-link btn-sm" data-comment-id="{{ comment.id }}">
+                    <i class="bi bi-trash"></i> 
+                </button>
+                {% endif %}
+
+            </div>
+            {% if user == comment.author %}
+            <!-- Icons for when editing comment-->
+            <div class="edit-actions" style="display: none;">
+                <button class="save-comment btn btn-link btn-sm" data-comment-id="{{ comment.id }}">
+                    <i class="bi bi-check-lg"></i> 
+                </button>
+                <button class="cancel-comment btn btn-link btn-sm" data-comment-id="{{ comment.id }}">
+                    <i class="bi bi-x-lg"></i> 
+                </button>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+    <div class="replies">
+        {% for reply in comment.replies.all %}
+            {% if forloop.counter <= 2 %}
+                {% include 'forum/components/comment.html' with comment=reply %}
+            {% elif forloop.counter == 3 %}
+                <div class="collapsed-replies" style="display: none;">
+                    {% include 'forum/components/comment.html' with comment=reply %}
+            {% else %}
+                    {% include 'forum/components/comment.html' with comment=reply %}
+            {% endif %}
+        {% endfor %}
+        {% if comment.replies.count > 2 %}
+            </div>
+            <button class="toggle-replies btn btn-link btn-sm" 
+                    data-comment-id="{{ comment.id }}"
+                    data-show-text="Show {{ comment.replies.count|add:'-3' }} more replies"
+                    data-hide-text="Hide replies">
+                Show {{ comment.replies.count|add:'-3' }} more replies
+            </button>
+        {% endif %}
+    </div>
+</div>

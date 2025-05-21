@@ -27,7 +27,8 @@
 
 /* Global Reset & Base Styles */
 body {
-  background: radial-gradient(circle, rgba(170,183,254,1) 0%, rgba(255,255,255,1) 100%);
+  /* background: radial-gradient(circle, rgba(170,183,254,1) 0%, rgba(255,255,255,1) 100%); */
+  transition: background 0.3s ease; 
 }
 
 /* Typography */
@@ -55,4 +56,36 @@ p { font-family: var(--font-secondary); }
 .logo {
     height: 40px; 
     width: auto; 
+}
+
+.text-muted {
+  font-size: smaller;
+}
+
+a {
+  color: inherit;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body, html {
+  margin: 0;
+  padding: 0;
+}
+
+.background-svg {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+}
+
+.notification-circle {
+  position: relative;
+  border-radius: 999px;
+  right: 12px;
 }

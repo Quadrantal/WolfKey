@@ -16,6 +16,7 @@
   border-radius: 12px;
   padding: 20px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+  border-width: 0px !important;
 }
 .post-header {
   padding: 20px;
@@ -70,12 +71,6 @@
   background-color: #e0e0e0;
 }
 
-.comment-section {
-  background-color: #f8f9fa;
-  padding: 15px;
-  margin-top: 10px;
-  border-top: 1px solid #e0e0e0;
-}
 
 .vote-cell {
   display: flex;
@@ -114,7 +109,6 @@
 
 .post-content-cell {
   flex-grow: 1;
-  padding: 10px 0;
 }
 
 .solution-container {
@@ -132,7 +126,6 @@
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  margin-bottom: 10px;
 }
 
 .question-header h1 {
@@ -237,7 +230,7 @@ button .fa-bell-slash {
     padding-top: 12px;
     border: 1px solid #45cb7d;
     background: linear-gradient(to bottom, #aae6a3 -5%, #fff 6%, #fff 85%,#aae6a3 120%);
-    box-shadow: 0 0px 20px rgba(41, 234, 14, 0.5);
+    box-shadow: 0 0px 20px rgba(41, 234, 14, 0.9);
 }
 
 .accept-button-accepted path{
@@ -280,8 +273,8 @@ button .fa-bell-slash {
   .sort-dropdown-button {
     background-color: #f8f9fa;
     color: #2c5282;
-    border: 1px solid #cbd5e0;
-    border-radius: 4px;
+    border: none !important;
+    border-radius: 12px;
     padding: 6px 12px;
     font-size: 14px;
     cursor: pointer;
@@ -314,7 +307,7 @@ button .fa-bell-slash {
     top: 100%;
     background-color: white;
     min-width: 120px;
-    border-radius: 4px;
+    border-radius: 12px;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
     z-index: 1000;
     border: 1px solid #e2e8f0;
@@ -337,6 +330,7 @@ button .fa-bell-slash {
     display: block;
     text-decoration: none;
     transition: background-color 0.2s ease;
+    border-radius: 6px;
   }
   
   .sort-option:hover {
@@ -490,4 +484,93 @@ button .fa-bell-slash {
 
 .bookmark-button:active {
   transform: scale(1.1); /* pop effect  */
+  
+    /* Comment styling */
+.comment {
+  position: relative;
+}
+.comments {
+  border-left: 2px solid #e1e4e8;
+}
+
+.comment-indicator {
+  position: absolute;
+  left: -2px;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background-color: transparent;
+  transition: background-color 0.2s ease;
+}
+
+.comment:hover > .comment-content > .comment-indicator {
+  background-color: #0366d6;
+}
+
+/* Increase indentation based on nesting level */
+.comment[data-depth="1"] { margin-left: 2rem; }
+.comment[data-depth="2"] { margin-left: 4rem; }
+.comment[data-depth="3"] { margin-left: 6rem; }
+
+.comment[data-depth="0"] > .replies > .toggle-replies { margin-left: 2rem !important ;}
+.comment[data-depth="1"] > .replies > .toggle-replies { margin-left: 4rem !important; }
+.comment[data-depth="2"] > .replies > .toggle-replies { margin-left: 6rem !important; }
+
+
+.comment[data-depth="1"] {border-left: 2px solid #e1e4e8;}
+.comment[data-depth="2"] {border-left: 2px solid #e1e4e8;}
+.comment[data-depth="3"] {border-left: 2px solid #e1e4e8;}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .comment[data-depth="1"] { margin-left: 1rem; }
+  .comment[data-depth="2"] { margin-left: 2rem; }
+  .comment[data-depth="3"] { margin-left: 3rem; }
+}
+
+/* Comment content spacing */
+.comment-content {
+  position: relative;
+  margin-bottom: 0.5rem;
+}
+
+.replies {
+  position: relative;
+}
+
+.codex-editor__redactor {
+  padding-bottom: 0px !important;
+  margin-left: 5px;
+}
+
+.comment-metadata{
+  margin-left: auto;
+}
+
+.comment-info {
+  margin-left: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.comment-actions {
+  margin-left: 0.5rem;
+}
+
+div[id^="comment-form-"][id$="-root"] {
+  border-top: 2px solid #e1e4e8;
+}
+
+#editorjs-solution-form{
+  background-color: #f9f9f9;
+  border-radius: 12px;
+}
+
+
+.post-form-editor {
+    background-color: #f9f9f9;
+    border-radius: 12px;
+}
+
+.form-control{
+    border-radius: 12px;
 }

@@ -8,7 +8,7 @@ from django.http import JsonResponse
 from django.utils.html import escape
 from forum.models import Post, Solution, Comment, Course, FollowedPost, SavedSolution
 from forum.forms import SolutionForm, CommentForm, PostForm
-from .utils import selective_quote_replace
+from .utils import selective_quote_replace, detect_bad_words
 from django.contrib import messages
 from .notification_views import send_course_notifications, send_solution_notification
 from django.http import HttpResponseForbidden
@@ -16,59 +16,50 @@ from django.http import HttpResponseForbidden
 
 logger = logging.getLogger(__name__)
 
-
 @login_required
 def create_post(request):
     if request.method == 'POST':
-        # print("Enter 1")
-        # print(f"POST data: {request.POST}")
-        # print(f"FILES: {request.FILES}")
-        
         form = PostForm(request.POST)
-        # print(f"Form data: {form.data}")
-        # print(f"Form is valid: {form.is_valid()}")
-        if not form.is_valid():
-            print(f"Form errors: {form.errors}")
-        
         if form.is_valid():
-            # print("Enter 2")
             try:
-                # Create and save the post first
                 post = form.save(commit=False)
                 post.author = request.user
-                
+
                 # Handle content
                 content_json = request.POST.get('content')
-                print(f"Content JSON: {content_json}")
                 content_data = json.loads(content_json) if content_json else {}
+
+                # Validate post content
+                if isinstance(content_data, dict) and 'blocks' in content_data:
+                    blocks = content_data.get('blocks', [])
+                    if (len(blocks) == 1 and blocks[0].get('type') == 'paragraph' and not blocks[0].get('data', {}).get('text', '').strip()) or len(blocks) == 0:
+                        messages.error(request, 'Post content cannot be empty.')
+                        return redirect('create_post')
+                detect_bad_words(content_data) 
                 post.content = content_data
-                
-                # Save post to generate ID
+
+                # Save post and handle courses
                 post.save()
-                
-                # Handle courses from the form
                 course_ids = request.POST.getlist('courses')
-                print(f"Course IDs: {course_ids}")
                 if course_ids:
                     courses = Course.objects.filter(id__in=course_ids)
                     post.courses.set(courses)
-                    print(f"Added courses: {list(courses.values_list('id', 'name'))}")
-
                     send_course_notifications(post, courses)
-                
+
                 return redirect(post.get_absolute_url())
-                
+            except ValueError as e:
+                # Catch bad word detection errors
+                messages.error(request, f"Content contains inappropriate language: {str(e)}")
             except Exception as e:
-                print(f"Error creating post: {str(e)}")
+                # Catch other errors
                 messages.error(request, f"Error creating post: {str(e)}")
-                return redirect('create_post')
         else:
             messages.error(request, f"Form validation failed: {form.errors}")
     else:
         form = PostForm()
 
     return render(request, 'forum/post_form.html', {'form': form, 'action': 'Create'})
-
+  
 @login_required
 def post_detail(request, post_id):
     post = get_object_or_404(Post, id=post_id)
@@ -83,12 +74,12 @@ def post_detail(request, post_id):
         '-vote_score',
         '-created_at'
     )
+
     solution_form = SolutionForm()
     comment_form = CommentForm()
     
     has_solution = Solution.objects.filter(post=post, author=request.user).exists()
     
-    # Process post content
     try:
         content_json = json.dumps(post.content, cls=DjangoJSONEncoder)
     except (TypeError, ValueError) as e:
@@ -101,7 +92,6 @@ def post_detail(request, post_id):
     for solution in solutions:
         try:
             solution_content = solution.content
-            # If content is a string, convert to object
             if isinstance(solution_content, str):
                 try:
                     solution_content = selective_quote_replace(solution_content)
@@ -111,12 +101,26 @@ def post_detail(request, post_id):
                     solution_content = {
                         "blocks": [{"type": "paragraph", "data": {"text": "Error parsing solution content"}}]
                     }
-                
+
             # Check if the solution is saved by the current user
             is_saved = False
             if request.user.is_authenticated:
                 is_saved = SavedSolution.objects.filter(user=request.user, solution=solution).exists()
-            
+
+            # Get comments for this solution
+            comments = solution.comments.select_related('author').order_by('created_at')
+            processed_comments = []
+            for comment in comments:
+                processed_comments.append({
+                    'id': comment.id,
+                    'content': comment.content,
+                    'author': f"{comment.author.first_name} {comment.author.last_name}",
+                    'created_at': comment.created_at.strftime("%Y-%m-%d %H:%M:%S"),
+                    'parent_id': comment.parent_id,
+                    'depth': comment.get_depth(),
+                })
+            root_comments_count = sum(1 for comment in comments if comment.get_depth() == 0)
+
             processed_solutions.append({
                 'id': solution.id,
                 'content': solution_content,  
@@ -124,7 +128,9 @@ def post_detail(request, post_id):
                 'created_at': solution.created_at.strftime("%Y-%m-%d %H:%M:%S"),
                 'upvotes': solution.upvotes,
                 'downvotes': solution.downvotes,
-                'is_saved': is_saved
+                'is_saved': is_saved,
+                'comments': processed_comments,
+                'root_comments_count': root_comments_count,
             })
         except Exception as e:
             logger.error(f"Error processing solution {solution.id}: {e}")
@@ -137,9 +143,11 @@ def post_detail(request, post_id):
                 'created_at': solution.created_at.strftime("%Y-%m-%d %H:%M:%S"),
                 'upvotes': solution.upvotes,
                 'downvotes': solution.downvotes,
+                'is_saved': False,
+                'comments': [],
+                'root_comments_count': 0,
             })
     
-    # Check if the current user is following this post
     is_following = False
     if request.user.is_authenticated:
         is_following = FollowedPost.objects.filter(user=request.user, post=post).exists()
@@ -158,6 +166,7 @@ def post_detail(request, post_id):
 
     return render(request, 'forum/post_detail.html', context)
 
+
 @login_required
 def edit_post(request, post_id):
     post = get_object_or_404(Post, id=post_id)
@@ -172,7 +181,7 @@ def edit_post(request, post_id):
             content = request.POST.get('content')
             if content:
                 content = json.loads(content)
-            
+            detect_bad_words(content)  # This will raise ValueError if bad words are detected
             # Update post
             post.content = content
             
@@ -184,7 +193,9 @@ def edit_post(request, post_id):
             post.save()
             messages.success(request, 'Post updated successfully!')
             return redirect('post_detail', post_id=post.id)
-            
+        except ValueError as e:
+            # Catch bad word detection errors
+            messages.error(request, f"Content contains inappropriate language: {str(e)}")
         except json.JSONDecodeError as e:
             messages.error(request, 'Invalid content format')
             logger.error(f"JSON decode error: {e}")

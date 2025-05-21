@@ -1,5 +1,5 @@
 .course-list {
-    max-height: 300px;
+    max-height: 175px;
     overflow-y: auto;
 }
 
@@ -18,4 +18,186 @@
 
 .course-item button {
     padding: 2px 8px;
+}
+.background_hue_slider::-webkit-slider-thumb {
+    background: linear-gradient(
+        to right,
+        hsl(0, 97.7%, 83.1%),
+        hsl(30, 97.7%, 83.1%),
+        hsl(60, 97.7%, 83.1%),
+        hsl(90, 97.7%, 83.1%),
+        hsl(120, 97.7%, 83.1%),
+        hsl(150, 97.7%, 83.1%),
+        hsl(180, 97.7%, 83.1%),
+        hsl(210, 97.7%, 83.1%),
+        hsl(240, 97.7%, 83.1%),
+        hsl(270, 97.7%, 83.1%),
+        hsl(300, 97.7%, 83.1%),
+        hsl(330, 97.7%, 83.1%),
+        hsl(360, 97.7%, 83.1%)
+      ) !important;      
+}
+
+
+.background_hue_slider::-moz-range-track {
+    background: linear-gradient(
+        to right,
+        hsl(0, 97.7%, 83.1%),
+        hsl(30, 97.7%, 83.1%),
+        hsl(60, 97.7%, 83.1%),
+        hsl(90, 97.7%, 83.1%),
+        hsl(120, 97.7%, 83.1%),
+        hsl(150, 97.7%, 83.1%),
+        hsl(180, 97.7%, 83.1%),
+        hsl(210, 97.7%, 83.1%),
+        hsl(240, 97.7%, 83.1%),
+        hsl(270, 97.7%, 83.1%),
+        hsl(300, 97.7%, 83.1%),
+        hsl(330, 97.7%, 83.1%),
+        hsl(360, 97.7%, 83.1%)
+
+      ) !important;  
+  }
+
+input[type="range"]::-webkit-slider-runnable-track {
+    background: linear-gradient(
+        to right,
+        hsl(0, 97.7%, 83.1%),
+        hsl(30, 97.7%, 83.1%),
+        hsl(60, 97.7%, 83.1%),
+        hsl(90, 97.7%, 83.1%),
+        hsl(120, 97.7%, 83.1%),
+        hsl(150, 97.7%, 83.1%),
+        hsl(180, 97.7%, 83.1%),
+        hsl(210, 97.7%, 83.1%),
+        hsl(240, 97.7%, 83.1%),
+        hsl(270, 97.7%, 83.1%),
+        hsl(300, 97.7%, 83.1%),
+        hsl(330, 97.7%, 83.1%),
+        hsl(360, 97.7%, 83.1%)
+      ) !important;  
+  }
+
+  #profile-tab{
+    color: black;
+    border-top-left-radius: 6px;
+    border-top-right-radius: 6px;
+  }
+
+#preferences-tab{
+    color: black;
+
+}
+
+#profile-tab.active, #preferences-tab.active {
+    color: #0d6efd;
+}
+
+
+#profile-tab:hover,
+#preferences-tab:hover {
+    background-color: #f1f1f1;
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+#profileTabs {
+    border-bottom: 1px solid white;
+}
+
+.block-container {
+    border-radius: 8px;
+    height: 100%;
+}
+
+.block-header {
+    padding: 5px 8px;
+}
+
+.block-content {
+    padding: 5px;
+    display: flex;
+    align-items: center;
+}
+
+.course-selector {
+    flex-grow: 1;
+    margin-right: 10px;
+}
+
+.block-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.block-buttons .btn {
+    white-space: nowrap;
+    min-width: 110px;
+}
+
+/* Make sure the CourseSelector custom element fits well */
+.course-selector select,
+.course-selector .selected-items {
+    width: 100%;
+    min-height: 38px;
+}
+
+.add-experience-btn{
+    background-color: #10B981;
+    border-radius: 999px !important; 
+    border-width: 0px !important;
+}
+
+.add-help-btn{
+    border-radius: 999px !important;
+}
+
+#profilePictureMenu {
+    display: none; 
+    position: absolute;
+    top: 90%; 
+    left: 1;
+    z-index: 9999 !important; 
+    background-color: white;
+    border-width: 0.2px;
+    border-radius: 5px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    padding: 10px;
+    width: 400px;
+}
+
+.changeablePfp:hover::after {
+    content: "Click to change";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: white;
+    font-size: 14px;
+    font-weight: bold;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+    pointer-events: none; /* Ensure the text doesn't interfere with the hover */
+}
+
+.changeablePfp:hover {
+    filter: brightness(0.7);
+    transition: filter 0.3s ease;
+}
+
+.hover-text {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: white;
+    font-size: 14px;
+    font-weight: bold;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+    pointer-events: none; /* Ensure the text doesn't interfere with hover */
+    text-align: center;
+}
+
+/* Show hover text on hover */
+.changeablePfp:hover + .hover-text {
+    display: block !important;
 }

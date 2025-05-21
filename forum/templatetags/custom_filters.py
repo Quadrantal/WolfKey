@@ -36,8 +36,15 @@ def has_upvoted(solution, user):
 def has_downvoted(solution, user):
     return solution.solutiondownvote_set.filter(user=user).exists()
 
+
 @register.filter
 def is_saved_solution(solution, user):
     if not user.is_authenticated:
         return False
     return solution.saves.filter(user=user).exists()
+
+@register.simple_tag
+def increment(value):
+    """Increments a counter by 1."""
+    return value + 1
+

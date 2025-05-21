@@ -10,7 +10,7 @@
 }
 
 /* Dropdown container */
-.dropdown {
+.course-dropdown {
     width: 100%;
     border: 1px solid #ccc;
     border-radius: 5px;
@@ -23,8 +23,12 @@
     z-index: 10;
 }
 
+.course-selector-wrapper {
+    position: relative;
+}
+
 /* Dropdown item */
-.dropdown div {
+.course-dropdown div {
     padding: 10px;
     cursor: pointer;
     border-bottom: 1px solid #f0f0f0;
@@ -32,24 +36,24 @@
 }
 
 /* Last item should not have a bottom border */
-.dropdown div:last-child {
+.course-dropdown div:last-child {
     border-bottom: none;
 }
 
 /* Hover effect */
-.dropdown div:hover {
+.course-dropdown div:hover {
     background-color: #f9f9f9;
 }
 
 /* Course name */
-.dropdown strong {
+.course-dropdown strong {
     display: block;
     font-size: 14px;
     color: #333;
 }
 
 /* Course category and level */
-.dropdown span {
+.course-dropdown span {
     font-size: 12px;
     color: gray;
 }
@@ -63,15 +67,18 @@
 
 /* Individual course tag */
 .course-tag {
-    background: #8bb5e7;
+    background: #f0f0f0;
+    border-width: 2px;
+    border-style: solid;
+    border-color: rgb(56, 56, 56);
     color: #333;
-    font-size: 14px;
-    padding: 6px 10px;
+    font-size: 11px;
+    padding: 5px 8px;
     border-radius: 8px;
     display: flex;
     align-items: center;
     gap: 6px;
-    margin-bottom: 10px;    
+    margin-bottom: 5px;    
 }
 
 /* Remove button (×) */

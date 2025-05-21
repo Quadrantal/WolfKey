@@ -1,23 +1,219 @@
 {% extends 'forum/base.html' %}
 
+{% block head %}
+{%load static %}
+    <link rel="stylesheet" href="{% static 'forum/css/schedule.css' %}"> 
+    <link rel="stylesheet" href="{% static 'forum/css/post-card.css' %}"> 
+
+
+{% endblock %}
 {% block content %}
-    <div class="alert alert-warning text-center" role="alert">
-        <strong>Beta Notice:</strong> This site is currently in beta. Please report any bugs or suggest features you'd like to see! Github can be found at github.com/HugoC1000/WolfKey
-    </div>
-    <div class="d-flex justify-content-between align-items-center mb-4">
-
-        <h1>Welcome back {{user.first_name}}!</h1>
+    <div class="d-flex justify-content-center align-items-center mb-2">
+        <h1 class="fade-text" id="animated-text">{{ greeting }}</h1>
     </div>
 
+    <!-- Schedule-->
+    <div class="row" style = "margin-bottom: 3rem;">
+        <div class="col-md-8">
+            <div class="d-flex flex-wrap gap-4">
+                <!-- Today's Schedule -->
+                <div class="flex-fill">
+                    <div class = "card">
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <h3 style = "font-size: 1.5rem;">Today's Schedule</h3>
+                            <span class="text-muted" id="current-date">
+                                {{ current_date}}
+                            </span>
+                        </div>
+                        <ul class="list-group shadow-sm rounded"id = "today-schedule">
+                            {% if ceremonial_required_today %}
+                            <li class="list-group-item">
+                                👔 Ceremonial Required
+                            </li>
+                            {% endif %}
+                            {% for item in schedule_today %}
+                            {% if item == "no school"  %}
+                            <li class="list-group-item">
+                                <p style = "margin-bottom: 0px;">No School</p>
+                            </li>
+                            {% else %}
+                                <li class="list-group-item">
+                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                        <p style = "margin-bottom: 0px;">{{ item.block }}</p>
+                                        {% if item.time %}
+                                            <p style = "margin-bottom: 0px;">{{ item.time }} </p>
+                                        {% endif %}
+                                    </div>
+                                </li>
+                            {% endif %}
+                            {% endfor %}
+                        </ul>
+                    </div>
 
-    <div class="row" id="post-list">
-        {% for post in posts %}
-            <div class="col-12 col-sm-12 col-md-6 mb-4">
-                {% include 'forum/components/post_card.html' with post=post %}
+                </div>
+    
+                <!-- Tomorrow's Schedule -->
+                <div class="flex-fill">
+                    <div class = "card">
+                    <div class="d-flex justify-content-between align-items-center mb-1">
+                        <h3 style = "font-size: 1.5rem;">Tomorrow's Schedule</h3>
+                        <span class="text-muted" id="tomorrow-date">
+                            {{ tomorrow_date}}
+                        </span>
+                    </div>
+                    <ul class="list-group shadow-sm rounded" id = "tomorrow-schedule">
+                        {% if ceremonial_required_tomorrow %}
+                        <li class="list-group-item">
+                            👔 Ceremonial Required
+                        </li>
+                        {% endif %}
+                        {% for item in schedule_tomorrow %}
+                        {% if item == "no school"  %}
+                        <li class="list-group-item">
+                            <p style = "margin-bottom: 0px;">No School</p>
+                        </li>
+                        {% else %}
+                        <li class="list-group-item">
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <p style = "margin-bottom: 0px;">{{ item.block }}</p>
+                                {% if item.time %}
+                                    <p style = "margin-bottom: 0px;">{{ item.time }} </p>
+                                {% endif %}
+                            </div>
+                        </li>
+                        {% endif %}
+                        {% endfor %}
+                    </ul>
+                    </div>
+                </div>
             </div>
-
-        {% endfor %}
+        </div>
+        <!-- Leaderboard -->
+        <div class="col-md-4 d-none d-md-block">
+            <!-- Reserved space -->
+        </div>
     </div>
 
-    <p>Add more interested courses <a href="{% url 'profile' user.username%}">here</a> in your profile to see more posts tailored towards you.</p>
+    <!-- Display the posts -->
+    <div class="row" id="post-list">
+        {% include 'forum/components/post_list.html' %}
+    </div>
+
+   <div id="loading-spinner" class="text-center">
+        <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+    </div>
+
+    <p>Add more interested courses <a href="{% url 'profile' user.username %}">here</a> in your profile to see more posts tailored towards you.</p>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Create animation observer function to reuse for new posts
+        function createAnimationObserver() {
+            return new IntersectionObserver((entries, observer) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('animate-visible');
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, {
+                threshold: 0.02
+            });
+        }
+
+        // Initialize animation observer
+        const animationObserver = createAnimationObserver();
+
+        // Observe initial posts
+        const postCards = document.querySelectorAll('[data-animate]');
+        postCards.forEach(card => animationObserver.observe(card));
+
+        // Text animation code
+        const textElement = document.getElementById('animated-text');
+        const text = textElement.textContent;
+        textElement.textContent = '';
+        
+        // Split text into individual characters
+        for (let i = 0; i < text.length; i++) {
+            const span = document.createElement('span');
+            if (text[i] === ' ') {
+                span.innerHTML = '&nbsp;';
+            } else {
+                span.textContent = text[i];
+            }
+            span.style.animationDelay = (i * 20) + 'ms'; // Adjust timing
+            textElement.appendChild(span);
+        }
+
+        // Infinite scroll implementation
+        let page = 1;
+        let loading = false;
+        let hasMore = true;
+        const postList = document.getElementById('post-list');
+        const loadingSpinner = document.getElementById('loading-spinner');
+
+        function loadMorePosts() {
+            if (loading || !hasMore) return;
+            
+            loading = true;
+            loadingSpinner.classList.remove('d-none');
+            
+            page++;
+            fetch(`${window.location.pathname}?page=${page}`, {
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(response => response.text())
+            .then(html => {
+                if (html.trim()) {
+                    const parser = new DOMParser();
+                    const doc = parser.parseFromString(html, 'text/html');
+                    const newPosts = doc.querySelectorAll('.post-card-container');
+                    
+                    if (newPosts.length === 0) {
+                        hasMore = false;
+                        loadingSpinner.style.display = 'none';
+                        return;
+                    }
+
+                    newPosts.forEach(post => {
+                        postList.appendChild(post);
+                        if (post.hasAttribute('data-animate')) {
+                            animationObserver.observe(post);
+                        }
+                    });
+                } else {
+                    hasMore = false;
+                    loadingSpinner.style.display = 'none';
+                }
+                loading = false;
+            })
+            .catch(error => {
+                console.error('Error loading posts:', error);
+                loading = false;
+                loadingSpinner.classList.add('d-none');
+            });
+        }
+
+        // Intersection Observer for infinite scroll
+        const scrollObserver = new IntersectionObserver((entries) => {
+            if (entries[0].isIntersecting && !loading && hasMore) {
+                loadMorePosts();
+            }
+        }, {
+            root: null,
+            rootMargin: '1000px',
+            threshold: 0.1
+        });
+
+        if (loadingSpinner) {
+            scrollObserver.observe(loadingSpinner);
+        }
+    });
+</script>
 {% endblock %}

@@ -134,12 +134,12 @@
 
             <div class="form-step" data-step="3">
                 <h3 class="mb-4">Hard Courses</h3>
-                <p class="text-muted">Select the courses you might have trouble in</p>
+                <p class="text-muted">Select the courses you might have trouble in. Courses that you have low grades in, or new clubs this year.</p>
                 <div id="currentCoursesSelector"></div>
                 <div id="currentCoursesError" style="color: red;"></div>
                 <input type="hidden" name="current_courses" id="current_courses_input">
                 <h3 class="mb-4 mt-4">Past Experience</h3>
-                <p class="text-muted">Select courses you're confident in</p>
+                <p class="text-muted">Select courses you're proficient in. Courses or clubs that you're doing good in.</p>
                 <div id="experiencedCoursesSelector"></div>
                 <div id="experiencedCoursesError" style="color: red;"></div>
                 <input type="hidden" name="experienced_courses" id="experienced_courses_input">
@@ -164,200 +164,199 @@
 
 {% load static %}
 <script src="{% static 'forum/js/course-selector.js' %}"></script>
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    const form = document.getElementById('onboardingForm');
-    const steps = document.querySelectorAll('.form-step');
-    const stepCircles = document.querySelectorAll('.step-circle');
-    const stepLabels = document.querySelectorAll('.step-label');
-    const nextBtn = document.getElementById('nextBtn');
-    const nextBtn2 = document.getElementById('nextBtn2');
-    const nextBtn3 = document.getElementById('nextBtn3');
-    const prevBtn = document.getElementById('prevBtn');
-    const prevBtn2 = document.getElementById('prevBtn2');
-    let currentStep = 1;
+<script type="module">
+    import { CourseSelector } from '{% static "forum/js/course-selector.js" %}';
+        document.addEventListener('DOMContentLoaded', function() {
+        const form = document.getElementById('onboardingForm');
+        const steps = document.querySelectorAll('.form-step');
+        const stepCircles = document.querySelectorAll('.step-circle');
+        const stepLabels = document.querySelectorAll('.step-label');
+        const nextBtn = document.getElementById('nextBtn');
+        const nextBtn2 = document.getElementById('nextBtn2');
+        const nextBtn3 = document.getElementById('nextBtn3');
+        const prevBtn = document.getElementById('prevBtn');
+        const prevBtn2 = document.getElementById('prevBtn2');
+        let currentStep = 1;
 
-    function updateSteps() {
-        steps.forEach(step => step.classList.remove('active'));
-        stepCircles.forEach(circle => circle.classList.remove('active'));
-        stepLabels.forEach(label => label.classList.remove('active'));
-        
-        document.querySelector(`.form-step[data-step="${currentStep}"]`).classList.add('active');
-        document.querySelector(`.step-circle[data-step="${currentStep}"]`).classList.add('active');
-        document.querySelector(`.step-circle[data-step="${currentStep}"]`).parentElement.querySelector('.step-label').classList.add('active');
-    }
+        function updateSteps() {
+            steps.forEach(step => step.classList.remove('active'));
+            stepCircles.forEach(circle => circle.classList.remove('active'));
+            stepLabels.forEach(label => label.classList.remove('active'));
+            
+            document.querySelector(`.form-step[data-step="${currentStep}"]`).classList.add('active');
+            document.querySelector(`.step-circle[data-step="${currentStep}"]`).classList.add('active');
+            document.querySelector(`.step-circle[data-step="${currentStep}"]`).parentElement.querySelector('.step-label').classList.add('active');
+        }
 
-    function showAllSteps() {
-        steps.forEach(step => step.classList.add('active'));
-        stepCircles.forEach(circle => circle.classList.add('active'));
-        stepLabels.forEach(label => label.classList.add('active'));
-    }
+        function showAllSteps() {
+            steps.forEach(step => step.classList.add('active'));
+            stepCircles.forEach(circle => circle.classList.add('active'));
+            stepLabels.forEach(label => label.classList.add('active'));
+        }
 
-    function hideAllStepsExceptCurrent() {
-        steps.forEach(step => step.classList.remove('active'));
-        stepCircles.forEach(circle => circle.classList.remove('active'));
-        stepLabels.forEach(label => label.classList.remove('active'));
-        
-        document.querySelector(`.form-step[data-step="${currentStep}"]`).classList.add('active');
-        document.querySelector(`.step-circle[data-step="${currentStep}"]`).classList.add('active');
-        document.querySelector(`.step-circle[data-step="${currentStep}"]`).parentElement.querySelector('.step-label').classList.add('active');
-    }
+        function hideAllStepsExceptCurrent() {
+            steps.forEach(step => step.classList.remove('active'));
+            stepCircles.forEach(circle => circle.classList.remove('active'));
+            stepLabels.forEach(label => label.classList.remove('active'));
+            
+            document.querySelector(`.form-step[data-step="${currentStep}"]`).classList.add('active');
+            document.querySelector(`.step-circle[data-step="${currentStep}"]`).classList.add('active');
+            document.querySelector(`.step-circle[data-step="${currentStep}"]`).parentElement.querySelector('.step-label').classList.add('active');
+        }
 
-    nextBtn.addEventListener('click', () => {
-        currentStep = 2;
-        updateSteps();
-    });
+        nextBtn.addEventListener('click', () => {
+            currentStep = 2;
+            updateSteps();
+        });
 
-    nextBtn2.addEventListener('click', () => {
-        currentStep = 3;
-        updateSteps();
-    });
+        nextBtn2.addEventListener('click', () => {
+            currentStep = 3;
+            updateSteps();
+        });
 
-    nextBtn3.addEventListener('click', () => {
-        currentStep = 4;
-        updateSteps();
-    });
+        nextBtn3.addEventListener('click', () => {
+            currentStep = 4;
+            updateSteps();
+        });
 
-    prevBtn.addEventListener('click', () => {
-        currentStep = 1;
-        updateSteps();
-    });
+        prevBtn.addEventListener('click', () => {
+            currentStep = 1;
+            updateSteps();
+        });
 
-    prevBtn2.addEventListener('click', () => {
-        currentStep = 2;
-        updateSteps();
-    });
+        prevBtn2.addEventListener('click', () => {
+            currentStep = 2;
+            updateSteps();
+        });
 
-    // Role selection functionality
-    const roleOptions = document.querySelectorAll('.role-option');
-    roleOptions.forEach(option => {
-        option.addEventListener('click', () => {
-            roleOptions.forEach(opt => opt.classList.remove('selected'));
-            option.classList.add('selected');
-            option.querySelector('input[type="radio"]').checked = true;
+        // Role selection functionality
+        const roleOptions = document.querySelectorAll('.role-option');
+        roleOptions.forEach(option => {
+            option.addEventListener('click', () => {
+                roleOptions.forEach(opt => opt.classList.remove('selected'));
+                option.classList.add('selected');
+                option.querySelector('input[type="radio"]').checked = true;
+            });
+        });
+
+        // Initialize current courses selector
+        const currentCoursesSelector = new CourseSelector({
+            containerId: 'currentCoursesSelector',
+            maxCourses: 20,
+            onSelectionChange: (courses) => {
+                validateCurrentCourses(courses);
+            },
+            initialSelection: {% if selected_current_courses %}{{ selected_current_courses|safe }}{% else %}[]{% endif %},
+            formName: "onboardingForm"
+        });
+
+        // Initialize experienced courses selector
+        const experiencedCoursesSelector = new CourseSelector({
+            containerId: 'experiencedCoursesSelector',
+            maxCourses: 20,
+            onSelectionChange: (courses) => {
+                validateExperiencedCourses(courses);
+            },
+            initialSelection: {% if selected_experienced_courses %}{{ selected_experienced_courses|safe }}{% else %}[]{% endif %},
+            formName: "onboardingForm"
+        });
+
+
+        function validateCurrentCourses(courses) {
+            const errorDiv = document.getElementById('currentCoursesError');
+            const currentCourses = currentCoursesSelector.getSelectedCourses();
+            // console.log(currentCourses)
+            if (courses.length < 3) {
+                errorDiv.textContent = 'You must select at least 3 courses you need help with.';
+            } else {
+                errorDiv.textContent = '';
+            }
+            document.getElementById('current_courses_input').value = currentCourses.map(course => course.id).join(',');
+        }
+
+        function validateExperiencedCourses(courses) {
+            const experiencedCourses = experiencedCoursesSelector.getSelectedCourses();
+
+            const errorDiv = document.getElementById('experiencedCoursesError');
+            if (courses.length < 5) {
+                errorDiv.textContent = 'You must select at least 5 experienced courses.';
+            } else {
+                errorDiv.textContent = '';
+            }
+            document.getElementById('experienced_courses_input').value = experiencedCourses.map(course => course.id).join(',');
+
+        }
+
+        // Show all steps before form submission
+        form.addEventListener('submit', (e) => {
+            // alert("Hi");
+            showAllSteps();
+            setTimeout(() => {
+                if (!form.checkValidity()) {
+                    console.log('Selected Courses:', selectedCourses);
+                    e.preventDefault();
+                    hideAllStepsExceptCurrent();
+                }
+            }, 0);
+        });
+
+        displayFormErrors();
+        function displayFormErrors() {
+            try {
+                const errorMessages = JSON.parse('{{ form_errors|safe }}');
+                if (Object.keys(errorMessages).length > 0) {
+                    alert("Please correct the errors in the form.");
+                }
+                console.log("Parsed error messages:", errorMessages);
+                
+                // Clear any existing error messages
+                document.querySelectorAll('.error-message').forEach(el => {
+                    el.style.display = 'none';
+                    el.textContent = '';
+                });
+                document.querySelectorAll('.is-invalid').forEach(el => {
+                    el.classList.remove('is-invalid');
+                });
+
+                // Display new error messages
+                Object.entries(errorMessages).forEach(([field, fieldErrors]) => {
+                    // Get the error element for this field
+                    const errorElement = document.getElementById(`error-${field}`);
+                    if (errorElement) {
+                        // Extract the error message from the messages array
+                        const errorMessage = fieldErrors[0].message;
+                        errorElement.textContent = errorMessage;
+                        errorElement.style.display = 'block';
+                        
+                        // Add invalid class to the input
+                        const inputElement = form.querySelector(`[name="${field}"]`);
+                        if (inputElement) {
+                            inputElement.classList.add('is-invalid');
+                        }
+                        
+                        // Navigate to the step containing the error
+                        const step = inputElement?.closest('.form-step');
+                        if (step) {
+                            currentStep = parseInt(step.dataset.step);
+                            updateSteps();
+                        }
+                    }
+                });
+            } catch (e) {
+                console.error("Error parsing form errors:", e);
+            }
+        }
+        validateCurrentCourses(currentCoursesSelector.getSelectedCourses());
+        validateExperiencedCourses(experiencedCoursesSelector.getSelectedCourses());
+
+        form.addEventListener('keypress', function(event) {
+            if (event.key === 'Enter') {
+                event.preventDefault();
+                console.log("Enters");
+                return false;
+            }
         });
     });
-
-    // Initialize current courses selector
-    const currentCoursesSelector = new CourseSelector({
-        containerId: 'currentCoursesSelector',
-        maxCourses: 20,
-        onSelectionChange: (courses) => {
-            // Handle current courses selection
-            // console.log('Current courses:', courses);
-            validateCurrentCourses(courses);
-        },
-        initialSelection: [] // Add any initial courses here
-    });
-
-    // Initialize experienced courses selector
-    const experiencedCoursesSelector = new CourseSelector({
-        containerId: 'experiencedCoursesSelector',
-        maxCourses: 20,
-        onSelectionChange: (courses) => {
-            // Handle experienced courses selection
-            // console.log('Experienced courses:', courses);
-            validateExperiencedCourses(courses);
-        },
-        initialSelection: [] // Add any initial courses here
-    });
-
-
-    function validateCurrentCourses(courses) {
-        const errorDiv = document.getElementById('currentCoursesError');
-        const currentCourses = currentCoursesSelector.getSelectedCourses();
-        // console.log(currentCourses)
-        if (courses.length < 3) {
-            errorDiv.textContent = 'You must select at least 3 courses you need help with.';
-        } else {
-            errorDiv.textContent = '';
-        }
-        document.getElementById('current_courses_input').value = currentCourses.map(course => course.id).join(',');
-    }
-
-    function validateExperiencedCourses(courses) {
-        const experiencedCourses = experiencedCoursesSelector.getSelectedCourses();
-
-        const errorDiv = document.getElementById('experiencedCoursesError');
-        if (courses.length < 5) {
-            errorDiv.textContent = 'You must select at least 5 experienced courses.';
-        } else {
-            errorDiv.textContent = '';
-        }
-        document.getElementById('experienced_courses_input').value = experiencedCourses.map(course => course.id).join(',');
-
-    }
-
-    // Show all steps before form submission
-    form.addEventListener('submit', (e) => {
-        // alert("Hi");
-        showAllSteps();
-        setTimeout(() => {
-            if (!form.checkValidity()) {
-                console.log('Selected Courses:', selectedCourses);
-                e.preventDefault();
-                hideAllStepsExceptCurrent();
-            }
-        }, 0);
-    });
-
-    displayFormErrors();
-    function displayFormErrors() {
-        try {
-            const errorMessages = JSON.parse('{{ form_errors|safe }}');
-            if (Object.keys(errorMessages).length > 0) {
-                alert("Please correct the errors in the form.");
-            }
-            console.log("Parsed error messages:", errorMessages);
-            
-            // Clear any existing error messages
-            document.querySelectorAll('.error-message').forEach(el => {
-                el.style.display = 'none';
-                el.textContent = '';
-            });
-            document.querySelectorAll('.is-invalid').forEach(el => {
-                el.classList.remove('is-invalid');
-            });
-
-            // Display new error messages
-            Object.entries(errorMessages).forEach(([field, fieldErrors]) => {
-                // Get the error element for this field
-                const errorElement = document.getElementById(`error-${field}`);
-                if (errorElement) {
-                    // Extract the error message from the messages array
-                    const errorMessage = fieldErrors[0].message;
-                    errorElement.textContent = errorMessage;
-                    errorElement.style.display = 'block';
-                    
-                    // Add invalid class to the input
-                    const inputElement = form.querySelector(`[name="${field}"]`);
-                    if (inputElement) {
-                        inputElement.classList.add('is-invalid');
-                    }
-                    
-                    // Navigate to the step containing the error
-                    const step = inputElement?.closest('.form-step');
-                    if (step) {
-                        currentStep = parseInt(step.dataset.step);
-                        updateSteps();
-                    }
-                }
-            });
-        } catch (e) {
-            console.error("Error parsing form errors:", e);
-        }
-    }
-    validateCurrentCourses(currentCoursesSelector.getSelectedCourses());
-    validateExperiencedCourses(experiencedCoursesSelector.getSelectedCourses());
-
-    form.addEventListener('keypress', function(event) {
-        if (event.key === 'Enter') {
-            event.preventDefault();
-            console.log("Enters");
-            return false;
-        }
-    });
-});
 
 </script>
 {% endblock %}

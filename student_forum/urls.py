@@ -21,6 +21,12 @@ from django.conf import settings
 from django.conf.urls.static import static
 from django.urls import re_path, include
 from forum.views.auth_views import register, login_view, logout_view
+from forum.views.auth_views import (
+    CustomPasswordResetView,
+    CustomPasswordResetDoneView,
+    CustomPasswordResetConfirmView,
+    CustomPasswordResetCompleteView,
+)
 from forum.views.post_views import (
     post_detail, 
     edit_post, 
@@ -40,7 +46,6 @@ from forum.views.solution_views import (
     downvote_solution,
     accept_solution
 )
-from forum.views.comments_views import upvote_comment
 from forum.views.search_views import search_results_new_page
 from forum.views.profile_views import (
     add_experience,
@@ -49,7 +54,9 @@ from forum.views.profile_views import (
     remove_help_request,
     edit_profile,
     my_profile,
-    profile_view
+    profile_view,
+    update_courses,
+    upload_profile_picture
 )
 from forum.views.course_views import (
     course_search
@@ -72,7 +79,19 @@ from forum.views.notification_views import (
 from forum.views.updates_views import acknowledge_update
 from forum.views.utils import upload_image
 
+from forum.views.comments_views import (
+    create_comment,
+    edit_comment,
+    delete_comment,
+    get_comments
+)
+from django.views.generic import RedirectView
+
+from forum.views.about_view import about_view
+
 urlpatterns = [
+
+    path('favicon.ico', RedirectView.as_view(url=settings.STATIC_URL + 'forum/images/WolfkeyLogo.ico')),
     # Post related URLs
     path('', for_you, name='for_you'),
     path('all-posts/', all_posts, name='all_posts'),
@@ -85,7 +104,13 @@ urlpatterns = [
     path('solution/<int:solution_id>/delete/', delete_solution, name='delete_solution'),
     path('solution/<int:post_id>/create/', create_solution, name='create_solution'),
 
+    path('comment/create/<int:solution_id>/', create_comment, name='create_comment'),
+    path('comment/edit/<int:comment_id>/', edit_comment, name='edit_comment'),
+    path('comment/delete/<int:comment_id>/', delete_comment, name='delete_comment'),
 
+    path('solution/<int:solution_id>/comments/', get_comments, name='get_solution_comments'),
+
+    path('about', about_view, name = 'site_info'),
     
     # Auth related URLs
     path('register/', register, name='register'),
@@ -96,7 +121,6 @@ urlpatterns = [
     path('solution/<int:solution_id>/upvote/', upvote_solution, name='upvote_solution'),
     path('solution/<int:solution_id>/downvote/', downvote_solution, name='downvote_solution'),
     path('solution/<int:solution_id>/accept/', accept_solution, name='accept_solution'),
-    path('comment/<int:comment_id>/upvote/', upvote_comment, name='upvote_comment'),
     
     # Search URLs
     path('search/', search_results_new_page, name='search_posts'),
@@ -106,9 +130,11 @@ urlpatterns = [
     path('upload-image/', upload_image, name='upload_image'),
     
     # Profile URLs
+    path('profile/upload-picture/', upload_profile_picture, name='upload_profile_picture'),
     path('profile/edit/', edit_profile, name='edit_profile'),
     path('my-profile/', my_profile, name='my_profile'),
     path('profile/<str:username>/', profile_view, name='profile'),
+    path('update-courses/', update_courses, name='update_courses'),
     
     # Course management URLs
     path('courses/experience/add/', add_experience, name='add_experience'),
@@ -138,6 +164,11 @@ urlpatterns = [
     
     # Admin URL
     path('admin/', admin.site.urls),
+
+    path('password_reset/', CustomPasswordResetView.as_view(), name='password_reset'),
+    path('password_reset/done/', CustomPasswordResetDoneView.as_view(), name='password_reset_done'),
+    path('reset/<uidb64>/<token>/', CustomPasswordResetConfirmView.as_view(), name='password_reset_confirm'),
+    path('reset/done/', CustomPasswordResetCompleteView.as_view(), name='password_reset_complete'),
 ]
 
 if settings.DEBUG:

@@ -1,0 +1,20 @@
+#tomorrow-schedule .list-group-item{
+    background-color: #F4F8FB;
+    border-radius: 12px;
+    margin-bottom: 5px;
+    border-width: 0px;
+}
+#tomorrow-schedule{
+    background-color: transparent !important;
+    box-shadow: none !important;
+}
+#today-schedule .list-group-item{
+    background-color: #F4F8FB;
+    border-radius: 12px;
+    margin-bottom: 5px;
+    border-width: 0px;
+}
+#today-schedule{
+    background-color: transparent !important;
+    box-shadow: none !important;
+}

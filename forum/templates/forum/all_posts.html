@@ -1,9 +1,6 @@
 {% extends 'forum/base.html' %}
 
 {% block content %}
-    <div class="alert alert-warning text-center" role="alert">
-        <strong>Beta Notice:</strong> This site is currently in beta. Please report any bugs or suggest features you'd like to see! Github can be found at github.com/HugoC1000/WolfKey
-    </div>
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h1>Welcome back {{user.first_name}}!</h1>
     </div>
@@ -11,15 +8,105 @@
     <div id="search-results" class="row"></div>
 
     <div class="row" id="post-list">
-        {% for post in posts %}
-            <div class="col-12 col-sm-12 col-md-6 mb-4">
-                {% include 'forum/components/post_card.html' with post=post %}
-            </div>
-
-        {% empty %}
-            <div class="col-12">
-                <p>No posts found.</p>
-            </div>
-        {% endfor %}
+        {% include 'forum/components/post_list.html' %}
     </div>
+
+   <div id="loading-spinner" class="text-center">
+        <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+    </div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        function createAnimationObserver() {
+            return new IntersectionObserver((entries, observer) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('animate-visible');
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, {
+                threshold: 0.02
+            });
+        }
+
+        // Initialize animation observer
+        const animationObserver = createAnimationObserver();
+
+        // Observe initial posts
+        const postCards = document.querySelectorAll('[data-animate]');
+        postCards.forEach(card => animationObserver.observe(card));
+
+
+        // Infinite scroll implementation
+        let page = 1;
+        let loading = false;
+        let hasMore = true;
+        const postList = document.getElementById('post-list');
+        const loadingSpinner = document.getElementById('loading-spinner');
+
+        function loadMorePosts() {
+            if (loading || !hasMore) return;
+            
+            loading = true;
+            loadingSpinner.classList.remove('d-none');
+            
+            page++;
+            fetch(`${window.location.pathname}?page=${page}`, {
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(response => response.text())
+            .then(html => {
+                if (html.trim()) {
+                    const parser = new DOMParser();
+                    const doc = parser.parseFromString(html, 'text/html');
+                    const newPosts = doc.querySelectorAll('.post-card-container');
+                    
+                    if (newPosts.length === 0) {
+                        hasMore = false;
+                        loadingSpinner.style.display = 'none';
+                        return;
+                    }
+
+                    newPosts.forEach(post => {
+                        postList.appendChild(post);
+                        if (post.hasAttribute('data-animate')) {
+                            animationObserver.observe(post);
+                        }
+                    });
+                } else {
+                    hasMore = false;
+                    loadingSpinner.style.display = 'none';
+                }
+                loading = false;
+            })
+            .catch(error => {
+                console.error('Error loading posts:', error);
+                loading = false;
+                loadingSpinner.classList.add('d-none');
+            });
+        }
+
+        // Intersection Observer for infinite scroll
+        const scrollObserver = new IntersectionObserver((entries) => {
+            if (entries[0].isIntersecting && !loading && hasMore) {
+                loadMorePosts();
+            }
+        }, {
+            root: null,
+            rootMargin: '1000px',
+            threshold: 0.1
+        });
+
+        if (loadingSpinner) {
+            scrollObserver.observe(loadingSpinner);
+        }
+    });
+</script>
 {% endblock %}

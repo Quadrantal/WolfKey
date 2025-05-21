@@ -3,40 +3,117 @@
         <link rel="stylesheet" href="{% static 'forum/css/post-card.css' %}">
 </head>
 
-    <div class="card clickable post hidden">
-        {% if post.accepted_solution %}
-            <div class="banner">Solved</div>    
-        {% endif %}
-        <div class="card-body">
-            <h4 class="card-title">{{ post.title }}</h4>
-            <p class="card-text">{{ post.preview_text|truncatewords:30 }}</p>
-            <div class="recommendation-context mb-2">
-                {% for course in post.course_context %}
-                    <span class="badge {% if course.is_experienced %} bg-success {% elif course.needs_help %} bg-info {% else %} bg-secondary {% endif %} me-2">
-                        {{ course.name }}
-                        {% if course.is_experienced %}
-                            (You're experienced)
-                        {% elif course.needs_help %}
-                            (You need help)
-                        {% endif %}
-                    </span>
-                {% endfor %}
+<div class="card clickable post {% if post.accepted_solution %}highlighted-card-green{% endif %}">
+    {% if post.accepted_solution %}
+        <div class="banner">Solved</div>
+    {% endif %}
+    <div class="card-body">
+        <!-- Author and Date Section -->
+        <div class="d-flex justify-content-between align-items-start mb-3">
+            <div style = "margin-right: 5px;">
+                <img 
+                    src="{{ post.author.userprofile.profile_picture.url }}" 
+                    alt="Profile Picture" 
+                    class="rounded-circle" 
+                    style="width: 35px; height: 35px; object-fit: cover;"
+                >
             </div>
-            <a href="{% url 'post_detail' post.id %}" class="btn btn-primary">Read More</a>
+            <div class="flex-grow-1">
+                <p class="mb-2">
+                    <strong>{{ post.author.first_name }} {{ post.author.last_name }}</strong>
+                    <span class="text-muted">{{ post.created_at|date:"F d, Y" }}</span>
+                </p>
+                <h4 class="card-title">{{ post.title }}</h4>
+                <p class="card-text mt-2">{{ post.preview_text|truncatewords:250 }}</p>
+            </div>
+
         </div>
-        <div class="card-footer text-muted">
-            Posted by {{ post.author.first_name }} {{ post.author.last_name }} on {{ post.created_at|date:"F d, Y" }}
+
+        <!-- Read More Button -->
+        <a href="{% url 'post_detail' post.id %}">Read More</a>
+
+        <!-- Recommendation Context -->
+        <div class="recommendation-context mb-2 mt-2">
+            {% for course in post.course_context %}
+                <span class="badge {% if course.is_experienced %} bg-success {% elif course.needs_help %} bg-info {% else %} bg-secondary {% endif %} me-2">
+                    {{ course.name }}
+                    {% if course.is_experienced %}
+                        (You're experienced)
+                    {% elif course.needs_help %}
+                        (You need help)
+                    {% endif %}
+                </span>
+            {% endfor %}
+        </div>
+
+        <!-- Post Footer -->
+        <div class="card-footer d-flex justify-content-between align-items-center">
+            <div class="d-flex align-items-center">
+                <i class="bi bi-chat me-2"></i> <span>{{ post.total_response_count }}</span>
+            </div>
+            <div class="d-flex align-items-center share-container">
+                <i class="bi bi-share me-2" data-post-url="{% url 'post_detail' post.id %}"></i>
+                <div class="share-menu">
+                    <div class="share-menu-content">
+                        <p>Share this post:</p>
+                        <input type="text" class="share-link form-control mb-2"
+                            value="{{ request.build_absolute_uri|cut:request.get_full_path }}{% url 'post_detail' post.id %}">
+
+                        <button class="copy-link-button btn btn-primary btn-sm">Copy Link</button>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
+</div>
 
-    <script>
-        document.addEventListener("DOMContentLoaded", function () {
-            const posts = document.querySelectorAll("#post-list .post");
-            console.log(posts);
-            posts.forEach((post, index) => {
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+
+        // Handle copy functionality
+        document.querySelectorAll('.copy-link-button').forEach(button => {
+            button.addEventListener('click', function() {
+                const linkInput = this.previousElementSibling;
+                linkInput.select();
+                document.execCommand('copy');
+                
+                // Show feedback
+                const originalText = this.textContent;
+                this.textContent = 'Copied!';
                 setTimeout(() => {
-                    post.classList.remove("hidden");
-                }, index * 125); // Delay each post by 150ms
+                    this.textContent = originalText;
+                }, 2000);
             });
         });
-    </script>
+    });
+</script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const likeIcons = document.querySelectorAll('.like-icon');
+
+        likeIcons.forEach(icon => {
+            icon.addEventListener('click', function () {
+                const postId = this.getAttribute('data-post-id');
+                const likeCountSpan = this.nextElementSibling;
+
+                fetch(`/post/${postId}/like/`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': '{{ csrf_token }}',
+                        'Content-Type': 'application/json',
+                    },
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.liked) {
+                        this.classList.add('text-danger');  // Highlight the heart
+                    } else {
+                        this.classList.remove('text-danger');  // Remove highlight
+                    }
+                    likeCountSpan.textContent = data.total_likes;  // Update like count
+                });
+            });
+        });
+    });
+</script>

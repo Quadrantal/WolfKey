@@ -81,6 +81,7 @@ TEMPLATES = [
                 'forum.context_processors.notifications',
                 'forum.context_processors.latest_update',
                 'forum.context_processors.user_background_slider',
+                'forum.context_processors.user_count',
             ],
         },
     },
@@ -95,7 +96,6 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
 # filepath: /Users/a0014208/Documents/GitHub/School-Forum/school_forum/settings.py
-# filepath: /Users/a0014208/Documents/GitHub/School-Forum/school_forum/settings.py
 if os.getenv('DATABASE_URL'):
     # Production database (Heroku)
     DATABASES = {
@@ -107,11 +107,11 @@ else:
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.postgresql',
-            'NAME': 'schoolforumdb',
-            'USER': 'superuser',
-            'PASSWORD': '1234',
-            'HOST': 'localhost',
-            'PORT': '5432',
+            'NAME': os.getenv('DB_NAME', 'schoolforumdb'),
+            'USER': os.getenv('DB_USER', 'superuser'),
+            'PASSWORD': os.getenv('DB_PASSWORD', '1234'),
+            'HOST': os.getenv('DB_HOST', 'localhost'),
+            'PORT': os.getenv('DB_PORT', '5432'),
         }
     }
     

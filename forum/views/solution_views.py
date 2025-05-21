@@ -7,7 +7,7 @@ from forum.models import Post, Solution, SolutionDownvote, SolutionUpvote
 from forum.forms import SolutionForm
 from django.contrib import messages
 from django.http import HttpResponseForbidden
-from .utils import process_messages_to_json
+from .utils import process_messages_to_json, detect_bad_words
 
 
 @login_required
@@ -22,15 +22,25 @@ def create_solution(request, post_id):
 
         solution_form = SolutionForm(request.POST)
         if solution_form.is_valid():
-            solution_json = request.POST.get('content')
-            solution_data = json.loads(solution_json) if solution_json else {}
-            solution = solution_form.save(commit=False)
-            solution.content = solution_data
-            solution.post = post
-            solution.author = request.user
-            solution.save()
-            messages.success(request, 'Solution submitted succesfully.')
-            return redirect(post.get_absolute_url())
+            try:
+                solution_json = request.POST.get('content')
+                solution_data = json.loads(solution_json) if solution_json else {}
+
+                blocks = solution_data.get('blocks', [])
+                if (len(blocks) == 1 and blocks[0].get('type') == 'paragraph' and not blocks[0].get('data', {}).get('text', '').strip()) or len(blocks) == 0:
+                    messages.error(request, 'Solution cannot be empty.')
+                    return redirect(post.get_absolute_url())
+                detect_bad_words(solution_data) 
+                solution = solution_form.save(commit=False)
+                solution.content = solution_data
+                solution.post = post
+                solution.author = request.user
+                solution.save()
+                messages.success(request, 'Solution submitted succesfully.')
+                
+                return redirect(post.get_absolute_url())
+            except ValueError as e:
+                messages.error(request, str(e))
 
     messages.error(request, 'An error occured.')
     return redirect(post.get_absolute_url())
@@ -42,14 +52,27 @@ def edit_solution(request, solution_id):
     if request.method == 'POST':
         solution_form = SolutionForm(request.POST, instance=solution)
         if solution_form.is_valid():
-            solution_json = request.POST.get('content')
-            solution_data = json.loads(solution_json) if solution_json else {}
-            solution = solution_form.save(commit=False)
-            solution.content = solution_data
-            solution.save()
-            messages.success(request, 'Solution edited succesfully')
-            messages_data = process_messages_to_json(request)
-            return JsonResponse({'status': 'success','messages': messages_data}, status=200)
+            try:
+                solution_json = request.POST.get('content')
+                solution_data = json.loads(solution_json) if solution_json else {}
+
+                blocks = solution_data.get('blocks', [])
+                if (len(blocks) == 1 and blocks[0].get('type') == 'paragraph' and not blocks[0].get('data', {}).get('text', '').strip()) or len(blocks) == 0:
+                    messages.error(request, 'Solution cannot be empty.')
+                    return redirect('edit_solution', solution_id=solution.id)
+                
+                detect_bad_words(solution_data) 
+                solution = solution_form.save(commit=False)
+                solution.content = solution_data
+                solution.save()
+                messages.success(request, 'Solution edited succesfully')
+                messages_data = process_messages_to_json(request)
+                return JsonResponse({'status': 'success','messages': messages_data}, status=200)
+            except ValueError as e:
+                print(e)
+                messages.error(request,str(e))
+                messages_data = process_messages_to_json(request)
+                return JsonResponse({'status': 'error','messages': messages_data}, status=200)
     messages.error(request, "Invalid request.")
     
     messages_data = process_messages_to_json(request)
