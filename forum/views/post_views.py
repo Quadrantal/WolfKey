@@ -63,6 +63,8 @@ def create_post(request):
 @login_required
 def post_detail(request, post_id):
     post = get_object_or_404(Post, id=post_id)
+    post.views += 1
+    post.save()
     solutions = post.solutions.annotate(
         vote_score=F('upvotes') - F('downvotes')
     ).order_by(

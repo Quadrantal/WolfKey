@@ -150,6 +150,7 @@ class Post(models.Model):
     search_vector = SearchVectorField(null=True, blank=True)
     courses = models.ManyToManyField(Course, related_name='posts', blank=True)
     solved = models.BooleanField(default = False)
+    views = models.IntegerField(default = 0)
     
     accepted_solution = models.OneToOneField(
         'Solution',
