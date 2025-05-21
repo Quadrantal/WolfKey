@@ -1,4 +1,4 @@
-from .models import UpdateAnnouncement, UserUpdateView
+from .models import UpdateAnnouncement, UserUpdateView, UserProfile, User
 
 def notifications(request):
     if request.user.is_authenticated:
@@ -27,4 +27,17 @@ def latest_update(request):
     
     return {
         'latest_update': latest if not has_viewed else None
+    }
+
+def user_background_slider(request):
+    if request.user.is_authenticated:
+        try:
+            return {'background_hue': request.user.userprofile.background_hue}
+        except UserProfile.DoesNotExist:
+            return {'background_hue': 231}  # Default value
+    return {'background_hue': 231}  # Default value for unauthenticated users
+
+def user_count(request):
+    return {
+        'user_count': User.objects.count()
     }
