@@ -190,7 +190,7 @@
                 <div class="default-actions">
                     <button class="btn btn-outline-secondary btn-sm"
                         onclick="showEditSolutionForm('{{ accepted.id }}')">Edit</button>
-                    <<form method="post" action="{% url 'delete_solution' solution.id %}" class="d-inline" id="delete-solution-form">
+                    <form id="delete-solution-form" method="post" action="{% url 'delete_solution' accepted.id %}" class="d-inline">
                         {% csrf_token %}
                         <input type="hidden" name="solution_id" value="{{ accepted.id }}">
                         <button type="submit" class="btn btn-outline-danger btn-sm">Delete</button>
