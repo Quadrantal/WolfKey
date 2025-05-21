@@ -1,0 +1,86 @@
+{% extends 'forum/base.html' %}
+
+{% block content %}
+<div class="container py-4">
+    <h1 class="mb-4">
+        <i class="fas fa-bookmark me-2"></i> Saved Solutions
+    </h1>
+    {% if solutions %}
+    <div class="row" id="solutions-list">
+        {% for solution in solutions %}
+            <div class="col-12 mb-4">
+                <div class="card shadow-sm">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="card-title mb-0">
+                            <a href="{% url 'post_detail' solution.post.id %}">{{ solution.post.title }}</a>
+                        </h5>
+                        <span class="badge bg-light text-dark border">
+                            {% if solution.id == solution.post.accepted_solution_id %}
+                            <i class="fas fa-check-circle text-success me-1"></i> Accepted Solution
+                            {% endif %}
+                        </span>
+                    </div>
+                    <div class="card-body">
+                        <p class="card-text text-muted">
+                            <small>
+                                Solution by {{ solution.author.get_full_name }} on {{ solution.created_at|date:"F d, Y" }}
+                            </small>
+                        </p>
+                        <div class="solution-preview mb-3">
+                            <div class="solution-content p-3 bg-light rounded">
+                                {% if solution.content %}
+                                    {% if solution.content|wordcount > 50 %}
+                                        {{ solution.content|truncatewords:50 }}...
+                                    {% else %}
+                                        {{ solution.content }}
+                                    {% endif %}
+                                {% else %}
+                                    <em>Solution contains formatted content or code. Click to view.</em>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <a href="{% url 'post_detail' solution.post.id %}" class="btn btn-primary btn-sm">
+                                View Full Solution
+                            </a>
+                            <form method="POST" action="{% url 'unsave_solution' solution.id %}">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-outline-secondary btn-sm">
+                                    <i class="fas fa-bookmark-slash me-1"></i> Unsave
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                    <div class="card-footer bg-white">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <span class="text-muted">
+                                    <i class="fas fa-thumbs-up me-1"></i> {{ solution.upvotes }}
+                                </span>
+                                <span class="text-muted ms-3">
+                                    <i class="fas fa-thumbs-down me-1"></i> {{ solution.downvotes }}
+                                </span>
+                                <span class="text-muted ms-3">
+                                    <i class="fas fa-comment me-1"></i> {{ solution.comments.count }}
+                                </span>
+                            </div>
+                            <small class="text-muted">Saved on {{ solution.saves.first.saved_at|date:"F d, Y" }}</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="alert alert-info">
+        <i class="fas fa-info-circle me-2"></i> You haven't saved any solutions yet.
+        Save solutions by clicking the bookmark icon on solutions you find helpful.
+    </div>
+    <div class="text-center mt-4">
+        <a href="{% url 'all_posts' %}" class="btn btn-primary">
+            <i class="fas fa-search me-2"></i> Browse All Posts
+        </a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %} 
