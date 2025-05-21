@@ -203,9 +203,11 @@ class CustomUserCreationForm(UserCreationForm):
     
     def save(self, commit=True):
         user = super().save(commit=False)
-        # Set username to school_email if not provided
-        if not user.username:
-            user.username = user.school_email
+        user.username = str(uuid.uuid4())[:30]
+
         if commit:
             user.save()
+
+        if not user.personal_email:
+            user.personal_email = user.school_email
         return user

@@ -20,22 +20,6 @@ from forum.forms import (
 
 @login_required
 def profile_view(request, username):
-    # Try to find user by username first, if not found, try by school_email
-    try:
-        # First try to find by username (which might be null for some users)
-        profile_user = User.objects.filter(username=username).first()
-        
-        # If not found by username, try by school_email
-        if profile_user is None:
-            profile_user = User.objects.filter(school_email=username).first()
-            
-        # If still not found, raise 404
-        if profile_user is None:
-            raise User.DoesNotExist
-            
-    except User.DoesNotExist:
-        raise Http404("User not found")
-        
     recent_posts = Post.objects.filter(author=profile_user).order_by('-created_at')[:5]
     posts_count = Post.objects.filter(author=profile_user).count()
     solutions_count = Solution.objects.filter(author=profile_user).count()
@@ -72,9 +56,7 @@ def edit_profile(request):
 
 @login_required
 def my_profile(request):
-    # Use the username if it exists, otherwise use school_email
-    identifier = request.user.username if request.user.username else request.user.school_email
-    return redirect('profile', username=identifier)
+    return redirect('profile', username=request.user.username)
 
 
 @login_required
