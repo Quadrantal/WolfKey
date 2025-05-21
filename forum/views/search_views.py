@@ -74,8 +74,6 @@ def for_you(request):
         post.preview_text = process_post_preview(post)
         add_course_context(post, experienced_courses, help_needed_courses)
 
-    print(len(posts))
-
     # Pagination
     paginator = Paginator(posts, 10)
     page = request.GET.get('page')

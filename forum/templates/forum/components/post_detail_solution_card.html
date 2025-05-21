@@ -42,15 +42,15 @@
 
         <!-- Solution Saving-->
         {% if user.is_authenticated %}
-            {% if accepted|is_saved_solution:user %}
-            <form method="post" action="{% url 'unsave_solution' accepted.id %}" class="d-inline save-solution-form">
+            {% if solution|is_saved_solution:user %}
+            <form method="post" action="{% url 'unsave_solution' solution.id %}" class="d-inline save-solution-form">
                 {% csrf_token %}
                 <button type="submit" class="bookmark-button active" title="Unsave">
                     <i class="fas fa-bookmark"></i>
                 </button>
             </form>
             {% else %}
-            <form method="post" action="{% url 'save_solution' accepted.id %}" class="d-inline save-solution-form">
+            <form method="post" action="{% url 'save_solution' solution.id %}" class="d-inline save-solution-form">
                 {% csrf_token %}
                 <button type="submit" class="bookmark-button" title="Save">
                     <i class="far fa-bookmark"></i>

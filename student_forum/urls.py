@@ -61,10 +61,7 @@ from forum.views.profile_views import (
 from forum.views.course_views import (
     course_search
 )
-from forum.views.save_posts_views import (
-    saved_posts,
-    save_post,
-    unsave_post,
+from forum.views.save_views import (
     follow_post,
     unfollow_post,
     followed_posts,
@@ -144,11 +141,8 @@ urlpatterns = [
     path('api/courses/', course_search, name='course-search'),
     
     # Saved posts URLs
-    path('saved-posts/', saved_posts, name='saved_posts'),
     path('followed-posts/', followed_posts, name='followed_posts'),
     path('my-posts/', my_posts, name='my_posts'),
-    path('save-post/<int:post_id>/', save_post, name='save_post'),
-    path('unsave-post/<int:post_id>/', unsave_post, name='unsave_post'),
     path('follow-post/<int:post_id>/', follow_post, name='follow_post'),
     path('unfollow-post/<int:post_id>/', unfollow_post, name='unfollow_post'),
     path('save-solution/<int:solution_id>/', save_solution, name='save_solution'),

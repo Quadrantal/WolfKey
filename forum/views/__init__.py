@@ -4,7 +4,7 @@ from .course_views import *
 from .notification_views import * 
 from .post_views import *
 from .profile_views import *
-from .save_posts_views import *
+from .save_views import *
 from .search_views import *
 from .solution_views import *
 from .updates_views import *

@@ -1,5 +1,10 @@
 {% extends 'forum/base.html' %}
 
+{% block head %}
+{% load static %}
+<link rel="stylesheet" href="{% static 'forum/css/post-card.css' %}">
+{% endblock %}
+
 {% block content %}
 <div class="container py-4">
     <h1 class="mb-4">
@@ -28,14 +33,14 @@
                         </p>
                         <div class="solution-preview mb-3">
                             <div class="solution-content p-3 bg-light rounded">
-                                {% if solution.content %}
-                                    {% if solution.content|wordcount > 50 %}
-                                        {{ solution.content|truncatewords:50 }}...
+                                {% if solution.preview_text %}
+                                    {% if solution.preview_text|wordcount > 100 %}
+                                        {{ solution.preview_text|truncatewords:100 }}...
                                     {% else %}
-                                        {{ solution.content }}
+                                        {{ solution.preview_text }}
                                     {% endif %}
                                 {% else %}
-                                    <em>Solution contains formatted content or code. Click to view.</em>
+                                    <em>Failed to load solution content</em>
                                 {% endif %}
                             </div>
                         </div>

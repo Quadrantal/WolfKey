@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.contrib.auth.models import Group, Permission
-from .models import Post File, UserProfile, SavedPost, Solution, Course, User, UserCourseExperience, UserCourseHelp,UpdateAnnouncement, DailySchedule
+from .models import Post, File, UserProfile, SavedPost, Solution, Course, User, UserCourseExperience, UserCourseHelp,UpdateAnnouncement, DailySchedule, SavedSolution, FollowedPost
 
 
 # Register your models here.
