@@ -1,0 +1,63 @@
+{% extends 'forum/base.html' %}
+
+{% block content %}
+<div class="container py-4">
+    <h1 class="mb-4">
+        <i class="fas fa-bell me-2"></i> Posts You're Following
+    </h1>
+    {% if posts %}
+    <div class="row" id="post-list">
+        {% for post in posts %}
+            <div class="col-12 mb-4">
+                <div class="card shadow-sm">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ post.title }}</h5>
+                        <p class="card-text text-muted">
+                            <small>
+                                Posted by {{ post.author.get_full_name }} on {{ post.created_at|date:"F d, Y" }}
+                                {% if post.courses.all %}
+                                in courses: 
+                                {% for course in post.courses.all %}
+                                    <span class="badge bg-light text-dark border me-1">{{ course.code }}</span>
+                                {% endfor %}
+                                {% endif %}
+                            </small>
+                        </p>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <a href="{% url 'post_detail' post.id %}" class="btn btn-primary btn-sm">View Post</a>
+                            <form method="POST" action="{% url 'unfollow_post' post.id %}">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-outline-secondary btn-sm">
+                                    <i class="fas fa-bell-slash me-1"></i> Unfollow
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                    <div class="card-footer bg-white d-flex justify-content-between align-items-center">
+                        <div>
+                            <span class="badge bg-primary me-1">{{ post.solutions.count }} solutions</span>
+                            {% if post.accepted_solution %}
+                            <span class="badge bg-success">Solved</span>
+                            {% else %}
+                            <span class="badge bg-warning text-dark">Unsolved</span>
+                            {% endif %}
+                        </div>
+                        <small class="text-muted">{{ post.followers.count }} followers</small>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="alert alert-info">
+        <i class="fas fa-info-circle me-2"></i> You're not following any posts yet. 
+        Follow posts to get notified of new solutions, edits, and comments.
+    </div>
+    <div class="text-center mt-4">
+        <a href="{% url 'all_posts' %}" class="btn btn-primary">
+            <i class="fas fa-search me-2"></i> Browse All Posts
+        </a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %} 

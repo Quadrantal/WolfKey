@@ -65,6 +65,12 @@ from forum.views.save_posts_views import (
     saved_posts,
     save_post,
     unsave_post,
+    follow_post,
+    unfollow_post,
+    followed_posts,
+    save_solution,
+    unsave_solution,
+    saved_solutions,
 )
 from forum.views.notification_views import (
     all_notifications,
@@ -139,9 +145,15 @@ urlpatterns = [
     
     # Saved posts URLs
     path('saved-posts/', saved_posts, name='saved_posts'),
+    path('followed-posts/', followed_posts, name='followed_posts'),
     path('my-posts/', my_posts, name='my_posts'),
     path('save-post/<int:post_id>/', save_post, name='save_post'),
     path('unsave-post/<int:post_id>/', unsave_post, name='unsave_post'),
+    path('follow-post/<int:post_id>/', follow_post, name='follow_post'),
+    path('unfollow-post/<int:post_id>/', unfollow_post, name='unfollow_post'),
+    path('save-solution/<int:solution_id>/', save_solution, name='save_solution'),
+    path('unsave-solution/<int:solution_id>/', unsave_solution, name='unsave_solution'),
+    path('saved-solutions/', saved_solutions, name='saved_solutions'),
 
     # API URLs
     path('api/acknowledge-update/', acknowledge_update, name='acknowledge_update'),
