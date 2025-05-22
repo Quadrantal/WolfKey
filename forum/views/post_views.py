@@ -94,15 +94,7 @@ def post_detail(request, post_id):
     for solution in solutions:
         try:
             solution_content = solution.content
-            if isinstance(solution_content, str):
-                try:
-                    solution_content = selective_quote_replace(solution_content)
-                    solution_content = json.loads(solution_content)
-                except json.JSONDecodeError:
-                    logger.error(f"Invalid JSON in solution {solution.id}")
-                    solution_content = {
-                        "blocks": [{"type": "paragraph", "data": {"text": "Error parsing solution content"}}]
-                    }
+    
 
             # Check if the solution is saved by the current user
             is_saved = False

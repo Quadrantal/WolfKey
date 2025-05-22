@@ -221,7 +221,7 @@ class File(models.Model):
 class Solution(models.Model):
     post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name='solutions')
     author = models.ForeignKey(User, on_delete=models.CASCADE)
-    content = models.TextField()
+    content = models.JSONField()
     created_at = models.DateTimeField(auto_now_add=True)
     upvotes = models.IntegerField(default=0)
     downvotes = models.IntegerField(default=0)
