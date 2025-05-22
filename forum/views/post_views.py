@@ -6,7 +6,7 @@ import json
 import logging
 from django.http import JsonResponse
 from django.utils.html import escape
-from forum.models import Post, Solution, Comment, Course, FollowedPost, SavedSolution
+from forum.models import Post, Solution, Comment, Course, FollowedPost, SavedSolution, Notification
 from forum.forms import SolutionForm, CommentForm, PostForm
 from .utils import selective_quote_replace, detect_bad_words
 from django.contrib import messages
@@ -63,6 +63,13 @@ def create_post(request):
 @login_required
 def post_detail(request, post_id):
     post = get_object_or_404(Post, id=post_id)
+
+    if request.user.is_authenticated:
+        Notification.objects.filter(
+            recipient=request.user,
+            post=post,
+            is_read=False
+        ).update(is_read=True)
     post.views += 1
     post.save()
     solutions = post.solutions.annotate(
