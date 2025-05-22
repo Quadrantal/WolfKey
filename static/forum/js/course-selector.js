@@ -70,11 +70,19 @@ class CourseSelector {
     createDropdownItem(course) {
         const div = document.createElement("div");
         div.classList.add("dropdown-item");
+        const experiencedColor = course.experienced_count !== 0 ? '#07D500' : 'inherit';
+        let experiencedHTML = '';
+        if (course.experienced_count >= 3) {
+            experiencedHTML = ` • <span style="color: ${experiencedColor};">${course.experienced_count} experienced users</span>`;
+        }else{
+            experiencedHTML = ` • <span style="color: ${experiencedColor};">3 experienced users</span>`;
+        }
+
         div.innerHTML = `
-            <strong>${course.name}</strong>
-            <br>
-            <span>${course.category} • ${course.level}</span>
+        <strong>${course.name}</strong><br>
+        <span>${course.category}${experiencedHTML}</span>
         `;
+
         div.addEventListener('click', () => this.addCourse(course));
         this.dropdown.appendChild(div);
     }

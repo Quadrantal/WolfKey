@@ -1,0 +1,27 @@
+{% extends 'forum/base.html' %}
+
+{% block content %}
+<div class="container py-4">
+    <h1 class="mb-4">
+        <i class="fas fa-bell me-2"></i> Posts You're Following
+    </h1>
+    {% if posts %}
+    <div class="row" id="post-list">
+        {% for post in posts %}
+            {% include 'forum/components/post_card.html' with post=post %}
+
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="alert alert-info">
+        <i class="fas fa-info-circle me-2"></i> You're not following any posts yet. 
+        Follow posts to get notified of new solutions, edits, and comments.
+    </div>
+    <div class="text-center mt-4">
+        <a href="{% url 'all_posts' %}" class="btn btn-primary">
+            <i class="fas fa-search me-2"></i> Browse All Posts
+        </a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %} 

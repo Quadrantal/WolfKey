@@ -4,10 +4,22 @@
     <div class="question-header">
         <h1>{{ post.title }}</h1>
         <div class="actions">
-            <button class="button follow-button">
-                Follow<span class="follow-count">90</span>
-            </button>
-            {% if not has_solution_from_user %}
+            {% if user.is_authenticated %}
+                {% if is_following %}
+                <form method="post" action="{% url 'unfollow_post' post.id %}" class="d-inline follow-form">
+                    {% csrf_token %}
+                    <button type="submit" class="button follow-button active">
+                        <i class="fas fa-bell-slash me-1"></i> Unfollow<span class="follow-count">{{ post.followers.count }}</span>
+                    </button>
+                </form>
+                {% else %}
+                <form method="post" action="{% url 'follow_post' post.id %}" class="d-inline follow-form">
+                    {% csrf_token %}
+                    <button type="submit" class="button follow-button">
+                        <i class="fas fa-bell me-1"></i> Follow<span class="follow-count">{{ post.followers.count }}</span>
+                    </button>
+                </form>
+                {% endif %} 
             <button class="button add-answer-button"><a href="#solution-form-container">Add answer</a></button>
             {% endif %}
             {% if user.is_authenticated and post.author == user %}
@@ -18,7 +30,7 @@
         </div>
 
     </div>
-
+    
     <!-- Question Content with Voting -->
     <div class="post-container">
         <!-- Post Content -->

@@ -11,6 +11,10 @@ from django.db.models import F
 from forum.views.schedule_views import get_block_order_for_day, process_schedule_for_user, is_ceremonial_uniform_required
 from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo
+from django.db.models import Count
+from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
+from django.http import HttpResponse
+
 
 @login_required
 def for_you(request):
@@ -24,8 +28,8 @@ def for_you(request):
     # Get today's and tomorrow's dates in the required format
     pst = ZoneInfo("America/Los_Angeles")
     now_pst = datetime.now(pst)
-    today = now_pst.strftime("%a, %b %-d") 
-    tomorrow = (now_pst + timedelta(days=1)).strftime("%a, %b %-d")  
+    today = now_pst.strftime("%a, %b %d").lstrip("0").replace(" 0", " ")
+    tomorrow = (now_pst + timedelta(days=1)).strftime("%a, %b %d").lstrip("0").replace(" 0", " ")
 
     ceremonial_required_today = is_ceremonial_uniform_required(request.user, today)
     ceremonial_required_tomorrow = is_ceremonial_uniform_required(request.user, tomorrow)
@@ -38,10 +42,31 @@ def for_you(request):
     processed_schedule_today = process_schedule_for_user(request.user, raw_schedule_today)
     processed_schedule_tomorrow = process_schedule_for_user(request.user, raw_schedule_tomorrow)
 
-    # Get posts for both types of courses
+
+    # Get posts that the user needs help or is expierenced in, taking currently, or posts posted by user
+    user_profile = request.user.userprofile
+
+    current_courses = list(filter(None, [
+        user_profile.block_1A,
+        user_profile.block_1B,
+        user_profile.block_1D,
+        user_profile.block_1E,
+        user_profile.block_2A,
+        user_profile.block_2B,
+        user_profile.block_2C,
+        user_profile.block_2D,
+        user_profile.block_2E
+    ]))
+
     posts = Post.objects.filter(
         Q(courses__in=experienced_courses) | 
-        Q(courses__in=help_needed_courses) | Q(author = request.user)
+        Q(courses__in=help_needed_courses) | 
+        Q(author=request.user) |
+        Q(courses__in=current_courses)
+    ).annotate(
+        solution_count=Count('solutions', distinct=True),
+        comment_count=Count('solutions__comments', distinct=True),
+        total_response_count=Count('solutions', distinct=True) + Count('solutions__comments', distinct=True)
     ).distinct().order_by('-created_at')
 
     # Process posts
@@ -49,22 +74,40 @@ def for_you(request):
         post.preview_text = process_post_preview(post)
         add_course_context(post, experienced_courses, help_needed_courses)
 
+    # Pagination
+    paginator = Paginator(posts, 10)
+    page = request.GET.get('page')
+    try:
+        posts = paginator.page(page)
+    except PageNotAnInteger:
+        posts = paginator.page(1)
+    except EmptyPage:
+        return HttpResponse('')  # Return empty response when no more posts
+    
+
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        return render(request, 'forum/components/post_list.html', {'posts': posts})
+
     return render(request, 'forum/for_you.html', {
         'posts': posts,
-        'experienced_courses': experienced_courses,
-        'help_needed_courses': help_needed_courses,
         'greeting': greeting,
         'current_date': today,
         'tomorrow_date': tomorrow,
         'schedule_today': processed_schedule_today,
         'schedule_tomorrow': processed_schedule_tomorrow,
         'ceremonial_required_today': ceremonial_required_today, 
-        'ceremonial_required_tomorrow': ceremonial_required_tomorrow
+        'ceremonial_required_tomorrow': ceremonial_required_tomorrow,
     })
 
 def all_posts(request):
     query = request.GET.get('q', '')
-    posts = Post.objects.all().order_by('-created_at')
+
+    posts = Post.objects.annotate(
+        solution_count=Count('solutions', distinct=True),
+        comment_count=Count('solutions__comments', distinct=True),
+        total_response_count=Count('solutions', distinct=True) + Count('solutions__comments', distinct=True)
+    ).order_by('-created_at')
+
 
     if query:
         search_query = SearchQuery(query)
@@ -79,6 +122,18 @@ def all_posts(request):
     for post in posts:
         post.preview_text = process_post_preview(post)
         add_course_context(post, experienced_courses, help_needed_courses)
+
+    paginator = Paginator(posts, 10)
+    page = request.GET.get('page')
+    try:
+        posts = paginator.page(page)
+    except PageNotAnInteger:
+        posts = paginator.page(1)
+    except EmptyPage:
+        return HttpResponse('')  # Return empty response when no more posts
+
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        return render(request, 'forum/components/post_list.html', {'posts': posts})
 
     return render(request, 'forum/all_posts.html', {
         'posts': posts,
@@ -97,12 +152,16 @@ def search_results_new_page(request):
 
         # Search in posts
         posts = posts.annotate(
-            rank=SearchRank(F('search_vector'), search_query) + TrigramSimilarity('title', query)
+            rank=SearchRank(F('search_vector'), search_query) + TrigramSimilarity('title', query),
+            
+            solution_count=Count('solutions', distinct=True),
+            comment_count=Count('solutions__comments', distinct=True),
+            total_response_count=Count('solutions', distinct=True) + Count('solutions__comments', distinct=True)
         ).filter(rank__gte=0.3).order_by('-rank')
 
         # Search in users
         users = users.annotate(
-            rank=SearchRank(F('search_vector'), search_query)
+            rank=SearchRank(F('search_vector'), search_query),
         ).filter(rank__gte=0.3).order_by('-rank')
 
         experienced_courses, help_needed_courses = get_user_courses(request.user)

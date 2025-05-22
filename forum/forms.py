@@ -218,11 +218,11 @@ class CustomUserCreationForm(UserCreationForm):
     
     def save(self, commit=True):
         user = super().save(commit=False)
-        # Generate a random username that won't be displayed
         user.username = str(uuid.uuid4())[:30]
+
         if commit:
             user.save()
-            
+
         if not user.personal_email:
             user.personal_email = user.school_email
         return user
@@ -278,7 +278,7 @@ class CustomPasswordResetForm(PasswordResetForm):
             context = {
                 "email": to_email,
                 "domain": domain_override or request.get_host(),
-                "site_name": "YourSite",
+                "site_name": "WolfKey",
                 "uid": urlsafe_base64_encode(force_bytes(user.pk)),
                 "user": user,
                 "token": token_generator.make_token(user),

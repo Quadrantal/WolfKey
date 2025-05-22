@@ -3,7 +3,7 @@
         <link rel="stylesheet" href="{% static 'forum/css/post-card.css' %}">
 </head>
 
-<div class="card clickable post hidden {% if post.accepted_solution %}highlighted-card-green{% endif %}">
+<div class="card clickable post {% if post.accepted_solution %}highlighted-card-green{% endif %}">
     {% if post.accepted_solution %}
         <div class="banner">Solved</div>
     {% endif %}
@@ -49,14 +49,36 @@
         <!-- Post Footer -->
         <div class="card-footer d-flex justify-content-between align-items-center">
             <div class="d-flex align-items-center">
-                <i class="bi bi-chat me-2"></i> <span>{{ post.solutions.count }}</span>
+                <i class="bi bi-chat me-2"></i> <span>{{ post.total_response_count }}</span>
             </div>
+            <div class="d-flex align-items-center">
+                <i class="bi bi-eye me-2"></i> <span>{{ post.views }}</span>
+            </div>
+
+            <div class="d-flex align-items-center">
+                {% if user.is_authenticated %}
+                    <button type="button"
+                        class="button follow-button d-inline {% if is_following %}active{% endif %}"
+                        data-post-id="{{ post.id }}"
+                        data-followed="{{ is_following|yesno:'true,false' }}"
+                        data-follow-url="{% url 'follow_post' post.id %}"
+                        data-unfollow-url="{% url 'unfollow_post' post.id %}"
+                        data-csrf="{{ csrf_token }}" 
+                        style = "padding: 0px; font-size: 16px;">
+                        <i class="bi {% if is_following %}bi-bell-fill{% else %}bi-bell{% endif %} me-1 follow-icon"></i>
+                        <span class = "follow-count">{{ post.followers.count }}</span>
+                    </button>
+                {% endif %}
+            </div>
+            
             <div class="d-flex align-items-center share-container">
                 <i class="bi bi-share me-2" data-post-url="{% url 'post_detail' post.id %}"></i>
                 <div class="share-menu">
                     <div class="share-menu-content">
                         <p>Share this post:</p>
-                        <input type="text" class="share-link form-control mb-2" value="{{ request.build_absolute_uri }}{% url 'post_detail' post.id %}" readonly>
+                        <input type="text" class="share-link form-control mb-2"
+                            value="{{ request.build_absolute_uri|cut:request.get_full_path }}{% url 'post_detail' post.id %}">
+
                         <button class="copy-link-button btn btn-primary btn-sm">Copy Link</button>
                     </div>
                 </div>
@@ -67,12 +89,6 @@
 
 <script>
     document.addEventListener("DOMContentLoaded", function () {
-        const posts = document.querySelectorAll("#post-list .post");
-        posts.forEach((post, index) => {
-            setTimeout(() => {
-                post.classList.remove("hidden");
-            }, index * 125); // Delay each post by 125ms
-        });
 
         // Handle copy functionality
         document.querySelectorAll('.copy-link-button').forEach(button => {
@@ -91,33 +107,51 @@
         });
     });
 </script>
-
 <script>
-    document.addEventListener('DOMContentLoaded', function () {
-        const likeIcons = document.querySelectorAll('.like-icon');
+document.addEventListener('DOMContentLoaded', function () {
+    // Follow Button AJAX Handler
+    document.querySelectorAll('.follow-button').forEach(button => {
+        button.addEventListener('click', function () {
+            const postId = this.dataset.postId;
+            const isFollowing = this.dataset.followed === 'true';
+            const url = isFollowing ? this.dataset.unfollowUrl : this.dataset.followUrl;
+            const csrfToken = this.dataset.csrf;
 
-        likeIcons.forEach(icon => {
-            icon.addEventListener('click', function () {
-                const postId = this.getAttribute('data-post-id');
-                const likeCountSpan = this.nextElementSibling;
 
-                fetch(`/post/${postId}/like/`, {
-                    method: 'POST',
-                    headers: {
-                        'X-CSRFToken': '{{ csrf_token }}',
-                        'Content-Type': 'application/json',
-                    },
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.liked) {
-                        this.classList.add('text-danger');  // Highlight the heart
+            fetch(url, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': csrfToken,
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'Content-Type': 'application/json',
+                },
+                credentials: 'same-origin'
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Update icon
+                    const icon = this.querySelector('.follow-icon');
+                    const count = this.querySelector('.follow-count');
+
+                    this.dataset.followed = data.followed.toString();
+                    count.textContent = data.followers_count;
+
+                    if (data.followed) {
+                        icon.classList.remove('bi-bell');
+                        icon.classList.add('bi-bell-fill');
+                        this.classList.add('active');
                     } else {
-                        this.classList.remove('text-danger');  // Remove highlight
+                        icon.classList.remove('bi-bell-fill');
+                        icon.classList.add('bi-bell');
+                        this.classList.remove('active');
                     }
-                    likeCountSpan.textContent = data.total_likes;  // Update like count
-                });
+                }
+            })
+            .catch(error => {
+                console.error('Follow toggle failed:', error);
             });
         });
     });
+});
 </script>

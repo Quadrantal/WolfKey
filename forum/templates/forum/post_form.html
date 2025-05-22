@@ -6,7 +6,7 @@
 
     {% load static %}
     <link rel="stylesheet" href="{% static 'forum/css/editorjs.css' %}">
-    <link rel="stylesheet" href="{% static 'forum/css/course-selector.css' %}"> 
+    <link rel="stylesheet" href="{% static 'forum/css/course-selector.css' %}"> year
     <link rel="stylesheet" href="{% static 'forum/css/post-detail.css' %}"> 
 
 {% endblock %}
@@ -15,7 +15,7 @@
 <div class="row justify-content-center">
         <div class="card">
             <div class="card-body">
-                <h2 class="card-title">{{ action }} Post</h2>
+                <h2 class="card-title">{{ action }} a Post</h2>
                 <form id= "postCreationForm" method="post" action="{% url 'create_post' %}" enctype="multipart/form-data">
                     {% csrf_token %}
                     
@@ -24,14 +24,14 @@
 
                     <h3>Content:</h3>
                     <!-- Editor.js Container -->
-                    <div id="editorjs"></div>
+                    <div id="editorjs" class = "post-form-editor"></div>
                     <input type="hidden" id="editorjs-content" name="content">
 
                     <!-- Course Selector -->
-                    <h3>Select a Course:</h3>
+                    <h3 class = "mt-4">Select a Course:</h3>
                     <div id="postCoursesSelector"></div>
 
-                    <button id = "submitPostButton" type="submit" class="btn btn-primary">{{ action }} Post</button>
+                    <button id = "submitPostButton" type="submit" class="btn btn-primary" style = "border-radius: 12px;">{{ action }} Post</button>
                     <a href="{% url 'for_you' %}" class="btn btn-secondary">Cancel</a>
                 </form>
             </div>
@@ -41,21 +41,21 @@
 
 <!-- Initialize Editor.js -->
 <script src="https://cdn.jsdelivr.net/npm/@editorjs/editorjs@latest"></script>
-<script src="https://cdn.jsdelivr.net/npm/@editorjs/image@latest"></script>
-<script src="https://cdn.jsdelivr.net/npm/@editorjs/header@latest"></script>
-<script src="https://cdn.jsdelivr.net/npm/@editorjs/quote@2.7.6/dist/quote.umd.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@blade47/editorjs-delimiter@1.4.3/dist/delimiter.umd.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@editorjs/list@2"></script>
-<script src="https://cdn.jsdelivr.net/gh/mdgaziur/EditorJS-LaTeX@latest/dist/editorjs-latex.bundle-min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@editorjs/inline-code@latest"></script>
-<script src="https://cdn.jsdelivr.net/npm/@calumk/editorjs-codecup@latest"></script>
-<script src="https://unpkg.com/mathlive"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/@editorjs/image@latest"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/@editorjs/header@latest"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/@editorjs/quote@2.7.6/dist/quote.umd.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/@blade47/editorjs-delimiter@1.4.3/dist/delimiter.umd.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/@editorjs/list@2"></script>
+<script defer src="https://cdn.jsdelivr.net/gh/mdgaziur/EditorJS-LaTeX@latest/dist/editorjs-latex.bundle-min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/@editorjs/inline-code@latest"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/@calumk/editorjs-codecup@latest"></script>
+<script defer src="https://unpkg.com/mathlive"></script>
 
 
 {% load static %}
-<script src="{% static 'forum/js/math-block.js' %}"></script>
-<script src="{% static 'forum/js/editor-config.js' %}"></script>
-<script src="{% static 'forum/js/course-selector.js' %}"></script>
+<script defer src="{% static 'forum/js/math-block.js' %}"></script>
+<script defer src="{% static 'forum/js/editor-config.js' %}"></script>
+<script defer src="{% static 'forum/js/course-selector.js' %}"></script>
 
     <script type="module">
         import createEditor from '{% static "forum/js/editor-config.js" %}';
