@@ -263,7 +263,7 @@ button .fa-bell-slash {
     align-items: center;
     margin: auto;
     max-width: 920px;
-  }
+}
   
   .sort-dropdown {
     position: relative;
@@ -360,41 +360,41 @@ button .fa-bell-slash {
     }
   }
 
-    .vote-button svg path {
-        fill: #bbb;  /* Default color */
-        transition: fill 0.2s ease;
-    }
-    
-    .vote-button:hover svg path {
-        fill: #000000;  /* Hover color */
-    }
-    
-    .vote-button.voted-up svg path {
-        fill: #2ecc71;  /* Green color for upvotes */
-    }
-    
-    .vote-button.voted-down svg path {
-        fill: #e74c3c;  /* Red color for downvotes */
-    }
-    
-    .vote-button {
-        background: none;
-        border: none;
-        padding: 0;
-        cursor: pointer;
-    }
-    
-    .vote-button:focus {
-        outline: none;
-    }
+.vote-button svg path {
+    fill: #bbb;  /* Default color */
+    transition: fill 0.2s ease;
+}
 
-    .math-field {
-        margin: 0px;
-    }
+.vote-button:hover svg path {
+    fill: #000000;  /* Hover color */
+}
 
-    .inline-math {
-        margin: 0px !important;
-    }
+.vote-button.voted-up svg path {
+    fill: #2ecc71;  /* Green color for upvotes */
+}
+
+.vote-button.voted-down svg path {
+    fill: #e74c3c;  /* Red color for downvotes */
+}
+
+.vote-button {
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+}
+
+.vote-button:focus {
+    outline: none;
+}
+
+.math-field {
+    margin: 0px;
+}
+
+.inline-math {
+    margin: 0px !important;
+}
 
 .custom-save-position {
     margin-left: auto;
@@ -402,13 +402,6 @@ button .fa-bell-slash {
     align-items: center;
 }
 
-/* Remove any bookmark button styles we don't need */
-.bookmark-button,
-.bookmark-button:hover,
-.bookmark-icon.saved,
-.bookmark-icon.unsaved {
-  /* Remove these styles */
-}
 
 /* Center the bookmark icon */
 .vote-cell .fa-bookmark {
@@ -483,7 +476,8 @@ button .fa-bell-slash {
 }
 
 .bookmark-button:active {
-  transform: scale(1.1); /* pop effect  */
+  transform: scale(1.1);
+}
   
     /* Comment styling */
 .comment {
@@ -508,9 +502,10 @@ button .fa-bell-slash {
 }
 
 /* Increase indentation based on nesting level */
-.comment[data-depth="1"] { margin-left: 2rem; }
-.comment[data-depth="2"] { margin-left: 4rem; }
-.comment[data-depth="3"] { margin-left: 6rem; }
+.comment[data-depth="0"] { margin-left: 1rem !important; }
+.comment[data-depth="1"] { margin-left: 2rem !important; }
+.comment[data-depth="2"] { margin-left: 4rem !important; }
+.comment[data-depth="3"] { margin-left: 6rem !important; }
 
 .comment[data-depth="0"] > .replies > .toggle-replies { margin-left: 2rem !important ;}
 .comment[data-depth="1"] > .replies > .toggle-replies { margin-left: 4rem !important; }

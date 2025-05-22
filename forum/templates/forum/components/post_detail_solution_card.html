@@ -93,11 +93,15 @@
             {% if user == solution.author %}
             <div class="default-actions">
                 <button class="btn btn-outline-secondary btn-sm"
-                    onclick="showEditSolutionForm(Number('{{ solution.id }}'))">Edit</button>
+                    onclick="showEditSolutionForm(Number('{{ solution.id }}'))">
+                    <i class="bi bi-pencil"></i> 
+                </button>
                 <form id="delete-solution-form-{{ solution.id }}"  method="post" action="{% url 'delete_solution' solution.id %}" class="delete-solution-form d-inline">
                     {% csrf_token %}
                     <input type="hidden" name="solution_id" value="{{ solution.id }}">
-                    <button type="submit" class="btn btn-outline-danger btn-sm">Delete</button>
+                    <button type="submit" class="btn btn-outline-danger btn-sm">
+                        <i class="bi bi-trash"></i> 
+                    </button>
                 </form>
             </div>
             <div class="edit-actions" style="display: none;">
@@ -111,15 +115,17 @@
 
         <!-- Comments -->
         <div class="comments-section">
-            <div class="comments">
-                {% include 'forum/components/comments_list.html' with comments=solution.comments.all %}
-            </div>
             {% if user.is_authenticated %}
             <button class="reply-button btn btn-outline-secondary btn-sm mt-2" 
                     data-solution-id="{{ solution.id }}">
                 Add a comment
             </button>
             {% endif %}
+            <br>
+            <div class="comments">
+                {% include 'forum/components/comments_list.html' with comments=solution.comments.all %}
+            </div>
+
         </div>
     </div>
 </div>

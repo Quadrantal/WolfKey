@@ -1,37 +1,77 @@
 {% extends 'forum/base.html' %}
 
 {% block head %}
-{% load static %}
-<link rel="stylesheet" href="{% static 'forum/css/post-card.css' %}">
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'forum/css/post-card.css' %}">
+    <link rel="stylesheet" href="{% static 'forum/css/post-detail.css' %}">
+    <link rel="stylesheet" href="{% static 'forum/css/editorjs.css' %}">
+
+            {% load custom_filters %}
+
 {% endblock %}
 
 {% block content %}
 <div class="container py-4">
-    <h1 class="mb-4">
-        <i class="fas fa-bookmark me-2"></i> Saved Solutions
-    </h1>
+    <h1 class="mb-4"><i class="fas fa-bookmark me-2"></i> Saved Solutions</h1>
+
     {% if solutions %}
-    <div class="row" id="solutions-list">
         {% for solution in solutions %}
-            <div class="col-12 mb-4">
-                <div class="card shadow-sm">
-                    <div class="card-header d-flex justify-content-between align-items-center">
-                        <h5 class="card-title mb-0">
-                            <a href="{% url 'post_detail' solution.post.id %}">{{ solution.post.title }}</a>
-                        </h5>
-                        <span class="badge bg-light text-dark border">
-                            {% if solution.id == solution.post.accepted_solution_id %}
-                            <i class="fas fa-check-circle text-success me-1"></i> Accepted Solution
-                            {% endif %}
-                        </span>
-                    </div>
-                    <div class="card-body">
-                        <p class="card-text text-muted">
-                            <small>
-                                Solution by {{ solution.author.get_full_name }} on {{ solution.created_at|date:"F d, Y" }}
-                            </small>
-                        </p>
-                        <div class="solution-preview mb-3">
+            <!-- Include post card -->
+            {% include 'forum/components/post_card.html' with post=solution.post %}
+
+
+
+
+            <div class="solution-container {% if solution == accepted_solution %}accepted-solution{% endif %} mt-2" data-solution-id="{{ solution.id }}">
+                <!-- Solution Vote Cell -->
+                <div class="vote-cell">
+                    <form method="post" action="{% url 'upvote_solution' solution.id %}" class="d-inline">
+                        {% csrf_token %}
+                        <button type="submit" class="vote-button {% if solution|has_upvoted:user %}voted-up{% endif %}">
+                            <svg width="36" height="36" viewBox="0 0 36 36">
+                                <path d="M2 26h32L18 10 2 26z"></path>
+                            </svg>
+                        </button>
+                        <input type="hidden" name="solution_id" value="{{ solution.id }}">
+                        <input type="hidden" name="action" value="upvote">
+                    </form>
+                    
+                    <div class="vote-count">{{ solution|vote_difference }}</div>
+                    
+                    <form method="post" action="{% url 'downvote_solution' solution.id %}" class="d-inline">
+                        {% csrf_token %}
+                        <button type="submit" class="vote-button {% if solution|has_downvoted:user %}voted-down{% endif %}">
+                            <svg width="36" height="36" viewBox="0 0 36 36">
+                                <path d="M2 10h32L18 26 2 10z"></path>
+                            </svg>
+                        </button>
+                        <input type="hidden" name="solution_id" value="{{ solution.id }}">
+                        <input type="hidden" name="action" value="downvote">
+                    </form>
+
+                    <!-- Solution Saving-->
+                    {% if user.is_authenticated %}
+                        {% if solution|is_saved_solution:user %}
+                        <form method="post" action="{% url 'unsave_solution' solution.id %}" class="d-inline save-solution-form">
+                            {% csrf_token %}
+                            <button type="submit" class="bookmark-button active" title="Unsave">
+                                <i class="fas fa-bookmark"></i>
+                            </button>
+                        </form>
+                        {% else %}
+                        <form method="post" action="{% url 'save_solution' solution.id %}" class="d-inline save-solution-form">
+                            {% csrf_token %}
+                            <button type="submit" class="bookmark-button" title="Save">
+                                <i class="far fa-bookmark"></i>
+                            </button>
+                        </form>
+                        {% endif %}
+                    {% endif %}
+                </div>
+
+                <!-- Solution Content -->
+                    <div class="post-content-cell">
+                        <div class="solution-preview p-3">
                             <div class="solution-content p-3 bg-light rounded">
                                 {% if solution.preview_text %}
                                     {% if solution.preview_text|wordcount > 100 %}
@@ -44,48 +84,45 @@
                                 {% endif %}
                             </div>
                         </div>
-                        <div class="d-flex justify-content-between align-items-center">
-                            <a href="{% url 'post_detail' solution.post.id %}" class="btn btn-primary btn-sm">
-                                View Full Solution
-                            </a>
-                            <form method="POST" action="{% url 'unsave_solution' solution.id %}">
-                                {% csrf_token %}
-                                <button type="submit" class="btn btn-outline-secondary btn-sm">
-                                    <i class="fas fa-bookmark-slash me-1"></i> Unsave
-                                </button>
-                            </form>
-                        </div>
-                    </div>
-                    <div class="card-footer bg-white">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <div>
-                                <span class="text-muted">
-                                    <i class="fas fa-thumbs-up me-1"></i> {{ solution.upvotes }}
-                                </span>
-                                <span class="text-muted ms-3">
-                                    <i class="fas fa-thumbs-down me-1"></i> {{ solution.downvotes }}
-                                </span>
-                                <span class="text-muted ms-3">
-                                    <i class="fas fa-comment me-1"></i> {{ solution.comments.count }}
-                                </span>
+                        
+
+                        <!-- Solution Author -->
+                        <div class="author-info mt-3">
+                            <div class="position-relative">
+                                <img 
+                                    src="{{ solution.author.userprofile.profile_picture.url }}" 
+                                    alt="Profile Picture" 
+                                    class="profile-picture"
+                                    style="width: 30px; height: 30px; border-radius: 50%; object-fit: cover; cursor: pointer;"
+                                    id="profilePicture"
+                                >
                             </div>
-                            <small class="text-muted">Saved on {{ solution.saves.first.saved_at|date:"F d, Y" }}</small>
+                            <div>
+                                <div class="d-flex align-items-center">
+                                    <a href="{{ solution.author.get_absolute_url }}">{{ solution.author.get_full_name }}</a>
+                                    {% if solution.author == post.author %}
+                                        <span class="badge bg-primary ms-2">OP</span>
+                                    {% endif %}
+                                </div>
+
+                                <div class="text-muted">Answered {{ solution.created_at|date:"M d, Y" }}</div>
+                            </div>
                         </div>
+                        <a href="{% url 'post_detail' solution.post.id %}"> See full solution</a>
+
                     </div>
                 </div>
             </div>
         {% endfor %}
-    </div>
     {% else %}
-    <div class="alert alert-info">
-        <i class="fas fa-info-circle me-2"></i> You haven't saved any solutions yet.
-        Save solutions by clicking the bookmark icon on solutions you find helpful.
-    </div>
-    <div class="text-center mt-4">
-        <a href="{% url 'all_posts' %}" class="btn btn-primary">
-            <i class="fas fa-search me-2"></i> Browse All Posts
-        </a>
-    </div>
+        <div class="alert alert-info">
+            <i class="fas fa-info-circle me-2"></i> You haven't saved any solutions yet.
+        </div>
+        <div class="text-center mt-4">
+            <a href="{% url 'all_posts' %}" class="btn btn-primary">
+                <i class="fas fa-search me-2"></i> Browse All Posts
+            </a>
+        </div>
     {% endif %}
 </div>
-{% endblock %} 
+{% endblock %}

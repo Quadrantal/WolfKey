@@ -69,8 +69,6 @@ def saved_solutions(request):
     solutions = Solution.objects.filter(saves__user=request.user)
 
     for solution in solutions:
-        solution = json.loads(solution)
         solution.preview_text = process_post_preview(solution)
 
-    print(solutions[0].preview_text)
     return render(request, 'forum/saved_solutions.html', {'solutions': solutions})
