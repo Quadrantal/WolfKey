@@ -246,9 +246,6 @@ class CustomPasswordResetForm(PasswordResetForm):
         except User.DoesNotExist:
             raise ValidationError("No account found with this email address.")
         
-        if email.endswith('@wpga.ca') and not user.personal_email:
-            raise ValidationError("This account does not have a personal email associated. Password reset is not possible.")
-        
         return email
 
     def get_users(self, email):

@@ -9,7 +9,7 @@
 {% endblock %}
 {% block content %}
     <div class="d-flex justify-content-center align-items-center mb-2">
-        <h1 class="fade-text" id="animated-text">{{ greeting }}</h1>
+        <h1 class="fade-text" id="animated-text" style = "display: none;">{{ greeting }}</h1>
     </div>
 
     <!-- Schedule-->
@@ -105,7 +105,14 @@
         </div>
     </div>
 
-    <p>Add more interested courses <a href="{% url 'profile' user.username %}">here</a> in your profile to see more posts tailored towards you.</p>
+    <div class="text-center mt-4">
+        <div class = "card" style ="margin: auto; max-width: 776px;">
+            <p> You've reached the end. </p>
+            <a href="{% url 'all_posts' %}" class="btn btn-primary">
+                <i class="fas fa-search me-2"></i> Explore
+            </a>
+        </div>
+    </div>
 {% endblock %}
 
 {% block scripts %}
@@ -136,6 +143,7 @@
         const textElement = document.getElementById('animated-text');
         const text = textElement.textContent;
         textElement.textContent = '';
+        textElement.style.display = "block";
         
         // Split text into individual characters
         for (let i = 0; i < text.length; i++) {
