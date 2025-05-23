@@ -9,7 +9,7 @@
 {% endblock %}
 {% block content %}
     <div class="d-flex justify-content-center align-items-center mb-2">
-        <h1 class="fade-text" id="animated-text">{{ greeting }}</h1>
+        <h1 class="fade-text" id="animated-text" style = "display: none;">{{ greeting }}</h1>
     </div>
 
     <!-- Schedule-->
@@ -136,6 +136,7 @@
         const textElement = document.getElementById('animated-text');
         const text = textElement.textContent;
         textElement.textContent = '';
+        textElement.style.display = "block";
         
         // Split text into individual characters
         for (let i = 0; i < text.length; i++) {
