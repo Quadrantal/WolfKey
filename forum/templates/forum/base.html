@@ -167,7 +167,7 @@
     
                                 <li class="nav-item dropdown">
                                     <a class="nav-link dropdown-toggle" href="#" id="notificationDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                        <i class="bi bi-bell"></i>
+                                        <i class="bi bi-bell" style = "font-size: 20px;"></i>
                                         {% if unread_notifications_count > 0 %}
                                             <span class="badge bg-danger notification-circle">{{ unread_notifications_count }}</span>
                                         {% endif %}
@@ -232,7 +232,7 @@
                 {% if user.is_authenticated %}
                 <li>
                     <a href="{% url 'followed_posts' %}" class="sidebar-item" data-title="Following">
-                        <i class="bi bi-pin-fill"></i> <span class="sidebar-text">Following</span>
+                        <i class="bi bi-pin"></i> <span class="sidebar-text">Following</span>
                     </a>
                 </li>
                 <li>
