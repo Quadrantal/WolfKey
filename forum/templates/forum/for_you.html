@@ -105,7 +105,14 @@
         </div>
     </div>
 
-    <p>Add more interested courses <a href="{% url 'profile' user.username %}">here</a> in your profile to see more posts tailored towards you.</p>
+    <div class="text-center mt-4">
+        <div class = "card" style ="margin: auto; max-width: 776px;">
+            <p> You've reached the end. </p>
+            <a href="{% url 'all_posts' %}" class="btn btn-primary">
+                <i class="fas fa-search me-2"></i> Explore
+            </a>
+        </div>
+    </div>
 {% endblock %}
 
 {% block scripts %}
