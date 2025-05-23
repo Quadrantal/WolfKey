@@ -183,7 +183,7 @@ class CustomUserCreationForm(UserCreationForm):
             'class': 'form-control',
             'placeholder': 'personal@example.com'
         }),
-        help_text="Optional personal email address. NOTE: You can not reset your password without this!"
+        help_text="<strong> Optional </strong> personal email address. NOTE: You can not reset your password without this!"
     )
     phone_number = forms.CharField(
         required=False,
@@ -191,7 +191,7 @@ class CustomUserCreationForm(UserCreationForm):
             'class': 'form-control',
             'placeholder': '+1234567890'
         }),
-        help_text="Optional phone number in international format (e.g., +12345678900)"
+        help_text="<strong> Optional </strong> phone number in international format (e.g., +12345678900)"
     )
 
     class Meta:
