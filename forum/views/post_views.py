@@ -2,6 +2,8 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 from django.db.models import F, Case, When, IntegerField
 from django.core.serializers.json import DjangoJSONEncoder
+from django.views.decorators.http import require_http_methods
+from django.views.decorators.csrf import ensure_csrf_cookie
 import json
 import logging
 from django.http import JsonResponse

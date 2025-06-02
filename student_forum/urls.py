@@ -88,7 +88,11 @@ from forum.views.api_views import(
     get_csrf_token,
     api_login,
     api_logout,
-    for_you_api
+    for_you_api,
+    api_post_detail,
+    api_delete_post,
+    api_create_post,
+    api_update_post
 )
 
 from django.views.generic import RedirectView
@@ -177,6 +181,10 @@ urlpatterns = [
     path('api/schedules/uniform/<str:target_date>/', is_ceremonial_uniform_required),
     path('api/for-you/', for_you_api, name='for_you_api'),
     path('api/csrf/', get_csrf_token),
+    path('api/posts/<int:post_id>/', api_post_detail, name='api_post_detail'),
+    path('api/posts/', api_create_post, name='api_create_post'),
+    path('api/posts/<int:post_id>/update/', api_update_post, name='api_update_post'),
+    path('api/posts/<int:post_id>/delete/', api_delete_post, name='api_delete_post'),
 ]
 
 if settings.DEBUG:
