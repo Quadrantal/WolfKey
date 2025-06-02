@@ -33,7 +33,9 @@ def course_search(request):
         "id": course.id,
         "name": course.name,
         "code": course.code,
-        "category": course.category
+        "category": course.category,
+        "experienced_count" : UserCourseExperience.objects.filter(course=course).count()
+
     } for course in courses[:10]] 
     
     return JsonResponse(data, safe=False)

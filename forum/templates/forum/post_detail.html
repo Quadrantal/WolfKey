@@ -1,7 +1,7 @@
 {% extends 'forum/base.html' %}
 {% load custom_filters %}
 {% load static %}
-{% load custom_filters %}
+
 <head>
     {% block head %}
     {{ block.super }}
@@ -9,10 +9,24 @@
     <link rel="stylesheet" href="{% static 'forum/css/post-detail.css' %}">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.19/dist/katex.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/default.min.css">
+    <style>
+        .custom-save-position {
+            display: inline-flex;
+            align-items: center;
+            vertical-align: middle;
+        }
+        .solution-actions {
+            display: flex;
+            align-items: center;
+        }
+        .solution-actions button {
+            margin-right: 5px;
+        }
+    </style>
     {% endblock %}
 </head>
-{% block content %}
 
+{% block content %}
 {% include 'forum/components/post_detail_post_card.html' %}
 
 <hr>
@@ -30,12 +44,13 @@
         </div>
     </div>
 </div>
+
 <div id="solutions-container">
     {% with accepted_solution=post.accepted_solution %}
     {% if accepted_solution %}
         {% include 'forum/components/post_detail_solution_card.html' with solution=accepted_solution accepted_solution=accepted_solution %}
     {% endif %}
-    
+
     {% for solution in solutions %}
         {% if solution != accepted_solution %}
             {% include 'forum/components/post_detail_solution_card.html' with solution=solution accepted_solution=accepted_solution %}
@@ -45,21 +60,21 @@
 </div>
 
 <!-- Add Solution Form -->
-{% if user.is_authenticated and not has_solution_from_user%}
+{% if user.is_authenticated and not has_solution_from_user %}
 <div id="solution-form-container" class="card mt-4">
     <div class="card-body">
-        <h4>Your Solution</h4>
+        <h4>Write another solution</h4>
         <form method="post" action="{% url 'create_solution' post.id %}" id="solutionForm">
             {% csrf_token %}
             <input type="hidden" name="action" value="create_solution">
             <input type="hidden" id="solution-content" name="content">
             <div id="editorjs-solution-form"></div>
-            <button type="submit" class="btn btn-primary mt-3">Post Your Solution</button>
+            <button type="submit" class="btn btn-primary mt-3" style="border-radius: 12px;">Submit Your Solution</button>
         </form>
     </div>
 </div>
 {% else %}
-<div class="alert alert-info mt-4" style ="max-width: 920px; margin:auto">
+<div class="alert alert-info mt-4" style="max-width: 920px; margin:auto">
     <i class="fas fa-info-circle"></i> You can only provide one solution per question. You can edit your existing solution if needed.
 </div>
 {% endif %}
@@ -80,33 +95,28 @@
 <script defer src="https://cdn.jsdelivr.net/npm/@editorjs/inline-code@latest"></script>
 <script defer src="https://cdn.jsdelivr.net/npm/@calumk/editorjs-codecup@latest"></script>
 
-{% load static %}
 <script src="{% static 'forum/js/inline-math.js' %}" defer></script>
 <script src="{% static 'forum/js/editor-config.js' %}" defer></script>
 
-<script defer src="https://cdn.jsdelivr.net/npm/mathlive@0.105.0/mathlive.min.js" defer></script>
+<script defer src="https://cdn.jsdelivr.net/npm/mathlive@0.105.0/mathlive.min.js"></script>
+
 <script type="module">
-    import { EditorManager } from '{% static "forum/js/editor-manager.js" %}';
-    import { VotingSystem } from '{% static "forum/js/voting-system.js" %}';
-    import { SolutionEditor } from '{% static "forum/js/solution-editing.js" %}';
-    import { SolutionSorter } from '{% static "forum/js/solution-sorting.js" %}';
-    import { CommentEditor } from '{% static "forum/js/comment-editing.js" %}';
-    import { MathLiveBlock } from '{% static "forum/js/math-block.js" %}';
-    import createEditor from '{% static "forum/js/editor-config.js" %}'; 
+import { EditorManager } from '{% static "forum/js/editor-manager.js" %}';
+import { VotingSystem } from '{% static "forum/js/voting-system.js" %}';
+import { SolutionEditor } from '{% static "forum/js/solution-editing.js" %}';
+import { SolutionSorter } from '{% static "forum/js/solution-sorting.js" %}';
+import { CommentEditor } from '{% static "forum/js/comment-editing.js" %}';
+import { MathLiveBlock } from '{% static "forum/js/math-block.js" %}';
+import createEditor from '{% static "forum/js/editor-config.js" %}';
 
-    document.addEventListener("DOMContentLoaded", async function () {
-
+document.addEventListener("DOMContentLoaded", async function () {
     try {
-
-        // Initialize Editor Manager
         const editorManager = new EditorManager();
 
-        
-        // Initialize main post editor
         const contentJSON = '{{ content_json|escapejs }}';
         const content = JSON.parse(contentJSON);
         await editorManager.initializeMainEditor('editorjs', content, '{{ csrf_token }}', true);
-        // Initialize solution editors
+
         const processedSolutions = JSON.parse('{{ processed_solutions_json|escapejs }}');
         await editorManager.initializeSolutionEditors(processedSolutions, '{{ csrf_token }}');
 
@@ -116,19 +126,15 @@
             }
         }
 
-        // Initialize solution form editor
-
         const user_posted_a_solution = {{ has_solution_from_user|yesno:"true,false"|safe }};
-        if(!user_posted_a_solution){
+        if (!user_posted_a_solution) {
             var solutionFormEditor = await editorManager.initializeSolutionFormEditor(
-            'editorjs-solution-form',
-            '{{ csrf_token }}',
-            'solution-content'
+                'editorjs-solution-form',
+                '{{ csrf_token }}',
+                'solution-content'
             );
         }
 
-
-        // Set up solution form submission
         const solutionForm = document.getElementById('solutionForm');
         if (solutionForm) {
             solutionForm.addEventListener('submit', async function (e) {
@@ -143,24 +149,111 @@
             });
         }
 
-        // Initialize voting system
         new VotingSystem('{{ csrf_token }}');
 
-        // Initialize solution editor
         const solutionEditor = new SolutionEditor(editorManager, '{{ csrf_token }}');
         window.showEditSolutionForm = solutionEditor.showEditForm.bind(solutionEditor);
         window.saveSolutionEdit = solutionEditor.saveSolution.bind(solutionEditor);
         window.cancelSolutionEdit = solutionEditor.cancelEdit.bind(solutionEditor);
 
         const commentEditor = new CommentEditor(editorManager, '{{ csrf_token }}');
-
-        // Initialize solution sorting
         new SolutionSorter();
 
     } catch (error) {
         console.error("Error initializing post detail page:", error);
     }
+
+    // Interaction listeners
+    const followForms = document.querySelectorAll('.follow-form');
+    followForms.forEach(form => {
+        form.addEventListener('submit', function (e) {
+            e.preventDefault();
+            const url = this.getAttribute('action');
+            const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+            fetch(url, {
+                method: 'POST',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRFToken': csrfToken,
+                    'Content-Type': 'application/json',
+                },
+                credentials: 'same-origin'
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    const followCount = document.querySelectorAll('.follow-count');
+                    followCount.forEach(count => {
+                        count.textContent = data.followers_count;
+                    });
+                    const button = this.querySelector('button');
+                    if (data.followed) {
+                        this.setAttribute('action', '{% url "unfollow_post" post.id %}');
+                        button.innerHTML = '<i class="fas fa-bell-slash me-1"></i> Unfollow<span class="follow-count">' + data.followers_count + '</span>';
+                        button.classList.add('active');
+                    } else {
+                        this.setAttribute('action', '{% url "follow_post" post.id %}');
+                        button.innerHTML = '<i class="fas fa-bell me-1"></i> Follow<span class="follow-count">' + data.followers_count + '</span>';
+                        button.classList.remove('active');
+                    }
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        });
+    });
+
+    const saveSolutionForms = document.querySelectorAll('.save-solution-form');
+    saveSolutionForms.forEach(form => {
+        form.addEventListener('submit', function (e) {
+            e.preventDefault();
+            const url = this.getAttribute('action');
+            const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+            fetch(url, {
+                method: 'POST',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRFToken': csrfToken,
+                    'Content-Type': 'application/json',
+                },
+                credentials: 'same-origin'
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    const solutionId = url.split('/').slice(-2)[0];
+                    const button = this.querySelector('button');
+                    if (data.saved) {
+                        this.setAttribute('action', '/unsave-solution/' + solutionId + '/');
+                        button.classList.add('active');
+                        button.innerHTML = '<i class="fas fa-bookmark"></i>';
+                        button.title = "Unsave";
+                    } else {
+                        this.setAttribute('action', '/save-solution/' + solutionId + '/');
+                        button.classList.remove('active');
+                        button.innerHTML = '<i class="far fa-bookmark"></i>';
+                        button.title = "Save";
+                    }
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        });
+    });
+
 });
+
+function showReplyForm(commentId) {
+    document.getElementById('reply-form-' + commentId).style.display = 'block';
+    console.log('Showing reply form for comment: ' + commentId);
+}
+
+function hideReplyForm(commentId) {
+    document.getElementById('reply-form-' + commentId).style.display = 'none';
+    console.log('Hiding reply form for comment: ' + commentId);
+}
 </script>
 
 {% endblock %}

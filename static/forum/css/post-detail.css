@@ -1,4 +1,3 @@
-
 .nav-link:hover {
   color: #004080 !important;
 }
@@ -54,10 +53,11 @@
   gap: 15px;
 }
 .vote-count {
-  font-size: 24px;
-  font-weight: 500;
+  font-size: 20px;
+  font-weight: bold;
   color: #333;
   text-align: center;
+  margin: 10px 0;
 }
 .author-info {
   display: flex;
@@ -80,12 +80,14 @@
   padding: 20px;
 }
 
-.vote-count {
-  font-size: 20px;
-  font-weight: bold;
-  color: #333;
+.vote-cell form {
+  margin-bottom: 5px;
   text-align: center;
-  margin: 10px 0;
+}
+
+.vote-cell .save-solution-form {
+  margin-top: 15px;
+  text-align: center;
 }
 
 .vote-button {
@@ -107,7 +109,6 @@
 
 .post-content-cell {
   flex-grow: 1;
-  padding: 10px 0;
 }
 
 .solution-container {
@@ -118,13 +119,13 @@
   background-color: white;
   margin:auto;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+  position: relative;
 }
 
 .question-header {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  margin-bottom: 10px;
 }
 
 .question-header h1 {
@@ -158,6 +159,12 @@
   color: #333;
 }
 
+.follow-button.active {
+  background-color: #e6f7ff;
+  color: #0d6efd;
+  border: 1px solid #b3d7ff;
+}
+
 .follow-count {
   margin-left: 5px;
   color: #666;
@@ -178,6 +185,34 @@
   background-color: white;
 }
 
+.solution-actions {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  justify-content: flex-start;
+}
+
+.default-actions {
+  display: flex;
+  align-items: center;
+  margin-right: 10px;
+}
+
+.edit-actions {
+  margin-right: 10px;
+}
+
+.save-solution-form {
+  margin-left: 0px;
+}
+
+/* Make bookmark icon and follow buttons more visible */
+button .fa-bookmark,
+button .fa-bookmark-slash,
+button .fa-bell,
+button .fa-bell-slash {
+  font-size: 1.1em;
+}
 
 .accept-button-accepted {
     background: transparent !important;
@@ -228,7 +263,7 @@
     align-items: center;
     margin: auto;
     max-width: 920px;
-  }
+}
   
   .sort-dropdown {
     position: relative;
@@ -238,8 +273,8 @@
   .sort-dropdown-button {
     background-color: #f8f9fa;
     color: #2c5282;
-    border: 1px solid #cbd5e0;
-    border-radius: 4px;
+    border: none !important;
+    border-radius: 12px;
     padding: 6px 12px;
     font-size: 14px;
     cursor: pointer;
@@ -272,7 +307,7 @@
     top: 100%;
     background-color: white;
     min-width: 120px;
-    border-radius: 4px;
+    border-radius: 12px;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
     z-index: 1000;
     border: 1px solid #e2e8f0;
@@ -295,6 +330,7 @@
     display: block;
     text-decoration: none;
     transition: background-color 0.2s ease;
+    border-radius: 6px;
   }
   
   .sort-option:hover {
@@ -324,42 +360,125 @@
     }
   }
 
-    .vote-button svg path {
-        fill: #bbb;  /* Default color */
-        transition: fill 0.2s ease;
-    }
-    
-    .vote-button:hover svg path {
-        fill: #000000;  /* Hover color */
-    }
-    
-    .vote-button.voted-up svg path {
-        fill: #2ecc71;  /* Green color for upvotes */
-    }
-    
-    .vote-button.voted-down svg path {
-        fill: #e74c3c;  /* Red color for downvotes */
-    }
-    
-    .vote-button {
-        background: none;
-        border: none;
-        padding: 0;
-        cursor: pointer;
-    }
-    
-    .vote-button:focus {
-        outline: none;
-    }
+.vote-button svg path {
+    fill: #bbb;  /* Default color */
+    transition: fill 0.2s ease;
+}
 
-    .math-field {
-        margin: 0px;
-    }
+.vote-button:hover svg path {
+    fill: #000000;  /* Hover color */
+}
 
-    .inline-math {
-        margin: 0px !important;
-    }
+.vote-button.voted-up svg path {
+    fill: #2ecc71;  /* Green color for upvotes */
+}
 
+.vote-button.voted-down svg path {
+    fill: #e74c3c;  /* Red color for downvotes */
+}
+
+.vote-button {
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+}
+
+.vote-button:focus {
+    outline: none;
+}
+
+.math-field {
+    margin: 0px;
+}
+
+.inline-math {
+    margin: 0px !important;
+}
+
+.custom-save-position {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+}
+
+
+/* Center the bookmark icon */
+.vote-cell .fa-bookmark {
+  font-size: 18px;
+}
+
+/* Reset button to a clean state */
+.vote-cell .save-solution-form button {
+  background: none;
+  border: none;
+  padding: 0;
+  margin: 0;
+}
+
+/* Stack Overflow style star button */
+.star-button {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  outline: none;
+  width: 24px;
+  height: 24px;
+  display: inline-block;
+}
+
+.star-button svg {
+  fill: #e3e6e8;  
+  transition: all 0.2s ease;
+}
+
+.star-button:hover svg {
+  fill: #babfc4; 
+}
+
+.star-button.active svg {
+  fill: #f5bd41; 
+}
+
+.star-button:active {
+  transform: scale(1.1); 
+}
+
+/* Bookmark button styling */
+.bookmark-button {
+  /* margin-top: 20px; *test*   */
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 2px;
+  outline: none;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.bookmark-button i {
+  margin-top: -20px;
+  font-size: 18px; 
+  color: #babfc4; 
+  transition: all 0.2s ease;
+}
+
+.bookmark-button:hover i {
+  color: #6a737c;
+}
+
+.bookmark-button.active i {
+  color: #0d6efd; 
+}
+
+.bookmark-button:active {
+  transform: scale(1.1);
+}
+  
     /* Comment styling */
 .comment {
   position: relative;
@@ -383,9 +502,10 @@
 }
 
 /* Increase indentation based on nesting level */
-.comment[data-depth="1"] { margin-left: 2rem; }
-.comment[data-depth="2"] { margin-left: 4rem; }
-.comment[data-depth="3"] { margin-left: 6rem; }
+.comment[data-depth="0"] { margin-left: 1rem !important; }
+.comment[data-depth="1"] { margin-left: 2rem !important; }
+.comment[data-depth="2"] { margin-left: 4rem !important; }
+.comment[data-depth="3"] { margin-left: 6rem !important; }
 
 .comment[data-depth="0"] > .replies > .toggle-replies { margin-left: 2rem !important ;}
 .comment[data-depth="1"] > .replies > .toggle-replies { margin-left: 4rem !important; }
@@ -433,4 +553,19 @@
 
 div[id^="comment-form-"][id$="-root"] {
   border-top: 2px solid #e1e4e8;
+}
+
+#editorjs-solution-form{
+  background-color: #f9f9f9;
+  border-radius: 12px;
+}
+
+
+.post-form-editor {
+    background-color: #f9f9f9;
+    border-radius: 12px;
+}
+
+.form-control{
+    border-radius: 12px;
 }

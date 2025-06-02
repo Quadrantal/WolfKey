@@ -20,11 +20,11 @@
         </div>
         <div class="step-item">
             <div class="step-circle" data-step="2">2</div>
-            <div class="step-label">School Info</div>
+            <div class="step-label">Personal Info</div>
         </div>
         <div class="step-item">
             <div class="step-circle" data-step="3">3</div>
-            <div class="step-label">Personal Info</div>
+            <div class="step-label">Course Info</div>
         </div>
         <div class="step-item">
             <div class="step-circle" data-step="4">4</div>
@@ -64,7 +64,7 @@
             </div>
 
             <div class="form-step" data-step="2">
-                <h3 class="mb-4">School Information</h3>
+                <h3 class="mb-4">General Information</h3>
                 <div class="mb-3">
                     {{ form.first_name }}
                     {% if form.first_name.help_text %}
@@ -92,7 +92,7 @@
                 <div class="mb-3">
                     {{ form.personal_email }}
                     {% if form.personal_email.help_text %}
-                        <small class="help-text">{{ form.personal_email.help_text }}</small>
+                        <small class="help-text">{{ form.personal_email.help_text |safe  }}</small>
                     {% endif %}
                     <div class="error-message" id="error-personal_email"></div>
                 </div>
@@ -100,13 +100,13 @@
                 <div class="mb-3">
                     {{ form.phone_number }}
                     {% if form.phone_number.help_text %}
-                        <small class="help-text">{{ form.phone_number.help_text }}</small>
+                        <small class="help-text">{{ form.phone_number.help_text | safe}}</small>
                     {% endif %}
                     <div class="error-message" id="error-phone_number"></div>
 
                 </div>
                 
-                <h3 class="mb-4">Personal Information</h3>
+                <h3 class="mb-4">Password</h3>
                 
                 <div class="mb-3">
                     {{ form.password1 }}

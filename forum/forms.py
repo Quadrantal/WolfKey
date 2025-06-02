@@ -183,7 +183,7 @@ class CustomUserCreationForm(UserCreationForm):
             'class': 'form-control',
             'placeholder': 'personal@example.com'
         }),
-        help_text="Optional personal email address. NOTE: You can not reset your password without this!"
+        help_text="<strong> Optional </strong> personal email address. NOTE: You can not reset your password without this!"
     )
     phone_number = forms.CharField(
         required=False,
@@ -191,7 +191,7 @@ class CustomUserCreationForm(UserCreationForm):
             'class': 'form-control',
             'placeholder': '+1234567890'
         }),
-        help_text="Optional phone number in international format (e.g., +12345678900)"
+        help_text="<strong> Optional </strong> phone number in international format (e.g., +12345678900)"
     )
 
     class Meta:
@@ -218,11 +218,11 @@ class CustomUserCreationForm(UserCreationForm):
     
     def save(self, commit=True):
         user = super().save(commit=False)
-        # Generate a random username that won't be displayed
         user.username = str(uuid.uuid4())[:30]
+
         if commit:
             user.save()
-            
+
         if not user.personal_email:
             user.personal_email = user.school_email
         return user
@@ -245,9 +245,6 @@ class CustomPasswordResetForm(PasswordResetForm):
             user = User.objects.get(school_email=email) if email.endswith('@wpga.ca') else User.objects.get(personal_email=email)
         except User.DoesNotExist:
             raise ValidationError("No account found with this email address.")
-        
-        if email.endswith('@wpga.ca') and not user.personal_email:
-            raise ValidationError("This account does not have a personal email associated. Password reset is not possible.")
         
         return email
 
@@ -278,7 +275,7 @@ class CustomPasswordResetForm(PasswordResetForm):
             context = {
                 "email": to_email,
                 "domain": domain_override or request.get_host(),
-                "site_name": "YourSite",
+                "site_name": "WolfKey",
                 "uid": urlsafe_base64_encode(force_bytes(user.pk)),
                 "user": user,
                 "token": token_generator.make_token(user),

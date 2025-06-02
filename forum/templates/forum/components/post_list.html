@@ -1,0 +1,5 @@
+{% for post in posts %}
+    <div class="mb-3 post-card-container" style="max-width: 800px; margin: 0 auto; margin-bottom: .75rem;" data-animate>
+        {% include 'forum/components/post_card.html' with post=post %}
+    </div>
+{% endfor %}

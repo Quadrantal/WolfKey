@@ -200,3 +200,32 @@
 .share-menu-content {
     padding: 8px;
 }
+
+.follow-button {
+    background-color: transparent;
+    border: none;
+    color: grey; /* Bootstrap primary */
+    font-weight: 500;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    cursor: pointer;
+    transition: color 0.2s ease, background-color 0.2s ease;
+    padding: 6px 10px;
+    border-radius: 6px;
+}
+
+.follow-button:hover {
+    background-color: rgba(13, 110, 253, 0.1); /* Light blue hover */
+    text-decoration: none;
+}
+
+
+/* Active (following) state */
+.follow-button.active {
+    color: #0d6efd; /* Bootstrap danger */
+}
+
+.follow-button.active:hover {
+    background-color: rgba(220, 53, 69, 0.1); /* Light red hover */
+}

@@ -13,7 +13,7 @@
 .course-dropdown {
     width: 100%;
     border: 1px solid #ccc;
-    border-radius: 5px;
+    border-radius: 12px;
     background: white;
     display: none;
     max-height: 200px;

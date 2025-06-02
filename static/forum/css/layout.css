@@ -295,3 +295,8 @@ li {
     border: none;
     font-size: 14px;
   }
+
+  #loading-spinner {
+    padding: 20px;
+    margin-bottom: 20px;
+}

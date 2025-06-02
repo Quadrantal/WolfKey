@@ -39,6 +39,25 @@
             </button>
         </form>
         {% endif %}
+
+        <!-- Solution Saving-->
+        {% if user.is_authenticated %}
+            {% if solution|is_saved_solution:user %}
+            <form method="post" action="{% url 'unsave_solution' solution.id %}" class="d-inline save-solution-form">
+                {% csrf_token %}
+                <button type="submit" class="bookmark-button active" title="Unsave">
+                    <i class="fas fa-bookmark"></i>
+                </button>
+            </form>
+            {% else %}
+            <form method="post" action="{% url 'save_solution' solution.id %}" class="d-inline save-solution-form">
+                {% csrf_token %}
+                <button type="submit" class="bookmark-button" title="Save">
+                    <i class="far fa-bookmark"></i>
+                </button>
+            </form>
+            {% endif %}
+        {% endif %}
     </div>
 
     <!-- Solution Content -->
@@ -74,11 +93,15 @@
             {% if user == solution.author %}
             <div class="default-actions">
                 <button class="btn btn-outline-secondary btn-sm"
-                    onclick="showEditSolutionForm(Number('{{ solution.id }}'))">Edit</button>
+                    onclick="showEditSolutionForm(Number('{{ solution.id }}'))">
+                    <i class="bi bi-pencil"></i> 
+                </button>
                 <form id="delete-solution-form-{{ solution.id }}"  method="post" action="{% url 'delete_solution' solution.id %}" class="delete-solution-form d-inline">
                     {% csrf_token %}
                     <input type="hidden" name="solution_id" value="{{ solution.id }}">
-                    <button type="submit" class="btn btn-outline-danger btn-sm">Delete</button>
+                    <button type="submit" class="btn btn-outline-danger btn-sm">
+                        <i class="bi bi-trash"></i> 
+                    </button>
                 </form>
             </div>
             <div class="edit-actions" style="display: none;">
@@ -92,15 +115,17 @@
 
         <!-- Comments -->
         <div class="comments-section">
-            <div class="comments">
-                {% include 'forum/components/comments_list.html' with comments=solution.comments.all %}
-            </div>
             {% if user.is_authenticated %}
             <button class="reply-button btn btn-outline-secondary btn-sm mt-2" 
                     data-solution-id="{{ solution.id }}">
                 Add a comment
             </button>
             {% endif %}
+            <br>
+            <div class="comments">
+                {% include 'forum/components/comments_list.html' with comments=solution.comments.all %}
+            </div>
+
         </div>
     </div>
 </div>

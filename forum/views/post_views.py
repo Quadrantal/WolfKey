@@ -8,11 +8,11 @@ import json
 import logging
 from django.http import JsonResponse
 from django.utils.html import escape
-from forum.models import Post, Solution, Comment, Course
+from forum.models import Post, Solution, Comment, Course, FollowedPost, SavedSolution, Notification
 from forum.forms import SolutionForm, CommentForm, PostForm
 from .utils import selective_quote_replace, detect_bad_words
 from django.contrib import messages
-from .notification_views import send_course_notifications
+from .notification_views import send_course_notifications, send_solution_notification
 from django.http import HttpResponseForbidden
 
 
@@ -61,10 +61,19 @@ def create_post(request):
         form = PostForm()
 
     return render(request, 'forum/post_form.html', {'form': form, 'action': 'Create'})
-
+  
 @login_required
 def post_detail(request, post_id):
     post = get_object_or_404(Post, id=post_id)
+
+    if request.user.is_authenticated:
+        Notification.objects.filter(
+            recipient=request.user,
+            post=post,
+            is_read=False
+        ).update(is_read=True)
+    post.views += 1
+    post.save()
     solutions = post.solutions.annotate(
         vote_score=F('upvotes') - F('downvotes')
     ).order_by(
@@ -76,23 +85,34 @@ def post_detail(request, post_id):
         '-vote_score',
         '-created_at'
     )
+
+    solution_form = SolutionForm()
+    comment_form = CommentForm()
     
     has_solution = Solution.objects.filter(post=post, author=request.user).exists()
-    # Process post content
-    content_json = json.dumps(post.content, cls=DjangoJSONEncoder)
+    
+    try:
+        content_json = json.dumps(post.content, cls=DjangoJSONEncoder)
+    except (TypeError, ValueError) as e:
+        logger.error(f"Error serializing post content: {e}")
+        content_json = json.dumps({
+            "blocks": [{"type": "paragraph", "data": {"text": "Error displaying content"}}]
+        })
     
     processed_solutions = []
     for solution in solutions:
         try:
             solution_content = solution.content
-            if isinstance(solution_content, str):
-                solution_content = selective_quote_replace(solution_content)
-                solution_content = json.loads(solution_content)
-            
+    
+
+            # Check if the solution is saved by the current user
+            is_saved = False
+            if request.user.is_authenticated:
+                is_saved = SavedSolution.objects.filter(user=request.user, solution=solution).exists()
+
             # Get comments for this solution
             comments = solution.comments.select_related('author').order_by('created_at')
             processed_comments = []
-            
             for comment in comments:
                 processed_comments.append({
                     'id': comment.id,
@@ -100,10 +120,10 @@ def post_detail(request, post_id):
                     'author': f"{comment.author.first_name} {comment.author.last_name}",
                     'created_at': comment.created_at.strftime("%Y-%m-%d %H:%M:%S"),
                     'parent_id': comment.parent_id,
-                    'depth' : comment.get_depth(),
+                    'depth': comment.get_depth(),
                 })
             root_comments_count = sum(1 for comment in comments if comment.get_depth() == 0)
-            
+
             processed_solutions.append({
                 'id': solution.id,
                 'content': solution_content,  
@@ -111,9 +131,9 @@ def post_detail(request, post_id):
                 'created_at': solution.created_at.strftime("%Y-%m-%d %H:%M:%S"),
                 'upvotes': solution.upvotes,
                 'downvotes': solution.downvotes,
+                'is_saved': is_saved,
                 'comments': processed_comments,
-                "root_comments_count": root_comments_count,
-
+                'root_comments_count': root_comments_count,
             })
         except Exception as e:
             logger.error(f"Error processing solution {solution.id}: {e}")
@@ -126,19 +146,29 @@ def post_detail(request, post_id):
                 'created_at': solution.created_at.strftime("%Y-%m-%d %H:%M:%S"),
                 'upvotes': solution.upvotes,
                 'downvotes': solution.downvotes,
+                'is_saved': False,
                 'comments': [],
+                'root_comments_count': 0,
             })
-
+    
+    is_following = False
+    if request.user.is_authenticated:
+        is_following = FollowedPost.objects.filter(user=request.user, post=post).exists()
+    
     context = {
         'post': post,
         'solutions': solutions,
         'content_json': content_json,
         'processed_solutions_json': json.dumps(processed_solutions),
         'courses': post.courses.all(),
-        'has_solution_from_user': has_solution, 
+        'has_solution_from_user': has_solution,
+        'solution_form': solution_form,
+        'comment_form': comment_form,
+        'is_following': is_following
     }
 
     return render(request, 'forum/post_detail.html', context)
+
 
 @login_required
 def edit_post(request, post_id):
