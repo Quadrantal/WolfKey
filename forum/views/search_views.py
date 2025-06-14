@@ -7,7 +7,6 @@ from forum.models import Post, User
 from forum.views.utils import process_post_preview, add_course_context
 from forum.views.greetings import get_random_greeting
 from forum.views.course_views import get_user_courses
-from forum.views.schedule_views import get_block_order_for_day, process_schedule_for_user, is_ceremonial_uniform_required
 from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo
 from django.db.models import Count

@@ -80,3 +80,13 @@ def paginate_posts(posts_queryset, page=1, limit=10):
         "page_obj": page_obj,
         "has_next": page_obj.has_next()
     }
+
+def get_user_posts(user):
+    posts = Post.objects.filter(author = user)
+    experienced_courses, help_needed_courses = get_user_courses(user)
+    
+    # Process posts
+    for post in posts:
+        post.preview_text = process_post_preview(post)
+        add_course_context(post, experienced_courses, help_needed_courses)
+    return posts

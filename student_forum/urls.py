@@ -84,9 +84,10 @@ from forum.views.comments_views import (
     get_comments
 )
 from forum.views.schedule_views import(
-    get_daily_schedule,
+    get_daily_schedule,    
+)
+from forum.services.schedule_services import (
     is_ceremonial_uniform_required
-    
 )
 from forum.views.api_views import(
     get_csrf_token,
