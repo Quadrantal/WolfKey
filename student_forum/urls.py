@@ -89,7 +89,6 @@ from forum.views.schedule_views import(
 )
 from forum.views.api_views import(
     get_csrf_token,
-    api_login,
     api_logout,
     for_you_api,
     api_post_detail,
@@ -180,7 +179,6 @@ urlpatterns = [
     path('reset/<uidb64>/<token>/', CustomPasswordResetConfirmView.as_view(), name='password_reset_confirm'),
     path('reset/done/', CustomPasswordResetCompleteView.as_view(), name='password_reset_complete'),
 
-    path('api/login/', api_login, name='api_login'),
     path('api/logout/', api_logout, name='api_logout'),
     path('api/schedules/daily/<str:target_date>/', get_daily_schedule),
     path('api/schedules/uniform/<str:target_date>/', is_ceremonial_uniform_required),
