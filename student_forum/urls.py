@@ -33,9 +33,10 @@ from forum.views.post_views import (
     delete_post, 
     create_post
 )
-from forum.views.search_views import (
-    for_you, 
+
+from forum.views.feed_views import (
     all_posts,
+    for_you,
     my_posts
 )
 from forum.views.solution_views import (

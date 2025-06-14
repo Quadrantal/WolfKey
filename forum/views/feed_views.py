@@ -1,14 +1,16 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
-from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
 from forum.services.feed_services import get_for_you_posts, get_all_posts, paginate_posts
+from forum.models import Post, User
 from forum.views.greetings import get_random_greeting
 from forum.views.schedule_views import (
     get_block_order_for_day, 
     process_schedule_for_user,
     is_ceremonial_uniform_required
 )
+from forum.views.course_views import get_user_courses
+from forum.views.utils import process_post_preview, add_course_context
 from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo
 
@@ -65,3 +67,14 @@ def all_posts(request):
         'posts': paginated_data["page_obj"],
         'query': query,
     })
+
+@login_required
+def my_posts(request):
+    posts = Post.objects.filter(author = request.user)
+    experienced_courses, help_needed_courses = get_user_courses(request.user)
+    
+    # Process posts
+    for post in posts:
+        post.preview_text = process_post_preview(post)
+        add_course_context(post, experienced_courses, help_needed_courses)
+    return render(request,'forum/my_posts.html', {'posts': posts})

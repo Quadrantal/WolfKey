@@ -26,6 +26,7 @@ def register(request):
                 messages.success(request, 'Welcome to WolfKey!')
                 return redirect('all_posts')
         else:
+            # Form has errors, make user fix fields and while doing so, keep what they have selected previously. 
             current_course_ids = request.POST.get('current_courses', '').split(',')
             experienced_course_ids = request.POST.get('experienced_courses', '').split(',')
 
