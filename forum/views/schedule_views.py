@@ -7,6 +7,9 @@ from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 import httpx
 import re
+from django.http import JsonResponse
+from django.views.decorators.http import require_http_methods
+from django.views.decorators.csrf import ensure_csrf_cookie
 
 # Initialize Google Sheets client
 scope = ['https://spreadsheets.google.com/feeds', 'https://www.googleapis.com/auth/drive']
@@ -107,29 +110,30 @@ def get_block_order_for_day(target_date):
 
     # Check if a DailySchedule already exists for the date
     existing_schedule = DailySchedule.objects.filter(date=date_obj).first()
-    if any([existing_schedule.block_1, existing_schedule.block_2, existing_schedule.block_3, existing_schedule.block_4, existing_schedule.block_5]):
-        # Use the saved schedule
-        return {
-            'blocks': [
-                existing_schedule.block_1,
-                existing_schedule.block_2,
-                existing_schedule.block_3,
-                existing_schedule.block_4,
-                existing_schedule.block_5,
-            ],
-            'times': [
-                existing_schedule.block_1_time,
-                existing_schedule.block_2_time,
-                existing_schedule.block_3_time,
-                existing_schedule.block_4_time,
-                existing_schedule.block_5_time,
-            ],
-        }
-    elif not existing_schedule.is_school and existing_schedule.is_school != None:
-        return {
-            'blocks': [None, None, None, None, None],
-            'times': [None,None, None, None, None],
-        }
+    if existing_schedule != None:
+        if any([existing_schedule.block_1, existing_schedule.block_2, existing_schedule.block_3, existing_schedule.block_4, existing_schedule.block_5]):
+            # Use the saved schedule
+            return {
+                'blocks': [
+                    existing_schedule.block_1,
+                    existing_schedule.block_2,
+                    existing_schedule.block_3,
+                    existing_schedule.block_4,
+                    existing_schedule.block_5,
+                ],
+                'times': [
+                    existing_schedule.block_1_time,
+                    existing_schedule.block_2_time,
+                    existing_schedule.block_3_time,
+                    existing_schedule.block_4_time,
+                    existing_schedule.block_5_time,
+                ],
+            }
+        elif not existing_schedule.is_school and existing_schedule.is_school != None:
+            return {
+                'blocks': [None, None, None, None, None],
+                'times': [None,None, None, None, None],
+            }
 
     # If no saved schedule exists, proceed to fetch from external sources
     # Check for an "alt day" event in Google Calendar
@@ -302,3 +306,28 @@ def process_schedule_for_user(user, raw_schedule):
                 course = getattr(profile, block_attr, None)
                 processed_schedule.append({"block": course.name if course else f"Add your courses in profile/preferences to unlock this!", "time": time})
     return processed_schedule
+
+@ensure_csrf_cookie
+@require_http_methods(["GET"])
+def get_daily_schedule(request, target_date):
+    try:
+        date_obj = datetime.datetime.strptime(target_date, '%Y-%m-%d')
+        formatted_date = date_obj.strftime('%a, %b %-d')  # e.g., "Tue, Sep 3"
+        schedule = get_block_order_for_day(formatted_date)
+        
+        return JsonResponse({
+            'date': formatted_date,
+            'blocks': schedule['blocks'],
+            'times': schedule['times']
+        })
+    except ValueError as e:
+        return JsonResponse({
+            'error': 'Invalid date format. Expected YYYY-MM-DD',
+            'details': str(e)
+        }, status=400)
+    except Exception as e:
+        print(f"Error in get_daily_schedule: {e}")
+        return JsonResponse({
+            'error': 'Internal server error',
+            'details': str(e)
+        }, status=500)

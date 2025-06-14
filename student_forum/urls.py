@@ -82,6 +82,22 @@ from forum.views.comments_views import (
     delete_comment,
     get_comments
 )
+from forum.views.schedule_views import(
+    get_daily_schedule,
+    is_ceremonial_uniform_required
+    
+)
+from forum.views.api_views import(
+    get_csrf_token,
+    api_login,
+    api_logout,
+    for_you_api,
+    api_post_detail,
+    api_delete_post,
+    api_create_post,
+    api_update_post
+)
+
 from django.views.generic import RedirectView
 
 from forum.views.about_view import about_view
@@ -163,6 +179,18 @@ urlpatterns = [
     path('password_reset/done/', CustomPasswordResetDoneView.as_view(), name='password_reset_done'),
     path('reset/<uidb64>/<token>/', CustomPasswordResetConfirmView.as_view(), name='password_reset_confirm'),
     path('reset/done/', CustomPasswordResetCompleteView.as_view(), name='password_reset_complete'),
+
+    path('api/login/', api_login, name='api_login'),
+    path('api/logout/', api_logout, name='api_logout'),
+    path('api/schedules/daily/<str:target_date>/', get_daily_schedule),
+    path('api/schedules/uniform/<str:target_date>/', is_ceremonial_uniform_required),
+    path('api/schedules/uniform/<str:target_date>/', is_ceremonial_uniform_required),
+    path('api/for-you/', for_you_api, name='for_you_api'),
+    path('api/csrf/', get_csrf_token),
+    path('api/posts/<int:post_id>/', api_post_detail, name='api_post_detail'),
+    path('api/posts/', api_create_post, name='api_create_post'),
+    path('api/posts/<int:post_id>/update/', api_update_post, name='api_update_post'),
+    path('api/posts/<int:post_id>/delete/', api_delete_post, name='api_delete_post'),
 ]
 
 if settings.DEBUG:

@@ -1,13 +1,12 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
-from django.db.models import Q
+from django.db.models import Q,F
 from django.contrib.postgres.search import SearchQuery, SearchRank, SearchVector
 from django.contrib.postgres.search import TrigramSimilarity
 from forum.models import Post, User
 from forum.views.utils import process_post_preview, add_course_context
 from forum.views.greetings import get_random_greeting
 from forum.views.course_views import get_user_courses
-from django.db.models import F
 from forum.views.schedule_views import get_block_order_for_day, process_schedule_for_user, is_ceremonial_uniform_required
 from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo
@@ -22,6 +21,8 @@ def for_you(request):
         return redirect('login')
 
     experienced_courses, help_needed_courses = get_user_courses(request.user)
+
+    print(experienced_courses, help_needed_courses)
 
     greeting = get_random_greeting(request.user.first_name, user_timezone="America/Vancouver")
 

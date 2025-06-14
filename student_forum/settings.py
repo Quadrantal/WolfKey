@@ -33,7 +33,7 @@ SECRET_KEY = os.getenv('SECRET_KEY', 'your-default-secret-key')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv('DEBUG', 'False') == 'True'
 
-ALLOWED_HOSTS = ['wolfkey-de5aac68fc04.herokuapp.com', '127.0.0.1', 'wolfkey.net', 'www.wolfkey.net']
+ALLOWED_HOSTS = ['wolfkey-de5aac68fc04.herokuapp.com', '127.0.0.1', 'wolfkey.net', 'www.wolfkey.net', 'localhost:19000', 'localhost:8000', 'localhost', 'localhost:8001']
 
 # Application definition
 
@@ -47,6 +47,8 @@ INSTALLED_APPS = [
     'forum',
     'storages',
     'django_editorjs_fields',
+    'rest_framework',
+    'corsheaders'
 ]
 
 MIDDLEWARE = [
@@ -59,7 +61,15 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'forum.middleware.UserRoleMiddleware',
+    'corsheaders.middleware.CorsMiddleware'
 ]
+
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ],
+}
 
 AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend',
@@ -185,6 +195,55 @@ LOGGING = {
         },
     },
 }
+
+CORS_ALLOWED_ORIGINS = [
+    'http://127.0.0.1:8081',
+    "http://localhost:8081",
+    "exp://localhost:19000",  # Expo development server
+    "http://localhost:19006",  # Expo web
+]
+
+CORS_ALLOW_CREDENTIALS = True
+
+CORS_ALLOWED_ORIGIN_REGEXES = [
+    r"^exp://.*",             # All Expo Go URLs
+    r"^http://192\.168\..*"   # Local network IPs
+]
+CSRF_TRUSTED_ORIGINS = [
+    "http://localhost:8081",
+    "http://localhost:19000",
+    "http://localhost:19006"
+]
+
+CORS_ALLOW_METHODS = [
+    'GET',
+    'POST',
+    'OPTIONS'
+]
+
+CORS_ALLOW_HEADERS = [
+    'accept',
+    'accept-encoding',
+    'authorization',
+    'content-type',
+    'dnt',
+    'origin',
+    'user-agent',
+    'x-csrftoken',
+    'x-requested-with',
+    'cookie'
+]
+
+
+
+# Cookie settings
+CORS_EXPOSE_HEADERS = ['set-cookie']
+CSRF_COOKIE_SAMESITE = 'Lax'
+SESSION_COOKIE_SAMESITE = 'Lax'
+CSRF_COOKIE_SECURE = False 
+CSRF_COOKIE_HTTPONLY = False 
+CSRF_USE_SESSIONS = False
+CSRF_COOKIE_SAMESITE = None
 
 from dotenv import load_dotenv
 
