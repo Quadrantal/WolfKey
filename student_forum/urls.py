@@ -83,7 +83,7 @@ from forum.views.comments_views import (
     delete_comment,
     get_comments
 )
-from forum.views.schedule_views import(
+from forum.api.schedule import(
     get_daily_schedule,    
 )
 from forum.services.schedule_services import (
