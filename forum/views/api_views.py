@@ -20,7 +20,7 @@ from forum.views.utils import (
     detect_bad_words
 )
 from forum.services.auth_services import (
-    authenticate_and_login_user
+    authenticate_user
 )
 from forum.views.notification_views import send_course_notifications
 

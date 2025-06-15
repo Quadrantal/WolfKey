@@ -1,17 +1,22 @@
 from forum.services.auth_services import (
-    authenticate_and_login_user,
+    authenticate_user,
     register_user,
     get_user_profile_data
 )
 from django.contrib.auth import authenticate, login, logout
 from django.http import JsonResponse
-from django.views.decorators.csrf import ensure_csrf_cookie
+from django.views.decorators.csrf import ensure_csrf_cookie, csrf_exempt
 from django.views.decorators.http import require_http_methods
 from django.contrib.auth.decorators import login_required
+from rest_framework.authtoken.models import Token
 from forum.forms import CustomUserCreationForm
+from rest_framework.decorators import api_view, authentication_classes, permission_classes
+from rest_framework.authentication import TokenAuthentication
+from rest_framework.permissions import IsAuthenticated
+from forum.views.utils import upload_image
 import json
 
-@ensure_csrf_cookie
+@csrf_exempt
 @require_http_methods(["POST"])
 def api_login(request):
     try:
@@ -22,13 +27,16 @@ def api_login(request):
         if not school_email or not password:
             return JsonResponse({'error': 'Please provide both school email and password'}, status=400)
 
-        user, error = authenticate_and_login_user(request, school_email, password)
+        user, error = authenticate_user(request, school_email, password)
         if error:
             return JsonResponse({'error': error}, status=401)
 
         profile = user.userprofile
 
+        token, _ = Token.objects.get_or_create(user=user)
+
         return JsonResponse({
+            'token': token.key,
             'user': {
                 'id': user.id,
                 'first_name': user.first_name,
@@ -52,11 +60,13 @@ def api_login(request):
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)
 
+@csrf_exempt
 @login_required
 def api_logout(request):
     logout(request)
     return JsonResponse({'success': 'Logged out successfully'})
 
+@csrf_exempt
 @require_http_methods(["POST"])
 def api_register(request):
     try:
@@ -83,4 +93,10 @@ def api_register(request):
         return JsonResponse({'error': 'Invalid JSON'}, status=400)
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)
+
+@api_view(['POST'])
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
+def api_upload_image(request):
+    return upload_image(request)
 

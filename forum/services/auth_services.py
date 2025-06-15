@@ -3,7 +3,7 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import ensure_csrf_cookie
 from forum.models import User, UserCourseHelp, UserCourseExperience
 
-def authenticate_and_login_user(request, school_email, password):
+def authenticate_user(request, school_email, password):
     try:
         user = User.objects.get(school_email=school_email)
     except User.DoesNotExist:
@@ -12,7 +12,6 @@ def authenticate_and_login_user(request, school_email, password):
     if not user.check_password(password):
         return None, "Invalid password"
 
-    login(request, user)
     return user, None
 
 @ensure_csrf_cookie

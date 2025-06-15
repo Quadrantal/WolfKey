@@ -8,7 +8,7 @@ from forum.forms import CustomUserCreationForm, CustomPasswordResetForm
 import json
 from django.contrib.auth.views import PasswordResetView, PasswordResetDoneView, PasswordResetConfirmView, PasswordResetCompleteView
 from django.urls import reverse_lazy
-from forum.services.auth_services import authenticate_and_login_user, register_user
+from forum.services.auth_services import authenticate_user, register_user
 
 def register(request):
     if request.method == 'POST':
@@ -59,8 +59,9 @@ def login_view(request):
             school_email = form.cleaned_data.get('username')  # AuthenticationForm uses 'username' field
             password = form.cleaned_data.get('password')
 
-            user, error = authenticate_and_login_user(request, school_email, password)
+            user, error = authenticate_user(request, school_email, password)
             if user:
+                login(request,user)
                 messages.success(request, 'You are now logged in!')
                 return redirect('for_you')
             else:

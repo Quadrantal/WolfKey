@@ -27,13 +27,13 @@
 </head>
 
 {% block content %}
-{% include 'forum/components/post_detail_post_card.html' %}
+{% include 'forum/components/post_detail_post_card.html'%}
 
 <hr>
 
 <!-- Solutions -->
 <div class="solutions-header">
-    <h3 class="mt-4 mb-3">{{ solutions.count }} Solutions</h3>
+    <h3 class="mt-4 mb-3">{{ post.solutions.count }} Solutions</h3>
     <div class="sort-dropdown">
         <button class="sort-dropdown-button" type="button" id="sortDropdown">
             Sort by: <span id="currentSort">Votes</span>
