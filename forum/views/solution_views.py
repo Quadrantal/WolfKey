@@ -1,49 +1,45 @@
 # views/solution_views.py
 from django.shortcuts import get_object_or_404, redirect
-from django.contrib.auth.decorators import login_required
-from django.http import JsonResponse
-import json
-from forum.models import Post, Solution, SolutionDownvote, SolutionUpvote
-from forum.forms import SolutionForm
+from django.http import JsonResponse, HttpResponseForbidden
 from django.contrib import messages
-from django.http import HttpResponseForbidden
-from .utils import process_messages_to_json, detect_bad_words
-
+from .utils import process_messages_to_json
+from forum.forms import SolutionForm
+from forum.models import Post, Solution
+from forum.services.solution_services import (
+    create_solution_service,
+    update_solution_service,
+    delete_solution_service,
+    vote_solution_service,
+    accept_solution_service
+)
+from django.contrib.auth.decorators import login_required
+from django.views.decorators.http import require_http_methods
+import json
 
 @login_required
 def create_solution(request, post_id):
     if request.method == 'POST':
-        post = get_object_or_404(Post, id=post_id)
-
-        has_solution = Solution.objects.filter(post=post, author=request.user).exists()
-        if has_solution:
-            messages.error(request, 'You have already submitted a solution.')
-            return redirect(post.get_absolute_url())
-
         solution_form = SolutionForm(request.POST)
         if solution_form.is_valid():
             try:
                 solution_json = request.POST.get('content')
                 solution_data = json.loads(solution_json) if solution_json else {}
-
-                blocks = solution_data.get('blocks', [])
-                if (len(blocks) == 1 and blocks[0].get('type') == 'paragraph' and not blocks[0].get('data', {}).get('text', '').strip()) or len(blocks) == 0:
-                    messages.error(request, 'Solution cannot be empty.')
-                    return redirect(post.get_absolute_url())
-                detect_bad_words(solution_data) 
-                solution = solution_form.save(commit=False)
-                solution.content = solution_data
-                solution.post = post
-                solution.author = request.user
-                solution.save()
-                messages.success(request, 'Solution submitted succesfully.')
                 
-                return redirect(post.get_absolute_url())
-            except ValueError as e:
+                result = create_solution_service(request.user, post_id, {
+                    'content': solution_data
+                })
+                
+                if 'error' in result:
+                    messages.error(request, result['error'])
+                else:
+                    messages.success(request, result['message'])
+                
+                return redirect('post_detail', post_id=post_id)
+            except Exception as e:
                 messages.error(request, str(e))
-
-    messages.error(request, 'An error occured.')
-    return redirect(post.get_absolute_url())
+        
+    messages.error(request, 'An error occurred.')
+    return redirect('post_detail', post_id=post_id)
 
 @login_required
 def edit_solution(request, solution_id):
@@ -56,18 +52,18 @@ def edit_solution(request, solution_id):
                 solution_json = request.POST.get('content')
                 solution_data = json.loads(solution_json) if solution_json else {}
 
-                blocks = solution_data.get('blocks', [])
-                if (len(blocks) == 1 and blocks[0].get('type') == 'paragraph' and not blocks[0].get('data', {}).get('text', '').strip()) or len(blocks) == 0:
-                    messages.error(request, 'Solution cannot be empty.')
-                    return redirect('edit_solution', solution_id=solution.id)
-                
-                detect_bad_words(solution_data) 
-                solution = solution_form.save(commit=False)
-                solution.content = solution_data
-                solution.save()
-                messages.success(request, 'Solution edited succesfully')
-                messages_data = process_messages_to_json(request)
-                return JsonResponse({'status': 'success','messages': messages_data}, status=200)
+                result = update_solution_service(request.user, solution_id, {
+                    'content': solution_data
+                })
+
+                print(result)
+
+                if 'error' in result:
+                    messages.error(request, result['error'])
+                else:
+                    messages.success(request, result['message'])
+                    messages_data = process_messages_to_json(request)
+                    return JsonResponse({'status': 'success','messages': messages_data}, status=200)
             except ValueError as e:
                 print(e)
                 messages.error(request,str(e))
@@ -83,11 +79,15 @@ def delete_solution(request, solution_id):
     solution = get_object_or_404(Solution, id=solution_id, author=request.user)
     
     if request.method == 'POST':
-        solution.delete()
-        messages.success(request, 'Solution deleted succesfully')
-        messages_data = process_messages_to_json(request)
+        result = delete_solution_service(request.user, solution_id)
 
-        return JsonResponse({'status': 'success','messages': messages_data}, status=200)
+        if 'error' in result:
+            messages.error(request, result['error'])
+        else:
+            messages.success(request, result['message'])
+            messages_data = process_messages_to_json(request)
+
+            return JsonResponse({'status': 'success','messages': messages_data}, status=200)
 
     messages_data = process_messages_to_json(request)
     return JsonResponse({'status': 'error','messages': messages_data}, status=400)
@@ -96,58 +96,89 @@ def delete_solution(request, solution_id):
 @login_required
 def upvote_solution(request, solution_id):
     solution = get_object_or_404(Solution, id=solution_id)
-    if SolutionDownvote.objects.filter(solution=solution, user=request.user).exists():
-        SolutionDownvote.objects.filter(solution=solution, user=request.user).delete()
-        solution.downvotes -= 1
-    elif not SolutionUpvote.objects.filter(solution=solution, user=request.user).exists():
-        SolutionUpvote.objects.create(solution=solution, user=request.user)
-        solution.upvotes += 1
-    else:
-        return JsonResponse({'success': False, 'message': 'You have already upvoted this solution.'}, status=400)
-    
-    solution.save()
-    return JsonResponse({'success': True, 'upvotes': solution.upvotes, 'downvotes': solution.downvotes, 'vote_state': 'upvoted' if SolutionUpvote.objects.filter(solution=solution, user=request.user).exists() else 'downvoted' if SolutionDownvote.objects.filter(solution=solution, user=request.user).exists() else 'none'})
+    result = vote_solution_service(request.user, solution_id, 'upvote')
 
+    if 'conflict' in result:
+        # Return 409 Conflict for duplicate votes
+        return JsonResponse({
+            'success': False,
+            'message': result['error'],
+            'messages': result.get('messages', [])
+        }, status=409)
+    elif 'error' in result:
+        return JsonResponse({
+            'success': False,
+            'message': result['error'],
+            'messages': result.get('messages', [])
+        }, status=400)
+
+    return JsonResponse({
+        'success': True,
+        'upvotes': result['upvotes'],
+        'downvotes': result['downvotes'],
+        'vote_state': result['vote_state'],
+        'messages': result.get('messages', [])
+    })
 
 @login_required
 def downvote_solution(request, solution_id):
     solution = get_object_or_404(Solution, id=solution_id)
-    if SolutionUpvote.objects.filter(solution=solution, user=request.user).exists():
-        SolutionUpvote.objects.filter(solution=solution, user=request.user).delete()
-        solution.upvotes -= 1
-    elif not SolutionDownvote.objects.filter(solution=solution, user=request.user).exists():
-        SolutionDownvote.objects.create(solution=solution, user=request.user)
-        solution.downvotes += 1
-    else:
-        return JsonResponse({'success': False, 'message': 'You have already downvoted this solution.'}, status=400)
-    
-    solution.save()
-    return JsonResponse({'success': True, 'upvotes': solution.upvotes, 'downvotes': solution.downvotes, 'vote_state': 'upvoted' if SolutionUpvote.objects.filter(solution=solution, user=request.user).exists() else 'downvoted' if SolutionDownvote.objects.filter(solution=solution, user=request.user).exists() else 'none'})
+    result = vote_solution_service(request.user, solution_id, 'downvote')
 
+    if 'conflict' in result:
+        # Return 409 Conflict for duplicate votes
+        return JsonResponse({
+            'success': False,
+            'message': result['error'],
+            'messages': result.get('messages', [])
+        }, status=409)
+    elif 'error' in result:
+        return JsonResponse({
+            'success': False,
+            'message': result['error'],
+            'messages': result.get('messages', [])
+        }, status=400)
+    
+    return JsonResponse({
+        'success': True,
+        'upvotes': result['upvotes'],
+        'downvotes': result['downvotes'],
+        'vote_state': result['vote_state'],
+        'messages': result.get('messages', [])
+    })
 
 @login_required
+@require_http_methods(["POST"])
 def accept_solution(request, solution_id):
-    solution = get_object_or_404(Solution, id=solution_id)
-    post = solution.post
-    
-    # Only post author can accept solutions
-    if request.user != post.author:
-        return HttpResponseForbidden("Only the post author can accept solutions")
-    
-    if post.accepted_solution == solution:
-        # Unaccept the solution
-        post.accepted_solution = None
-        post.save()
-        messages.success(request, 'Solution unmarked as accepted.')
-    else:
-        if post.accepted_solution:
-            # Unaccept the previous solution
-            post.accepted_solution = None
-            post.save()
-            messages.info(request, 'Previous accepted solution has been unmarked.')
-        # Accept the solution
-        post.accepted_solution = solution
-        post.save()
-        messages.success(request, 'Solution marked as accepted!')
+    try:
+        result = accept_solution_service(request.user, solution_id)
+
+        print(result)
         
-    return redirect('post_detail', post_id=post.id)
+        if 'error' in result:
+            return JsonResponse({
+                'success': False,
+                'message': result['error'],
+                'messages': result.get('messages', [])
+            }, status=400)
+        
+        return JsonResponse({
+            'success': True,
+            'message': result['message'],
+            'is_accepted': result['is_accepted'],
+            'previous_solution_id': result.get('previous_solution_id'),
+            'messages': result.get('messages', [])
+        })
+        
+    except json.JSONDecodeError:
+        return JsonResponse({
+            'success': False,
+            'message': 'Invalid JSON data',
+            'messages': [{'message': 'Invalid JSON data', 'tags': 'error'}]
+        }, status=400)
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'message': str(e),
+            'messages': [{'message': f'Server error: {str(e)}', 'tags': 'error'}]
+        }, status=500)

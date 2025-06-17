@@ -56,6 +56,7 @@ def get_post_detail_service(post_id):
         return {
             'id': post.id,
             'title': post.title,
+            'solutions_object' : solutions,
             'content': post.content,
             'author': post.author.get_full_name(),
             'created_at': post.created_at.isoformat(),

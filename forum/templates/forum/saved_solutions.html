@@ -51,66 +51,56 @@
 
                     <!-- Solution Saving-->
                     {% if user.is_authenticated %}
-                        {% if solution|is_saved_solution:user %}
-                        <form method="post" action="{% url 'unsave_solution' solution.id %}" class="d-inline save-solution-form">
-                            {% csrf_token %}
-                            <button type="submit" class="bookmark-button active" title="Unsave">
-                                <i class="fas fa-bookmark"></i>
-                            </button>
-                        </form>
-                        {% else %}
-                        <form method="post" action="{% url 'save_solution' solution.id %}" class="d-inline save-solution-form">
-                            {% csrf_token %}
-                            <button type="submit" class="bookmark-button" title="Save">
-                                <i class="far fa-bookmark"></i>
-                            </button>
-                        </form>
-                        {% endif %}
+                    <button type="button" 
+                            class="bookmark-button {% if solution|is_saved_solution:user %}active{% endif %}" 
+                            onclick="votingSystem.toggleSaveSolution('{{ solution.id }}')"
+                            title="{% if solution|is_saved_solution:user %}Unsave{% else %}Save{% endif %}">
+                        <i class="{% if solution|is_saved_solution:user %}fas{% else %}far{% endif %} fa-bookmark"></i>
+                    </button>
                     {% endif %}
                 </div>
 
                 <!-- Solution Content -->
-                    <div class="post-content-cell">
-                        <div class="solution-preview p-3">
-                            <div class="solution-content p-3 bg-light rounded">
-                                {% if solution.preview_text %}
-                                    {% if solution.preview_text|wordcount > 100 %}
-                                        {{ solution.preview_text|truncatewords:100 }}...
-                                    {% else %}
-                                        {{ solution.preview_text }}
-                                    {% endif %}
+                <div class="post-content-cell">
+                    <div class="solution-preview p-3">
+                        <div class="solution-content p-3 bg-light rounded">
+                            {% if solution.preview_text %}
+                                {% if solution.preview_text|wordcount > 100 %}
+                                    {{ solution.preview_text|truncatewords:100 }}...
                                 {% else %}
-                                    <em>Failed to load solution content</em>
+                                    {{ solution.preview_text }}
                                 {% endif %}
-                            </div>
+                            {% else %}
+                                <em>Failed to load solution content</em>
+                            {% endif %}
                         </div>
+                    </div>
                         
 
-                        <!-- Solution Author -->
-                        <div class="author-info mt-3">
-                            <div class="position-relative">
-                                <img 
-                                    src="{{ solution.author.userprofile.profile_picture.url }}" 
-                                    alt="Profile Picture" 
-                                    class="profile-picture"
-                                    style="width: 30px; height: 30px; border-radius: 50%; object-fit: cover; cursor: pointer;"
-                                    id="profilePicture"
-                                >
-                            </div>
-                            <div>
-                                <div class="d-flex align-items-center">
-                                    <a href="{{ solution.author.get_absolute_url }}">{{ solution.author.get_full_name }}</a>
-                                    {% if solution.author == post.author %}
-                                        <span class="badge bg-primary ms-2">OP</span>
-                                    {% endif %}
-                                </div>
-
-                                <div class="text-muted">Answered {{ solution.created_at|date:"M d, Y" }}</div>
-                            </div>
+                    <!-- Solution Author -->
+                    <div class="author-info mt-3">
+                        <div class="position-relative">
+                            <img 
+                                src="{{ solution.author.userprofile.profile_picture.url }}" 
+                                alt="Profile Picture" 
+                                class="profile-picture"
+                                style="width: 30px; height: 30px; border-radius: 50%; object-fit: cover; cursor: pointer;"
+                                id="profilePicture"
+                            >
                         </div>
-                        <a href="{% url 'post_detail' solution.post.id %}"> See full solution</a>
+                        <div>
+                            <div class="d-flex align-items-center">
+                                <a href="{{ solution.author.get_absolute_url }}">{{ solution.author.get_full_name }}</a>
+                                {% if solution.author == post.author %}
+                                    <span class="badge bg-primary ms-2">OP</span>
+                                {% endif %}
+                            </div>
 
+                            <div class="text-muted">Answered {{ solution.created_at|date:"M d, Y" }}</div>
+                        </div>
                     </div>
+                    <a href="{% url 'post_detail' solution.post.id %}"> See full solution</a>
+
                 </div>
             </div>
         {% endfor %}
@@ -125,4 +115,22 @@
         </div>
     {% endif %}
 </div>
+{% endblock %}
+
+{% block scripts %}
+
+<script type="module">
+import { VotingSystem } from '/static/forum/js/voting-system.js';
+
+document.addEventListener("DOMContentLoaded", async function () {
+    try {
+        // Initialize VotingSystem first
+        window.votingSystem = new VotingSystem();
+        console.log("VotingSystem initialized:", votingSystem);
+    }catch (error) {
+        console.error("Error initializing saved solutions page:", error);
+    }
+});
+</script>
+
 {% endblock %}

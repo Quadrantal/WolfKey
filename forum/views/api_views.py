@@ -100,7 +100,6 @@ def api_post_detail(request, post_id):
             '-vote_score',
             '-created_at'
         )
-        print(solutions)
 
         # Process solutions
         processed_solutions = []

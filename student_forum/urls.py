@@ -67,7 +67,6 @@ from forum.views.save_views import (
     unfollow_post,
     followed_posts,
     save_solution,
-    unsave_solution,
     saved_solutions,
 )
 from forum.views.notification_views import (
@@ -163,7 +162,6 @@ urlpatterns = [
     path('follow-post/<int:post_id>/', follow_post, name='follow_post'),
     path('unfollow-post/<int:post_id>/', unfollow_post, name='unfollow_post'),
     path('save-solution/<int:solution_id>/', save_solution, name='save_solution'),
-    path('unsave-solution/<int:solution_id>/', unsave_solution, name='unsave_solution'),
     path('saved-solutions/', saved_solutions, name='saved_solutions'),
 
     # API URLs

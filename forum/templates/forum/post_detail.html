@@ -102,15 +102,18 @@
 
 <script type="module">
 import { EditorManager } from '{% static "forum/js/editor-manager.js" %}';
-import { VotingSystem } from '{% static "forum/js/voting-system.js" %}';
 import { SolutionEditor } from '{% static "forum/js/solution-editing.js" %}';
 import { SolutionSorter } from '{% static "forum/js/solution-sorting.js" %}';
 import { CommentEditor } from '{% static "forum/js/comment-editing.js" %}';
 import { MathLiveBlock } from '{% static "forum/js/math-block.js" %}';
 import createEditor from '{% static "forum/js/editor-config.js" %}';
+import { SolutionInteractions } from '/static/forum/js/solution-interactions.js';
 
 document.addEventListener("DOMContentLoaded", async function () {
     try {
+        window.solutionInteractions = new SolutionInteractions();
+        console.log("solutionInteractions initialized:", solutionInteractions);
+
         const editorManager = new EditorManager();
 
         const contentJSON = '{{ content_json|escapejs }}';
@@ -149,7 +152,6 @@ document.addEventListener("DOMContentLoaded", async function () {
             });
         }
 
-        new VotingSystem('{{ csrf_token }}');
 
         const solutionEditor = new SolutionEditor(editorManager, '{{ csrf_token }}');
         window.showEditSolutionForm = solutionEditor.showEditForm.bind(solutionEditor);
@@ -204,44 +206,6 @@ document.addEventListener("DOMContentLoaded", async function () {
         });
     });
 
-    const saveSolutionForms = document.querySelectorAll('.save-solution-form');
-    saveSolutionForms.forEach(form => {
-        form.addEventListener('submit', function (e) {
-            e.preventDefault();
-            const url = this.getAttribute('action');
-            const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
-            fetch(url, {
-                method: 'POST',
-                headers: {
-                    'X-Requested-With': 'XMLHttpRequest',
-                    'X-CSRFToken': csrfToken,
-                    'Content-Type': 'application/json',
-                },
-                credentials: 'same-origin'
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    const solutionId = url.split('/').slice(-2)[0];
-                    const button = this.querySelector('button');
-                    if (data.saved) {
-                        this.setAttribute('action', '/unsave-solution/' + solutionId + '/');
-                        button.classList.add('active');
-                        button.innerHTML = '<i class="fas fa-bookmark"></i>';
-                        button.title = "Unsave";
-                    } else {
-                        this.setAttribute('action', '/save-solution/' + solutionId + '/');
-                        button.classList.remove('active');
-                        button.innerHTML = '<i class="far fa-bookmark"></i>';
-                        button.title = "Save";
-                    }
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-            });
-        });
-    });
 
 });
 

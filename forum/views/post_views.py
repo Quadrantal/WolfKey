@@ -84,9 +84,12 @@ def post_detail(request, post_id):
         ).exists() if request.user.is_authenticated else False
         processed_solutions.append(solution)
 
+    
+
     context = {
         'post': post,  # Use actual post object for template helpers
-        'post_data': result,  # Keep service response data
+        'solutions' : result['solutions_object'],
+        'post_data': result,
         'content_json': json.dumps(result['content']),
         'processed_solutions_json': json.dumps(processed_solutions),
         'has_solution_from_user': has_solution,
