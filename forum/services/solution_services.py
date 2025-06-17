@@ -1,6 +1,7 @@
 from django.shortcuts import get_object_or_404
 from forum.models import Post, Solution, SolutionUpvote, SolutionDownvote, SavedSolution
 from forum.views.utils import detect_bad_words
+from django.db.models import F
 import json
 
 def create_solution_service(user, post_id, data):
@@ -186,4 +187,35 @@ def save_solution_service(user, solution_id):
         return {
             'error': str(e),
             'messages': [{'message': f'Error saving solution: {str(e)}', 'tags': 'error'}]
+        }
+
+def get_sorted_solutions_service(post_id, sort_by='votes'):
+    try:
+        post = get_object_or_404(Post, id=post_id)
+        solutions = Solution.objects.filter(post=post)
+        
+        if sort_by == 'votes':
+            # First get accepted solution if exists
+            solutions = solutions.annotate(
+                vote_score=F('upvotes') - F('downvotes')
+            ).order_by('-vote_score')
+        elif sort_by == 'recency':
+            solutions = solutions.order_by('-created_at')
+        
+        # Always ensure accepted solution is first if it exists
+        if post.accepted_solution:
+            solutions = list(solutions)
+            if post.accepted_solution in solutions:
+                solutions.remove(post.accepted_solution)
+                solutions.insert(0, post.accepted_solution)
+        
+        return {
+            'success': True,
+            'solutions': solutions
+        }
+        
+    except Exception as e:
+        return {
+            'error': str(e),
+            'messages': [{'message': f'Error fetching solutions: {str(e)}', 'tags': 'error'}]
         }

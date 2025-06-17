@@ -10,11 +10,13 @@ from forum.services.solution_services import (
     update_solution_service,
     delete_solution_service,
     vote_solution_service,
-    accept_solution_service
+    accept_solution_service,
+    get_sorted_solutions_service
 )
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_http_methods
 import json
+from django.core import serializers
 
 @login_required
 def create_solution(request, post_id):
@@ -182,3 +184,37 @@ def accept_solution(request, solution_id):
             'message': str(e),
             'messages': [{'message': f'Server error: {str(e)}', 'tags': 'error'}]
         }, status=500)
+
+def get_sorted_solutions(request, post_id):
+    sort_by = request.GET.get('sort', 'votes')
+    result = get_sorted_solutions_service(post_id, sort_by)
+
+    print(result)
+    
+    if 'error' in result:
+        return JsonResponse({
+            'success': False,
+            'message': result['error'],
+            'messages': result.get('messages', [])
+        }, status=400)
+    
+    solutions_data = []
+    for solution in result['solutions']:
+        solution_dict = {
+            'id': solution.id,
+            'content': solution.content,
+            'author': {
+                'username': solution.author.username,
+                'id': solution.author.id
+            },
+            'created_at': solution.created_at.isoformat(),
+            'upvotes': solution.upvotes,
+            'downvotes': solution.downvotes,
+            'is_accepted': solution.post.accepted_solution_id == solution.id if solution.post.accepted_solution_id else False
+        }
+        solutions_data.append(solution_dict)
+    
+    return JsonResponse({
+        'success': True,
+        'solutions': solutions_data
+    })

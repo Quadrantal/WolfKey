@@ -45,7 +45,8 @@ from forum.views.solution_views import (
     edit_solution,
     upvote_solution, 
     downvote_solution,
-    accept_solution
+    accept_solution,
+    get_sorted_solutions
 )
 from forum.views.search_views import search_results_new_page
 from forum.views.profile_views import (
@@ -116,6 +117,8 @@ urlpatterns = [
     path('solution/<int:solution_id>/edit/', edit_solution, name='edit_solution'),
     path('solution/<int:solution_id>/delete/', delete_solution, name='delete_solution'),
     path('solution/<int:post_id>/create/', create_solution, name='create_solution'),
+    path('post/<int:post_id>/solutions/sorted/', get_sorted_solutions, name='get_sorted_solutions'),
+
 
     path('comment/create/<int:solution_id>/', create_comment, name='create_comment'),
     path('comment/edit/<int:comment_id>/', edit_comment, name='edit_comment'),

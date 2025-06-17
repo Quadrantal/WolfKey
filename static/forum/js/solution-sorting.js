@@ -3,6 +3,7 @@
 export class SolutionSorter {
     constructor() {
         this.currentSort = 'votes';
+        this.postId = document.querySelector('#solutions-container').dataset.postId;
         this.initializeSortDropdown();
     }
 
@@ -22,7 +23,7 @@ export class SolutionSorter {
         });
 
         sortOptions.forEach(option => {
-            option.addEventListener("click", (e) => {
+            option.addEventListener("click", async (e) => {
                 e.preventDefault();
                 const innerSortOptions = document.querySelectorAll('.sort-option');
                 innerSortOptions.forEach(opt => opt.classList.remove('active'));
@@ -30,56 +31,49 @@ export class SolutionSorter {
                 this.currentSort = option.getAttribute("data-sort");
                 currentSortText.textContent = this.currentSort.charAt(0).toUpperCase() + this.currentSort.slice(1);
                 
-                this.sortSolutions(this.currentSort);
+                await this.fetchAndRenderSolutions(this.currentSort);
                 option.classList.add('active');
                 sortDropdownMenu.classList.remove('show');
             });
         });
 
-        this.sortSolutions(this.currentSort);
+        this.fetchAndRenderSolutions(this.currentSort);
     }
 
-    sortSolutions(sortBy) {
+    async fetchAndRenderSolutions(sortBy) {
+        try {
+            const response = await fetch(`solutions/sorted?sort=${sortBy}`);
+            if (!response.ok) throw new Error('Failed to fetch solutions');
+            
+            const data = await response.json();
+            if (!data.success) throw new Error(data.message);
+            
+            this.updateSolutionsOrder(data.solutions);
+        } catch (error) {
+            console.error('Error fetching solutions:', error);
+        }
+    }
+
+    updateSolutionsOrder(solutions) {
         const solutionsContainer = document.getElementById("solutions-container");
-        if (!solutionsContainer) {
-            console.error("Solutions container not found");
-            return;
-        }
+        if (!solutionsContainer) return;
 
-        const acceptedSolution = document.querySelector(".accepted-solution");
-        const regularSolutions = Array.from(
-            document.querySelectorAll(".solution-container:not(.accepted-solution)")
-        );
+        // Create a temporary container to store existing solution elements
+        const existingSolutions = new Map();
+        solutionsContainer.querySelectorAll('.solution-container').forEach(element => {
+            const solutionId = element.dataset.solutionId;
+            existingSolutions.set(solutionId, element);
+        });
 
-        if (sortBy === "votes") {
-            regularSolutions.sort((a, b) => {
-                const votesA = parseInt(a.querySelector(".vote-count").textContent) || 0;
-                const votesB = parseInt(b.querySelector(".vote-count").textContent) || 0;
-                return votesB - votesA;
-            });
-        } else if (sortBy === "recency") {
-            regularSolutions.sort((a, b) => {
-                const dateStrA = a.querySelector(".author-info .text-muted").textContent.replace("Answered ", "");
-                const dateStrB = b.querySelector(".author-info .text-muted").textContent.replace("Answered ", "");
-                const dateA = new Date(dateStrA);
-                const dateB = new Date(dateStrB);
-                return dateB - dateA;
-            });
-        }
+        // Clear the container
+        solutionsContainer.innerHTML = '';
 
-        // Clear and rebuild the container
-        while (solutionsContainer.firstChild) {
-            solutionsContainer.removeChild(solutionsContainer.firstChild);
-        }
-
-        // Always add accepted solution first if it exists
-        if (acceptedSolution) {
-            solutionsContainer.appendChild(acceptedSolution);
-        }
-
-        // Add sorted regular solutions
-        regularSolutions.forEach(solution => {
-            solutionsContainer.appendChild(solution);
+        // Reorder solutions based on the new order
+        solutions.forEach(solution => {
+            const solutionElement = existingSolutions.get(solution.id.toString());
+            if (solutionElement) {
+                solutionsContainer.appendChild(solutionElement);
+            }
         });
     }
 }
