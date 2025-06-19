@@ -1,5 +1,5 @@
 from django import forms
-from .models import Post, Comment, Solution, Tag, File, UserProfile, UserCourseExperience, UserCourseHelp, Course, User
+from .models import Post, Comment, Solution, File, UserProfile, UserCourseExperience, UserCourseHelp, Course, User
 from django.forms.widgets import ClearableFileInput
 from django.core.files.uploadedfile import UploadedFile
 from django.contrib.auth.forms import UserCreationForm
@@ -37,7 +37,7 @@ class MultipleFileField(forms.FileField):
 class PostForm(forms.ModelForm):
     class Meta:
         model = Post
-        fields = ['title', 'content', 'tags', 'courses']
+        fields = ['title', 'content', 'courses']
         widgets = {
             'title': forms.TextInput(attrs={'class': 'form-control'}),
         }
@@ -91,11 +91,6 @@ class CommentForm(forms.ModelForm):
         if not isinstance(data, dict):  # Ensure content is valid JSON
             raise forms.ValidationError("Invalid content format.")
         return data
-        
-class TagForm(forms.ModelForm):
-    class Meta:
-        model = Tag
-        fields = ['name']
 
 
 class UserProfileForm(forms.ModelForm):

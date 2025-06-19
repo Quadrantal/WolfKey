@@ -10,7 +10,6 @@ def create_comment_service(request, solution_id, data):
     solution = get_object_or_404(Solution, id=solution_id)
     content = data.get('content')
     parent_id = data.get('parent_id')
-    print(parent_id)
     try:
         if isinstance(content, dict) and 'blocks' in content:
             blocks = content.get('blocks', [])
@@ -63,8 +62,6 @@ def get_comments_service(request, solution_id):
     solution = get_object_or_404(Solution, id=solution_id)
     comments = Comment.objects.filter(solution=solution).order_by('created_at')
 
-    print(comments)
-
     def process_comment(comment):
         return {
             'id': comment.id,
@@ -78,7 +75,6 @@ def get_comments_service(request, solution_id):
         }
     comments_data = [process_comment(comment) for comment in comments]
 
-    print("COMMENT DATA WEJFAOIFJA: ", comments_data)
     html = render_to_string('forum/components/comments_list.html', {
         'comments': comments,
         'solution': solution
