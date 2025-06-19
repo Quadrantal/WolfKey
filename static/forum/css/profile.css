@@ -201,3 +201,7 @@ input[type="range"]::-webkit-slider-runnable-track {
 .changeablePfp:hover + .hover-text {
     display: block !important;
 }
+
+.block-label {
+    margin-right: 10px;
+}
