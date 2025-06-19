@@ -85,7 +85,7 @@ def create_post_service(user, data):
         if course_ids:
             courses = Course.objects.filter(id__in=course_ids)
             post.courses.set(courses)
-            send_course_notifications(post, courses)
+            send_course_notifications_service(post, courses)
 
         return {
             'id': post.id,
