@@ -109,104 +109,105 @@ import { MathLiveBlock } from '{% static "forum/js/math-block.js" %}';
 import createEditor from '{% static "forum/js/editor-config.js" %}';
 import { SolutionInteractions } from '/static/forum/js/solution-interactions.js';
 
-document.addEventListener("DOMContentLoaded", async function () {
-    try {
-        window.solutionInteractions = new SolutionInteractions();
-        console.log("solutionInteractions initialized:", solutionInteractions);
+document.addEventListener("DOMContentLoaded", function () {
+    async function initializePage() {
+        try {
+            window.solutionInteractions = new SolutionInteractions();
 
-        const editorManager = new EditorManager();
+            const editorManager = new EditorManager();
 
-        const contentJSON = '{{ content_json|escapejs }}';
-        const content = JSON.parse(contentJSON);
-        await editorManager.initializeMainEditor('editorjs', content, '{{ csrf_token }}', true);
+            const contentJSON = '{{ content_json|escapejs }}';
+            const content = JSON.parse(contentJSON);
+            await editorManager.initializeMainEditor('editorjs', content, '{{ csrf_token }}', true);
 
-        const processedSolutions = JSON.parse('{{ processed_solutions_json|escapejs }}');
-        await editorManager.initializeSolutionEditors(processedSolutions, '{{ csrf_token }}');
+            const processedSolutions = JSON.parse('{{ processed_solutions_json|escapejs }}');
+            await editorManager.initializeSolutionEditors(processedSolutions, '{{ csrf_token }}');
 
-        for (const solution of processedSolutions) {
-            if (solution.comments && solution.comments.length > 0) {
-                await editorManager.initializeCommentEditors(solution.comments);
+            for (const solution of processedSolutions) {
+                if (solution.comments && solution.comments.length > 0) {
+                    await editorManager.initializeCommentEditors(solution.comments);
+                }
             }
-        }
 
-        const user_posted_a_solution = {{ has_solution_from_user|yesno:"true,false"|safe }};
-        if (!user_posted_a_solution) {
-            var solutionFormEditor = await editorManager.initializeSolutionFormEditor(
-                'editorjs-solution-form',
-                '{{ csrf_token }}',
-                'solution-content'
-            );
-        }
+            const user_posted_a_solution = {{ has_solution_from_user|yesno:"true,false"|safe }};
+            if (!user_posted_a_solution) {
+                var solutionFormEditor = await editorManager.initializeSolutionFormEditor(
+                    'editorjs-solution-form',
+                    '{{ csrf_token }}',
+                    'solution-content'
+                );
+            }
 
-        const solutionForm = document.getElementById('solutionForm');
-        if (solutionForm) {
-            solutionForm.addEventListener('submit', async function (e) {
-                e.preventDefault();
-                try {
-                    const outputData = await solutionFormEditor.save();
-                    document.getElementById('solution-content').value = JSON.stringify(outputData);
-                    this.submit();
-                } catch (error) {
-                    console.error('Failed to save solution content:', error);
-                }
-            });
-        }
-
-
-        const solutionEditor = new SolutionEditor(editorManager, '{{ csrf_token }}');
-        window.showEditSolutionForm = solutionEditor.showEditForm.bind(solutionEditor);
-        window.saveSolutionEdit = solutionEditor.saveSolution.bind(solutionEditor);
-        window.cancelSolutionEdit = solutionEditor.cancelEdit.bind(solutionEditor);
-
-        const commentEditor = new CommentEditor(editorManager, '{{ csrf_token }}');
-        new SolutionSorter();
-
-    } catch (error) {
-        console.error("Error initializing post detail page:", error);
-    }
-
-    // Interaction listeners
-    const followForms = document.querySelectorAll('.follow-form');
-    followForms.forEach(form => {
-        form.addEventListener('submit', function (e) {
-            e.preventDefault();
-            const url = this.getAttribute('action');
-            const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
-            fetch(url, {
-                method: 'POST',
-                headers: {
-                    'X-Requested-With': 'XMLHttpRequest',
-                    'X-CSRFToken': csrfToken,
-                    'Content-Type': 'application/json',
-                },
-                credentials: 'same-origin'
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    const followCount = document.querySelectorAll('.follow-count');
-                    followCount.forEach(count => {
-                        count.textContent = data.followers_count;
-                    });
-                    const button = this.querySelector('button');
-                    if (data.followed) {
-                        this.setAttribute('action', '{% url "unfollow_post" post.id %}');
-                        button.innerHTML = '<i class="fas fa-bell-slash me-1"></i> Unfollow<span class="follow-count">' + data.followers_count + '</span>';
-                        button.classList.add('active');
-                    } else {
-                        this.setAttribute('action', '{% url "follow_post" post.id %}');
-                        button.innerHTML = '<i class="fas fa-bell me-1"></i> Follow<span class="follow-count">' + data.followers_count + '</span>';
-                        button.classList.remove('active');
+            const solutionForm = document.getElementById('solutionForm');
+            if (solutionForm) {
+                solutionForm.addEventListener('submit', async function (e) {
+                    e.preventDefault();
+                    try {
+                        const outputData = await solutionFormEditor.save();
+                        document.getElementById('solution-content').value = JSON.stringify(outputData);
+                        this.submit();
+                    } catch (error) {
+                        console.error('Failed to save solution content:', error);
                     }
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
+                });
+            }
+
+
+            const solutionEditor = new SolutionEditor(editorManager, '{{ csrf_token }}');
+            window.showEditSolutionForm = solutionEditor.showEditForm.bind(solutionEditor);
+            window.saveSolutionEdit = solutionEditor.saveSolution.bind(solutionEditor);
+            window.cancelSolutionEdit = solutionEditor.cancelEdit.bind(solutionEditor);
+
+            const commentEditor = new CommentEditor(editorManager, '{{ csrf_token }}');
+            new SolutionSorter();
+
+        } catch (error) {
+            console.error("Error initializing post detail page:", error);
+        }
+
+        // Interaction listeners
+        const followForms = document.querySelectorAll('.follow-form');
+        followForms.forEach(form => {
+            form.addEventListener('submit', function (e) {
+                e.preventDefault();
+                const url = this.getAttribute('action');
+                const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+                fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'X-CSRFToken': csrfToken,
+                        'Content-Type': 'application/json',
+                    },
+                    credentials: 'same-origin'
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        const followCount = document.querySelectorAll('.follow-count');
+                        followCount.forEach(count => {
+                            count.textContent = data.followers_count;
+                        });
+                        const button = this.querySelector('button');
+                        if (data.followed) {
+                            this.setAttribute('action', '{% url "unfollow_post" post.id %}');
+                            button.innerHTML = '<i class="fas fa-bell-slash me-1"></i> Unfollow<span class="follow-count">' + data.followers_count + '</span>';
+                            button.classList.add('active');
+                        } else {
+                            this.setAttribute('action', '{% url "follow_post" post.id %}');
+                            button.innerHTML = '<i class="fas fa-bell me-1"></i> Follow<span class="follow-count">' + data.followers_count + '</span>';
+                            button.classList.remove('active');
+                        }
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                });
             });
         });
-    });
+    }
 
-
+    initializePage();
 });
 
 function showReplyForm(commentId) {

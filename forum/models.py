@@ -234,6 +234,10 @@ class Solution(models.Model):
         Returns the URL to the specific solution element on the post detail page.
         """
         return f"{self.post.get_absolute_url()}#solution-{self.id}"
+    
+    def root_comments_count(self):
+        return self.comments.filter(parent__isnull=True).count()
+
         
 
 class SavedSolution(models.Model):
@@ -274,6 +278,7 @@ class Comment(models.Model):
         while parent:
             depth += 1
             parent = parent.parent
+        print("Dep: ", depth)
         return min(depth, 5)  # Limit maximum nesting depth to 5
 
 class SolutionUpvote(models.Model):

@@ -82,9 +82,9 @@
             </div>
             <button class="toggle-replies btn btn-link btn-sm" 
                     data-comment-id="{{ comment.id }}"
-                    data-show-text="Show {{ comment.replies.count|add:'-3' }} more replies"
+                    data-show-text="Show {{ comment.replies.count|add:'-2' }} more replies"
                     data-hide-text="Hide replies">
-                Show {{ comment.replies.count|add:'-3' }} more replies
+                Show {{ comment.replies.count|add:'-2' }} more replies
             </button>
         {% endif %}
     </div>
