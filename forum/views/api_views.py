@@ -13,7 +13,7 @@ import logging
 
 from forum.models import User, Post, Solution, Comment, Course
 from forum.views.course_views import get_user_courses
-from forum.views.utils import (
+from forum.services.utils import (
     process_post_preview, 
     add_course_context, 
     selective_quote_replace, 

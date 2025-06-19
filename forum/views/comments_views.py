@@ -2,15 +2,8 @@
 from django.shortcuts import get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
-from forum.models import Post, Solution, Comment
-from forum.forms import CommentForm
-from django.shortcuts import render, redirect
-from django.contrib import messages
-from django.core.serializers.json import DjangoJSONEncoder
-from django.template.loader import render_to_string
-from .notification_views import send_notification, send_comment_notifications
+from django.shortcuts import render
 import json
-from .utils import process_messages_to_json, detect_bad_words
 
 from forum.services.comment_services import (
     create_comment_service,

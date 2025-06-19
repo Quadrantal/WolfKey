@@ -1,6 +1,7 @@
 from django.shortcuts import get_object_or_404
 from forum.models import Post, Solution, SolutionUpvote, SolutionDownvote, SavedSolution
-from forum.views.utils import detect_bad_words
+from forum.services.utils import detect_bad_words
+from forum.services.notification_services import send_solution_notification_service
 from django.db.models import F
 import json
 
@@ -30,6 +31,8 @@ def create_solution_service(user, post_id, data):
             author=user,
             content=content
         )
+
+        send_solution_notification_service(solution)
 
         return {
             'id': solution.id,

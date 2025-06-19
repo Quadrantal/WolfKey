@@ -46,7 +46,8 @@ from forum.views.solution_views import (
     upvote_solution, 
     downvote_solution,
     accept_solution,
-    get_sorted_solutions
+    get_sorted_solutions,
+    
 )
 from forum.views.search_views import search_results_new_page
 from forum.views.profile_views import (
@@ -75,7 +76,7 @@ from forum.views.notification_views import (
     mark_notification_read
 )
 from forum.views.updates_views import acknowledge_update
-from forum.views.utils import upload_image
+from forum.services.utils import upload_image
 
 from forum.views.comments_views import (
     create_comment,

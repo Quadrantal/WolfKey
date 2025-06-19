@@ -1,8 +1,8 @@
 from django.shortcuts import get_object_or_404
 from django.db.models import F, Case, When, IntegerField
 from forum.models import Post, Course
-from forum.views.utils import detect_bad_words, selective_quote_replace
-from forum.views.notification_views import send_course_notifications
+from forum.services.utils import detect_bad_words, selective_quote_replace
+from forum.services.notification_services import send_course_notifications_service
 import json
 import logging
 

@@ -13,7 +13,7 @@ from forum.forms import CustomUserCreationForm
 from rest_framework.decorators import api_view, authentication_classes, permission_classes
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
-from forum.views.utils import upload_image
+from forum.services.utils import upload_image
 import json
 
 @csrf_exempt

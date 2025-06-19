@@ -2,7 +2,7 @@
 from django.shortcuts import get_object_or_404, redirect
 from django.http import JsonResponse, HttpResponseForbidden
 from django.contrib import messages
-from .utils import process_messages_to_json
+from ..services.utils import process_messages_to_json
 from forum.forms import SolutionForm
 from forum.models import Post, Solution
 from forum.services.solution_services import (

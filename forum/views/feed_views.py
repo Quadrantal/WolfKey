@@ -11,7 +11,7 @@ from forum.services.schedule_services import (
 from forum.models import Post, User
 from forum.views.greetings import get_random_greeting
 from forum.views.course_views import get_user_courses
-from forum.views.utils import process_post_preview, add_course_context
+from forum.services.utils import process_post_preview, add_course_context
 from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo
 

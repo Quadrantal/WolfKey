@@ -8,4 +8,4 @@ from .save_views import *
 from .search_views import *
 from .solution_views import *
 from .updates_views import *
-from .utils import *
+from ..services.utils import *

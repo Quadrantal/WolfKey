@@ -1,9 +1,8 @@
 from django.shortcuts import get_object_or_404
 from django.contrib import messages
 from forum.models import Solution, Comment
-from forum.forms import CommentForm
-from forum.views.notification_views import send_comment_notifications
-from forum.views.utils import process_messages_to_json, detect_bad_words
+from forum.services.notification_services import send_comment_notifications_service
+from forum.services.utils import process_messages_to_json, detect_bad_words
 from django.template.loader import render_to_string
 
 def create_comment_service(request, solution_id, data):
@@ -30,7 +29,7 @@ def create_comment_service(request, solution_id, data):
             content=content,
             parent=parent_comment
         )
-        send_comment_notifications(comment, solution, parent_comment)
+        send_comment_notifications_service(comment, solution, parent_comment)
         messages.success(request, 'Comment created succesfully')
         return {'status': 'success', 'messages': process_messages_to_json(request)}
     messages.error(request, 'Invalid comment data.')

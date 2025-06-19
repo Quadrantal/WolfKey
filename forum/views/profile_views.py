@@ -19,7 +19,7 @@ from forum.forms import (
     UserProfileForm
 )
 
-from forum.views.utils import (
+from forum.services.utils import (
     detect_bad_words
 )
 

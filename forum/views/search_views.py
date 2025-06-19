@@ -4,7 +4,7 @@ from django.db.models import Q,F
 from django.contrib.postgres.search import SearchQuery, SearchRank, SearchVector
 from django.contrib.postgres.search import TrigramSimilarity
 from forum.models import Post, User
-from forum.views.utils import process_post_preview, add_course_context
+from forum.services.utils import process_post_preview, add_course_context
 from forum.views.greetings import get_random_greeting
 from forum.views.course_views import get_user_courses
 from datetime import datetime, timedelta

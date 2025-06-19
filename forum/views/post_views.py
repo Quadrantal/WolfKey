@@ -6,7 +6,7 @@ import json
 import logging
 from django.utils.html import escape
 from forum.models import Post, Solution, FollowedPost, SavedSolution, Notification
-from .utils import selective_quote_replace, detect_bad_words
+from ..services.utils import selective_quote_replace, detect_bad_words
 from forum.forms import SolutionForm, CommentForm, PostForm
 from forum.services.post_services import (
     create_post_service,

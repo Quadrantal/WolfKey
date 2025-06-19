@@ -2,7 +2,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from forum.models import Post, SavedPost, FollowedPost, Solution, SavedSolution
-from forum.views.utils import process_post_preview, add_course_context
+from forum.services.utils import process_post_preview, add_course_context
 from forum.services.solution_services import save_solution_service
 import json
 

@@ -2,7 +2,7 @@ from django.db.models import Q, F, Count
 from django.contrib.postgres.search import SearchQuery, SearchRank, SearchVector, TrigramSimilarity
 from forum.models import Post
 from forum.views.course_views import get_user_courses
-from forum.views.utils import process_post_preview, add_course_context
+from forum.services.utils import process_post_preview, add_course_context
 from django.core.paginator import Paginator
 from django.utils.timezone import localtime
 
