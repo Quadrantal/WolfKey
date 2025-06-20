@@ -6,35 +6,40 @@ from forum.services.utils import process_post_preview, add_course_context
 from django.core.paginator import Paginator
 from django.utils.timezone import localtime
 
-def get_for_you_posts(user):
+def get_for_you_posts(user, page=1, per_page=8):
+    """
+    Return a tuple of (annotated posts on the current page, page_obj).
+    """
     experienced_courses, help_needed_courses = get_user_courses(user)
-    user_profile = user.userprofile
+    profile = user.userprofile
 
     current_courses = list(filter(None, [
-        user_profile.block_1A,
-        user_profile.block_1B,
-        user_profile.block_1D,
-        user_profile.block_1E,
-        user_profile.block_2A,
-        user_profile.block_2B,
-        user_profile.block_2C,
-        user_profile.block_2D,
-        user_profile.block_2E
+        profile.block_1A, profile.block_1B, profile.block_1D, profile.block_1E,
+        profile.block_2A, profile.block_2B, profile.block_2C, profile.block_2D, profile.block_2E
     ]))
 
-    posts = Post.objects.filter(
+    base_qs = Post.objects.filter(
         Q(courses__in=experienced_courses) | 
         Q(courses__in=help_needed_courses) | 
         Q(author=user) |
         Q(courses__in=current_courses)
-    ).annotate(
+    ).distinct().order_by('-created_at')
+
+    paginator = Paginator(base_qs, per_page)
+    page_obj = paginator.get_page(page)
+
+    post_ids = [post.id for post in page_obj.object_list]
+
+    posts = Post.objects.filter(id__in=post_ids).annotate(
         solution_count=Count('solutions', distinct=True),
         comment_count=Count('solutions__comments', distinct=True),
         total_response_count=Count('solutions', distinct=True) + Count('solutions__comments', distinct=True)
-    ).distinct().order_by('-created_at')
+    ).select_related('author').prefetch_related('courses', 'solutions__comments')
 
-    process_posts(posts, experienced_courses, help_needed_courses)
-    return posts
+    posts_dict = {post.id: post for post in posts}
+    ordered_posts = [posts_dict[pid] for pid in post_ids if pid in posts_dict]
+
+    return ordered_posts, page_obj
 
 def get_all_posts(user, query=''):
     posts = Post.objects.annotate(

@@ -20,14 +20,12 @@ def _get_iso_date(dt):
 def for_you(request):
     if not request.user.is_authenticated:
         return redirect('login')
-
-    posts_qs = get_for_you_posts(request.user)
-    page = request.GET.get('page', 1)
-    paginated_data = paginate_posts(posts_qs, page)
     
+    page = request.GET.get('page', 1)
+    posts, page_obj = get_for_you_posts(request.user, page)
+
     if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-        return render(request, 'forum/components/post_list.html', 
-                     {'posts': paginated_data["page_obj"]})
+        return render(request, 'forum/components/post_list.html', {'posts': posts, 'page_obj': page_obj})
 
     # Get schedule info
     pst = ZoneInfo("America/Los_Angeles")
@@ -51,7 +49,7 @@ def for_you(request):
     tomorrow_display = _convert_to_sheet_date_format(tomorrow_pst.date())
 
     return render(request, 'forum/for_you.html', {
-        'posts': paginated_data["page_obj"],
+        'posts': posts,
         'greeting': greeting,
         'current_date': today_display,
         'tomorrow_date': tomorrow_display,

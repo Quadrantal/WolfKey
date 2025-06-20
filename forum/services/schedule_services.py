@@ -91,6 +91,7 @@ def get_block_order_for_day(iso_date):
     sheet_date = _convert_to_sheet_date_format(date_obj)
 
     existing_schedule = DailySchedule.objects.filter(date=date_obj).first()
+
     if existing_schedule != None:
         if any([existing_schedule.block_1, existing_schedule.block_2, existing_schedule.block_3, existing_schedule.block_4, existing_schedule.block_5]):
             return {
@@ -114,6 +115,7 @@ def get_block_order_for_day(iso_date):
                 'blocks': [None, None, None, None, None],
                 'times': [None,None, None, None, None],
             }
+        
 
     alt_day_description = get_alt_day_event(date_obj)
     if alt_day_description:
@@ -127,7 +129,6 @@ def get_block_order_for_day(iso_date):
     for i, date_str in enumerate(date_column):
         if date_str.strip() == sheet_date.strip():
             schedule, created = DailySchedule.objects.get_or_create(date=date_obj)
-            updated = False
             for block_index in range(5):
                 block_field = f'block_{block_index + 1}'
                 time_field = f'block_{block_index + 1}_time'
@@ -136,14 +137,22 @@ def get_block_order_for_day(iso_date):
 
                 if getattr(schedule, block_field) in [None, ""] and block_value:
                     setattr(schedule, block_field, block_value)
-                    updated = True
 
                 if getattr(schedule, time_field) in [None, ""] and time_value:
                     setattr(schedule, time_field, time_value)
-                    updated = True
 
-            if updated:
-                schedule.save()
+            if any([
+                schedule.block_1,
+                schedule.block_2,
+                schedule.block_3,
+                schedule.block_4,
+                schedule.block_5
+            ]):
+                schedule.is_school = True
+            else:
+                schedule.is_school = False
+
+            schedule.save()
 
             return {
                 'blocks': [getattr(schedule, f'block_{i+1}') for i in range(5)],
