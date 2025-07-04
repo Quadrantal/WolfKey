@@ -45,7 +45,14 @@ def create_post(request):
     else:
         form = PostForm()
 
-    return render(request, 'forum/post_form.html', {'form': form, 'action': 'Create'})
+    context = {
+        'form': form,
+        'action': 'Create',
+        'post': None,
+        'post_content': json.dumps({"blocks": [{"type": "paragraph", "data": {"text": ""}}]}),
+        'selected_courses_json': '[]'
+    }
+    return render(request, 'forum/post_form.html', context)
 
 @login_required
 def post_detail(request, post_id):
@@ -103,85 +110,6 @@ def post_detail(request, post_id):
 
 @login_required
 def edit_post(request, post_id):
-    post = Post.objects.get(id=post_id)
-    
-    if request.user != post.author:
-        messages.error(request, "You don't have permission to edit this post.")
-        return redirect('post_detail', post_id=post_id)
-    
-    if request.method == 'POST':
-        try:
-            content = json.loads(request.POST.get('content', '{}'))
-            course_ids = request.POST.getlist('courses')
-            
-            # Update post using service
-            result = update_post_service(request.user, post_id, {
-                'content': content,
-                'courses': course_ids
-            })
-            
-            if 'error' in result:
-                messages.error(request, result['error'])
-            else:
-                messages.success(request, 'Post updated successfully!')
-                return redirect('post_detail', post_id=post_id)
-                
-        except json.JSONDecodeError:
-            messages.error(request, 'Invalid content format')
-        except Exception as e:
-            messages.error(request, f'Error updating post: {str(e)}')
-        
-        return redirect('edit_post', post_id=post_id)
-    
-    # Prepare data for the edit form
-    try:
-        content = post.content
-        post_content = json.dumps(content)
-        selected_courses = list(post.courses.values('id', 'name', 'code', 'category'))
-        selected_courses_json = json.dumps(selected_courses)
-    except Exception:
-        post_content = json.dumps({"blocks": [{"type": "paragraph", "data": {"text": ""}}]})
-        selected_courses_json = '[]'
-
-    context = {
-        'post': post,
-        'action': 'Edit',
-        'post_content': post_content,
-        'selected_courses_json': selected_courses_json
-    }
-
-    return render(request, 'forum/edit_post.html', context)
-
-@login_required
-def delete_post(request, post_id):
-    result = delete_post_service(request.user, post_id)
-    
-    if 'error' in result:
-        messages.error(request, result['error'])
-        return redirect('post_detail', post_id=post_id)
-        
-    if request.method == 'POST':
-        messages.success(request, 'Post deleted successfully!')
-        return redirect('all_posts')
-        
-    return render(request, 'forum/delete_confirm.html', {'post': {'id': post_id}})
-    context = {
-        'post': post,
-        'solutions': solutions,
-        'content_json': content_json,
-        'processed_solutions_json': json.dumps(processed_solutions),
-        'courses': post.courses.all(),
-        'has_solution_from_user': has_solution,
-        'solution_form': solution_form,
-        'comment_form': comment_form,
-        'is_following': is_following
-    }
-
-    return render(request, 'forum/post_detail.html', context)
-
-
-@login_required
-def edit_post(request, post_id):
     post = get_object_or_404(Post, id=post_id)
 
     if request.user != post.author:
@@ -203,6 +131,7 @@ def edit_post(request, post_id):
             if course_ids:
                 post.courses.set(course_ids)
             
+            post.title = request.POST.get('title', post.title)
             post.save()
             messages.success(request, 'Post updated successfully!')
             return redirect('post_detail', post_id=post.id)
@@ -243,11 +172,12 @@ def edit_post(request, post_id):
         'post': post,
         'action': 'Edit',
         'post_content': post_content,
-        'selected_courses_json': selected_courses_json
+        'selected_courses_json': selected_courses_json,
+        'form': None  # Not needed for edit
     }
 
     # print(selected_courses_json)
-    return render(request, 'forum/edit_post.html', context)
+    return render(request, 'forum/post_form.html', context)
 
 
 @login_required
