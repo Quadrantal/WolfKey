@@ -2,8 +2,7 @@ from django.db.models import F, Count
 from django.contrib.postgres.search import SearchQuery, SearchRank, TrigramSimilarity
 from forum.models import Post, User
 from forum.services.utils import process_post_preview, add_course_context
-from forum.views.course_views import get_user_courses
-from django.core.paginator import Paginator
+from forum.services.course_services import get_user_courses
 
 def search_posts_and_users_service(user, query):
     search_query = SearchQuery(query)

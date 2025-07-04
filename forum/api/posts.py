@@ -8,7 +8,7 @@ from django.shortcuts import get_object_or_404
 import json
 
 from forum.models import Post, Course
-from forum.views.course_views import get_user_courses
+from forum.services.course_services import get_user_courses
 from forum.services.utils import process_post_preview, add_course_context, detect_bad_words
 from forum.services.post_services import (
     create_post_service,

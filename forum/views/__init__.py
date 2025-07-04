@@ -1,6 +1,6 @@
 from .auth_views import *
 from .comments_views import *
-from .course_views import *
+from ..services.course_services import *
 from .notification_views import * 
 from .post_views import *
 from .profile_views import *

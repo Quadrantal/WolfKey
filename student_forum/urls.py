@@ -60,7 +60,7 @@ from forum.views.profile_views import (
     update_courses,
     upload_profile_picture
 )
-from forum.views.course_views import (
+from forum.services.course_services import (
     course_search
 )
 from forum.views.save_views import (

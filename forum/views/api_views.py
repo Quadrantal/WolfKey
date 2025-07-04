@@ -12,7 +12,7 @@ import json
 import logging
 
 from forum.models import User, Post, Solution, Comment, Course
-from forum.views.course_views import get_user_courses
+from forum.services.course_services import get_user_courses
 from forum.services.utils import (
     process_post_preview, 
     add_course_context, 
