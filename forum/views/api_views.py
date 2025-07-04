@@ -12,12 +12,15 @@ import json
 import logging
 
 from forum.models import User, Post, Solution, Comment, Course
-from forum.views.course_views import get_user_courses
-from forum.views.utils import (
+from forum.services.course_services import get_user_courses
+from forum.services.utils import (
     process_post_preview, 
     add_course_context, 
     selective_quote_replace, 
     detect_bad_words
+)
+from forum.services.auth_services import (
+    authenticate_user
 )
 from forum.views.notification_views import send_course_notifications
 
@@ -28,65 +31,6 @@ def get_csrf_token(request):
     return JsonResponse({'csrfToken': request.META.get('CSRF_COOKIE')})
 
 
-@ensure_csrf_cookie
-@require_http_methods(["POST"])
-def api_login(request):
-    try:
-        data = json.loads(request.body)
-        print(data)
-        school_email = data.get('school_email')
-        password = data.get('password')
-
-        if not school_email or not password:
-            return JsonResponse({
-                'error': 'Please provide both school email and password'
-            }, status=400)
-
-        try:
-            # Get user by school email
-            user = User.objects.get(school_email=school_email)
-            if user.check_password(password):
-                login(request, user)
-                profile = user.userprofile
-
-                print(profile)
-                
-                return JsonResponse({
-                    'user': {
-                        'id': user.id,
-                        'first_name' : user.first_name,
-                        'last_name' : user.last_name,
-                        'name': user.get_full_name(),
-                        'school_email': user.school_email,
-                        'is_moderator': profile.is_moderator,
-                        'points': profile.points,
-                        'profile_picture': profile.profile_picture.url if profile.profile_picture else None,
-                        'background_hue' : profile.background_hue,
-                        'courses': {
-                            f'block_{block}': getattr(profile, f'block_{block}').name 
-                            for block in ['1A', '1B', '1D', '1E', '2A', '2B', '2C', '2D', '2E']
-                            if getattr(profile, f'block_{block}')
-                        }
-                    }
-                })
-            else:
-                return JsonResponse({
-                    'error': 'Invalid password'
-                }, status=401)
-                
-        except User.DoesNotExist:
-            return JsonResponse({
-                'error': 'No account found with this school email'
-            }, status=401)
-
-    except json.JSONDecodeError:
-        return JsonResponse({
-            'error': 'Invalid JSON'
-        }, status=400)
-    except Exception as e:
-        return JsonResponse({
-            'error': str(e)
-        }, status=500)
     
 @login_required
 def api_logout(request):
@@ -156,7 +100,6 @@ def api_post_detail(request, post_id):
             '-vote_score',
             '-created_at'
         )
-        print(solutions)
 
         # Process solutions
         processed_solutions = []

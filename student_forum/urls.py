@@ -33,9 +33,10 @@ from forum.views.post_views import (
     delete_post, 
     create_post
 )
-from forum.views.search_views import (
-    for_you, 
+
+from forum.views.feed_views import (
     all_posts,
+    for_you,
     my_posts
 )
 from forum.views.solution_views import (
@@ -44,7 +45,9 @@ from forum.views.solution_views import (
     edit_solution,
     upvote_solution, 
     downvote_solution,
-    accept_solution
+    accept_solution,
+    get_sorted_solutions,
+    
 )
 from forum.views.search_views import search_results_new_page
 from forum.views.profile_views import (
@@ -52,13 +55,12 @@ from forum.views.profile_views import (
     remove_experience,
     add_help_request,
     remove_help_request,
-    edit_profile,
     my_profile,
     profile_view,
     update_courses,
     upload_profile_picture
 )
-from forum.views.course_views import (
+from forum.services.course_services import (
     course_search
 )
 from forum.views.save_views import (
@@ -66,7 +68,6 @@ from forum.views.save_views import (
     unfollow_post,
     followed_posts,
     save_solution,
-    unsave_solution,
     saved_solutions,
 )
 from forum.views.notification_views import (
@@ -74,7 +75,7 @@ from forum.views.notification_views import (
     mark_notification_read
 )
 from forum.views.updates_views import acknowledge_update
-from forum.views.utils import upload_image
+from forum.services.utils import upload_image
 
 from forum.views.comments_views import (
     create_comment,
@@ -82,14 +83,14 @@ from forum.views.comments_views import (
     delete_comment,
     get_comments
 )
-from forum.views.schedule_views import(
-    get_daily_schedule,
+from forum.api.schedule import(
+    get_daily_schedule,    
+)
+from forum.services.schedule_services import (
     is_ceremonial_uniform_required
-    
 )
 from forum.views.api_views import(
     get_csrf_token,
-    api_login,
     api_logout,
     for_you_api,
     api_post_detail,
@@ -116,6 +117,8 @@ urlpatterns = [
     path('solution/<int:solution_id>/edit/', edit_solution, name='edit_solution'),
     path('solution/<int:solution_id>/delete/', delete_solution, name='delete_solution'),
     path('solution/<int:post_id>/create/', create_solution, name='create_solution'),
+    path('post/<int:post_id>/solutions/sorted/', get_sorted_solutions, name='get_sorted_solutions'),
+
 
     path('comment/create/<int:solution_id>/', create_comment, name='create_comment'),
     path('comment/edit/<int:comment_id>/', edit_comment, name='edit_comment'),
@@ -144,7 +147,6 @@ urlpatterns = [
     
     # Profile URLs
     path('profile/upload-picture/', upload_profile_picture, name='upload_profile_picture'),
-    path('profile/edit/', edit_profile, name='edit_profile'),
     path('my-profile/', my_profile, name='my_profile'),
     path('profile/<str:username>/', profile_view, name='profile'),
     path('update-courses/', update_courses, name='update_courses'),
@@ -162,7 +164,6 @@ urlpatterns = [
     path('follow-post/<int:post_id>/', follow_post, name='follow_post'),
     path('unfollow-post/<int:post_id>/', unfollow_post, name='unfollow_post'),
     path('save-solution/<int:solution_id>/', save_solution, name='save_solution'),
-    path('unsave-solution/<int:solution_id>/', unsave_solution, name='unsave_solution'),
     path('saved-solutions/', saved_solutions, name='saved_solutions'),
 
     # API URLs
@@ -180,7 +181,6 @@ urlpatterns = [
     path('reset/<uidb64>/<token>/', CustomPasswordResetConfirmView.as_view(), name='password_reset_confirm'),
     path('reset/done/', CustomPasswordResetCompleteView.as_view(), name='password_reset_complete'),
 
-    path('api/login/', api_login, name='api_login'),
     path('api/logout/', api_logout, name='api_logout'),
     path('api/schedules/daily/<str:target_date>/', get_daily_schedule),
     path('api/schedules/uniform/<str:target_date>/', is_ceremonial_uniform_required),

@@ -153,11 +153,11 @@
             } else {
                 span.textContent = text[i];
             }
-            span.style.animationDelay = (i * 20) + 'ms'; // Adjust timing
+            span.style.animationDelay = (i * 40) + 'ms'; // Adjust timing
             textElement.appendChild(span);
         }
 
-        // Infinite scroll implementation
+        // Infinite scroll
         let page = 1;
         let loading = false;
         let hasMore = true;

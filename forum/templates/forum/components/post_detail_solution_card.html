@@ -4,59 +4,47 @@
 <div class="solution-container {% if solution == accepted_solution %}accepted-solution{% endif %}" data-solution-id="{{ solution.id }}">
     <!-- Solution Vote Cell -->
     <div class="vote-cell">
-        <form method="post" action="{% url 'upvote_solution' solution.id %}" class="d-inline">
-            {% csrf_token %}
-            <button type="submit" class="vote-button {% if solution|has_upvoted:user %}voted-up{% endif %}">
-                <svg width="36" height="36" viewBox="0 0 36 36">
-                    <path d="M2 26h32L18 10 2 26z"></path>
-                </svg>
-            </button>
-            <input type="hidden" name="solution_id" value="{{ solution.id }}">
-            <input type="hidden" name="action" value="upvote">
-        </form>
+        {% csrf_token %}
+        <button type="button" 
+                class="vote-button {% if solution|has_upvoted:user %}voted-up{% endif %}" 
+                data-vote-type="upvote"
+                onclick="solutionInteractions.upvoteSolution('{{ solution.id }}')">
+            <svg width="36" height="36" viewBox="0 0 36 36">
+                <path d="M2 26h32L18 10 2 26z"></path>
+            </svg>
+        </button>
         
         <div class="vote-count">{{ solution|vote_difference }}</div>
         
-        <form method="post" action="{% url 'downvote_solution' solution.id %}" class="d-inline">
-            {% csrf_token %}
-            <button type="submit" class="vote-button {% if solution|has_downvoted:user %}voted-down{% endif %}">
-                <svg width="36" height="36" viewBox="0 0 36 36">
-                    <path d="M2 10h32L18 26 2 10z"></path>
-                </svg>
-            </button>
-            <input type="hidden" name="solution_id" value="{{ solution.id }}">
-            <input type="hidden" name="action" value="downvote">
-        </form>
+        <button type="button" 
+                class="vote-button {% if solution|has_downvoted:user %}voted-down{% endif %}" 
+                data-vote-type="downvote"
+                onclick="solutionInteractions.downvoteSolution('{{ solution.id }}')">
+            <svg width="36" height="36" viewBox="0 0 36 36">
+                <path d="M2 10h32L18 26 2 10z"></path>
+            </svg>
+        </button>
 
         {% if user == post.author %}
-        <form method="post" action="{% url 'accept_solution' solution.id %}" class="d-inline">
-            {% csrf_token %}
-            <button type="submit" class="{% if solution == accepted_solution %}accept-button-accepted{% else %}accept-button-unaccepted{% endif %}" 
-                    title="{% if solution == accepted_solution %}Unaccept this answer{% else %}Accept this answer{% endif %}">
-                <svg aria-hidden="true" class="m0 svg-icon iconCheckmarkLg" width="36" height="36" viewBox="0 0 36 36">
-                    <path d="m6 14 8 8L30 6v8L14 30l-8-8z"></path>
-                </svg>
-            </button>
-        </form>
+        <button type="button" 
+                class="accept-solution-button {% if solution == accepted_solution %}accept-button-accepted{% else %}accept-button-unaccepted{% endif %}"
+                data-solution-id="{{ solution.id }}"
+                onclick="solutionInteractions.toggleAcceptSolution('{{ solution.id }}')"
+                title="{% if solution == accepted_solution %}Unaccept this answer{% else %}Accept this answer{% endif %}">
+            <svg aria-hidden="true" class="m0 svg-icon iconCheckmarkLg" width="36" height="36" viewBox="0 0 36 36">
+                <path d="m6 14 8 8L30 6v8L14 30l-8-8z"></path>
+            </svg>
+        </button>
         {% endif %}
-
+        
         <!-- Solution Saving-->
         {% if user.is_authenticated %}
-            {% if solution|is_saved_solution:user %}
-            <form method="post" action="{% url 'unsave_solution' solution.id %}" class="d-inline save-solution-form">
-                {% csrf_token %}
-                <button type="submit" class="bookmark-button active" title="Unsave">
-                    <i class="fas fa-bookmark"></i>
-                </button>
-            </form>
-            {% else %}
-            <form method="post" action="{% url 'save_solution' solution.id %}" class="d-inline save-solution-form">
-                {% csrf_token %}
-                <button type="submit" class="bookmark-button" title="Save">
-                    <i class="far fa-bookmark"></i>
-                </button>
-            </form>
-            {% endif %}
+        <button type="button" 
+                class="bookmark-button {% if solution|is_saved_solution:user %}active{% endif %}" 
+                onclick="solutionInteractions.toggleSaveSolution('{{ solution.id }}')"
+                title="{% if solution|is_saved_solution:user %}Unsave{% else %}Save{% endif %}">
+            <i class="{% if solution|is_saved_solution:user %}fas{% else %}far{% endif %} fa-bookmark"></i>
+        </button>
         {% endif %}
     </div>
 

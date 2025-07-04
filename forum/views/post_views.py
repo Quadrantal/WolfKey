@@ -1,20 +1,19 @@
-from django.shortcuts import render, get_object_or_404, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
-from django.db.models import F, Case, When, IntegerField
-from django.core.serializers.json import DjangoJSONEncoder
-from django.views.decorators.http import require_http_methods
-from django.views.decorators.csrf import ensure_csrf_cookie
+from django.contrib import messages
+from django.http import HttpResponseForbidden
 import json
 import logging
-from django.http import JsonResponse
 from django.utils.html import escape
-from forum.models import Post, Solution, Comment, Course, FollowedPost, SavedSolution, Notification
+from forum.models import Post, Solution, FollowedPost, SavedSolution, Notification
+from ..services.utils import selective_quote_replace, detect_bad_words
 from forum.forms import SolutionForm, CommentForm, PostForm
-from .utils import selective_quote_replace, detect_bad_words
-from django.contrib import messages
-from .notification_views import send_course_notifications, send_solution_notification
-from django.http import HttpResponseForbidden
-
+from forum.services.post_services import (
+    create_post_service,
+    update_post_service,
+    delete_post_service,
+    get_post_detail_service
+)
 
 logger = logging.getLogger(__name__)
 
@@ -24,151 +23,90 @@ def create_post(request):
         form = PostForm(request.POST)
         if form.is_valid():
             try:
-                post = form.save(commit=False)
-                post.author = request.user
-
-                # Handle content
                 content_json = request.POST.get('content')
                 content_data = json.loads(content_json) if content_json else {}
+                
+                # Create post using service
+                result = create_post_service(request.user, {
+                    'title': form.cleaned_data['title'],
+                    'content': content_data,
+                    'courses': [course.id for course in form.cleaned_data['courses']]
+                })
 
-                # Validate post content
-                if isinstance(content_data, dict) and 'blocks' in content_data:
-                    blocks = content_data.get('blocks', [])
-                    if (len(blocks) == 1 and blocks[0].get('type') == 'paragraph' and not blocks[0].get('data', {}).get('text', '').strip()) or len(blocks) == 0:
-                        messages.error(request, 'Post content cannot be empty.')
-                        return redirect('create_post')
-                detect_bad_words(content_data) 
-                post.content = content_data
+                if 'error' in result:
+                    messages.error(request, result['error'])
+                    return redirect('create_post')
 
-                # Save post and handle courses
-                post.save()
-                course_ids = request.POST.getlist('courses')
-                if course_ids:
-                    courses = Course.objects.filter(id__in=course_ids)
-                    post.courses.set(courses)
-                    send_course_notifications(post, courses)
-
-                return redirect(post.get_absolute_url())
-            except ValueError as e:
-                # Catch bad word detection errors
-                messages.error(request, f"Content contains inappropriate language: {str(e)}")
+                return redirect('post_detail', post_id=result['id'])
             except Exception as e:
-                # Catch other errors
                 messages.error(request, f"Error creating post: {str(e)}")
         else:
             messages.error(request, f"Form validation failed: {form.errors}")
     else:
         form = PostForm()
 
-    return render(request, 'forum/post_form.html', {'form': form, 'action': 'Create'})
-  
+    context = {
+        'form': form,
+        'action': 'Create',
+        'post': None,
+        'post_content': json.dumps({"blocks": [{"type": "paragraph", "data": {"text": ""}}]}),
+        'selected_courses_json': '[]'
+    }
+    return render(request, 'forum/post_form.html', context)
+
 @login_required
 def post_detail(request, post_id):
-    post = get_object_or_404(Post, id=post_id)
-
+    # Get post details using service
+    result = get_post_detail_service(post_id)
+    
+    if 'error' in result:
+        messages.error(request, result['error'])
+        return redirect('all_posts')
+        
+    # Update notifications
     if request.user.is_authenticated:
         Notification.objects.filter(
             recipient=request.user,
-            post=post,
+            post_id=post_id,
             is_read=False
         ).update(is_read=True)
+
+    post = Post.objects.get(id=post_id)  # Get the actual post object
     post.views += 1
     post.save()
-    solutions = post.solutions.annotate(
-        vote_score=F('upvotes') - F('downvotes')
-    ).order_by(
-        Case(
-            When(id=post.accepted_solution_id, then=0),
-            default=1,
-            output_field=IntegerField(),
-        ),
-        '-vote_score',
-        '-created_at'
-    )
 
+    # Prepare forms and additional context
     solution_form = SolutionForm()
     comment_form = CommentForm()
     
-    has_solution = Solution.objects.filter(post=post, author=request.user).exists()
-    
-    try:
-        content_json = json.dumps(post.content, cls=DjangoJSONEncoder)
-    except (TypeError, ValueError) as e:
-        logger.error(f"Error serializing post content: {e}")
-        content_json = json.dumps({
-            "blocks": [{"type": "paragraph", "data": {"text": "Error displaying content"}}]
-        })
-    
+    has_solution = Solution.objects.filter(post_id=post_id, author=request.user).exists()
+    is_following = FollowedPost.objects.filter(user=request.user, post_id=post_id).exists() if request.user.is_authenticated else False
+
+    # Process solutions for template
     processed_solutions = []
-    for solution in solutions:
-        try:
-            solution_content = solution.content
+    for solution in result['solutions']:
+        solution['is_saved'] = SavedSolution.objects.filter(
+            user=request.user, 
+            solution_id=solution['id']
+        ).exists() if request.user.is_authenticated else False
+        processed_solutions.append(solution)
+
     
 
-            # Check if the solution is saved by the current user
-            is_saved = False
-            if request.user.is_authenticated:
-                is_saved = SavedSolution.objects.filter(user=request.user, solution=solution).exists()
-
-            # Get comments for this solution
-            comments = solution.comments.select_related('author').order_by('created_at')
-            processed_comments = []
-            for comment in comments:
-                processed_comments.append({
-                    'id': comment.id,
-                    'content': comment.content,
-                    'author': f"{comment.author.first_name} {comment.author.last_name}",
-                    'created_at': comment.created_at.strftime("%Y-%m-%d %H:%M:%S"),
-                    'parent_id': comment.parent_id,
-                    'depth': comment.get_depth(),
-                })
-            root_comments_count = sum(1 for comment in comments if comment.get_depth() == 0)
-
-            processed_solutions.append({
-                'id': solution.id,
-                'content': solution_content,  
-                'author': f"{solution.author.first_name} {solution.author.last_name}",
-                'created_at': solution.created_at.strftime("%Y-%m-%d %H:%M:%S"),
-                'upvotes': solution.upvotes,
-                'downvotes': solution.downvotes,
-                'is_saved': is_saved,
-                'comments': processed_comments,
-                'root_comments_count': root_comments_count,
-            })
-        except Exception as e:
-            logger.error(f"Error processing solution {solution.id}: {e}")
-            processed_solutions.append({
-                'id': solution.id,
-                'content': {
-                    "blocks": [{"type": "paragraph", "data": {"text": "Error loading solution content"}}]
-                },
-                'author': f"{solution.author.first_name} {solution.author.last_name}",
-                'created_at': solution.created_at.strftime("%Y-%m-%d %H:%M:%S"),
-                'upvotes': solution.upvotes,
-                'downvotes': solution.downvotes,
-                'is_saved': False,
-                'comments': [],
-                'root_comments_count': 0,
-            })
-    
-    is_following = False
-    if request.user.is_authenticated:
-        is_following = FollowedPost.objects.filter(user=request.user, post=post).exists()
-    
     context = {
-        'post': post,
-        'solutions': solutions,
-        'content_json': content_json,
+        'post': post,  # Use actual post object for template helpers
+        'solutions' : result['solutions_object'],
+        'post_data': result,
+        'content_json': json.dumps(result['content']),
         'processed_solutions_json': json.dumps(processed_solutions),
-        'courses': post.courses.all(),
         'has_solution_from_user': has_solution,
         'solution_form': solution_form,
         'comment_form': comment_form,
-        'is_following': is_following
+        'is_following': is_following,
+        'courses': result['courses']
     }
 
     return render(request, 'forum/post_detail.html', context)
-
 
 @login_required
 def edit_post(request, post_id):
@@ -193,6 +131,7 @@ def edit_post(request, post_id):
             if course_ids:
                 post.courses.set(course_ids)
             
+            post.title = request.POST.get('title', post.title)
             post.save()
             messages.success(request, 'Post updated successfully!')
             return redirect('post_detail', post_id=post.id)
@@ -223,6 +162,7 @@ def edit_post(request, post_id):
         selected_courses = list(post.courses.values('id', 'name', 'code', 'category'))
         selected_courses_json = json.dumps(selected_courses)
     except Exception as e:
+        print(e)
         post_content = json.dumps({
             "blocks": [{"type": "paragraph", "data": {"text": ""}}]
         })
@@ -232,11 +172,12 @@ def edit_post(request, post_id):
         'post': post,
         'action': 'Edit',
         'post_content': post_content,
-        'selected_courses_json': selected_courses_json
+        'selected_courses_json': selected_courses_json,
+        'form': None  # Not needed for edit
     }
 
     # print(selected_courses_json)
-    return render(request, 'forum/edit_post.html', context)
+    return render(request, 'forum/post_form.html', context)
 
 
 @login_required

@@ -150,7 +150,7 @@ export class CommentEditor {
             const data = await response.json();
             const commentsContainer = document.querySelector(`[data-solution-id="${solutionId}"] .comments`);
 
-
+            console.log("DATA: ", data);
             
             if (commentsContainer) {
                 // Update HTML
@@ -160,11 +160,6 @@ export class CommentEditor {
                 // Initialize editors using the comments data
                 if (data.comments && data.comments.length > 0) {
                     await this.editorManager.initializeCommentEditors(data.comments, this.csrfToken);
-                    
-                    // Reinitialize math fields
-                    data.comments.forEach(comment => {
-
-                    });
                 }
             }
         } catch (error) {

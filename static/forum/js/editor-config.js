@@ -1,5 +1,6 @@
 import { MathLiveBlock } from './math-block.js';
 const createEditor = (holder,initialData, csrfToken, isReadOnly = false, contentElementId = 'editorjs-content') => {
+    console.log("Intial Data: ", initialData);
     return new EditorJS({
         holder: holder,  // The container where Editor.js will be initialized
         data: initialData,
