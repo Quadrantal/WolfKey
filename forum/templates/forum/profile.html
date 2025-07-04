@@ -222,7 +222,7 @@
                         <!-- Block Courses Section -->
                         <div class="card mb-4">
                             <div class="card-header">
-                                <h5 class="mb-0">Select Courses for Each Block</h5>
+                                <h5 class="mb-0">Fill in your schedule info</h5>
                             </div>
                             <div class="card-body">
                                 <form method="post" action="{% url 'update_courses' %}" id="blockCoursesForm">
@@ -442,21 +442,57 @@
 {% endblock %}
 
 {% block scripts %}
+<!-- Background Color Setting -->
 <script>
-    
     document.addEventListener('DOMContentLoaded', function () {
         const hueValue = {{ profile_user.userprofile.background_hue }};
         setBackground(hueValue);
-        const personalInfoForm = document.getElementById('personalInfoForm');
+    });
     
-        // Prevent Enter key from submitting the form
+</script>
+
+<!-- Profile Picture Upload -->
+<script>
+    {% if user == profile_user %}
+    document.addEventListener('DOMContentLoaded', function () {
+        const profilePicture = document.getElementById('profilePicture');
+        const profilePictureMenu = document.getElementById('profilePictureMenu');
+        const hoverText = document.getElementById('hoverText');
+
+        // Show/hide hover text
+        profilePicture.addEventListener('mouseenter', () => {
+            hoverText.style.display = 'block';
+        });
+        profilePicture.addEventListener('mouseleave', () => {
+            hoverText.style.display = 'none';
+        });
+
+        // Toggle dropdown menu
+        profilePicture.addEventListener('click', function (e) {
+            e.stopPropagation();
+            profilePictureMenu.style.display = 
+                profilePictureMenu.style.display === 'block' ? 'none' : 'block';
+        });
+
+        // Close menu when clicking outside
+        document.addEventListener('click', function () {
+            profilePictureMenu.style.display = 'none';
+        });
+    });
+    {% endif %}
+</script>
+
+<!-- Personal Info Form Handling -->
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const personalInfoForm = document.getElementById('personalInfoForm');
+        
         personalInfoForm.addEventListener('keydown', (event) => {
             if (event.key === 'Enter') {
                 event.preventDefault();
             }
         });
-    
-        // Prevent form submission on Enter key press
+
         personalInfoForm.addEventListener('submit', (event) => {
             const activeElement = document.activeElement;
             if (activeElement.tagName === 'INPUT' && activeElement.type !== 'submit') {
@@ -464,49 +500,126 @@
             }
         });
     });
-
 </script>
 
+<!-- Course Experience/Help Buttons -->
 <script>
-    {% if user == profile_user %}
-        document.addEventListener('DOMContentLoaded', function () {
-        const profilePicture = document.getElementById('profilePicture');
-        const profilePictureMenu = document.getElementById('profilePictureMenu');
+    document.addEventListener('DOMContentLoaded', function () {
+        const initialCourses = JSON.parse('{{ initial_courses_json|escapejs }}');
 
-        // Toggle the dropdown menu when the profile picture is clicked
-        profilePicture.addEventListener('click', function () {
-            const isMenuVisible = profilePictureMenu.style.display === 'block';
-            profilePictureMenu.style.display = isMenuVisible ? 'none' : 'block';
-        });
+        // Handle "Proficient" and "Need Help" buttons
+        document.querySelectorAll('.add-experience-btn, .add-help-btn').forEach(button => {
+            button.addEventListener('click', async function() {
+                const block = this.dataset.block;
+                const courseId = initialCourses[`block_${block}`]?.id;
+                const isExperienceBtn = this.classList.contains('add-experience-btn');
+                
+                if (!courseId) return;
 
-        // Close the menu if clicked outside
-        document.addEventListener('click', function (event) {
-            if (!profilePicture.contains(event.target) && !profilePictureMenu.contains(event.target)) {
-                profilePictureMenu.style.display = 'none';
-            }
+                const url = isExperienceBtn 
+                    ? '{% url "add_experience" %}' 
+                    : '{% url "add_help_request" %}';
+                
+                try {
+                    const response = await fetch(url, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded',
+                            'X-CSRFToken': '{{ csrf_token }}'
+                        },
+                        body: `course=${courseId}`
+                    });
+                    
+                    const data = await response.json();
+                    if (data.success) {
+                        this.style.display = 'none';
+                        document.getElementById(`block_${block}_buttons`).style.display = 'none';
+                    } else {
+                        alert('Error: ' + (data.message || 'Request failed'));
+                    }
+                } catch (error) {
+                    console.error('Error:', error);
+                    alert('Network error occurred');
+                }
+            });
         });
     });
-    {% endif %}
-
 </script>
 
+<!-- Modal Form Submissions -->
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Experience Modal Form
+        const experienceForm = document.getElementById('addExperienceForm');
+        if (experienceForm) {
+            experienceForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const formData = new FormData(experienceForm);
+                
+                try {
+                    const response = await fetch(experienceForm.action, {
+                        method: 'POST',
+                        body: formData,
+                        headers: {
+                            'X-CSRFToken': '{{ csrf_token }}'
+                        }
+                    });
+                    
+                    const data = await response.json();
+                    if (data.success) {
+                        bootstrap.Modal.getInstance(document.getElementById('addExperienceModal')).hide();
+                        location.reload();
+                    } else {
+                        alert('Error adding experience: ' + (data.message || 'Unknown error'));
+                    }
+                } catch (error) {
+                    console.error('Error:', error);
+                    alert('Network error occurred');
+                }
+            });
+        }
+
+        // Help Modal Form
+        const helpForm = document.getElementById('addHelpForm');
+        if (helpForm) {
+            helpForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const formData = new FormData(helpForm);
+                
+                try {
+                    const response = await fetch(helpForm.action, {
+                        method: 'POST',
+                        body: formData,
+                        headers: {
+                            'X-CSRFToken': '{{ csrf_token }}'
+                        }
+                    });
+                    
+                    const data = await response.json();
+                    if (data.success) {
+                        bootstrap.Modal.getInstance(document.getElementById('addHelpModal')).hide();
+                        location.reload();
+                    } else {
+                        alert('Error adding help request: ' + (data.message || 'Unknown error'));
+                    }
+                } catch (error) {
+                    console.error('Error:', error);
+                    alert('Network error occurred');
+                }
+            });
+        }
+    });
+</script>
+
+<!-- Course Selector Initialization -->
 <script type="module">
     import { CourseSelector } from '{% static "forum/js/course-selector.js" %}';
+
+    
     document.addEventListener('DOMContentLoaded', () => {
-        const hueValue = {{ profile_user.userprofile.background_hue }};
-        setBackground(hueValue);
-
-        const blocks = ['1A', '1B', '1D', '1E', '2A', '2B', '2C', '2D', '2E'];
-
-        // Parse initial courses from JSON
         const initialCourses = JSON.parse('{{ initial_courses_json|escapejs }}');
         const experiencedCourses = JSON.parse('{{ experienced_courses_json|escapejs }}');
-        const helpNeededCourses = JSON.parse('{{ help_needed_courses_json|escapejs }}');
-
-        // Function to check if a course is in the experienced or help-needed list
-        function isCourseInList(courseId, list) {
-            return list.includes(courseId);
-        }
+        const helpNeededCourses = JSON.parse('{{ help_needed_courses_json|escapejs }}');        const blocks = ['1A', '1B', '1D', '1E', '2A', '2B', '2C', '2D', '2E'];
 
         blocks.forEach(block => {
             const blockId = `block_${block}`;
@@ -517,7 +630,7 @@
             if (buttonsContainer && course) {
                 buttonsContainer.style.display = 'flex';
                 // Check if the course is already in either the "Experienced" or "Help Needed" lists
-                if (isCourseInList(course.id, experiencedCourses) || isCourseInList(course.id, helpNeededCourses)) {
+                if (experiencedCourses.includes(course.id) || helpNeededCourses.includes(course.id)) {
                     // Hide buttons if the course is in one of the lists
                     buttonsContainer.style.display = 'none';
                 }
@@ -525,142 +638,18 @@
                 buttonsContainer.style.display = 'none';
             }
 
-            // Add course selection handler to toggle visibility of buttons
             new CourseSelector({
-                containerId: `block_${block}_selector`,
+                containerId: `${blockId}_selector`,
                 formName: 'blockCoursesForm',
-                maxCourses: 1, // Only one course per block
-                initialSelection: course ? [course] : [], // Initialize with the selected course, if any
+                maxCourses: 1,
+                initialSelection: initialCourses[blockId] ? [initialCourses[blockId]] : [],
                 block: block,
                 onSelectionChange: (selectedCourses) => {
-                    console.log(`Block ${block} selected courses:`, selectedCourses);
-
-                    // Show or hide the buttons based on course selection
-                    if (selectedCourses.length > 0) {
-                        buttonsContainer.style.display = 'flex';
-                    } else {
-                        buttonsContainer.style.display = 'none';
-                    }
+                    const buttonsContainer = document.getElementById(`${blockId}_buttons`);
+                    buttonsContainer.style.display = selectedCourses.length > 0 ? 'flex' : 'none';
                 }
             });
         });
-
-        // Attach click event listeners to the buttons
-        blocks.forEach(block => {
-            const buttonsContainer = document.getElementById(`block_${block}_buttons`);
-            if (buttonsContainer) {
-                buttonsContainer.addEventListener('click', (event) => {
-                    const target = event.target;
-                    const blockId = target.getAttribute('data-block');
-                    const courseId = initialCourses[`block_${blockId}`]?.id;
-
-                    if (courseId) {
-                        let url, formData;
-                        if (target.classList.contains('add-help-btn')) {
-                            url = '{% url "add_help_request" %}';
-                            formData = new FormData();
-                            formData.append('course', courseId);
-                        } else if (target.classList.contains('add-experience-btn')) {
-                            url = '{% url "add_experience" %}';
-                            formData = new FormData();
-                            formData.append('course', courseId);
-                        }
-
-                        fetch(url, {
-                            method: 'POST',
-                            body: formData,
-                            headers: {
-                                'X-CSRFToken': '{{ csrf_token }}'
-                            }
-                        })
-                        .then(response => response.json())
-                        .then(data => {
-                            if (data.success) {
-                                // Hide the button after it's clicked
-                                target.style.display = 'none';
-                                buttonsContainer.style.display = 'none'; // Hide the button container as well
-                            } else {
-                                console.log(data);
-                                alert('There was an issue with the request.');
-                            }
-                        })
-                        .catch(error => {
-                            console.error('Error:', error);
-                            alert('There was an error with the request.');
-                        });
-                    }
-                });
-            }
-        });
-
-        const addExperienceForm = document.getElementById('addExperienceForm');
-        const addHelpForm = document.getElementById('addHelpForm');
-
-        console.log(addExperienceForm, addHelpForm);
-
-        if (addExperienceForm) {
-            addExperienceForm.addEventListener('submit', (event) => {
-                event.preventDefault();  // Prevent the default form submission behavior
-
-                const formData = new FormData(addExperienceForm);
-                console.log(formData);
-                fetch(addExperienceForm.action, {
-                    method: 'POST',
-                    body: formData,
-                    headers: {
-                        'X-CSRFToken': '{{ csrf_token }}',
-                    },
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        // Hide modal and reload the page
-                        const addExperienceModal = new bootstrap.Modal(document.getElementById('addExperienceModal'));
-                        addExperienceModal.hide();
-                        location.reload();
-                    } else {
-                        alert('There was an issue with adding the experience.');
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    alert('There was an error processing the request.');
-                });
-            });
-        }
-
-        if (addHelpForm) {
-            addHelpForm.addEventListener('submit', (event) => {
-                event.preventDefault();  // Prevent the default form submission behavior
-
-                const formData = new FormData(addHelpForm);
-                console.log(formData);
-
-                fetch(addHelpForm.action, {
-                    method: 'POST',
-                    body: formData,
-                    headers: {
-                        'X-CSRFToken': '{{ csrf_token }}',
-                    },
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        // Hide modal and reload the page
-                        const addHelpModal = new bootstrap.Modal(document.getElementById('addHelpModal'));
-                        addHelpModal.hide();
-                        location.reload();
-                    } else {
-                        alert('There was an issue with adding the help request.');
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    alert('There was an error processing the request.');
-                });
-            });
-        }
     });
-
 </script>
 {% endblock %}
