@@ -1,13 +1,29 @@
 import re
+import os
+import uuid
 from django.utils.html import strip_tags
 from django.core.files.base import ContentFile
 from django.core.files.storage import default_storage
 from django.http import JsonResponse
 from django.contrib import messages
+from django.views.decorators.csrf import csrf_exempt
+from PIL import Image
+from io import BytesIO
+
+ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/gif']
+ALLOWED_EXTENSIONS = ['.jpg', '.jpeg', '.png', '.gif']
 
 
 def process_post_preview(post):
-    """Process post content to create preview text"""
+    """
+    Generate a preview text for a post by extracting and cleaning paragraph blocks from Editor.js content.
+
+    Args:
+        post: Post object with a content attribute (dict or str).
+
+    Returns:
+        str: Concatenated and cleaned preview text.
+    """
     if isinstance(post.content, dict) and 'blocks' in post.content:
         paragraphs = []
         for block in post.content['blocks']:
@@ -29,7 +45,17 @@ def process_post_preview(post):
         return ' '.join(text.split())
 
 def add_course_context(post, experienced_courses=None, help_needed_courses=None):
-    """Add course context to a post"""
+    """
+    Add course context information to a post object.
+
+    Args:
+        post: Post object with a courses relation.
+        experienced_courses: Optional list of Course objects the user has experience with.
+        help_needed_courses: Optional list of Course objects the user needs help with.
+
+    Returns:
+        post: The same post object with a 'course_context' attribute added.
+    """
     post.course_context = []
     for course in post.courses.all():
         post.course_context.append({
@@ -39,23 +65,72 @@ def add_course_context(post, experienced_courses=None, help_needed_courses=None)
         })
     return post
 
+@csrf_exempt
 def upload_image(request):
+    """
+    Handle image uploads for Editor.js.
+
+    - Ensures only allowed image types are accepted.
+    - Converts all images to JPEG format.
+    - Generates a unique filename for each upload.
+    - Saves the image to the default Django storage.
+    - Enforces a maximum file size of 500 MB.
+
+    Args:
+        request: Django HttpRequest object with an uploaded file in 'image'.
+
+    Returns:
+        JsonResponse: Success with image URL or error message.
+    """
+    MAX_IMAGE_SIZE = 10 * 1024 * 1024  #10 MB
+
     if request.method == 'POST' and request.FILES.get('image'):
-        image = request.FILES['image']
-        # Optionally, process the image before saving (e.g., resize, convert formats) TODO
-        
-        # Save the image in your static or media directory
-        filename = default_storage.save('uploads/' + image.name, ContentFile(image.read()))
-        
-        # Return the URL of the uploaded image
-        image_url = default_storage.url(filename)
-        
-        return JsonResponse({'success': 1, 'file': {'url': image_url}})
+        image_file = request.FILES['image']
+        ext = os.path.splitext(image_file.name)[1].lower()
+        mime_type = image_file.content_type
+
+        # Check file size
+        if image_file.size > MAX_IMAGE_SIZE:
+            return JsonResponse({'error': 'Image file too large (max 10 MB).'}, status=400)
+
+        # 1. Check allowed types
+        if mime_type not in ALLOWED_IMAGE_TYPES or ext not in ALLOWED_EXTENSIONS:
+            return JsonResponse({'error': 'Unsupported file type.'}, status=400)
+
+        # 2. Open and convert to JPEG
+        try:
+            img = Image.open(image_file)
+            rgb_img = img.convert('RGB')  # Convert to RGB for JPEG
+
+            # 3. Generate unique filename
+            unique_name = f"{uuid.uuid4().hex}.jpg"
+            upload_path = os.path.join('uploads', unique_name)
+
+            # 4. Save to BytesIO as JPEG
+            buffer = BytesIO()
+            rgb_img.save(buffer, format='JPEG', quality=90)
+            buffer.seek(0)
+
+            # 5. Save to storage
+            saved_path = default_storage.save(upload_path, ContentFile(buffer.read()))
+            image_url = default_storage.url(saved_path)
+
+            return JsonResponse({'success': 1, 'file': {'url': image_url}})
+        except Exception as e:
+            return JsonResponse({'error': f'Image processing failed: {str(e)}'}, status=400)
     else:
         return JsonResponse({'error': 'No image uploaded'}, status=400)
     
 def selective_quote_replace(content):
-    """Helper function to selectively replace quotes while preserving inlineMath"""
+    """
+    Replace quotes in content while preserving inlineMath quotes.
+
+    Args:
+        content (str): The content string to process.
+
+    Returns:
+        str: The processed content string with quotes replaced.
+    """
     # First, preserve inlineMath quotes
     content = re.sub(r'data-tex="(.*?)"', r'data-tex=__INLINEMATH__\1__INLINEMATH__', content)
     
@@ -87,6 +162,15 @@ def selective_quote_replace(content):
     return content
 
 def process_messages_to_json(request):
+    """
+    Convert Django messages to a JSON-serializable list.
+
+    Args:
+        request: Django HttpRequest object.
+
+    Returns:
+        list: List of dicts with 'message' and 'tags' keys.
+    """
     messages_data = [
         {
             'message': message.message,
@@ -111,7 +195,15 @@ leet_mapping = str.maketrans({
 })
 
 def normalize_text(text):
-    """Normalizes text by converting leetspeak, removing special characters, and reducing repeated letters."""
+    """
+    Normalize text by converting leetspeak, removing special characters, and reducing repeated letters.
+
+    Args:
+        text (str): The input text.
+
+    Returns:
+        str: Normalized, lowercase text.
+    """
     if not text:
         return ""
     

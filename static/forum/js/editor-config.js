@@ -15,7 +15,10 @@ const createEditor = (holder,initialData, csrfToken, isReadOnly = false, content
                     field: 'image', // The name of the field expected by the backend
                     additionalRequestHeaders: {
                         'X-CSRFToken': document.querySelector('[name="csrfmiddlewaretoken"]').value
-                    }
+                    },
+                    features: {
+                        caption: 'optional',
+                    }  
                 }
             },
             header: {
