@@ -24,7 +24,7 @@
     <link rel="stylesheet" href="{% static 'forum/css/layout.css' %}">
     <link rel="stylesheet" href="{% static 'forum/css/whats-new.css' %}">
 
-    <script async>
+    <script>
         function setBackground(hue) {
             const gradientEnd = document.getElementById('gradient-end');
             // Create HSL color for the gradient end
@@ -61,8 +61,20 @@
             console.log(rgba);
             gradientEnd.setAttribute('stop-color', rgba);
             }
+        document.addEventListener('DOMContentLoaded', function() {
+            const isProfilePage = document.body.classList.contains('profile-page');
+            if (!isProfilePage) {
+                const hue = {{ request.user.userprofile.background_hue}};
+                {% if request.user.is_authenticated %}
+                    setBackground({{ request.user.userprofile.background_hue|default:231 }});
+                {% else %}
+                    setBackground(231);
+                {% endif %};
+                    setBackground(hue);
+            }
+        });
     </script>
-
+    
     {% block head %}
     {% endblock %}
 </head>
@@ -284,20 +296,7 @@
         <script defer src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"></script>
 
     {% block extra_js %}
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const isProfilePage = document.body.classList.contains('profile-page');
-            if (!isProfilePage) {
-                const hue = {{ request.user.userprofile.background_hue}};
-                {% if request.user.is_authenticated %}
-                    setBackground({{ request.user.userprofile.background_hue|default:231 }});
-                {% else %}
-                    setBackground(231);
-                {% endif %};
-                    setBackground(hue);
-            }
-        });
-    </script>
+
     <script>
     document.addEventListener('DOMContentLoaded', function() {
         initializeToasts();
@@ -428,7 +427,7 @@ function acknowledgeUpdate(updateId) {
 
             // Handle fade-out animation before hiding
             toastEl.addEventListener('hidden.bs.toast', function () {
-                toastEl.classList.add('fade-out');
+                toastEl.clxassList.add('fade-out');
             });
 
             const delay = toastEl.getAttribute('data-bs-delay') || 10000;

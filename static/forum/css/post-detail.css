@@ -1,6 +1,15 @@
+/* =============================================================================
+   NAVIGATION
+   ============================================================================= */
+
 .nav-link:hover {
   color: #004080 !important;
 }
+
+
+/* =============================================================================
+   LAYOUT & CONTAINERS
+   ============================================================================= */
 
 #main-section {
   max-width: 920px;
@@ -18,10 +27,55 @@
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
   border-width: 0px !important;
 }
+
+.solution-container {
+  display: flex;
+  margin-bottom: 20px !important;
+  border-radius: 12px;
+  max-width: 920px;
+  background-color: white;
+  margin: auto;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+  position: relative;
+}
+
+#solution-form-container {
+  max-width: 920px;
+  margin: 10px auto;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+  border-radius: 12px;
+  border-color: transparent;
+  background-color: white;
+}
+
+
+/* =============================================================================
+   QUESTION & POST STYLES
+   ============================================================================= */
+
+.question-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.question-header h1 {
+  max-width: 69%;
+}
+
+.title {
+  font-size: 48px;
+  font-weight: bold;
+  color: #333;
+  margin: 0;
+  max-width: 70%;
+}
+
 .post-header {
   padding: 20px;
   border-bottom: 1px solid #e0e0e0;
 }
+
 .post-stats {
   display: flex;
   align-items: center;
@@ -29,48 +83,62 @@
   color: #666;
   font-size: 14px;
 }
+
 .post-content {
   padding: 10px;
   font-size: 16px;
   line-height: 1.6;
 }
+
+.post-content-cell {
+  flex-grow: 1;
+}
+
+
+/* =============================================================================
+   SOLUTION CARDS
+   ============================================================================= */
+
 .solution-card {
   border: 1px solid #e0e0e0;
   border-radius: 8px;
   margin-bottom: 20px;
   background: white;
 }
+
 .solution-header {
   display: flex;
   align-items: center;
   padding: 15px 20px;
   border-bottom: 1px solid #e0e0e0;
 }
+
 .solution-stats {
   margin-left: auto;
   display: flex;
   align-items: center;
   gap: 15px;
 }
-.vote-count {
-  font-size: 20px;
-  font-weight: bold;
-  color: #333;
-  text-align: center;
-  margin: 10px 0;
-}
-.author-info {
+
+.solutions-header {
   display: flex;
+  justify-content: space-between;
   align-items: center;
-  gap: 10px;
-}
-.author-avatar {
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  background-color: #e0e0e0;
+  margin: auto;
+  max-width: 920px;
 }
 
+.accepted-solution {
+  padding-top: 12px;
+  border: 1px solid #45cb7d;
+  background: linear-gradient(to bottom, #aae6a3 -5%, #fff 6%, #fff 85%, #aae6a3 120%);
+  box-shadow: 0 0px 20px rgba(41, 234, 14, 0.9);
+}
+
+
+/* =============================================================================
+   VOTING SYSTEM
+   ============================================================================= */
 
 .vote-cell {
   display: flex;
@@ -107,38 +175,340 @@
   color: #f48024;
 }
 
-.post-content-cell {
-  flex-grow: 1;
+.vote-button {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
 }
 
-.solution-container {
+.vote-button:focus {
+  outline: none;
+}
+
+.vote-button svg path {
+  fill: #bbb;
+  transition: fill 0.2s ease;
+}
+
+.vote-button:hover svg path {
+  fill: #000000;
+}
+
+.vote-button.voted-up svg path {
+  fill: #2ecc71;
+}
+
+.vote-button.voted-down svg path {
+  fill: #e74c3c;
+}
+
+.vote-count {
+  font-size: 20px;
+  font-weight: bold;
+  color: #333;
+  text-align: center;
+  margin: 10px 0;
+}
+
+
+/* =============================================================================
+   ACCEPT/REJECT BUTTONS
+   ============================================================================= */
+
+.accept-button-accepted {
+  background: transparent !important;
+  border: none;
+  border-color: transparent !important;
+  cursor: pointer;
+  padding: 5px;
   display: flex;
-  margin-bottom: 20px !important;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.2s ease;
+}
+
+.accept-button-accepted path {
+  fill: green;
+}
+
+.accept-button-unaccepted {
+  background: transparent !important;
+  border: none;
+  border-color: transparent !important;
+  cursor: pointer;
+  padding: 5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.2s ease;
+}
+
+.accept-button-unaccepted path {
+  fill: grey;
+}
+
+.accept-button:hover {
+  transform: scale(1.1);
+}
+
+
+/* =============================================================================
+   BOOKMARK & SAVE FUNCTIONALITY
+   ============================================================================= */
+
+.star-button {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  outline: none;
+  width: 24px;
+  height: 24px;
+  display: inline-block;
+}
+
+.star-button svg {
+  fill: #e3e6e8;
+  transition: all 0.2s ease;
+}
+
+.star-button:hover svg {
+  fill: #babfc4;
+}
+
+.star-button.active svg {
+  fill: #f5bd41;
+}
+
+.star-button:active {
+  transform: scale(1.1);
+}
+
+.bookmark-button {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 2px;
+  outline: none;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.bookmark-button i {
+  margin-top: -20px;
+  font-size: 18px;
+  color: #babfc4;
+  transition: all 0.2s ease;
+}
+
+.bookmark-button:hover i {
+  color: #6a737c;
+}
+
+.bookmark-button.active i {
+  color: #0d6efd;
+}
+
+.bookmark-button:active {
+  transform: scale(1.1);
+}
+
+.vote-cell .fa-bookmark {
+  font-size: 18px;
+}
+
+.vote-cell .save-solution-form button {
+  background: none;
+  border: none;
+  padding: 0;
+  margin: 0;
+}
+
+.save-solution-form {
+  margin-left: 0px;
+}
+
+.custom-save-position {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+}
+
+
+/* =============================================================================
+   SORTING DROPDOWN
+   ============================================================================= */
+
+.sort-dropdown {
+  position: relative;
+  display: inline-block;
+}
+
+.sort-dropdown-button {
+  background-color: #f8f9fa;
+  color: #2c5282;
+  border: none !important;
   border-radius: 12px;
-  max-width: 920px;
+  padding: 6px 12px;
+  font-size: 14px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  transition: all 0.2s ease;
+}
+
+.sort-dropdown-button:hover {
+  background-color: #edf2f7;
+  border-color: #4299e1;
+}
+
+.sort-dropdown-button:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(66, 153, 225, 0.5);
+}
+
+.sort-dropdown-button::after {
+  content: "";
+  border-left: 5px solid transparent;
+  border-right: 5px solid transparent;
+  border-top: 5px solid #2c5282;
+  margin-left: 8px;
+}
+
+.sort-dropdown-menu {
+  position: absolute;
+  right: 0;
+  top: 100%;
   background-color: white;
-  margin:auto;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+  min-width: 120px;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  z-index: 1000;
+  border: 1px solid #e2e8f0;
+  display: none;
+  margin-top: 4px;
+  padding: 6px 0;
+  overflow: hidden;
+}
+
+.sort-dropdown-menu.show {
+  display: block;
+  animation: fadeIn 0.2s ease;
+}
+
+.sort-option {
+  padding: 8px 16px;
+  cursor: pointer;
+  color: #4a5568;
+  font-size: 14px;
+  display: block;
+  text-decoration: none;
+  transition: background-color 0.2s ease;
+  border-radius: 6px;
+}
+
+.sort-option:hover {
+  background-color: #ebf8ff;
+  color: #3182ce;
+}
+
+.sort-option.active {
+  background-color: #bee3f8;
+  color: #2b6cb0;
+  font-weight: 500;
+}
+
+#currentSort {
+  font-weight: 500;
+  margin-left: 4px;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+
+/* =============================================================================
+   COMMENTS SYSTEM
+   ============================================================================= */
+
+.comment {
   position: relative;
 }
 
-.question-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
+.comments {
+  border-left: 2px solid #e1e4e8;
 }
 
-.question-header h1 {
-  max-width: 69%;
+.comment-indicator {
+  position: absolute;
+  left: -2px;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background-color: transparent;
+  transition: background-color 0.2s ease;
 }
 
-.title {
-  font-size: 48px;
-  font-weight: bold;
-  color: #333;
-  margin: 0;
-  max-width: 70%;
+.comment:hover > .comment-content > .comment-indicator {
+  background-color: #0366d6;
 }
+
+.comment-content {
+  position: relative;
+  margin-bottom: 0.5rem;
+}
+
+.comment-metadata {
+  margin-left: auto;
+}
+
+.comment-info {
+  margin-left: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.comment-actions {
+  margin-left: 0.5rem;
+}
+
+.replies {
+  position: relative;
+}
+
+/* Comment nesting levels */
+.comment[data-depth="0"] { margin-left: 1rem !important; }
+.comment[data-depth="1"] { margin-left: 2rem !important; }
+.comment[data-depth="2"] { margin-left: 4rem !important; }
+.comment[data-depth="3"] { margin-left: 6rem !important; }
+
+.comment[data-depth="0"] > .replies > .toggle-replies { margin-left: 2rem !important; }
+.comment[data-depth="1"] > .replies > .toggle-replies { margin-left: 4rem !important; }
+.comment[data-depth="2"] > .replies > .toggle-replies { margin-left: 6rem !important; }
+
+.comment[data-depth="1"] { border-left: 2px solid #e1e4e8; }
+.comment[data-depth="2"] { border-left: 2px solid #e1e4e8; }
+.comment[data-depth="3"] { border-left: 2px solid #e1e4e8; }
+
+div[id^="comment-form-"][id$="-root"] {
+  border-top: 2px solid #e1e4e8;
+}
+
+
+/* =============================================================================
+   BUTTONS & ACTIONS
+   ============================================================================= */
 
 .actions {
   display: flex;
@@ -176,15 +546,6 @@
   color: #333;
 }
 
-#solution-form-container {
-  max-width: 920px;
-  margin: 10px auto;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
-  border-radius: 12px;
-  border-color: transparent;
-  background-color: white;
-}
-
 .solution-actions {
   display: flex;
   align-items: center;
@@ -202,10 +563,6 @@
   margin-right: 10px;
 }
 
-.save-solution-form {
-  margin-left: 0px;
-}
-
 /* Make bookmark icon and follow buttons more visible */
 button .fa-bookmark,
 button .fa-bookmark-slash,
@@ -214,323 +571,41 @@ button .fa-bell-slash {
   font-size: 1.1em;
 }
 
-.accept-button-accepted {
-    background: transparent !important;
-    border: none;
-    border-color: transparent !important;
-    cursor: pointer;
-    padding: 5px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: transform 0.2s ease;
-}  
 
-.accepted-solution {
-    padding-top: 12px;
-    border: 1px solid #45cb7d;
-    background: linear-gradient(to bottom, #aae6a3 -5%, #fff 6%, #fff 85%,#aae6a3 120%);
-    box-shadow: 0 0px 20px rgba(41, 234, 14, 0.9);
-}
+/* =============================================================================
+   AUTHOR & USER INFO
+   ============================================================================= */
 
-.accept-button-accepted path{
-    fill: green;
-}
-
-.accept-button-unaccepted {
-    background: transparent !important;
-    border: none;
-    border-color: transparent !important;
-    cursor: pointer;
-    padding: 5px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: transform 0.2s ease;
-}
-.accept-button-unaccepted path{
-    fill: grey;
-}
-
-.accept-button:hover {
-    transform: scale(1.1);
-}
-
-/* Solution Sorting Dropdown */
-.solutions-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin: auto;
-    max-width: 920px;
-}
-  
-  .sort-dropdown {
-    position: relative;
-    display: inline-block;
-  }
-  
-  .sort-dropdown-button {
-    background-color: #f8f9fa;
-    color: #2c5282;
-    border: none !important;
-    border-radius: 12px;
-    padding: 6px 12px;
-    font-size: 14px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    transition: all 0.2s ease;
-  }
-  
-  .sort-dropdown-button:hover {
-    background-color: #edf2f7;
-    border-color: #4299e1;
-  }
-  
-  .sort-dropdown-button:focus {
-    outline: none;
-    box-shadow: 0 0 0 2px rgba(66, 153, 225, 0.5);
-  }
-  
-  .sort-dropdown-button::after {
-    content: "";
-    border-left: 5px solid transparent;
-    border-right: 5px solid transparent;
-    border-top: 5px solid #2c5282;
-    margin-left: 8px;
-  }
-  
-  .sort-dropdown-menu {
-    position: absolute;
-    right: 0;
-    top: 100%;
-    background-color: white;
-    min-width: 120px;
-    border-radius: 12px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-    z-index: 1000;
-    border: 1px solid #e2e8f0;
-    display: none;
-    margin-top: 4px;
-    padding: 6px 0;
-    overflow: hidden;
-  }
-  
-  .sort-dropdown-menu.show {
-    display: block;
-    animation: fadeIn 0.2s ease;
-  }
-  
-  .sort-option {
-    padding: 8px 16px;
-    cursor: pointer;
-    color: #4a5568;
-    font-size: 14px;
-    display: block;
-    text-decoration: none;
-    transition: background-color 0.2s ease;
-    border-radius: 6px;
-  }
-  
-  .sort-option:hover {
-    background-color: #ebf8ff;
-    color: #3182ce;
-  }
-  
-  .sort-option.active {
-    background-color: #bee3f8;
-    color: #2b6cb0;
-    font-weight: 500;
-  }
-  
-  #currentSort {
-    font-weight: 500;
-    margin-left: 4px;
-  }
-  
-  @keyframes fadeIn {
-    from {
-      opacity: 0;
-      transform: translateY(-10px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
-
-.vote-button svg path {
-    fill: #bbb;  /* Default color */
-    transition: fill 0.2s ease;
-}
-
-.vote-button:hover svg path {
-    fill: #000000;  /* Hover color */
-}
-
-.vote-button.voted-up svg path {
-    fill: #2ecc71;  /* Green color for upvotes */
-}
-
-.vote-button.voted-down svg path {
-    fill: #e74c3c;  /* Red color for downvotes */
-}
-
-.vote-button {
-    background: none;
-    border: none;
-    padding: 0;
-    cursor: pointer;
-}
-
-.vote-button:focus {
-    outline: none;
-}
-
-.math-field {
-    margin: 0px;
-}
-
-.inline-math {
-    margin: 0px !important;
-}
-
-.custom-save-position {
-    margin-left: auto;
-    display: flex;
-    align-items: center;
-}
-
-
-/* Center the bookmark icon */
-.vote-cell .fa-bookmark {
-  font-size: 18px;
-}
-
-/* Reset button to a clean state */
-.vote-cell .save-solution-form button {
-  background: none;
-  border: none;
-  padding: 0;
-  margin: 0;
-}
-
-/* Stack Overflow style star button */
-.star-button {
-  background: transparent;
-  border: none;
-  cursor: pointer;
-  padding: 0;
-  outline: none;
-  width: 24px;
-  height: 24px;
-  display: inline-block;
-}
-
-.star-button svg {
-  fill: #e3e6e8;  
-  transition: all 0.2s ease;
-}
-
-.star-button:hover svg {
-  fill: #babfc4; 
-}
-
-.star-button.active svg {
-  fill: #f5bd41; 
-}
-
-.star-button:active {
-  transform: scale(1.1); 
-}
-
-/* Bookmark button styling */
-.bookmark-button {
-  /* margin-top: 20px; *test*   */
-  background: transparent;
-  border: none;
-  cursor: pointer;
-  padding: 2px;
-  outline: none;
-  width: 24px;
-  height: 24px;
+.author-info {
   display: flex;
-  justify-content: center;
   align-items: center;
+  gap: 10px;
 }
 
-.bookmark-button i {
-  margin-top: -20px;
-  font-size: 18px; 
-  color: #babfc4; 
-  transition: all 0.2s ease;
+.author-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background-color: #e0e0e0;
 }
 
-.bookmark-button:hover i {
-  color: #6a737c;
+
+/* =============================================================================
+   FORMS & EDITORS
+   ============================================================================= */
+
+.form-control {
+  border-radius: 12px;
 }
 
-.bookmark-button.active i {
-  color: #0d6efd; 
+.post-form-editor {
+  background-color: #f9f9f9;
+  border-radius: 12px;
 }
 
-.bookmark-button:active {
-  transform: scale(1.1);
-}
-  
-    /* Comment styling */
-.comment {
-  position: relative;
-}
-.comments {
-  border-left: 2px solid #e1e4e8;
-}
-
-.comment-indicator {
-  position: absolute;
-  left: -2px;
-  top: 0;
-  bottom: 0;
-  width: 2px;
-  background-color: transparent;
-  transition: background-color 0.2s ease;
-}
-
-.comment:hover > .comment-content > .comment-indicator {
-  background-color: #0366d6;
-}
-
-/* Increase indentation based on nesting level */
-.comment[data-depth="0"] { margin-left: 1rem !important; }
-.comment[data-depth="1"] { margin-left: 2rem !important; }
-.comment[data-depth="2"] { margin-left: 4rem !important; }
-.comment[data-depth="3"] { margin-left: 6rem !important; }
-
-.comment[data-depth="0"] > .replies > .toggle-replies { margin-left: 2rem !important ;}
-.comment[data-depth="1"] > .replies > .toggle-replies { margin-left: 4rem !important; }
-.comment[data-depth="2"] > .replies > .toggle-replies { margin-left: 6rem !important; }
-
-
-.comment[data-depth="1"] {border-left: 2px solid #e1e4e8;}
-.comment[data-depth="2"] {border-left: 2px solid #e1e4e8;}
-.comment[data-depth="3"] {border-left: 2px solid #e1e4e8;}
-
-/* Responsive adjustments */
-@media (max-width: 768px) {
-  .comment[data-depth="1"] { margin-left: 1rem; }
-  .comment[data-depth="2"] { margin-left: 2rem; }
-  .comment[data-depth="3"] { margin-left: 3rem; }
-}
-
-/* Comment content spacing */
-.comment-content {
-  position: relative;
-  margin-bottom: 0.5rem;
-}
-
-.replies {
-  position: relative;
+#editorjs-solution-form {
+  background-color: #f9f9f9;
+  border-radius: 12px;
 }
 
 .codex-editor__redactor {
@@ -538,34 +613,26 @@ button .fa-bell-slash {
   margin-left: 5px;
 }
 
-.comment-metadata{
-  margin-left: auto;
+
+/* =============================================================================
+   MATH & INLINE ELEMENTS
+   ============================================================================= */
+
+.math-field {
+  margin: 0px;
 }
 
-.comment-info {
-  margin-left: 0.5rem;
-  margin-top: 0.5rem;
-}
-
-.comment-actions {
-  margin-left: 0.5rem;
-}
-
-div[id^="comment-form-"][id$="-root"] {
-  border-top: 2px solid #e1e4e8;
-}
-
-#editorjs-solution-form{
-  background-color: #f9f9f9;
-  border-radius: 12px;
+.inline-math {
+  margin: 0px !important;
 }
 
 
-.post-form-editor {
-    background-color: #f9f9f9;
-    border-radius: 12px;
-}
+/* =============================================================================
+   RESPONSIVE DESIGN
+   ============================================================================= */
 
-.form-control{
-    border-radius: 12px;
+@media (max-width: 768px) {
+  .comment[data-depth="1"] { margin-left: 1rem; }
+  .comment[data-depth="2"] { margin-left: 2rem; }
+  .comment[data-depth="3"] { margin-left: 3rem; }
 }
