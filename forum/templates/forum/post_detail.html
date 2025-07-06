@@ -33,7 +33,7 @@
 
 <!-- Solutions -->
 <div class="solutions-header">
-    <h3 class="mt-4 mb-3">{{ post.solutions.count }} Solutions</h3>
+    <h3 class="mt-4 mb-3">{% if post.solutions.count == 1 %} {{ post.solutions.count }} Solution {% else %} {{ post.solutions.count }} Solutions {%endif%}</h3>
     <div class="sort-dropdown">
         <button class="sort-dropdown-button" type="button" id="sortDropdown">
             Sort by: <span id="currentSort">Votes</span>
