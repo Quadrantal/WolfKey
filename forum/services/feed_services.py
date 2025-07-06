@@ -38,10 +38,14 @@ def get_for_you_posts(user, page=1, per_page=8):
 
     posts_dict = {post.id: post for post in posts}
     ordered_posts = [posts_dict[pid] for pid in post_ids if pid in posts_dict]
+    process_posts(ordered_posts, experienced_courses, help_needed_courses)
 
     return ordered_posts, page_obj
 
-def get_all_posts(user, query=''):
+def get_all_posts(user, query='', page=1, per_page=8):
+    """
+    Returns a dict with paginated posts and page_obj, similar to get_for_you_posts.
+    """
     posts = Post.objects.annotate(
         solution_count=Count('solutions', distinct=True),
         comment_count=Count('solutions__comments', distinct=True),
@@ -56,7 +60,14 @@ def get_all_posts(user, query=''):
 
     experienced_courses, help_needed_courses = get_user_courses(user)
     process_posts(posts, experienced_courses, help_needed_courses)
-    return posts
+
+    paginator = Paginator(posts, per_page)
+    page_obj = paginator.get_page(page)
+
+    return {
+        "page_obj": page_obj,
+        "has_next": page_obj.has_next()
+    }
 
 def process_posts(posts, experienced_courses, help_needed_courses):
     for post in posts:

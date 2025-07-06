@@ -1,113 +1,149 @@
 .card {
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-    border-radius: 12px;
-    border-color: transparent;
-    background-color: white;
-    padding: 0.9rem;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    position: relative;
-    overflow: visible;
-    border-width: 0px !important;
-    z-index: 0 !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  border-radius: 12px;
+  border-color: transparent;
+  background-color: white;
+  padding: 0.9rem;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: visible;
+  border-width: 0px !important;
+  z-index: 0 !important;
 }
-  
-.card-body{
-    padding: 0.4rem;
-    position: relative;
-    z-index: 0 !important;
+
+.card-body {
+  padding: 0.4rem;
+  position: relative;
+  z-index: 0 !important;
+  opacity: 0;
+  animation: fadeIn 1s ease-out forwards;
+}
+
+.card-body h5,
+.card-body .post-title {
+  font-size: 1.125rem;
+  font-weight: 600;
+  margin-bottom: 0.25rem;
+}
+
+.card-body .post-meta,
+.card-footer .text-muted,
+.card-body small {
+  font-size: 0.875rem;
+  color: #6c757d;
+}
+
+.card-footer {
+  background: none !important;
+  border: none;
+  padding: .25rem 1rem;
+}
+
+.card-header {
+  position: relative;
+  z-index: 2;
+  background: none;
+}
+
+.card-header .btn,
+.card .btn,
+.follow-button {
+  font-size: 0.875rem;
+  transition: all 0.2s ease;
+}
+
+.card .btn:hover,
+.follow-button:hover {
+  transform: scale(1.05);
+}
+
+.follow-button {
+  background-color: transparent;
+  border: none;
+  color: grey;
+  font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  cursor: pointer;
+  padding: 6px 10px;
+  border-radius: 6px;
+}
+
+.follow-button.active {
+  color: #0d6efd;
+}
+
+.follow-button.active:hover {
+  background-color: rgba(220, 53, 69, 0.1);
 }
 
 .banner {
-    position: absolute;
-    top: 2px;
-    left: -20px;
-    background-color: #5cb85c;
-    color: white;
-    padding: 5px 0;
-    width: 80px;
-    text-align: center;
-    font-weight: bold;
-    transform: rotate(-45deg);
-    transform-origin: center;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-    z-index: 100;
+  position: absolute;
+  top: 2px;
+  left: -20px;
+  background-color: #5cb85c;
+  color: white;
+  padding: 5px 0;
+  width: 80px;
+  text-align: center;
+  font-weight: bold;
+  transform: rotate(-45deg);
+  transform-origin: center;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+  z-index: 100;
 }
 
-/* Hover Effects */
-.card:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
-    z-index: 0 !important;  
-
-}
-
-/* Subtle Highlight Effect */
-.card::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(120deg, transparent 0%, transparent 50%, rgba(255, 255, 255, 0.1) 50%, transparent 100%);
-    background-size: 200% 100%;
-    transition: background-position 0.5s ease-out;
-    z-index: 0 !important;  
-}
-
-.card:hover::before {
-    background-position: -100% 0;
-    z-index: 0 !important;  
-}
-
-/* Loading State Animation */
 .card.loading {
-    animation: cardPulse 1.5s ease-in-out infinite;
-}
-
-/* Interactive Elements */
-.card .btn {
-    transition: all 0.2s ease;
-}
-
-.card .btn:hover {
-    transform: scale(1.05);
-}
-
-/* Animations */
-@keyframes cardPulse {
-    0% {
-        opacity: 1;
-    }
-    50% {
-        opacity: 0.7;
-    }
-    100% {
-        opacity: 1;
-    }
-}
-
-/* Card Content Fade In */
-.card-body {
-    opacity: 0;
-    animation: fadeIn 1s ease-out forwards;
-    z-index: 0 !important;  
-
+  animation: cardPulse 1.5s ease-in-out infinite;
 }
 
 @keyframes fadeIn {
-    from {
-        opacity: 0;
-    }
-    to {
-        opacity: 1;
-    }
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
-.hidden {
-    opacity: 0;
-    transform: translateY(15px);
-    transition: opacity 3s ease-out, transform 1s ease-out;
+@keyframes cardPulse {
+  0% { opacity: 1; }
+  50% { opacity: 0.7; }
+  100% { opacity: 1; }
+}
+
+/* Reveal Animation */
+.post-card-container {
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.6s ease, transform 0.6s ease;
+}
+
+.post-card-container.animate-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Share Menu */
+.share-container {
+  position: relative;
+  display: inline-block;
+}
+
+.share-menu {
+  position: absolute;
+  bottom: 100%;
+  right: 0;
+  background-color: white;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+  padding: 10px;
+  z-index: 100;
+  min-width: 250px;
+  display: none;
+  transition: opacity 0.3s ease;
+}
+
+.share-container:hover .share-menu {
+  display: block;
 }
 
 .highlighted-card-red {
@@ -132,100 +168,4 @@
     background: linear-gradient(to bottom, #a3a5e6 -5%, #fff 6%, #fff 85%,#a9a3e6 120%);
     box-shadow: 0 0px 20px rgba(14, 14, 234, 0.9) !important;
     z-index: 1; 
-}
-
-.card-header {
-    position: relative;
-    z-index: 2; 
-    background: none;
-}
-
-/* Ensure the button itself is clickable above the card's background */
-.card-header .btn {
-    position: relative;
-    z-index: 3;
-}
-
-.card-footer {
-    background: none !important;
-    border: none;
-    padding: .25rem 1rem;
-}
-
-.card-footer .text-muted{
-    font-size: smaller;
-}
-
-#post-list .card{
-    border-bottom-color: #808080 !important;
-    border-bottom-width: 4px !important;
-}
-
-/* Initial state: hidden and slightly translated */
-.post-card-container {
-    opacity: 0;
-    transform: translateY(20px);
-    transition: opacity 0.6s ease, transform 0.6s ease;
-}
-
-/* Visible state: fully visible and in place */
-.post-card-container.animate-visible {
-    opacity: 1;
-    transform: translateY(0);
-}
-.share-container {
-    position: relative;
-    display: inline-block;
-}
-
-.share-menu {
-    position: absolute;
-    bottom: 100%;
-    right: 0;
-    background-color: white;
-    border: 1px solid #ddd;
-    border-radius: 5px;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-    padding: 10px;
-    z-index: 100;
-    min-width: 250px;
-    display: none;
-    transition: opacity 0.3s ease;
-}
-
-.share-container:hover .share-menu {
-    display: block;
-}
-
-.share-menu-content {
-    padding: 8px;
-}
-
-.follow-button {
-    background-color: transparent;
-    border: none;
-    color: grey; /* Bootstrap primary */
-    font-weight: 500;
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-    cursor: pointer;
-    transition: color 0.2s ease, background-color 0.2s ease;
-    padding: 6px 10px;
-    border-radius: 6px;
-}
-
-.follow-button:hover {
-    background-color: rgba(13, 110, 253, 0.1); /* Light blue hover */
-    text-decoration: none;
-}
-
-
-/* Active (following) state */
-.follow-button.active {
-    color: #0d6efd; /* Bootstrap danger */
-}
-
-.follow-button.active:hover {
-    background-color: rgba(220, 53, 69, 0.1); /* Light red hover */
 }

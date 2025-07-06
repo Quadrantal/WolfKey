@@ -61,9 +61,8 @@ def for_you(request):
 
 def all_posts(request):
     query = request.GET.get('q', '')
-    posts_qs = get_all_posts(request.user, query)
     page = request.GET.get('page', 1)
-    paginated_data = paginate_posts(posts_qs, page)
+    paginated_data = get_all_posts(request.user, query, page)
 
     if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
         return render(request, 'forum/components/post_list.html', 
