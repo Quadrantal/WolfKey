@@ -1,11 +1,11 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
-from django.http import HttpResponseForbidden
+from django.http import HttpResponseForbidden, JsonResponse
 import json
 import logging
 from django.utils.html import escape
-from forum.models import Post, Solution, FollowedPost, SavedSolution, Notification
+from forum.models import Post, Solution, FollowedPost, SavedSolution, Notification, PostLike
 from ..services.utils import selective_quote_replace, detect_bad_words
 from forum.forms import SolutionForm, CommentForm, PostForm
 from forum.services.post_services import (
@@ -57,7 +57,7 @@ def create_post(request):
 @login_required
 def post_detail(request, post_id):
     # Get post details using service
-    result = get_post_detail_service(post_id)
+    result = get_post_detail_service(post_id, user=request.user)
     
     if 'error' in result:
         messages.error(request, result['error'])
@@ -103,7 +103,9 @@ def post_detail(request, post_id):
         'solution_form': solution_form,
         'comment_form': comment_form,
         'is_following': is_following,
-        'courses': result['courses']
+        'courses': result['courses'],
+        'like_count': result.get('like_count', 0),
+        'is_liked_by_user': result.get('is_liked', False),
     }
 
     return render(request, 'forum/post_detail.html', context)
@@ -193,3 +195,19 @@ def delete_post(request, post_id):
         return redirect('all_posts')
         
     return render(request, 'forum/delete_confirm.html', {'post': post})
+
+@login_required
+def like_post(request, post_id):
+    if request.method == 'POST':
+        post = get_object_or_404(Post, id=post_id)
+        like, created = PostLike.objects.get_or_create(user=request.user, post=post)
+        return JsonResponse({'success': True, 'liked': True, 'like_count': post.like_count()})
+    return JsonResponse({'success': False}, status=400)
+
+@login_required
+def unlike_post(request, post_id):
+    if request.method == 'POST':
+        post = get_object_or_404(Post, id=post_id)
+        PostLike.objects.filter(user=request.user, post=post).delete()
+        return JsonResponse({'success': True, 'liked': False, 'like_count': post.like_count()})
+    return JsonResponse({'success': False}, status=400)
