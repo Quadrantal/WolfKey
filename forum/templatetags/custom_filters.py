@@ -1,4 +1,8 @@
 from django import template
+from django.template.defaultfilters import timesince
+from django.utils import timezone
+from datetime import timedelta
+
 
 register = template.Library()
 
@@ -48,3 +52,21 @@ def increment(value):
     """Increments a counter by 1."""
     return value + 1
 
+@register.filter
+def relative_if_recent(value, days=30):
+    """
+    Render *value* (a timezone‑aware ``datetime``) as a relative string
+    when it is younger than *days*; otherwise fall back to an
+    absolute date formatted as “Month DD, YYYY”.
+
+    Usage in template:
+        {% load post_extras %}
+        {{ post.created_at|relative_if_recent }}             # 30‑day default
+        {{ post.created_at|relative_if_recent:45 }}           # custom window
+    """
+    if not value:
+        return ""
+    threshold = timezone.now() - timedelta(days=int(days))
+    if value >= threshold:
+        return f"{timesince(value)} ago"
+    return value.strftime("%B %d, %Y")

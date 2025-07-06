@@ -19,9 +19,6 @@
             <!-- Include post card -->
             {% include 'forum/components/post_card.html' with post=solution.post %}
 
-
-
-
             <div class="solution-container {% if solution == accepted_solution %}accepted-solution{% endif %} mt-2" data-solution-id="{{ solution.id }}">
                 <!-- Solution Vote Cell -->
                 <div class="vote-cell">
@@ -53,7 +50,7 @@
                     {% if user.is_authenticated %}
                     <button type="button" 
                             class="bookmark-button {% if solution|is_saved_solution:user %}active{% endif %}" 
-                            onclick="votingSystem.toggleSaveSolution('{{ solution.id }}')"
+                            onclick="SolutionInteraction.toggleSaveSolution('{{ solution.id }}')"
                             title="{% if solution|is_saved_solution:user %}Unsave{% else %}Save{% endif %}">
                         <i class="{% if solution|is_saved_solution:user %}fas{% else %}far{% endif %} fa-bookmark"></i>
                     </button>
@@ -96,7 +93,10 @@
                                 {% endif %}
                             </div>
 
-                            <div class="text-muted">Answered {{ solution.created_at|date:"M d, Y" }}</div>
+                            <span class="text-muted">
+                                {{ solution.created_at|relative_if_recent }}
+                            </span>
+
                         </div>
                     </div>
                     <a href="{% url 'post_detail' solution.post.id %}"> See full solution</a>
@@ -120,13 +120,13 @@
 {% block scripts %}
 
 <script type="module">
-import { VotingSystem } from '/static/forum/js/voting-system.js';
+import { SolutionInteractions } from '/static/forum/js/solution-interactions.js';
 
 document.addEventListener("DOMContentLoaded", async function () {
     try {
-        // Initialize VotingSystem first
-        window.votingSystem = new VotingSystem();
-        console.log("VotingSystem initialized:", votingSystem);
+        // Initialize SolutionInteraction first
+        window.SolutionInteraction = new SolutionInteractions();
+        console.log("Solution Interaction initialized:", SolutionInteraction);
     }catch (error) {
         console.error("Error initializing saved solutions page:", error);
     }
