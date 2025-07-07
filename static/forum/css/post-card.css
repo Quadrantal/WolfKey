@@ -11,6 +11,13 @@
   z-index: 0 !important;
 }
 
+.card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+    z-index: 0 !important;  
+
+}
+
 .card-body {
   padding: 0.4rem;
   position: relative;
@@ -33,23 +40,15 @@
   color: #6c757d;
 }
 
-.card-footer {
-  background: none !important;
-  border: none;
-  padding: .25rem 1rem;
-}
-
 .card-header {
   position: relative;
   z-index: 2;
   background: none;
 }
 
-.card-header .btn,
-.card .btn,
 .follow-button {
-  font-size: 0.875rem;
   transition: all 0.2s ease;
+  font-size: 22px;
 }
 
 .card .btn:hover,
@@ -57,25 +56,29 @@
   transform: scale(1.05);
 }
 
-.follow-button {
+.follow-button,
+.follow-count {
   background-color: transparent;
   border: none;
   color: grey;
-  font-weight: 500;
   display: inline-flex;
   align-items: center;
   gap: 4px;
   cursor: pointer;
   padding: 6px 10px;
   border-radius: 6px;
+  font-size: 1rem;
+  line-height: 1.5rem;
 }
 
-.follow-button.active {
-  color: #0d6efd;
-}
-
-.follow-button.active:hover {
-  background-color: rgba(220, 53, 69, 0.1);
+.follow-count {
+  padding: 0;
+  font-size: 1rem;
+  line-height: 1.5rem;
+  color: black;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .banner {
@@ -129,8 +132,10 @@
 
 .share-menu {
   position: absolute;
-  bottom: 100%;
-  right: 0;
+  top: auto;
+  bottom: 75%;
+  right: 0px;
+  left: 10px;
   background-color: white;
   border: 1px solid #ddd;
   border-radius: 5px;
@@ -144,6 +149,12 @@
 
 .share-container:hover .share-menu {
   display: block;
+}
+
+.copy-link-button {
+  background-color: #0d6efd !important;
+  color: white !important;
+
 }
 
 .highlighted-card-red {
@@ -168,4 +179,115 @@
     background: linear-gradient(to bottom, #a3a5e6 -5%, #fff 6%, #fff 85%,#a9a3e6 120%);
     box-shadow: 0 0px 20px rgba(14, 14, 234, 0.9) !important;
     z-index: 1; 
+}
+
+.post-card-title {
+  font-size: 1.125rem;
+  line-height: 1.5rem;
+  margin-bottom: .5rem;
+}
+.post-card-text {
+  font-size: .875rem;
+  line-height: 1.25rem;
+}
+
+/* Non-interactions row (top) */
+.post-noninteractions {
+  display: flex;
+  justify-content: flex-start;
+  align-items: left;
+  gap: 1.5rem;
+  margin-bottom: .5rem;
+  color: #000000;
+  font-size: .875rem;
+}
+.post-noninteractions span {
+  display: flex;
+  align-items: center;
+  gap: .25rem;
+}
+
+/* Interactions row (bottom) */
+.post-interactions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1.5rem;
+  margin-top: .5rem;
+  z-index: 99;
+}
+.post-interactions button,
+.post-interactions .share-container {
+  background: none;
+  border: none;
+}
+.post-interactions .like-button,
+.post-interactions .follow-button {
+  display: flex;
+  align-items: center;
+  gap: .25rem;
+}
+
+/* Make all SVG icons and response/views icons the same size */
+.post-interactions svg,
+.post-noninteractions svg,
+.share-container .bi,
+.follow-button .bi,
+.like-button svg {
+  width: 22px;
+  height: 22px;
+  vertical-align: middle;
+  display: inline-block;
+}
+
+
+/* Make the heart icon red when liked */
+.like-button.active .like-icon svg {
+  color: #e74c3c;
+  fill: #e74c3c;
+}
+.like-icon svg {
+  color: #000000;
+  fill: #000000;
+  transition: color 0.2s, fill 0.2s;
+}
+.like-button:hover .like-icon svg {
+  color: #e74c3c;
+  fill: #e74c3c;
+}
+
+/* Make bell and share icons consistent color */
+.follow-button .bi,
+.share-container .bi {
+  color: #000000;
+  font-size: 22px;
+  width: 22px;
+  height: 22px;
+  vertical-align: middle;
+}
+.follow-button.active .bi {
+  color: #0d6efd;
+}
+
+/* Make the whole card clickable except for interactive elements */
+.card.clickable {
+  cursor: pointer;
+}
+.card.clickable * {
+  pointer-events: auto;
+}
+.card.clickable .post-card-link {
+  display: block;
+  color: inherit;
+  text-decoration: none;
+}
+.card.clickable .post-interactions,
+.card.clickable .post-interactions *,
+.card.clickable .share-container,
+.card.clickable .share-container *,
+.card.clickable button,
+.card.clickable input,
+.card.clickable select,
+.card.clickable textarea {
+  pointer-events: auto;
 }

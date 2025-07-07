@@ -31,7 +31,9 @@ from forum.views.post_views import (
     post_detail, 
     edit_post, 
     delete_post, 
-    create_post
+    create_post,
+    like_post,
+    unlike_post
 )
 
 from forum.views.feed_views import (
@@ -113,6 +115,8 @@ urlpatterns = [
     path('post/<int:post_id>/edit/', edit_post, name='edit_post'),
     path('post/<int:post_id>/delete/', delete_post, name='delete_post'),
     path('post/create/', create_post, name='create_post'),
+    path('posts/<int:post_id>/like/', like_post, name='like_post'),
+    path('posts/<int:post_id>/unlike/', unlike_post, name='unlike_post'),
 
     path('solution/<int:solution_id>/edit/', edit_solution, name='edit_solution'),
     path('solution/<int:solution_id>/delete/', delete_solution, name='delete_solution'),
