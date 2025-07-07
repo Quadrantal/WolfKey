@@ -469,18 +469,24 @@
 
         // Toggle dropdown menu
         profilePicture.addEventListener('click', function (e) {
-            e.stopPropagation();
-            profilePictureMenu.style.display = 
-                profilePictureMenu.style.display === 'block' ? 'none' : 'block';
+            e.stopPropagation();  // prevent document click from firing
+            const isVisible = profilePictureMenu.style.display === 'block';
+            profilePictureMenu.style.display = isVisible ? 'none' : 'block';
         });
 
-        // Close menu when clicking outside
-        document.addEventListener('click', function () {
+        // Prevent clicks inside the menu from closing it
+        profilePictureMenu.addEventListener('click', function (e) {
+            e.stopPropagation();
+        });
+
+        // Close menu on document click if outside
+        document.addEventListener('click', function (e) {
             profilePictureMenu.style.display = 'none';
         });
     });
     {% endif %}
 </script>
+
 
 <!-- Personal Info Form Handling -->
 <script>
