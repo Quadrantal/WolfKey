@@ -571,6 +571,24 @@ button .fa-bell-slash {
   font-size: 1.1em;
 }
 
+.like-button.active .like-icon svg {
+  color: #e74c3c;
+  fill: #e74c3c;
+}
+.like-icon svg {
+  color: #000000;
+  fill: #000000;
+  transition: color 0.2s, fill 0.2s;
+}
+.like-button:hover .like-icon svg {
+  color: #e74c3c;
+  fill: #e74c3c;
+}
+
+.like-button {
+  margin-top: auto;
+  margin-bottom: auto;
+}
 
 /* =============================================================================
    AUTHOR & USER INFO
