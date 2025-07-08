@@ -563,6 +563,14 @@ div[id^="comment-form-"][id$="-root"] {
   margin-right: 10px;
 }
 
+.comment .edit-actions {
+    display: none !important;
+}
+.comment.editing .edit-actions {
+    display: flex;
+    gap: 0.5rem; /* equivalent to Bootstrap's gap-2 */
+}
+
 /* Make bookmark icon and follow buttons more visible */
 button .fa-bookmark,
 button .fa-bookmark-slash,

@@ -80,7 +80,7 @@ const createEditor = (holder,initialData, csrfToken, isReadOnly = false, content
                 }
             });
         },
-        onChange: !isReadOnly ? async (api) => {
+        onChange: async (api) => {
             try {
                 const outputData = await api.saver.save();
                 const blocks = outputData.blocks;
@@ -104,7 +104,7 @@ const createEditor = (holder,initialData, csrfToken, isReadOnly = false, content
             } catch (error) {
                 console.error('Saving failed:', error);
             }
-        } : undefined,
+        },
         minHeight: 75,
     })
 }

@@ -170,6 +170,7 @@ export class CommentEditor {
     async showEditForm(commentId) {
         try {
             await this.editorManager.toggleEditorReadOnly(commentId, false);
+            await this.editorManager.storeOriginalContent(commentId);
             const editor = this.editorManager.editors.get(commentId);
             if (editor) {
                 if (!editor.readOnly.isEnabled) {
@@ -241,17 +242,14 @@ export class CommentEditor {
 
     async cancelCommentEdit(commentId) {
         const editor = this.editorManager.editors.get(commentId);
-        if (editor && this.originalContents[commentId]) {
+        if (editor) {
             try {
                 // Restore original content
-                await editor.render(this.originalContents[commentId]);
-                
+                await this.editorManager.restoreOriginalContent(commentId);
+
                 // Reset editor state
-                await this.editorManager.toggleEditorReadOnly(`editorjs-comment-${commentId}`, true);
+                await this.editorManager.toggleEditorReadOnly(commentId, true);
                 this.toggleCommentActions(commentId, false);
-                
-                // Cleanup
-                delete this.originalContents[commentId];
                 
             } catch (error) {
                 console.error('Error canceling comment edit:', error);

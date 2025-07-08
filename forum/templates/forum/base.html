@@ -427,7 +427,7 @@ function acknowledgeUpdate(updateId) {
 
             // Handle fade-out animation before hiding
             toastEl.addEventListener('hidden.bs.toast', function () {
-                toastEl.clxassList.add('fade-out');
+                toastEl.classList.add('fade-out');
             });
 
             const delay = toastEl.getAttribute('data-bs-delay') || 10000;

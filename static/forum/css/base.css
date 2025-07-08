@@ -89,3 +89,32 @@ body, html {
   border-radius: 999px;
   right: 12px;
 }
+
+.pill-btn {
+  border-radius: 999px !important;
+  padding: 0.25rem .5rem !important;
+  font-weight: 400;
+  font-size: .875rem;
+  line-height: 1.5;
+  border: none;
+  color: #fff !important;
+  background-color: #0d6efd !important; /* Bootstrap primary blue */
+  transition: background 0.2s;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+  align-items: center;
+  gap: 0.5em;
+  transition: all 0.2s ease;
+}
+
+.pill-btn.btn-outline-danger {
+  background-color: #e74c3c !important;
+}
+
+.pill-btn.btn-outline-secondary {
+  background-color: #6C757D !important;
+}
+
+.pill-btn:hover, .pill-btn:focus {
+  filter: brightness(0.95);
+  text-decoration: none;
+}
