@@ -214,7 +214,6 @@
   align-items: center;
   gap: 1.5rem;
   margin-top: .5rem;
-  z-index: 99;
 }
 .post-interactions button,
 .post-interactions .share-container {

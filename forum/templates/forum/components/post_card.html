@@ -206,19 +206,23 @@
                 });
             });
         });
-
-        document.querySelectorAll('.card.clickable').forEach(card => {
-            card.addEventListener('click', function(e) {
-                // Ignore clicks on interactive elements
-                if (e.target.closest('.post-interactions, .post-interactions *, button, input, textarea, select')) return;
-                // Ignore if user is selecting text
-                if (window.getSelection && window.getSelection().toString()) return;
-                // Navigate to post detail
-                const url = card.dataset.postUrl;
-                if (url) {
-                    window.location.href = url;
-                }
-            });
-        });
     });
+
+
+    document.addEventListener('click', function (e) {
+        const card = e.target.closest('.card.clickable');
+        if (!card) return;
+
+        // Ignore clicks on interactive elements
+        if (e.target.closest(' button, input, textarea, select')) return;
+
+        // Ignore if user is selecting text
+        if (window.getSelection && window.getSelection().toString()) return;
+
+        const url = card.dataset.postUrl;
+        if (url) {
+            window.location.href = url;
+        }
+    });
+
 </script>
