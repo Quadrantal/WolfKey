@@ -28,7 +28,6 @@
             </a>
             {% endif %}
         </div>
-
     </div>
     
     <!-- Question Content -->
@@ -59,7 +58,7 @@
                 <div class="author-info">
                     <div class="position-relative">
                         <img 
-                            src="{{ post.author.userprofile.profile_picture.url }}" 
+                            src="{{ post.get_author.userprofile.profile_picture.url }}" 
                             alt="Profile Picture" 
                             class="profile-picture"
                             style="width: 30px; height: 30px; border-radius: 50%; object-fit: cover; cursor: pointer;"
@@ -68,7 +67,7 @@
                     </div>
                     <div>
                         <div class="text-muted">asked {{ post.created_at|date:"M d, Y" }}</div>
-                        <div class="fw-bold"><a href = "{{post.author.get_absolute_url}}">{{ post.author.get_full_name }}</a></div>
+                        <div class="fw-bold"><a href = "{{post.get_author.get_absolute_url}}">{% if post.is_anonymous %} Anonymous {% else %} {{post.get_author.get_full_name}} {% endif %}</a></div>
                     </div>
                 </div>
             </div>

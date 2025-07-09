@@ -143,6 +143,7 @@ class Post(models.Model):
     courses = models.ManyToManyField(Course, related_name='posts', blank=True)
     solved = models.BooleanField(default = False)
     views = models.IntegerField(default = 0)
+    is_anonymous = models.BooleanField(default=False)
     
     accepted_solution = models.OneToOneField(
         'Solution',
@@ -173,6 +174,9 @@ class Post(models.Model):
         if not user.is_authenticated:
             return False
         return self.likes.filter(user=user).exists()
+    
+    def get_author(self):
+        return "Anonymous" if self.is_anonymous else self.author
     
 class SavedPost(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="saved_posts")
