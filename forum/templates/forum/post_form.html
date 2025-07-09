@@ -121,16 +121,5 @@
             formName: "postForm"
         });
     });
-
-    function customWaitForMathLive() {
-        return new Promise((resolve) => {
-            const checkMathField = setInterval(() => {
-                if (window.MathfieldElement) {
-                    clearInterval(checkMathField);
-                    resolve();
-                }
-            }, 50);
-        });
-    }
 </script>
 {% endblock %}
