@@ -31,7 +31,7 @@ def create_post(request):
                     'title': form.cleaned_data['title'],
                     'content': content_data,
                     'courses': [course.id for course in form.cleaned_data['courses']],
-                    'is_anonymous': form.cleaned_data.get('is_anonymous', False)
+                    'is_anonymous': True if request.POST.get("is_anonymous") == 'on' else False
                 })
 
                 if 'error' in result:
