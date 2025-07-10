@@ -129,9 +129,12 @@ class Course(models.Model):
     category = models.CharField(max_length=100, default = "Misc")
     description = models.TextField(blank=True)
     
-    
     def __str__(self):
-        return f"{self.code} - {self.name}"
+        return f"{self.name}"
+    
+class CourseAlias(models.Model):
+    name = models.CharField(max_length=100)
+    course = models.ForeignKey(Course, related_name='aliases', on_delete=models.CASCADE)
     
 class Post(models.Model):
     title = models.CharField(max_length=200)
