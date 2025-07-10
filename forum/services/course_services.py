@@ -32,7 +32,6 @@ def course_search(request):
     data = [{
         "id": course.id,
         "name": course.name,
-        "code": course.code,
         "category": course.category,
         "experienced_count" : UserCourseExperience.objects.filter(course=course).count()
 

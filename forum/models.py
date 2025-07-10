@@ -125,7 +125,6 @@ class User(AbstractUser):
         User.objects.filter(id=self.id).update(search_vector=search_vector)
     
 class Course(models.Model):
-    code = models.CharField(max_length=10, unique=True)
     name = models.CharField(max_length=100)
     category = models.CharField(max_length=100, default = "Misc")
     description = models.TextField(blank=True)

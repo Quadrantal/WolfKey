@@ -162,7 +162,7 @@
                                 <div class="course-list">
                                     {% for course in experienced_courses %}
                                     <div class="course-item d-flex justify-content-between align-items-center mb-2">
-                                        <span>{{ course.course.code }} - {{ course.course.name }}</span>
+                                        <span>{{ course.course.name }}</span>
                                         {% if user == profile_user %}
                                         <form method="post" action="{% url 'remove_experience' course.id %}" class="d-inline">
                                             {% csrf_token %}
@@ -194,7 +194,7 @@
                                 <div class="course-list">
                                     {% for course in help_needed_courses %}
                                     <div class="course-item d-flex justify-content-between align-items-center mb-2">
-                                        <span>{{ course.course.code }} - {{ course.course.name }}</span>
+                                        <span>{{ course.course.name }}</span>
                                         <form method="post" action="{% url 'remove_help_request' course.id %}" class="d-inline">
                                             {% csrf_token %}
                                             <button type="submit" class="btn btn-sm btn-outline-danger">
