@@ -122,10 +122,6 @@ class CourseSelector {
         });
     }
 
-    getSelectedCourses() {
-        return this.selectedCourses;
-    }
-
     updateFormData() {
         this.clearExistingInputs();
 

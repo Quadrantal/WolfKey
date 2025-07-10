@@ -96,7 +96,7 @@
                     formData.set('title', document.querySelector('#id_title').value);
                     formData.set('is_anonymous', document.getElementById('id_is_anonymous').checked ? 'on' : 'off');
 
-                    selectedCourses.forEach(course => {
+                    courseSelector.selectedCourses.forEach(course => {
                         formData.append('courses', course.id);
                     });
 
