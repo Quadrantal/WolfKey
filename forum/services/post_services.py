@@ -79,7 +79,8 @@ def create_post_service(user, data):
         post = Post(
             author=user,
             title=data.get('title'),
-            content=content
+            content=content,
+            is_anonymous=data.get('is_anonymous', False)
         )
         post.save()
 

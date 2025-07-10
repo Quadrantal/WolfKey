@@ -98,7 +98,7 @@ def paginate_posts(posts_queryset, page=1, limit=10):
     }
 
 def get_user_posts(user):
-    posts = Post.objects.filter(author = user)
+    posts = Post.objects.filter(author = user).order_by('-created_at')
     experienced_courses, help_needed_courses = get_user_courses(user)
     
     # Process posts

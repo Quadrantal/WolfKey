@@ -6,7 +6,10 @@ from forum.services.utils import detect_bad_words
 
 def get_profile_context(request, username):
     profile_user = get_object_or_404(User, username=username)
-    recent_posts = Post.objects.filter(author=profile_user).order_by('-created_at')[:3]
+    recent_posts = Post.objects.filter(
+        author=profile_user,
+        is_anonymous=False
+    ).order_by('-created_at')[:3]
     posts_count = Post.objects.filter(author=profile_user).count()
     solutions_count = Solution.objects.filter(author=profile_user).count()
 

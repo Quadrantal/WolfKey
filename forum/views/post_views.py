@@ -30,7 +30,8 @@ def create_post(request):
                 result = create_post_service(request.user, {
                     'title': form.cleaned_data['title'],
                     'content': content_data,
-                    'courses': [course.id for course in form.cleaned_data['courses']]
+                    'courses': [course.id for course in form.cleaned_data['courses']],
+                    'is_anonymous': form.cleaned_data.get('is_anonymous', False)
                 })
 
                 if 'error' in result:
@@ -134,6 +135,7 @@ def edit_post(request, post_id):
                 post.courses.set(course_ids)
             
             post.title = request.POST.get('title', post.title)
+            post.is_anonymous = True if request.POST.get("is_anonymous") == 'on' else False
             post.save()
             messages.success(request, 'Post updated successfully!')
             return redirect('post_detail', post_id=post.id)

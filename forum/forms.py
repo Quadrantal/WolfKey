@@ -35,9 +35,14 @@ class MultipleFileField(forms.FileField):
 
         
 class PostForm(forms.ModelForm):
+
+    is_anonymous = forms.BooleanField(
+        required=False, label="Post Anonymously",
+        widget=forms.CheckboxInput(attrs={'class': 'form-check-input'})
+    )
     class Meta:
         model = Post
-        fields = ['title', 'content', 'courses']
+        fields = ['title', 'content', 'courses', 'is_anonymous']
         widgets = {
             'title': forms.TextInput(attrs={'class': 'form-control'}),
         }
