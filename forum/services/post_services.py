@@ -61,7 +61,7 @@ def get_post_detail_service(post_id, user=None):
             'author': post.author.get_full_name(),
             'created_at': post.created_at.isoformat(),
             'solutions': processed_solutions,
-            'courses': [{'id': c.id, 'name': c.name, 'code': c.code} for c in post.courses.all()],
+            'courses': [{'id': c.id, 'name': c.name} for c in post.courses.all()],
             'like_count': post.like_count(),
             'is_liked': post.is_liked_by(user) if user else False,
         }
