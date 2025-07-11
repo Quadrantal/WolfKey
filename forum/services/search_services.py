@@ -15,7 +15,7 @@ def search_posts_and_users_service(user, query):
 
     users = User.objects.annotate(
         rank=SearchRank(F('search_vector'), search_query),
-    ).filter(rank__gte=0.3).order_by('-rank')
+    ).filter(rank__gte=0.1).order_by('-rank')
 
     experienced_courses, help_needed_courses = get_user_courses(user)
     for post in posts:
