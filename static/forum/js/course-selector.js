@@ -151,6 +151,10 @@ class CourseSelector {
             this.onSelectionChange(this.selectedCourses);
         }
     }
+
+    getSelectedCourses() {
+        return this.selectedCourses;
+    }
 }
 
 export { CourseSelector };

@@ -148,6 +148,19 @@ document.addEventListener('DOMContentLoaded', function() {
     let selectedUsersData = [];
     let selectedUsers = []; // Track selected users independently from UserSelector
     
+    // Check for initial users from sessionStorage (from profile compare button)
+    const storedInitialUsers = sessionStorage.getItem('courseComparerInitialUsers');
+    let initialUsers = [];
+    
+    if (storedInitialUsers) {
+        try {
+            initialUsers = JSON.parse(storedInitialUsers);
+            sessionStorage.removeItem('courseComparerInitialUsers'); // Clear after use
+        } catch (e) {
+            console.error('Error parsing stored initial users:', e);
+        }
+    }
+    
     // Initialize UserSelector
     const userSelector = new UserSelector({
         containerId: 'user-selector-container',
@@ -165,13 +178,20 @@ document.addEventListener('DOMContentLoaded', function() {
         excludeUsers: selectedUsers
     });
     
-    // Add current user by default
-    if (window.currentUser) {
+    // Add initial users (either from sessionStorage or current user)
+    if (initialUsers.length > 0) {
+        // Use users from profile compare button
+        selectedUsers = [...initialUsers];
+        selectedUsers.forEach(user => {
+            fetchUserSchedule(user);
+        });
+        updateSelectedUsersDisplay(selectedUsers);
+        userSelector.updateExcludeUsers(selectedUsers);
+    } else if (window.currentUser) {
+        // Default behavior: add current user
         selectedUsers = [window.currentUser];
         fetchUserSchedule(window.currentUser);
         updateSelectedUsersDisplay(selectedUsers);
-        
-        // Update excluded users for UserSelector
         userSelector.updateExcludeUsers(selectedUsers);
     }
     
@@ -232,7 +252,7 @@ document.addEventListener('DOMContentLoaded', function() {
         
         comparisonSection.style.display = 'block';
         emptyState.style.display = 'none';
-        
+        arrangeCurrentUserFirst();
         // Update user headers
         updateUserHeaders();
         
@@ -306,6 +326,27 @@ document.addEventListener('DOMContentLoaded', function() {
                 });
             }
         });
+    }
+    
+    function arrangeCurrentUserFirst() {
+        if (!window.currentUser) return;
+        
+        // Find current user in selectedUsersData and move to first position
+        const currentUserDataIndex = selectedUsersData.findIndex(userData => userData.user_id === window.currentUser.id);
+        if (currentUserDataIndex > 0) {
+            const currentUserData = selectedUsersData.splice(currentUserDataIndex, 1)[0];
+            selectedUsersData.unshift(currentUserData);
+        }
+        
+        // Also arrange selectedUsers array to match
+        const currentUserIndex = selectedUsers.findIndex(user => user.id === window.currentUser.id);
+        if (currentUserIndex > 0) {
+            const currentUserObj = selectedUsers.splice(currentUserIndex, 1)[0];
+            selectedUsers.unshift(currentUserObj);
+        }
+        
+        // Update the badges display to match the new order
+        updateSelectedUsersDisplay(selectedUsers);
     }
     
     // Initialize layout

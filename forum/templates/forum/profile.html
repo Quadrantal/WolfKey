@@ -48,6 +48,15 @@
                             <p>{{ profile_user.userprofile.bio }}</p>
                         </div>
                     </div>
+                    
+                    <!-- Compare Schedules Button -->
+                    {% if can_compare %}
+                    <div class="ms-auto">
+                        <a href="{% url 'course_comparer' %}" class="btn btn-primary" id="compare-schedules-btn">
+                            <i class="bi bi-arrow-left-right" title="Compare schedules"></i>
+                        </a>
+                    </div>
+                    {% endif %}
                 </div>
             </div>
         </div>
@@ -442,6 +451,27 @@
 {% endblock %}
 
 {% block scripts %}
+<!-- Compare Schedules Button Handler -->
+{% if can_compare %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const compareBtn = document.getElementById('compare-schedules-btn');
+        if (compareBtn) {
+            compareBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                
+                // Store the initial users data in sessionStorage
+                const initialUsers = {{ initial_users|safe }};
+                sessionStorage.setItem('courseComparerInitialUsers', JSON.stringify(initialUsers));
+                
+                // Navigate to course comparer
+                window.location.href = this.href;
+            });
+        }
+    });
+</script>
+{% endif %}
+
 <!-- Background Color Setting -->
 <script>
     document.addEventListener('DOMContentLoaded', function () {
