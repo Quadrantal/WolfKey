@@ -1,0 +1,315 @@
+{% extends 'forum/base.html' %}
+
+{% block head %}
+{% load static %}
+    <link rel="stylesheet" href="{% static 'forum/css/schedule.css' %}">
+    <link rel="stylesheet" href="{% static 'forum/css/course-comparer.css' %}">
+    <link rel="stylesheet" href="{% static 'forum/css/user-selector.css' %}">
+    <link rel="stylesheet" href="{% static 'forum/css/post-card.css' %}">
+
+
+    <script type="module" src="{% static 'forum/js/user-selector.js' %}"></script>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+
+    <!-- User Management Section -->
+    <div class="card mb-4">
+        <div class="card-body text-center">
+            <h5 class="card-title mb-3">Comparing users:</h5>
+            
+            <!-- Selected Users Display -->
+            <div id="selected-users" class="d-flex flex-wrap gap-2 mb-3 justify-content-center">
+                <!-- Selected users will be dynamically added here -->
+            </div>
+            
+            <!-- Add User Section -->
+            <div class="d-flex justify-content-center">
+                <div id="user-selector-container" style="max-width: 400px;">
+                    <!-- User selector will be dynamically added here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Course Comparison Section -->
+    <div id="comparison-section" style="display: none;">
+        <!-- Course Tables Row -->
+        <div class="row">
+            <!-- Day 1 Schedule -->
+            <div class="col-md-6 mb-4">
+                <div class="day-header">Day 1</div>
+                <div class="schedule-blocks-container">
+                    <!-- User Headers Row -->
+                    <div class="user-headers-row" id="user-headers-day1">
+                        <!-- User headers will be dynamically added here -->
+                    </div>
+                    <div class="schedule-block" data-block="1A">
+                        <div class="block-label">1A</div>
+                        <div class="course-row" id="courses-1A">
+                            <!-- Course items will be dynamically added here -->
+                        </div>
+                    </div>
+                    <div class="schedule-block" data-block="1B">
+                        <div class="block-label">1B</div>
+                        <div class="course-row" id="courses-1B">
+                            <!-- Course items will be dynamically added here -->
+                        </div>
+                    </div>
+                    <div class="schedule-block" data-block="1D">
+                        <div class="block-label">1D</div>
+                        <div class="course-row" id="courses-1D">
+                            <!-- Course items will be dynamically added here -->
+                        </div>
+                    </div>
+                    <div class="schedule-block" data-block="1E">
+                        <div class="block-label">1E</div>
+                        <div class="course-row" id="courses-1E">
+                            <!-- Course items will be dynamically added here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Day 2 Schedule -->
+            <div class="col-md-6 mb-4">
+                <div class="day-header">Day 2</div>
+                <div class="schedule-blocks-container">
+                    <!-- User Headers Row -->
+                    <div class="user-headers-row" id="user-headers-day2">
+                        <!-- User headers will be dynamically added here -->
+                    </div>
+                    <div class="schedule-block" data-block="2A">
+                        <div class="block-label">2A</div>
+                        <div class="course-row" id="courses-2A">
+                            <!-- Course items will be dynamically added here -->
+                        </div>
+                    </div>
+                    <div class="schedule-block" data-block="2B">
+                        <div class="block-label">2B</div>
+                        <div class="course-row" id="courses-2B">
+                            <!-- Course items will be dynamically added here -->
+                        </div>
+                    </div>
+                    <div class="schedule-block" data-block="2C">
+                        <div class="block-label">2C</div>
+                        <div class="course-row" id="courses-2C">
+                            <!-- Course items will be dynamically added here -->
+                        </div>
+                    </div>
+                    <div class="schedule-block" data-block="2D">
+                        <div class="block-label">2D</div>
+                        <div class="course-row" id="courses-2D">
+                            <!-- Course items will be dynamically added here -->
+                        </div>
+                    </div>
+                    <div class="schedule-block" data-block="2E">
+                        <div class="block-label">2E</div>
+                        <div class="course-row" id="courses-2E">
+                            <!-- Course items will be dynamically added here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Empty state -->
+    <div id="empty-state" class="text-center py-5">
+        <i class="fas fa-users fa-3x text-muted mb-3"></i>
+        <h5 class="text-muted">No users selected</h5>
+        <p class="text-muted">Search and add users to compare their course schedules</p>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+{% if user.is_authenticated %}
+<script>
+    window.currentUser = {
+        id: {{ user.id }},
+        username: '{{ user.username }}',
+        full_name: '{{ user.get_full_name }}',
+        school_email: '{{ user.school_email }}',
+        profile_picture_url: '{{user.userprofile.profile_picture.url}}',
+    };
+</script>
+{% endif %}
+
+<script type="module">
+import { UserSelector } from '{% static "forum/js/user-selector.js" %}';
+
+document.addEventListener('DOMContentLoaded', function() {
+    const comparisonSection = document.getElementById('comparison-section');
+    const emptyState = document.getElementById('empty-state');
+    const selectedUsersContainer = document.getElementById('selected-users');
+    
+    let selectedUsersData = [];
+    let selectedUsers = []; // Track selected users independently from UserSelector
+    
+    // Initialize UserSelector
+    const userSelector = new UserSelector({
+        containerId: 'user-selector-container',
+        onUserSelect: function(user) {
+            // Add user to our local list if not already selected
+            if (!selectedUsers.find(u => u.id === user.id)) {
+                selectedUsers.push(user);
+                fetchUserSchedule(user);
+                updateSelectedUsersDisplay(selectedUsers);
+                
+                // Update excluded users for UserSelector
+                userSelector.updateExcludeUsers(selectedUsers);
+            }
+        },
+        excludeUsers: selectedUsers
+    });
+    
+    // Add current user by default
+    if (window.currentUser) {
+        selectedUsers = [window.currentUser];
+        fetchUserSchedule(window.currentUser);
+        updateSelectedUsersDisplay(selectedUsers);
+        
+        // Update excluded users for UserSelector
+        userSelector.updateExcludeUsers(selectedUsers);
+    }
+    
+    function fetchUserSchedule(user) {
+        fetch(`/api/user-schedule/${user.id}/`)
+            .then(response => response.json())
+            .then(data => {
+                selectedUsersData.push(data);
+                updateLayout();
+            })
+            .catch(error => {
+                console.error('Error fetching user schedule:', error);
+            });
+    }
+    
+    function updateSelectedUsersDisplay(users) {
+        selectedUsersContainer.innerHTML = users.map(user => `
+            <span class="badge bg-primary d-flex align-items-center gap-2 user-selected-badge">
+                <img src="${user.profile_picture_url}" alt="Profile Picture" class="rounded-circle" style="width: 24px; height: 24px; object-fit: cover;">
+                ${user.full_name}
+                <span class="user-remove-btn" 
+                        data-user-id="${user.id}"
+                        aria-label="Remove ${user.full_name}">&times</span>
+            </span>
+        `).join('');
+
+        // Add event listeners to remove buttons
+        selectedUsersContainer.querySelectorAll('.user-remove-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.preventDefault();
+                const userId = parseInt(btn.dataset.userId);
+                removeUserFromComparison(userId);
+            });
+        });
+    }
+    
+    function removeUserFromComparison(userId) {
+        // Remove from selected users array
+        selectedUsers = selectedUsers.filter(user => user.id !== userId);
+        
+        // Remove from selected users data array
+        selectedUsersData = selectedUsersData.filter(userData => userData.user_id !== userId);
+        
+        // Update displays
+        updateSelectedUsersDisplay(selectedUsers);
+        updateLayout();
+        
+        // Update excluded users for UserSelector
+        userSelector.updateExcludeUsers(selectedUsers);
+    }
+    
+    function updateLayout() {
+        if (selectedUsersData.length === 0) {
+            comparisonSection.style.display = 'none';
+            emptyState.style.display = 'block';
+            return;
+        }
+        
+        comparisonSection.style.display = 'block';
+        emptyState.style.display = 'none';
+        
+        // Update user headers
+        updateUserHeaders();
+        
+        // Update course blocks
+        updateCourseBlocks();
+    }
+    
+    function updateUserHeaders() {
+        const userHeadersDay1 = document.getElementById('user-headers-day1');
+        const userHeadersDay2 = document.getElementById('user-headers-day2');
+        
+        // Clear existing headers
+        userHeadersDay1.innerHTML = '';
+        userHeadersDay2.innerHTML = '';
+        
+        // Add block label space to align with course columns
+        const blockLabelSpaceDay1 = document.createElement('div');
+        blockLabelSpaceDay1.className = 'block-label-space';
+        userHeadersDay1.appendChild(blockLabelSpaceDay1);
+        
+        const blockLabelSpaceDay2 = document.createElement('div');
+        blockLabelSpaceDay2.className = 'block-label-space';
+        userHeadersDay2.appendChild(blockLabelSpaceDay2);
+        
+        // Add user headers (append to the right)
+        selectedUsersData.forEach((userData, index) => {
+            const userHeaderDay1 = document.createElement('div');
+            userHeaderDay1.className = 'user-header d-flex flex-column align-items-center gap-1';
+            userHeaderDay1.innerHTML = `
+                <img src="${userData.profile_picture_url}" alt="${userData.full_name}" class="rounded-circle" style="width: 32px; height: 32px; object-fit: cover;">
+                <span style="font-size: 0.8rem;">${userData.full_name}</span>
+            `;
+            userHeadersDay1.appendChild(userHeaderDay1);
+            
+            const userHeaderDay2 = document.createElement('div');
+            userHeaderDay2.className = 'user-header d-flex flex-column align-items-center gap-1';
+            userHeaderDay2.innerHTML = `
+                <img src="${userData.profile_picture_url}" alt="${userData.full_name}" class="rounded-circle" style="width: 32px; height: 32px; object-fit: cover;">
+                <span style="font-size: 0.8rem;">${userData.full_name}</span>
+            `;
+            userHeadersDay2.appendChild(userHeaderDay2);
+        });
+    }
+    
+    function updateCourseBlocks() {
+        const allBlocks = ['1A', '1B', '1D', '1E', '2A', '2B', '2C', '2D', '2E'];
+        
+        allBlocks.forEach(block => {
+            const courseRow = document.getElementById(`courses-${block}`);
+            if (courseRow) {
+                courseRow.innerHTML = '';
+                
+                selectedUsersData.forEach((userData, index) => {
+                    const courseItem = document.createElement('div');
+                    const courseName = document.createElement('div');
+                    courseName.className = 'course-name-container'
+                    courseItem.className = 'course-item';
+                    courseItem.dataset.userId = userData.user_id;
+                    
+                    const course = userData.schedule[block];
+                    if (course && course.course) {
+                        courseName.textContent = course.course;
+                    } else {
+                        courseName.textContent = '-';
+                        courseItem.classList.add('empty');
+                    }
+                    courseItem.appendChild(courseName);
+                    
+                    // Append to the right
+                    courseRow.appendChild(courseItem);
+                });
+            }
+        });
+    }
+    
+    // Initialize layout
+    updateLayout();
+});
+</script>
+{% endblock %}

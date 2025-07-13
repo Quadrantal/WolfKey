@@ -14,6 +14,7 @@ from rest_framework.decorators import api_view, authentication_classes, permissi
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
 from forum.services.utils import upload_image
+from forum.services.search_services import search_users
 import json
 
 @csrf_exempt
@@ -93,6 +94,24 @@ def api_register(request):
         return JsonResponse({'error': 'Invalid JSON'}, status=400)
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)
+
+@login_required
+def search_users_api(request):
+    """Search for users API endpoint"""
+    query = request.GET.get('q', '').strip()
+    users = search_users(request.user, query)[:10]
+
+    users_data = []
+    for user in users:
+        users_data.append({
+            'id': user.id,
+            'username': user.username,
+            'full_name': user.get_full_name(),
+            'profile_picture_url' : user.userprofile.profile_picture.url,
+            'school_email': user.school_email,
+        })
+
+    return JsonResponse({'users': users_data})
 
 @api_view(['POST'])
 @authentication_classes([TokenAuthentication])

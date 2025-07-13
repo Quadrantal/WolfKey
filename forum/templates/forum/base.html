@@ -241,6 +241,11 @@
                         <i class="bi bi-compass"></i> <span class="sidebar-text">Explore</span>
                     </a>
                 </li>
+                <li>
+                    <a href="{% url 'course_comparer' %}" class="sidebar-item" data-title="Course Comparer">
+                        <i class="bi bi-people"></i> <span class="sidebar-text">Course Comparer</span>
+                    </a>
+                </li>
                 {% if user.is_authenticated %}
                 <li>
                     <a href="{% url 'followed_posts' %}" class="sidebar-item" data-title="Following">

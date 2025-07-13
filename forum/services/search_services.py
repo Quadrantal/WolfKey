@@ -1,4 +1,5 @@
-from django.db.models import F, Count
+from django.db.models import Value, F, Count, Q
+from django.db.models.functions import Concat, Greatest
 from django.contrib.postgres.search import SearchQuery, SearchRank, TrigramSimilarity
 from forum.models import Post, User
 from forum.services.utils import process_post_preview, add_course_context, annotate_post_card_context
@@ -16,11 +17,27 @@ def search_posts(user, query):
     posts = annotate_post_card_context(posts, user)
     return posts
 
+
+
+
 def search_users(user, query):
-    search_query = SearchQuery(query)
+    query = query.strip()
 
-    users = User.objects.annotate(
-        rank=SearchRank(F('search_vector'), search_query),
-    ).filter(rank__gte=0.1).order_by('-rank')
+    qs = User.objects.annotate(
+        trigram_first=TrigramSimilarity('first_name', query),
+        trigram_last=TrigramSimilarity('last_name', query),
+        trigram_full=TrigramSimilarity(
+            Concat(F('first_name'), Value(' '), F('last_name')),
+            query
+        ),
+        similarity=Greatest(
+            F('trigram_first'),
+            F('trigram_last'),
+            F('trigram_full'),
+        )
+    ).filter(
+        similarity__gte=0.1
+    ).order_by('-similarity')
 
-    return users
+    return qs
+

@@ -1,0 +1,111 @@
+/* User Selector Styles */
+.user-selector-wrapper {
+    position: relative;
+}
+
+.user-selector-wrapper .search-box {
+    width: 100%;
+    padding: 0.5rem;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-size: 1rem;
+    transition: border-color 0.3s ease;
+    border-radius: 12px;
+
+}
+
+.user-selector-wrapper .search-box:focus {
+    outline: none;
+    border-color: #007bff;
+    box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+}
+
+.user-dropdown {
+    width: 100%;
+    border: 1px solid #ccc;
+    border-radius: 12px;
+    background: white;
+    display: none;
+    max-height: 200px;
+    overflow-y: auto;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    position: absolute;
+    z-index: 10;
+}
+
+.user-dropdown .dropdown-item {
+    padding: 0.75rem;
+    cursor: pointer;
+    border-bottom: 1px solid #eee;
+    transition: background-color 0.2s ease;
+}
+
+.user-dropdown .dropdown-item:hover {
+    background-color: #f8f9fa;
+}
+
+.user-dropdown .dropdown-item:last-child {
+    border-bottom: none;
+}
+
+
+.user-tag {
+    background: #f0f0f0;
+    border-width: 2px;
+    border-style: solid;
+    border-color: rgb(56, 56, 56);
+    color: #333;
+    font-size: 11px;
+    padding: 5px 8px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 5px;    
+}
+
+.user-tag .remove-btn {
+    background: #ff6b6b;
+    color: white;
+    border-radius: 5px;
+    width: 16px;
+    height: 16px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 12px;
+}
+
+.user-tag:hover {
+    transform: translateY(-1px);
+    transition: transform 0.2s ease;
+}
+
+.user-tag .remove-btn:hover {
+    transform: translateY(-1px);
+    transition: transform 0.2s ease;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .user-selector-wrapper .search-box {
+        padding: 0.5rem;
+        font-size: 0.9rem;
+    }
+    
+    .user-dropdown .dropdown-item {
+        padding: 0.5rem;
+    }
+    
+    .add-user-btn {
+        padding: 0.5rem 0.75rem;
+        font-size: 0.8rem;
+    }
+    
+    .user-tag {
+        font-size: 0.8rem;
+        padding: 0.4rem 0.6rem;
+    }
+}
