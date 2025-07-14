@@ -39,7 +39,7 @@
         <div class="row">
             <!-- Day 1 Schedule -->
             <div class="col-md-6 mb-4">
-                <div class="day-header">Day 1</div>
+                <div class="card mb-2" style = "text-align: center; font-weight: 500;">Day 1</div>
                 <div class="schedule-blocks-container">
                     <!-- User Headers Row -->
                     <div class="user-headers-row" id="user-headers-day1">
@@ -74,7 +74,7 @@
             
             <!-- Day 2 Schedule -->
             <div class="col-md-6 mb-4">
-                <div class="day-header">Day 2</div>
+                <div class="card mb-2" style = "text-align: center; font-weight: 500;">Day 2</div>
                 <div class="schedule-blocks-container">
                     <!-- User Headers Row -->
                     <div class="user-headers-row" id="user-headers-day2">
@@ -209,10 +209,10 @@ document.addEventListener('DOMContentLoaded', function() {
     
     function updateSelectedUsersDisplay(users) {
         selectedUsersContainer.innerHTML = users.map(user => `
-            <span class="badge bg-primary d-flex align-items-center gap-2 user-selected-badge">
+            <span class="badge d-flex align-items-center gap-2 pill-btn btn-outline-secondary">
                 <img src="${user.profile_picture_url}" alt="Profile Picture" class="rounded-circle" style="width: 24px; height: 24px; object-fit: cover;">
                 ${user.full_name}
-                <span class="user-remove-btn" 
+                <span class="user-remove-btn remove-btn" 
                         data-user-id="${user.id}"
                         aria-label="Remove ${user.full_name}">&times</span>
             </span>
