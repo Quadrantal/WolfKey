@@ -1,12 +1,13 @@
 /* Search box styling */
 .search-box {
     width: 100%;
-    padding: 10px;
+    padding: 0.5rem;
     border: 1px solid #ccc;
     border-radius: 5px;
     font-size: 16px;
     outline: none;
     margin-bottom: 10px;
+    border-radius: 12px;
 }
 
 /* Dropdown container */
@@ -20,11 +21,12 @@
     overflow-y: auto;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     position: absolute;
-    z-index: 10;
+    z-index: 9999 !important;
 }
 
 .course-selector-wrapper {
     position: relative;
+    z-index: 10000;
 }
 
 /* Dropdown item */

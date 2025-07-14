@@ -2,7 +2,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from forum.models import Post, SavedPost, FollowedPost, Solution, SavedSolution
-from forum.services.utils import process_post_preview, add_course_context
+from forum.services.utils import process_post_preview, add_course_context, annotate_post_card_context
 from forum.services.solution_services import save_solution_service
 import json
 
@@ -40,8 +40,7 @@ def unfollow_post(request, post_id):
 def followed_posts(request):
     posts = Post.objects.filter(followers__user=request.user)
 
-    for post in posts:
-        post.preview_text = process_post_preview(post)
+    posts = annotate_post_card_context(posts, request.user)
 
     return render(request, 'forum/followed_posts.html', {'posts': posts})
 

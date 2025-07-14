@@ -7,6 +7,7 @@ from django.core.files.storage import default_storage
 from django.http import JsonResponse
 from django.contrib import messages
 from django.views.decorators.csrf import csrf_exempt
+from forum.services.course_services import get_user_courses
 from PIL import Image
 from io import BytesIO
 
@@ -43,6 +44,15 @@ def process_post_preview(post):
         text = re.sub(r'<br\s*/?>', ' ', text)
         text = strip_tags(text)
         return ' '.join(text.split())
+    
+def annotate_post_card_context(posts, user):
+    experienced_courses, help_needed_courses = get_user_courses(user)
+    for post in posts:
+        post.preview_text = process_post_preview(post)
+        add_course_context(post, experienced_courses, help_needed_courses)
+    
+    return posts
+
 
 def add_course_context(post, experienced_courses=None, help_needed_courses=None):
     """

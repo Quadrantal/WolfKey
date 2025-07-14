@@ -2,7 +2,7 @@ from django.db.models import Q, F, Count
 from django.contrib.postgres.search import SearchQuery, SearchRank, SearchVector, TrigramSimilarity
 from forum.models import Post
 from forum.services.course_services import get_user_courses
-from forum.services.utils import process_post_preview, add_course_context
+from forum.services.utils import process_post_preview, add_course_context, annotate_post_card_context
 from django.core.paginator import Paginator
 from django.utils.timezone import localtime
 
@@ -38,7 +38,7 @@ def get_for_you_posts(user, page=1, per_page=8):
 
     posts_dict = {post.id: post for post in posts}
     ordered_posts = [posts_dict[pid] for pid in post_ids if pid in posts_dict]
-    process_posts(ordered_posts, experienced_courses, help_needed_courses)
+    ordered_posts = annotate_post_card_context(ordered_posts, user)
 
     return ordered_posts, page_obj
 
@@ -58,8 +58,7 @@ def get_all_posts(user, query='', page=1, per_page=8):
             rank=SearchRank(F('search_vector'), search_query) + TrigramSimilarity('title', query)
         ).filter(rank__gte=0.3).order_by('-rank')
 
-    experienced_courses, help_needed_courses = get_user_courses(user)
-    process_posts(posts, experienced_courses, help_needed_courses)
+    posts = annotate_post_card_context(posts, user)
 
     paginator = Paginator(posts, per_page)
     page_obj = paginator.get_page(page)
@@ -68,11 +67,6 @@ def get_all_posts(user, query='', page=1, per_page=8):
         "page_obj": page_obj,
         "has_next": page_obj.has_next()
     }
-
-def process_posts(posts, experienced_courses, help_needed_courses):
-    for post in posts:
-        post.preview_text = process_post_preview(post)
-        add_course_context(post, experienced_courses, help_needed_courses)
 
 def paginate_posts(posts_queryset, page=1, limit=10):
     """
@@ -99,10 +93,5 @@ def paginate_posts(posts_queryset, page=1, limit=10):
 
 def get_user_posts(user):
     posts = Post.objects.filter(author = user).order_by('-created_at')
-    experienced_courses, help_needed_courses = get_user_courses(user)
-    
-    # Process posts
-    for post in posts:
-        post.preview_text = process_post_preview(post)
-        add_course_context(post, experienced_courses, help_needed_courses)
+    posts = annotate_post_card_context(posts, user)
     return posts

@@ -85,8 +85,18 @@ from forum.views.comments_views import (
     delete_comment,
     get_comments
 )
+from forum.views.course_comparer_views import (
+    course_comparer
+)
 from forum.api.schedule import(
-    get_daily_schedule,    
+    get_daily_schedule,
+    get_user_schedule_api
+)
+from forum.api.auth import(
+    api_login,
+    api_register,
+    api_upload_image,
+    search_users_api
 )
 from forum.services.schedule_services import (
     is_ceremonial_uniform_required
@@ -162,6 +172,11 @@ urlpatterns = [
     path('courses/help/remove/<int:help_id>/', remove_help_request, name='remove_help_request'),
     path('api/courses/', course_search, name='course-search'),
     
+    # Course comparer URLs
+    path('course-comparer/', course_comparer, name='course_comparer'),
+    path('api/search-users/', search_users_api, name='search_users_api'),
+    path('api/user-schedule/<int:user_id>/', get_user_schedule_api, name='get_user_schedule_api'),
+
     # Saved posts URLs
     path('followed-posts/', followed_posts, name='followed_posts'),
     path('my-posts/', my_posts, name='my_posts'),

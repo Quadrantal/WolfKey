@@ -21,6 +21,7 @@
     {% load static %}
     <link rel="icon" type="image/x-icon" href="{% static 'forum/images/WolfkeyLogo.ico' %}">
     <link rel="stylesheet" href="{% static 'forum/css/base.css' %}">
+    <link rel="stylesheet" href="{% static 'forum/css/asset.css' %}">
     <link rel="stylesheet" href="{% static 'forum/css/layout.css' %}">
     <link rel="stylesheet" href="{% static 'forum/css/whats-new.css' %}">
 
@@ -239,6 +240,11 @@
                 <li>
                     <a href="{% url 'all_posts'%}" class="sidebar-item" data-title="All Posts">
                         <i class="bi bi-compass"></i> <span class="sidebar-text">Explore</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="{% url 'course_comparer' %}" class="sidebar-item" data-title="Course Comparer">
+                        <i class="bi bi-arrow-left-right"></i> <span class="sidebar-text">Course Comparer</span>
                     </a>
                 </li>
                 {% if user.is_authenticated %}

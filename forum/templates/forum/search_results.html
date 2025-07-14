@@ -31,14 +31,26 @@
                         </div>
     
                         <!-- User Info -->
-                        <div>
+                        <div class="flex-grow-1">
                             <h5 class="card-title mb-1">{{ user.get_full_name }}</h5>
                             <p class="card-text text-muted mb-2">{{ user.userprofile.bio|default:"No bio available." }}</p>
                             <p class="card-text mb-2">
                                 <strong>Points:</strong> {{ user.userprofile.points }}
                                 <span class="ms-3"><strong>Role:</strong> {% if user.userprofile.is_moderator %}Moderator{% else %}User{% endif %}</span>
                             </p>
-                            <a href="{% url 'profile' user.username %}" class="btn btn-primary btn-sm">View Profile</a>
+                            <div class="d-flex gap-2">
+                                <a href="{% url 'profile' user.username %}" class="btn btn-primary btn-sm">View Profile</a>
+                                {% if can_compare and user != request.user %}
+                                <button class="btn btn-outline-secondary btn-sm compare-schedule-btn" 
+                                        data-user-id="{{ user.id }}"
+                                        data-username="{{ user.username }}"
+                                        data-full-name="{{ user.get_full_name }}"
+                                        data-school-email="{{ user.school_email }}"
+                                        data-profile-picture="{{ user.userprofile.profile_picture.url }}">
+                                    Compare Schedules
+                                </button>
+                                {% endif %}
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -59,4 +71,40 @@
         {% endfor %}
     </div>
 </div>
+{% endblock %}
+
+{% block scripts %}
+<!-- Compare Schedules Button Handler -->
+{% if can_compare %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const currentUserData = {{ current_user_data|safe }};
+        
+        // Handle compare schedule button clicks
+        document.querySelectorAll('.compare-schedule-btn').forEach(button => {
+            button.addEventListener('click', function(e) {
+                e.preventDefault();
+                
+                // Get target user data from button attributes
+                const targetUser = {
+                    id: parseInt(this.dataset.userId),
+                    username: this.dataset.username,
+                    full_name: this.dataset.fullName,
+                    school_email: this.dataset.schoolEmail,
+                    profile_picture_url: this.dataset.profilePicture
+                };
+                
+                // Prepare users data for course comparer
+                const initialUsers = [currentUserData, targetUser];
+                
+                // Store the initial users data in sessionStorage
+                sessionStorage.setItem('courseComparerInitialUsers', JSON.stringify(initialUsers));
+                
+                // Navigate to course comparer
+                window.location.href = '{% url "course_comparer" %}';
+            });
+        });
+    });
+</script>
+{% endif %}
 {% endblock %}

@@ -43,6 +43,30 @@ def get_profile_context(request, username):
         'help_needed_courses_json': help_needed_courses_json,
         'initial_courses_json': initial_courses_json,
     }
+    
+    # Add comparison data if viewing someone else's profile
+    if request.user.is_authenticated and request.user != profile_user:
+        initial_users = [
+            {
+                'id': request.user.id,
+                'username': request.user.username,
+                'full_name': request.user.get_full_name(),
+                'school_email': request.user.school_email,
+                'profile_picture_url': request.user.userprofile.profile_picture.url,
+            },
+            {
+                'id': profile_user.id,
+                'username': profile_user.username,
+                'full_name': profile_user.get_full_name(),
+                'school_email': profile_user.school_email,
+                'profile_picture_url': profile_user.userprofile.profile_picture.url,
+            }
+        ]
+        context['initial_users'] = json.dumps(initial_users)
+        context['can_compare'] = True
+    else:
+        context['can_compare'] = False
+    
     return context
 
 def update_profile_info(request, username):

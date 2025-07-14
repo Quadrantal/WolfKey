@@ -27,9 +27,11 @@ class GeneralURLTests(TestCase):
             'title': 'Test Post',
             'content': json.dumps({'blocks': [{'type': 'paragraph', 'data': {'text': 'Test Content'}}]}),
             'courses': [self.course.id],
+            'is_anonymous' : 'off',
         }
-        self.client.post(reverse('create_post'), data=post_data)
+        response = self.client.post(reverse('create_post'), data=post_data)
         post = Post.objects.get(title='Test Post')
+
         response = self.client.get(reverse('post_detail', kwargs={'post_id': post.id}))
         self.assertEqual(response.status_code, 200)
 
@@ -52,6 +54,10 @@ class GeneralURLTests(TestCase):
 
     def test_profile_view_url(self):
         response = self.client.get(reverse('profile', kwargs={'username': 'testuser'}))
+        self.assertEqual(response.status_code, 200)
+
+    def test_compare_schedule_url(self):
+        response = self.client.get(reverse('course_comparer'))
         self.assertEqual(response.status_code, 200)
 
 
