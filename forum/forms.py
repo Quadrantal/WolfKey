@@ -15,6 +15,9 @@ from django.utils.encoding import force_bytes
 from django.contrib.auth.tokens import default_token_generator
 from django.conf import settings
 from django.core.exceptions import ValidationError
+from django.contrib.auth.hashers import make_password, check_password
+from cryptography.fernet import Fernet
+import base64
 
 
 class MultipleFileInput(forms.ClearableFileInput):
@@ -105,6 +108,51 @@ class UserProfileForm(forms.ModelForm):
         widgets = {
             'bio': forms.Textarea(attrs={'rows': 4}),
         }
+
+class WolfNetSettingsForm(forms.ModelForm):
+    wolfnet_password = forms.CharField(
+        widget=forms.PasswordInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Enter your WolfNet password'
+        }),
+        required=False,
+        help_text='Your WolfNet password will be securely encrypted and stored for grade notifications and schedule integration.'
+    )
+    
+    class Meta:
+        model = UserProfile
+        fields = ['wolfnet_password']
+        
+    def clean_wolfnet_password(self):
+        password = self.cleaned_data.get('wolfnet_password')
+        if password:
+            # Add any additional validation for WolfNet password here
+            if len(password) < 1:
+                raise forms.ValidationError("Please enter a valid WolfNet password.")
+        return password
+
+    
+    def encrypt_password(self, password):
+        """Encrypt the password using Fernet encryption"""
+        # Generate a key from Django's SECRET_KEY
+        key = base64.urlsafe_b64encode(settings.SECRET_KEY[:32].encode())
+        f = Fernet(key)
+        encrypted_password = f.encrypt(password.encode())
+        return encrypted_password.decode()
+    
+    @staticmethod
+    def decrypt_password(encrypted_password):
+        """Decrypt the password for use in web scraping"""
+        if not encrypted_password:
+            return None
+        try:
+            key = base64.urlsafe_b64encode(settings.SECRET_KEY[:32].encode())
+            f = Fernet(key)
+            decrypted_password = f.decrypt(encrypted_password.encode())
+            return decrypted_password.decode()
+        except Exception:
+            return None
+
 
 class UserCourseExperienceForm(forms.ModelForm):
     class Meta:

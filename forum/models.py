@@ -8,6 +8,9 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.contrib.auth.models import BaseUserManager
 from django.utils import timezone
+import base64
+from django.conf import settings
+from cryptography.fernet import Fernet
 
 class UserManager(BaseUserManager):
     def create_user(self, school_email, first_name, last_name, password=None, **extra_fields):
@@ -315,6 +318,26 @@ class UserProfile(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     background_hue = models.IntegerField(default=231)
+    
+    # WolfNet Integration
+    wolfnet_password = models.CharField(
+        max_length=255,
+        blank=True,
+        null=True,
+        help_text="Your WolfNet password for grade notifications and schedule integration"
+    )
+
+    def get_decrypted_wolfnet_password(self):
+        """Get the decrypted WolfNet password for use in web scraping"""
+        from .forms import WolfNetSettingsForm
+        return WolfNetSettingsForm.decrypt_password(self.wolfnet_password)
+    
+    def save(self, *args, **kwargs):
+        if self.wolfnet_password and not self.wolfnet_password.startswith('gAAAA'):  # Fernet tokens start with 'gAAAA'
+            key = base64.urlsafe_b64encode(settings.SECRET_KEY[:32].encode())
+            f = Fernet(key)
+            self.wolfnet_password = f.encrypt(self.wolfnet_password.encode()).decode()
+        super().save(*args, **kwargs)
 
     profile_picture = models.ImageField(
         upload_to='profile_pictures/',

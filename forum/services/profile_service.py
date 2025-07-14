@@ -72,6 +72,10 @@ def get_profile_context(request, username):
 def update_profile_info(request, username):
     profile_user = get_object_or_404(User, username=username)
     try:
+        # Handle WolfNet settings form
+        if request.POST.get('form_type') == 'wolfnet_settings':
+            return update_wolfnet_settings(request, profile_user)
+        
         request.user.first_name = request.POST.get('first_name', request.user.first_name)
         request.user.last_name = request.POST.get('last_name', request.user.last_name)
         request.user.personal_email = request.POST.get('personal_email', request.user.personal_email)
@@ -93,6 +97,28 @@ def update_profile_info(request, username):
         return False, str(e)
     except Exception as e:
         return False, f'Error updating profile: {str(e)}'
+
+def update_wolfnet_settings(request, profile_user):
+    """Handle WolfNet settings update"""
+    try:
+        # Check if we're clearing the password
+        if request.POST.get('clear_wolfnet_password') == 'true':
+            profile_user.userprofile.wolfnet_password = None
+            profile_user.userprofile.save()
+            return True, 'WolfNet password cleared successfully!'
+        
+        # Otherwise, update the password
+        wolfnet_password = request.POST.get('wolfnet_password', '').strip()
+        if wolfnet_password:
+            # TODO: Add password encryption here before storing
+            profile_user.userprofile.wolfnet_password = wolfnet_password
+            profile_user.userprofile.save()
+            return True, 'WolfNet settings updated successfully! Grade notifications and schedule integration are now enabled.'
+        else:
+            return False, 'Please enter a valid WolfNet password.'
+            
+    except Exception as e:
+        return False, f'Error updating WolfNet settings: {str(e)}'
 
 def update_profile_picture(request):
     profile = request.user.userprofile

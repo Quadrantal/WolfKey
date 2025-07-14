@@ -11,7 +11,8 @@ from forum.models import (
 from forum.forms import ( 
     UserCourseExperienceForm,
     UserCourseHelpForm,
-    UserProfileForm
+    UserProfileForm,
+    WolfNetSettingsForm
 )
 
 # Import the new service layer

@@ -395,6 +395,40 @@
                             </div>
                         </div>
     
+                        <div class="card mb-4">
+                            <div class="card-header">
+                                <h5 class="mb-0">WolfNet Integration</h5>
+                            </div>
+                            <div class="card-body">
+                                <form method="post" id="wolfnetForm">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="form_type" value="wolfnet_settings">
+                                    <div class="mb-3">
+                                        <label for="id_wolfnet_password" class="form-label">WolfNet Password</label>
+                                        <input type="password" 
+                                               name="wolfnet_password" 
+                                               id="id_wolfnet_password" 
+                                               class="form-control" 
+                                               placeholder="Enter your WolfNet password"
+                                               value="{% if request.user.userprofile.wolfnet_password %}••••••••{% endif %}">
+                                        <small class="text-muted">
+                                            Your WolfNet password will be securely stored and used for:
+                                            <ul class="mt-2 mb-0">
+                                                <li>Email notifications when assignments are graded</li>
+                                                <li>Automatic schedule retrieval and updates</li>
+                                            </ul>
+                                        </small>
+                                    </div>
+                                    <div class="d-flex gap-2">
+                                        <button type="submit" class="btn btn-primary">Save WolfNet Settings</button>
+                                        {% if request.user.userprofile.wolfnet_password %}
+                                        <button type="button" class="btn btn-outline-danger" onclick="clearWolfNetPassword()">Clear Password</button>
+                                        {% endif %}
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+    
                         <div class="card mb-4" style = "overflow: hidden;">
                             <a href="{% url 'password_reset' %}" class="btn btn-secondary" style = "z-index: 2;">Reset Password</a>
                         </div>
@@ -687,5 +721,23 @@
             });
         });
     });
+    
+    // WolfNet functionality
+    function clearWolfNetPassword() {
+        if (confirm('Are you sure you want to clear your WolfNet password? This will disable grade notifications and schedule integration.')) {
+            const form = document.getElementById('wolfnetForm');
+            const passwordInput = document.getElementById('id_wolfnet_password');
+            passwordInput.value = '';
+            
+            // Create a hidden input to indicate we want to clear the password
+            const clearInput = document.createElement('input');
+            clearInput.type = 'hidden';
+            clearInput.name = 'clear_wolfnet_password';
+            clearInput.value = 'true';
+            form.appendChild(clearInput);
+            
+            form.submit();
+        }
+    }
 </script>
 {% endblock %}
