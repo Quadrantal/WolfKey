@@ -233,33 +233,37 @@
         <nav class="sidebar">
             <ul class="list-unstyled">
                 <li>
-                    <a href="{% url 'for_you' %}" class="sidebar-item" data-title="Home">
-                        <i class="bi bi-house"></i> <span class="sidebar-text">Home</span>
+                    <a href="{% url 'for_you' %}" class="sidebar-item{% if request.resolver_match.url_name == 'for_you' %} active{% endif %}" data-title="Home">
+                        <i class="bi {% if request.resolver_match.url_name == 'for_you' %}bi-house-fill{% else %}bi-house{% endif %}"></i> <span class="sidebar-text">Home</span>
                     </a>
                 </li>
                 <li>
-                    <a href="{% url 'all_posts'%}" class="sidebar-item" data-title="All Posts">
-                        <i class="bi bi-compass"></i> <span class="sidebar-text">Explore</span>
+                    <a href="{% url 'all_posts'%}" class="sidebar-item{% if request.resolver_match.url_name == 'all_posts' %} active{% endif %}" data-title="All Posts">
+                        <i class="bi {% if request.resolver_match.url_name == 'all_posts' %}bi-compass-fill{% else %}bi-compass{% endif %}"></i> <span class="sidebar-text">Explore</span>
                     </a>
                 </li>
                 <li>
                     <a href="{% url 'course_comparer' %}" class="sidebar-item" data-title="Course Comparer">
-                        <i class="bi bi-arrow-left-right"></i> <span class="sidebar-text">Course Comparer</span>
+                        {% if request.resolver_match.url_name == 'course_comparer' %} 
+                        <i class="bi bi-calendar-range-fill"></i> <span class="sidebar-text">Course Comparer</span>
+                        {% else %}
+                        <i class="bi bi-calendar-range"></i> <span class="sidebar-text">Course Comparer</span>
+                        {% endif %}
                     </a>
                 </li>
                 {% if user.is_authenticated %}
                 <li>
-                    <a href="{% url 'followed_posts' %}" class="sidebar-item" data-title="Following">
-                        <i class="bi bi-pin"></i> <span class="sidebar-text">Following</span>
+                    <a href="{% url 'followed_posts' %}" class="sidebar-item{% if request.resolver_match.url_name == 'followed_posts' %} active{% endif %}" data-title="Following">
+                        <i class="bi {% if request.resolver_match.url_name == 'followed_posts' %}bi-pin-fill{% else %}bi-pin{% endif %}"></i> <span class="sidebar-text">Following</span>
                     </a>
                 </li>
                 <li>
-                    <a href="{% url 'saved_solutions' %}" class="sidebar-item" data-title="Saved Solutions">
-                        <i class="bi bi-bookmark-star"></i> <span class="sidebar-text">Saved Solutions</span>
+                    <a href="{% url 'saved_solutions' %}" class="sidebar-item{% if request.resolver_match.url_name == 'saved_solutions' %} active{% endif %}" data-title="Saved Solutions">
+                        <i class="bi {% if request.resolver_match.url_name == 'saved_solutions' %}bi-bookmark-star-fill{% else %}bi-bookmark-star{% endif %}"></i> <span class="sidebar-text">Saved Solutions</span>
                     </a>
                 </li>
                 <li>
-                    <a href="{% url 'my_posts'%}" class="sidebar-item" data-title="My Posts">
+                    <a href="{% url 'my_posts'%}" class="sidebar-item{% if request.resolver_match.url_name == 'my_posts' %} active{% endif %}" data-title="My Posts">
                         <i class="bi bi-pencil-square"></i> <span class="sidebar-text">My Posts</span>
                     </a>
                 </li>
