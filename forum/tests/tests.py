@@ -56,6 +56,10 @@ class GeneralURLTests(TestCase):
         response = self.client.get(reverse('profile', kwargs={'username': 'testuser'}))
         self.assertEqual(response.status_code, 200)
 
+    def test_compare_schedule_url(self):
+        response = self.client.get(reverse('course_comparer'))
+        self.assertEqual(response.status_code, 200)
+
 
 class SolutionFeatureTests(TestCase):
     def setUp(self):

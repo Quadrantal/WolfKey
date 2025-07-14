@@ -17,9 +17,6 @@ def search_posts(user, query):
     posts = annotate_post_card_context(posts, user)
     return posts
 
-
-
-
 def search_users(user, query):
     query = query.strip()
 
