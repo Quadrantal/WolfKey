@@ -60,11 +60,62 @@ def main():
             stay_signed_in_btn.click()
         except Exception:
             pass  # If not present, continue
+        time.sleep(8)
 
-        wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "#site-logo img")))
-        logo_img = driver.find_element(By.CSS_SELECTOR, "#site-logo img")
-        logo_src = logo_img.get_attribute("src")
-        print("School image link:", logo_src)
+        # Wait for courses to load
+        wait.until(EC.presence_of_all_elements_located((By.CSS_SELECTOR, ".collapse")))
+        course_divs = driver.find_elements(By.CSS_SELECTOR, ".collapse")
+        section_ids = []
+        for div in course_divs:
+            div_id = div.get_attribute("id")
+            if div_id and div_id.startswith("course"):
+                section_ids.append(div_id.replace("course", ""))
+
+        print("Section IDs: ", section_ids)
+
+        # Get studentId from #profile-link
+        wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "#profile-link")))
+        profile_link = driver.find_element(By.CSS_SELECTOR, "#profile-link")
+        href = profile_link.get_attribute("href")
+        import re
+        m = re.search(r"profile/(\d+)/contactcard", href)
+        student_id = m.group(1) if m else None
+        print("Student ID:", student_id)
+
+        # Wait for page/session to fully load
+
+        import requests
+        from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
+
+        # Get cookies from Selenium to use in requests
+        selenium_cookies = driver.get_cookies()
+        cookies = {c['name']: c['value'] for c in selenium_cookies}
+
+        headers = {
+            "User-Agent": "Mozilla/5.0",
+            "Accept": "application/json, text/javascript, */*; q=0.01",
+            "Referer": LOGIN_URL,
+        }
+
+        # For each sectionId, get markingPeriodId and then grades
+        for section_id in section_ids:
+            # Get marking periods
+            mp_url = f"https://wpga.myschoolapp.com/api/datadirect/GradeBookMarkingPeriodList?sectionId={section_id}"
+            mp_resp = requests.get(mp_url, cookies=cookies, headers=headers)
+            if mp_resp.status_code == 200:
+                mp_json = mp_resp.json()
+                for mp in mp_json:
+                    marking_period_id = mp.get("MarkingPeriodId")
+                    # Get grades JSON
+                    grades_url = f"https://wpga.myschoolapp.com/api/gradebook/AssignmentPerformanceStudent?sectionId={section_id}&markingPeriodId={marking_period_id}&studentId={student_id}"
+                    grades_resp = requests.get(grades_url, cookies=cookies, headers=headers)
+                    if grades_resp.status_code == 200:
+                        print(f"Grades for section {section_id}, marking period {marking_period_id}:")
+                        print(grades_resp.json())
+                    else:
+                        print(f"Failed to get grades for section {section_id}, marking period {marking_period_id}")
+            else:
+                print(f"Failed to get marking periods for section {section_id}")
     finally:
         driver.quit()
 
