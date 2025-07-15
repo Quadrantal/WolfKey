@@ -126,6 +126,19 @@ class User(AbstractUser):
             SearchVector('last_name', weight='A')
         )
         User.objects.filter(id=self.id).update(search_vector=search_vector)
+
+class GradebookSnapshot(models.Model):
+    user = models.ForeignKey('User', on_delete=models.CASCADE, related_name='gradebook_snapshots')
+    section_id = models.CharField(max_length=32)
+    marking_period_id = models.CharField(max_length=32)
+    json_data = models.JSONField()
+    timestamp = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('user', 'section_id', 'marking_period_id', 'timestamp')
+
+    def __str__(self):
+        return f"Snapshot for {self.user.school_email} | Section {self.section_id} | MP {self.marking_period_id} @ {self.timestamp}"
     
 class Course(models.Model):
     name = models.CharField(max_length=100)

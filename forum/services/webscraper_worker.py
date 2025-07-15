@@ -8,6 +8,8 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+import requests
+from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 
 # Ensure project root is in sys.path
 PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../'))
@@ -18,6 +20,7 @@ if PROJECT_ROOT not in sys.path:
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "student_forum.settings")
 django.setup()
 
+from forum.models import GradebookSnapshot
 from forum.models import User
 
 LOGIN_URL = "https://wpga.myschoolapp.com/"
@@ -27,6 +30,29 @@ def get_decrypted_wolfnet_password(user_email):
     user = User.objects.get(school_email=user_email)
     profile = user.userprofile
     return profile.get_decrypted_wolfnet_password()
+
+def compare_assignments(old_assignments, new_assignments):
+    changes = []
+    old_map = {a["assignment_id"]: a for a in old_assignments}
+    for new_a in new_assignments:
+        aid = new_a["assignment_id"]
+        old_a = old_map.get(aid)
+        if not old_a:
+            changes.append({"type": "new", "assignment": new_a})
+            continue
+
+        old_skills = {s["skill_id"]: s for s in old_a.get("skills", [])}
+        for s in new_a["skills"]:
+            old_s = old_skills.get(s["skill_id"])
+            if not old_s or s["rating"] != old_s.get("rating") or s["rating_desc"] != old_s.get("rating_desc"):
+                changes.append({"type": "skill_changed", "assignment": new_a, "skill": s})
+
+        if new_a.get("points_earned") != old_a.get("points_earned") or new_a.get("max_points") != old_a.get("max_points"):
+            changes.append({"type": "points_changed", "assignment": new_a})
+        # Compare comments
+        if new_a.get("comment") != old_a.get("comment"):
+            changes.append({"type": "comment_changed", "assignment": new_a})
+    return changes
 
 def main():
     PASSWORD = get_decrypted_wolfnet_password(USERNAME)
@@ -84,9 +110,6 @@ def main():
 
         # Wait for page/session to fully load
 
-        import requests
-        from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
-
         # Get cookies from Selenium to use in requests
         selenium_cookies = driver.get_cookies()
         cookies = {c['name']: c['value'] for c in selenium_cookies}
@@ -97,8 +120,11 @@ def main():
             "Referer": LOGIN_URL,
         }
 
-        # For each sectionId, get markingPeriodId and then grades
+        # For each sectionId, get markingPeriodId and then hydrategradebook JSON
+        from forum.models import GradebookSnapshot, User
+        user_obj = User.objects.get(school_email=USERNAME)
         for section_id in section_ids:
+            section_id = 114310931
             # Get marking periods
             mp_url = f"https://wpga.myschoolapp.com/api/datadirect/GradeBookMarkingPeriodList?sectionId={section_id}"
             mp_resp = requests.get(mp_url, cookies=cookies, headers=headers)
@@ -106,16 +132,72 @@ def main():
                 mp_json = mp_resp.json()
                 for mp in mp_json:
                     marking_period_id = mp.get("MarkingPeriodId")
-                    # Get grades JSON
-                    grades_url = f"https://wpga.myschoolapp.com/api/gradebook/AssignmentPerformanceStudent?sectionId={section_id}&markingPeriodId={marking_period_id}&studentId={student_id}"
-                    grades_resp = requests.get(grades_url, cookies=cookies, headers=headers)
-                    if grades_resp.status_code == 200:
-                        print(f"Grades for section {section_id}, marking period {marking_period_id}:")
-                        print(grades_resp.json())
+                    # Get hydrategradebook JSON
+                    hydrate_url = (
+                        f"https://wpga.myschoolapp.com/api/gradebook/hydrategradebook?"
+                        f"sectionId={section_id}&markingPeriodId={marking_period_id}"
+                        f"&sortAssignmentId=null&sortSkillPk=null&sortDesc=null&sortCumulative=null"
+                        f"&studentUserId={student_id}&fromProgress=true"
+                    )
+                    hydrate_resp = requests.get(hydrate_url, cookies=cookies, headers=headers)
+                    if hydrate_resp.status_code == 200:
+                        hydrate_json = hydrate_resp.json()
+                        print(f"HydrateGradebook for section {section_id}, marking period {marking_period_id}:")
+                        # Extract relevant assignment info
+                        assignments = []
+                        roster = hydrate_json.get("Roster", [])
+                        if roster:
+                            for a in roster[0].get("AssignmentGrades", []):
+                                assignments.append({
+                                    "assignment_id": a.get("AssignmentId"),
+                                    "name": a.get("AssignmentType", "").strip(),
+                                    "points_earned": a.get("PointsEarned"),
+                                    "max_points": a.get("MaxPoints"),
+                                    "comment": a.get("Comment", "").strip(),
+                                    "assignment_type": a.get("AssignmentType", "").strip(),
+                                    "assignment_type_id": a.get("AssignmentTypeId"),
+                                    "skills": [
+                                        {
+                                            "skill_id": s.get("SkillId"),
+                                            "skill_name": s.get("SkillName"),
+                                            "rating": s.get("Rating"),
+                                            "rating_desc": s.get("RatingDesc")
+                                        }
+                                        for s in a.get("AssignmentSkillList", [])
+                                    ]
+                                })
+                        print(assignments[:5])
+                        # Compare with previous snapshot
+                        snapshot_qs = GradebookSnapshot.objects.filter(
+                            user=user_obj,
+                            section_id=section_id,
+                            marking_period_id=str(marking_period_id)
+                        ).order_by('-timestamp')
+                        print("SNAPSHOP: ", snapshot_qs.first().json_data)
+                        if snapshot_qs.exists():
+                            snapshot = snapshot_qs.first()
+                            old_assignments = snapshot.json_data
+                            changes = compare_assignments(old_assignments, assignments)
+                            print(f"Changes for section {section_id}, marking period {marking_period_id}:")
+                            for change in changes:
+                                print(change)
+                            # Update snapshot
+                            snapshot.json_data = assignments
+                            snapshot.timestamp = django.utils.timezone.now()
+                            snapshot.save()
+                        else:
+                            GradebookSnapshot.objects.create(
+                                user=user_obj,
+                                section_id=section_id,
+                                marking_period_id=str(marking_period_id),
+                                json_data=assignments
+                            )
                     else:
-                        print(f"Failed to get grades for section {section_id}, marking period {marking_period_id}")
+                        print(f"Failed to get hydrategradebook for section {section_id}, marking period {marking_period_id}")
             else:
                 print(f"Failed to get marking periods for section {section_id}")
+
+            break
     finally:
         driver.quit()
 
