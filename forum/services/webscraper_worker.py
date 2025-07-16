@@ -22,6 +22,7 @@ django.setup()
 
 from forum.models import GradebookSnapshot
 from forum.models import User
+from django.utils.html import strip_tags
 
 LOGIN_URL = "https://wpga.myschoolapp.com/"
 USERNAME = "hugoc101923@wpga.ca" #TODO
@@ -86,7 +87,7 @@ def main():
             stay_signed_in_btn.click()
         except Exception:
             pass  # If not present, continue
-        time.sleep(8)
+        time.sleep(7)
 
         # Wait for courses to load
         wait.until(EC.presence_of_all_elements_located((By.CSS_SELECTOR, ".collapse")))
@@ -124,7 +125,6 @@ def main():
         from forum.models import GradebookSnapshot, User
         user_obj = User.objects.get(school_email=USERNAME)
         for section_id in section_ids:
-            section_id = 114310931
             # Get marking periods
             mp_url = f"https://wpga.myschoolapp.com/api/datadirect/GradeBookMarkingPeriodList?sectionId={section_id}"
             mp_resp = requests.get(mp_url, cookies=cookies, headers=headers)
@@ -166,21 +166,86 @@ def main():
                                         for s in a.get("AssignmentSkillList", [])
                                     ]
                                 })
-                        print(assignments[:5])
+                        print(assignments[-3:])
+                        # Fetch AssignmentPerformanceStudent JSON for assignment names
+                        aps_url = (
+                            f"https://wpga.myschoolapp.com/api/gradebook/AssignmentPerformanceStudent?"
+                            f"sectionId={section_id}&markingPeriodId={marking_period_id}&studentId={student_id}"
+                        )
+                        aps_resp = requests.get(aps_url, cookies=cookies, headers=headers)
+                        assignment_names = {}
+                        if aps_resp.status_code == 200:
+                            aps_json = aps_resp.json()
+                            for entry in aps_json:
+                                aid = entry.get("AssignmentId")
+                                short_desc = entry.get("AssignmentShortDescription")
+                                if aid and short_desc:
+                                    assignment_names[aid] = short_desc
+
                         # Compare with previous snapshot
                         snapshot_qs = GradebookSnapshot.objects.filter(
                             user=user_obj,
                             section_id=section_id,
                             marking_period_id=str(marking_period_id)
                         ).order_by('-timestamp')
-                        print("SNAPSHOP: ", snapshot_qs.first().json_data)
+
                         if snapshot_qs.exists():
                             snapshot = snapshot_qs.first()
                             old_assignments = snapshot.json_data
                             changes = compare_assignments(old_assignments, assignments)
                             print(f"Changes for section {section_id}, marking period {marking_period_id}:")
+                            from forum.services.notification_services import send_notification_service
                             for change in changes:
                                 print(change)
+                                # Send notification for new/changed grade
+                                assignment = change["assignment"]
+                                recipient = user_obj
+                                sender = user_obj  # System or self
+                                notification_type = "grade_update"
+                                assignment_id = assignment.get("assignment_id")
+                                assignment_name = strip_tags(assignment_names.get(assignment_id) or assignment.get("name") or assignment.get("assignment_type"))
+                                # Determine grading system
+                                skills = assignment.get("skills", [])
+                                prof_skills = [s for s in skills if s.get("rating_desc", "")]
+                                has_proficiency = bool(prof_skills)
+                                if has_proficiency:
+                                    # Use first non-empty proficiency
+                                    prof_list = [f"{s.get('skill_name')}: {s.get('rating_desc')}" for s in prof_skills]
+                                    grade_info = "\n".join(prof_list)
+                                else:
+                                    # Use percentage
+                                    points_earned = assignment.get("points_earned")
+                                    max_points = assignment.get("max_points")
+                                    if points_earned is not None and max_points:
+                                        try:
+                                            percent = round((points_earned / max_points) * 100, 2)
+                                        except Exception:
+                                            percent = None
+                                        grade_info = f"\n Grade: {points_earned}/{max_points} ({percent}%)" if percent is not None else f"Grade: {points_earned}/{max_points}"
+                                    else:
+                                        grade_info = "Grade information not available."
+
+                                message = f"Your assignment '{assignment_name}' was graded or updated. \n{grade_info}"
+                                if change["type"] == "new":
+                                    message = f"New assignment '{assignment_name}' has been graded. \n{grade_info} \nComment: {assignment.get('comment')}"
+                                elif change["type"] == "skill_changed":
+                                    skill = change["skill"]
+                                    message = f"Competency '{skill.get('skill_name')}' for assignment '{assignment_name}' was updated to '{skill.get('rating_desc')}'. {grade_info}"
+                                elif change["type"] == "points_changed":
+                                    message = f"Points for assignment '{assignment_name}' changed to {assignment.get('points_earned')}/{assignment.get('max_points')}. {grade_info}"
+                                elif change["type"] == "comment_changed":
+                                    message = f"Comment for assignment '{assignment_name}' was updated. {grade_info} \nComment: {assignment.get('comment')}"
+                                email_subject = "WolfKey Grade Update"
+                                email_message = f"Hello {recipient.get_full_name()},\n\n{message}\n\nBest regards,\nWolfKey Team"
+                                print(email_message)
+                                send_notification_service(
+                                    recipient=recipient,
+                                    sender=sender,
+                                    notification_type=notification_type,
+                                    message=message,
+                                    email_subject=email_subject,
+                                    email_message=email_message,
+                                )
                             # Update snapshot
                             snapshot.json_data = assignments
                             snapshot.timestamp = django.utils.timezone.now()
@@ -196,8 +261,6 @@ def main():
                         print(f"Failed to get hydrategradebook for section {section_id}, marking period {marking_period_id}")
             else:
                 print(f"Failed to get marking periods for section {section_id}")
-
-            break
     finally:
         driver.quit()
 
