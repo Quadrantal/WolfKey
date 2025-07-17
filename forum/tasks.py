@@ -1,32 +1,20 @@
-
-import os
-import sys
-import django
+from celery import shared_task
+from forum.models import User
+import logging
 import time
+import re
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 import requests
-from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
-
-# Ensure project root is in sys.path
-PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../'))
-if PROJECT_ROOT not in sys.path:
-    sys.path.insert(0, PROJECT_ROOT)
-
-# Setup Django
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "student_forum.settings")
-django.setup()
-
-from forum.models import GradebookSnapshot
-from forum.models import User
 from django.utils.html import strip_tags
+import django
 
-LOGIN_URL = "https://wpga.myschoolapp.com/"
-USERNAME = "hugoc101923@wpga.ca" #TODO
+logger = logging.getLogger(__name__)
 
+# Grade checking functions
 def get_decrypted_wolfnet_password(user_email):
     user = User.objects.get(school_email=user_email)
     profile = user.userprofile
@@ -50,26 +38,32 @@ def compare_assignments(old_assignments, new_assignments):
 
         if new_a.get("points_earned") != old_a.get("points_earned") or new_a.get("max_points") != old_a.get("max_points"):
             changes.append({"type": "points_changed", "assignment": new_a})
-        # Compare comments
         if new_a.get("comment") != old_a.get("comment"):
             changes.append({"type": "comment_changed", "assignment": new_a})
     return changes
 
-def main():
-    PASSWORD = get_decrypted_wolfnet_password(USERNAME)
+def check_user_grades_core(user_email):
+    """Core grade checking logic using Selenium"""
+    logger.info(f"Starting grade check for user: {user_email}")
+    LOGIN_URL = "https://wpga.myschoolapp.com/"
+    
+    PASSWORD = get_decrypted_wolfnet_password(user_email)
+    if not PASSWORD:
+        logger.error(f"No Wolfnet password found for {user_email}. Skipping grade check.")
+        return
     chrome_options = Options()
-    # chrome_options.add_argument("--headless") CHANGE IN PROD
     chrome_options.add_argument("--no-sandbox")
     chrome_options.add_argument("--disable-dev-shm-usage")
     driver = webdriver.Chrome(options=chrome_options)
     wait = WebDriverWait(driver, 20)
 
     try:
+        logger.info(f"Navigating to login page for {user_email}")
         driver.get(LOGIN_URL)
 
         wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "#Username")))
         username_input = driver.find_element(By.CSS_SELECTOR, "#Username")
-        username_input.send_keys(USERNAME)
+        username_input.send_keys(user_email)
         next_btn = driver.find_element(By.CSS_SELECTOR, "#nextBtn")
         next_btn.click()
 
@@ -98,18 +92,15 @@ def main():
             if div_id and div_id.startswith("course"):
                 section_ids.append(div_id.replace("course", ""))
 
-        print("Section IDs: ", section_ids)
+        logger.info(f"Section IDs for {user_email}: {section_ids}")
 
         # Get studentId from #profile-link
         wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "#profile-link")))
         profile_link = driver.find_element(By.CSS_SELECTOR, "#profile-link")
         href = profile_link.get_attribute("href")
-        import re
         m = re.search(r"profile/(\d+)/contactcard", href)
         student_id = m.group(1) if m else None
-        print("Student ID:", student_id)
-
-        # Wait for page/session to fully load
+        logger.info(f"Student ID for {user_email}: {student_id}")
 
         # Get cookies from Selenium to use in requests
         selenium_cookies = driver.get_cookies()
@@ -122,8 +113,8 @@ def main():
         }
 
         # For each sectionId, get markingPeriodId and then hydrategradebook JSON
-        from forum.models import GradebookSnapshot, User
-        user_obj = User.objects.get(school_email=USERNAME)
+        from forum.models import GradebookSnapshot
+        user_obj = User.objects.get(school_email=user_email)
         for section_id in section_ids:
             # Get marking periods
             mp_url = f"https://wpga.myschoolapp.com/api/datadirect/GradeBookMarkingPeriodList?sectionId={section_id}"
@@ -142,8 +133,6 @@ def main():
                     hydrate_resp = requests.get(hydrate_url, cookies=cookies, headers=headers)
                     if hydrate_resp.status_code == 200:
                         hydrate_json = hydrate_resp.json()
-                        print(f"HydrateGradebook for section {section_id}, marking period {marking_period_id}:")
-                        # Extract relevant assignment info
                         assignments = []
                         roster = hydrate_json.get("Roster", [])
                         if roster:
@@ -166,7 +155,7 @@ def main():
                                         for s in a.get("AssignmentSkillList", [])
                                     ]
                                 })
-                        print(assignments[-3:])
+                        logger.info(f"Recent assignments for {user_email}: {assignments[-3:] if assignments else 'None'}")
                         # Fetch AssignmentPerformanceStudent JSON for assignment names
                         aps_url = (
                             f"https://wpga.myschoolapp.com/api/gradebook/AssignmentPerformanceStudent?"
@@ -193,10 +182,10 @@ def main():
                             snapshot = snapshot_qs.first()
                             old_assignments = snapshot.json_data
                             changes = compare_assignments(old_assignments, assignments)
-                            print(f"Changes for section {section_id}, marking period {marking_period_id}:")
-                            from forum.services.notification_services import send_notification_service
+                            logger.info(f"Changes for {user_email} - section {section_id}, marking period {marking_period_id}: {len(changes)} changes found")
+                            
                             for change in changes:
-                                print(change)
+                                logger.info(f"Processing change for {user_email}: {change}")
                                 # Send notification for new/changed grade
                                 assignment = change["assignment"]
                                 recipient = user_obj
@@ -204,10 +193,12 @@ def main():
                                 notification_type = "grade_update"
                                 assignment_id = assignment.get("assignment_id")
                                 assignment_name = strip_tags(assignment_names.get(assignment_id) or assignment.get("name") or assignment.get("assignment_type"))
+                                
                                 # Determine grading system
                                 skills = assignment.get("skills", [])
                                 prof_skills = [s for s in skills if s.get("rating_desc", "")]
                                 has_proficiency = bool(prof_skills)
+                                
                                 if has_proficiency:
                                     # Use first non-empty proficiency
                                     prof_list = [f"{s.get('skill_name')}: {s.get('rating_desc')}" for s in prof_skills]
@@ -235,21 +226,33 @@ def main():
                                     message = f"Points for assignment '{assignment_name}' changed to {assignment.get('points_earned')}/{assignment.get('max_points')}. {grade_info}"
                                 elif change["type"] == "comment_changed":
                                     message = f"Comment for assignment '{assignment_name}' was updated. {grade_info} \nComment: {assignment.get('comment')}"
+                                
                                 email_subject = "WolfKey Grade Update"
                                 email_message = f"Hello {recipient.get_full_name()},\n\n{message}\n\nBest regards,\nWolfKey Team"
-                                print(email_message)
+                                logger.info(f"Sending grade update notification to {recipient.personal_email}: {message}")
+                                
+                                # Use the new email task for sending emails
+                                send_email_notification.delay(
+                                    recipient.personal_email,
+                                    email_subject,
+                                    email_message
+                                )
+                                
+                                # Send in-app notification without email
+                                from forum.services.notification_services import send_notification_service
                                 send_notification_service(
                                     recipient=recipient,
                                     sender=sender,
                                     notification_type=notification_type,
                                     message=message,
-                                    email_subject=email_subject,
-                                    email_message=email_message,
+                                    # Remove email parameters to avoid duplicate emails
                                 )
+                            
                             # Update snapshot
                             snapshot.json_data = assignments
                             snapshot.timestamp = django.utils.timezone.now()
                             snapshot.save()
+                            logger.info(f"Updated snapshot for {user_email} - section {section_id}, marking period {marking_period_id}")
                         else:
                             GradebookSnapshot.objects.create(
                                 user=user_obj,
@@ -257,12 +260,62 @@ def main():
                                 marking_period_id=str(marking_period_id),
                                 json_data=assignments
                             )
+                            logger.info(f"Created new snapshot for {user_email} - section {section_id}, marking period {marking_period_id}")
                     else:
-                        print(f"Failed to get hydrategradebook for section {section_id}, marking period {marking_period_id}")
+                        logger.error(f"Failed to get hydrategradebook for {user_email} - section {section_id}, marking period {marking_period_id}")
             else:
-                print(f"Failed to get marking periods for section {section_id}")
+                logger.error(f"Failed to get marking periods for {user_email} - section {section_id}")
     finally:
         driver.quit()
+        logger.info(f"Grade check completed for {user_email}")
 
-if __name__ == "__main__":
-    main()
+@shared_task
+def check_single_user_grades(user_email):
+    """
+    Check grades for a single user
+    """
+    try:
+        return check_user_grades_core(user_email)
+    except Exception as e:
+        logger.error(f"Error checking grades for {user_email}: {str(e)}")
+        raise
+
+@shared_task
+def check_all_user_grades():
+    """
+    Schedule grade checking for all users in parallel
+    """
+    users = User.objects.all()
+    logger.info(f"Starting grade check for {users.count()} users")
+    
+    # Create a task for each user
+    job_ids = []
+    for user in users:
+        if user.school_email:  # Only check users with school emails
+            job = check_single_user_grades.delay(user.school_email)
+            job_ids.append(job.id)
+    
+    logger.info(f"Scheduled {len(job_ids)} grade checking tasks")
+    return {"scheduled_tasks": len(job_ids), "task_ids": job_ids}
+
+@shared_task
+def send_email_notification(recipient_email, subject, message):
+    """
+    Send email notification - separate task for email queue
+    """
+    from django.core.mail import send_mail
+    from django.conf import settings
+    
+    try:
+        send_mail(
+            subject,
+            message,
+            settings.DEFAULT_FROM_EMAIL,
+            [recipient_email],
+            fail_silently=False,
+        )
+        logger.info(f"Email sent successfully to {recipient_email}")
+        return f"Email sent to {recipient_email}"
+    except Exception as e:
+        logger.error(f"Failed to send email to {recipient_email}: {str(e)}")
+        raise

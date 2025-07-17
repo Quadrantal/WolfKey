@@ -1,2 +1,3 @@
 web: gunicorn student_forum.wsgi --log-file -
-worker: python forum/services/webscraper_worker.py
+worker: celery -A student_forum worker --loglevel=info --concurrency=3
+beat: celery -A student_forum beat --loglevel=info

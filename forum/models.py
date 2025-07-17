@@ -11,6 +11,9 @@ from django.utils import timezone
 import base64
 from django.conf import settings
 from cryptography.fernet import Fernet
+import logging
+
+logger = logging.getLogger(__name__)
 
 class UserManager(BaseUserManager):
     def create_user(self, school_email, first_name, last_name, password=None, **extra_fields):
@@ -343,6 +346,7 @@ class UserProfile(models.Model):
     def get_decrypted_wolfnet_password(self):
         """Get the decrypted WolfNet password for use in web scraping"""
         from .forms import WolfNetSettingsForm
+        logger.info(f"Wolfnet password encrypted: {self.wolfnet_password}")
         return WolfNetSettingsForm.decrypt_password(self.wolfnet_password)
     
     def save(self, *args, **kwargs):

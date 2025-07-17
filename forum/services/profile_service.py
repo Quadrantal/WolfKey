@@ -110,8 +110,9 @@ def update_wolfnet_settings(request, profile_user):
         # Otherwise, update the password
         wolfnet_password = request.POST.get('wolfnet_password', '').strip()
         if wolfnet_password:
-            # TODO: Add password encryption here before storing
-            profile_user.userprofile.wolfnet_password = wolfnet_password
+            from forum.forms import WolfNetSettingsForm
+            encrypted_password = WolfNetSettingsForm().encrypt_password(wolfnet_password)
+            profile_user.userprofile.wolfnet_password = encrypted_password
             profile_user.userprofile.save()
             return True, 'WolfNet settings updated successfully! Grade notifications and schedule integration are now enabled.'
         else:

@@ -18,7 +18,9 @@ from django.core.exceptions import ValidationError
 from django.contrib.auth.hashers import make_password, check_password
 from cryptography.fernet import Fernet
 import base64
+import logging
 
+logger = logging.getLogger(__name__)
 
 class MultipleFileInput(forms.ClearableFileInput):
     allow_multiple_selected = True
@@ -135,22 +137,32 @@ class WolfNetSettingsForm(forms.ModelForm):
     def encrypt_password(self, password):
         """Encrypt the password using Fernet encryption"""
         # Generate a key from Django's SECRET_KEY
-        key = base64.urlsafe_b64encode(settings.SECRET_KEY[:32].encode())
+        key = settings.FERNET_KEY.encode()
         f = Fernet(key)
+        print(f"Encrpyt Key: {key}")
+
         encrypted_password = f.encrypt(password.encode())
+        print(f"Encrypted password at start: {encrypted_password}")
+
         return encrypted_password.decode()
     
     @staticmethod
     def decrypt_password(encrypted_password):
         """Decrypt the password for use in web scraping"""
         if not encrypted_password:
+            logger.error("No encrypted password passed")
             return None
         try:
-            key = base64.urlsafe_b64encode(settings.SECRET_KEY[:32].encode())
+            key = settings.FERNET_KEY.encode()
+            logger.info(f"Key: {key}")
+            logger.info(f"Encrypted password: {encrypted_password}")
             f = Fernet(key)
             decrypted_password = f.decrypt(encrypted_password.encode())
+            logger.info(f"Decrypted password: {decrypted_password.decode()}")
             return decrypted_password.decode()
-        except Exception:
+        except Exception as e:
+            import traceback
+            logger.error(f"Exception during decryption: {e}\n{traceback.format_exc()}")
             return None
 
 
