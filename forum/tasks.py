@@ -1,5 +1,5 @@
 from celery import shared_task
-from forum.models import User
+from forum.models import User, GradebookSnapshot
 import logging
 import time
 import re
@@ -87,10 +87,20 @@ def check_user_grades_core(user_email):
         wait.until(EC.presence_of_all_elements_located((By.CSS_SELECTOR, ".collapse")))
         course_divs = driver.find_elements(By.CSS_SELECTOR, ".collapse")
         section_ids = []
+        section_id_to_course_name = {}
         for div in course_divs:
             div_id = div.get_attribute("id")
             if div_id and div_id.startswith("course"):
-                section_ids.append(div_id.replace("course", ""))
+                sid = div_id.replace("course", "")
+                section_ids.append(sid)
+                try:
+                    parent = div.find_element(By.XPATH, "..")
+                    a_tag = parent.find_element(By.TAG_NAME, "a")
+                    h3 = a_tag.find_element(By.TAG_NAME, "h3")
+                    course_name = h3.text.strip()
+                except Exception:
+                    course_name = "Unknown Course"
+                section_id_to_course_name[sid] = course_name
 
         logger.info(f"Section IDs for {user_email}: {section_ids}")
 
@@ -113,8 +123,8 @@ def check_user_grades_core(user_email):
         }
 
         # For each sectionId, get markingPeriodId and then hydrategradebook JSON
-        from forum.models import GradebookSnapshot
         user_obj = User.objects.get(school_email=user_email)
+
         for section_id in section_ids:
             # Get marking periods
             mp_url = f"https://wpga.myschoolapp.com/api/datadirect/GradeBookMarkingPeriodList?sectionId={section_id}"
@@ -201,7 +211,7 @@ def check_user_grades_core(user_email):
                                 
                                 if has_proficiency:
                                     # Use first non-empty proficiency
-                                    prof_list = [f"{s.get('skill_name')}: {s.get('rating_desc')}" for s in prof_skills]
+                                    prof_list = [f"<strong>{s.get('skill_name')}:</strong> {s.get('rating_desc')}" for s in prof_skills]
                                     grade_info = "\n".join(prof_list)
                                 else:
                                     # Use percentage
@@ -212,7 +222,7 @@ def check_user_grades_core(user_email):
                                             percent = round((points_earned / max_points) * 100, 2)
                                         except Exception:
                                             percent = None
-                                        grade_info = f"\n Grade: {points_earned}/{max_points} ({percent}%)" if percent is not None else f"Grade: {points_earned}/{max_points}"
+                                        grade_info = f"\n <strong>Grade:</strong> {points_earned}/{max_points} ({percent}%)" if percent is not None else f"Grade: {points_earned}/{max_points}"
                                     else:
                                         grade_info = "Grade information not available."
 
@@ -227,17 +237,28 @@ def check_user_grades_core(user_email):
                                 elif change["type"] == "comment_changed":
                                     message = f"Comment for assignment '{assignment_name}' was updated. {grade_info} \nComment: {assignment.get('comment')}"
                                 
-                                email_subject = "WolfKey Grade Update"
-                                email_message = f"Hello {recipient.get_full_name()},\n\n{message}\n\nBest regards,\nWolfKey Team"
+                                # Get course name for this section
+                                course_name = section_id_to_course_name.get(str(section_id), "Unknown Course")
+                                email_subject = f"WolfKey Grade Update: {course_name}"
+                                # HTML email body
+                                email_message = f"""
+                                    <html>
+                                    <body>
+                                        <h2>Course: {course_name}</h2>
+                                        <p>Hello {recipient.get_full_name()},</p>
+                                        <p>{message.replace(chr(10), '<br>')}</p>
+                                        <br>
+                                        <p>Best regards,<br>WolfKey Team</p>
+                                    </body>
+                                    </html>
+                                """
                                 logger.info(f"Sending grade update notification to {recipient.personal_email}: {message}")
-                                
                                 # Use the new email task for sending emails
                                 send_email_notification.delay(
                                     recipient.personal_email,
                                     email_subject,
                                     email_message
                                 )
-                                
                                 # Send in-app notification without email
                                 from forum.services.notification_services import send_notification_service
                                 send_notification_service(
@@ -313,6 +334,7 @@ def send_email_notification(recipient_email, subject, message):
             settings.DEFAULT_FROM_EMAIL,
             [recipient_email],
             fail_silently=False,
+            html_message=message
         )
         logger.info(f"Email sent successfully to {recipient_email}")
         return f"Email sent to {recipient_email}"
