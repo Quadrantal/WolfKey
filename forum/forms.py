@@ -139,10 +139,8 @@ class WolfNetSettingsForm(forms.ModelForm):
         # Generate a key from Django's SECRET_KEY
         key = settings.FERNET_KEY.encode()
         f = Fernet(key)
-        print(f"Encrpyt Key: {key}")
 
         encrypted_password = f.encrypt(password.encode())
-        print(f"Encrypted password at start: {encrypted_password}")
 
         return encrypted_password.decode()
     
@@ -154,11 +152,8 @@ class WolfNetSettingsForm(forms.ModelForm):
             return None
         try:
             key = settings.FERNET_KEY.encode()
-            logger.info(f"Key: {key}")
-            logger.info(f"Encrypted password: {encrypted_password}")
             f = Fernet(key)
             decrypted_password = f.decrypt(encrypted_password.encode())
-            logger.info(f"Decrypted password: {decrypted_password.decode()}")
             return decrypted_password.decode()
         except Exception as e:
             import traceback
