@@ -81,6 +81,7 @@ def check_user_grades_core(user_email):
             stay_signed_in_btn.click()
         except Exception:
             pass  # If not present, continue
+
         time.sleep(7)
 
         # Wait for courses to load
@@ -90,7 +91,8 @@ def check_user_grades_core(user_email):
         section_id_to_course_name = {}
         for div in course_divs:
             div_id = div.get_attribute("id")
-            if div_id and div_id.startswith("course"):
+            # Only process divs whose IDs match 'course' followed by digits (e.g., 'course114310942')
+            if div_id and re.match(r"^course\d+$", div_id):
                 sid = div_id.replace("course", "")
                 section_ids.append(sid)
                 try:
@@ -165,7 +167,7 @@ def check_user_grades_core(user_email):
                                         for s in a.get("AssignmentSkillList", [])
                                     ]
                                 })
-                        logger.info(f"Recent assignments for {user_email}: {assignments[-3:] if assignments else 'None'}")
+                        # logger.info(f"Recent assignments for {user_email}: {assignments[-1:] if assignments else 'None'}")
                         # Fetch AssignmentPerformanceStudent JSON for assignment names
                         aps_url = (
                             f"https://wpga.myschoolapp.com/api/gradebook/AssignmentPerformanceStudent?"
