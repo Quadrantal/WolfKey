@@ -10,6 +10,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 import requests
 from django.utils.html import strip_tags
+from django.http import HttpRequest
 import django
 
 logger = logging.getLogger(__name__)
@@ -42,21 +43,15 @@ def compare_assignments(old_assignments, new_assignments):
             changes.append({"type": "comment_changed", "assignment": new_a})
     return changes
 
-def check_user_grades_core(user_email):
-    """Core grade checking logic using Selenium"""
-    logger.info(f"Starting grade check for user: {user_email}")
+def login_to_wolfnet(user_email, driver, wait):
+    """Log into WolfNet and return the authenticated driver"""
     LOGIN_URL = "https://wpga.myschoolapp.com/"
     
     PASSWORD = get_decrypted_wolfnet_password(user_email)
     if not PASSWORD:
-        logger.error(f"No Wolfnet password found for {user_email}. Skipping grade check.")
-        return
-    chrome_options = Options()
-    chrome_options.add_argument("--no-sandbox")
-    chrome_options.add_argument("--disable-dev-shm-usage")
-    driver = webdriver.Chrome(options=chrome_options)
-    wait = WebDriverWait(driver, 20)
-
+        logger.error(f"No Wolfnet password found for {user_email}. Cannot login.")
+        return False
+    
     try:
         logger.info(f"Navigating to login page for {user_email}")
         driver.get(LOGIN_URL)
@@ -83,6 +78,27 @@ def check_user_grades_core(user_email):
             pass  # If not present, continue
 
         time.sleep(7)
+        logger.info(f"Successfully logged in for {user_email}")
+        return True
+    except Exception as e:
+        logger.error(f"Failed to login for {user_email}: {str(e)}")
+        return False
+
+def check_user_grades_core(user_email):
+    """Core grade checking logic using Selenium"""
+    logger.info(f"Starting grade check for user: {user_email}")
+    LOGIN_URL = "https://wpga.myschoolapp.com/"
+    
+    chrome_options = Options()
+    chrome_options.add_argument("--no-sandbox")
+    chrome_options.add_argument("--disable-dev-shm-usage")
+    driver = webdriver.Chrome(options=chrome_options)
+    wait = WebDriverWait(driver, 20)
+
+    try:
+        # Use the new login function
+        if not login_to_wolfnet(user_email, driver, wait):
+            return
 
         # Wait for courses to load
         wait.until(EC.presence_of_all_elements_located((By.CSS_SELECTOR, ".collapse")))
@@ -121,7 +137,7 @@ def check_user_grades_core(user_email):
         headers = {
             "User-Agent": "Mozilla/5.0",
             "Accept": "application/json, text/javascript, */*; q=0.01",
-            "Referer": LOGIN_URL,
+            "Referer": "https://wpga.myschoolapp.com/",
         }
 
         # For each sectionId, get markingPeriodId and then hydrategradebook JSON
@@ -343,3 +359,128 @@ def send_email_notification(recipient_email, subject, message):
     except Exception as e:
         logger.error(f"Failed to send email to {recipient_email}: {str(e)}")
         raise
+
+@shared_task
+def auto_complete_courses(user_email):
+    """
+    Auto-complete courses from WolfNet schedule for a user
+    """
+    logger.info(f"Starting auto-complete courses for user: {user_email}")
+    
+    chrome_options = Options()
+    chrome_options.add_argument("--no-sandbox")
+    chrome_options.add_argument("--disable-dev-shm-usage")
+    driver = webdriver.Chrome(options=chrome_options)
+    wait = WebDriverWait(driver, 20)
+
+    try:
+        # Use the login function
+        if not login_to_wolfnet(user_email, driver, wait):
+            return {"success": False, "error": "Failed to login to WolfNet"}
+
+        # Wait for the page to load and find the first .subnav-multicol element
+        wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, ".subnav-multicol")))
+        subnav_elements = driver.find_elements(By.CSS_SELECTOR, ".subnav-multicol")
+        
+        if not subnav_elements:
+            logger.error(f"No .subnav-multicol elements found for {user_email}")
+            return {"success": False, "error": "No course navigation found"}
+        
+        # Take the first .subnav-multicol element
+        subnav = subnav_elements[0]
+        
+        # Find all span.multi.title elements in the subnav
+        title_spans = subnav.find_elements(By.CSS_SELECTOR, "span.multi.title")
+        logger.info(f"Found {len(title_spans)} span.multi.title elements")
+
+        courses_data = {}
+        for title_span in title_spans:
+            try:
+                # Try multiple ways to get the text
+                text_direct = title_span.text.strip()
+                text_inner = title_span.get_attribute('innerText').strip() if title_span.get_attribute('innerText') else ''
+                text_content = title_span.get_attribute('textContent').strip() if title_span.get_attribute('textContent') else ''
+                logger.info(f"Title span outer HTML: {title_span.get_attribute('outerHTML')}")
+                logger.info(f"Title span .text: '{text_direct}' | innerText: '{text_inner}' | textContent: '{text_content}'")
+
+                # Use the first non-empty value
+                course_text = text_direct or text_inner or text_content
+
+                # Only process if it matches the block course pattern
+                if " (" in course_text and course_text.endswith(")"):
+                    block_match = re.search(r'\(([^)]+)\)$', course_text)
+                    logger.info(block_match)
+                    if block_match:
+                        block = block_match.group(1)
+                        course_name_part = course_text.split(" (", 1)[0]
+                        if " - " in course_name_part:
+                            course_name = course_name_part.split(" - ", 1)[0].strip()
+                        else:
+                            course_name = course_name_part.strip()
+                        logger.info(block)
+                        logger.info(course_name)
+                        if re.match(r'^[12][A-E]|Flex\d*$', block):
+                            if block.startswith("Flex"):
+                                continue  # Skip flex blocks
+                            courses_data[block] = {
+                                "name": course_name,
+                                "block": block,
+                                "raw_text": course_text
+                            }
+                            logger.info(f"Found course for {user_email}: {course_name} in block {block}")
+            except Exception as e:
+                logger.warning(f"Error parsing span.multi.title for {user_email}: {str(e)}")
+                continue
+        logger.info(f"Found {len(courses_data)} courses for {user_email}: {courses_data}")
+        
+        # Now search for each course in our database using course_search
+        matched_courses = {}
+        
+        for block, course_info in courses_data.items():
+            course_name = course_info["name"]
+            
+            # Create a mock request object for course_search
+            mock_request = type('MockRequest', (), {
+                'GET': {'q': course_name},
+                'method': 'GET'
+            })()
+            
+            try:
+                # Import course_search function locally to avoid circular imports
+                from forum.services.course_services import course_search
+                
+                # Use the course_search function to find matching courses
+                search_response = course_search(mock_request)
+                search_data = search_response.content.decode('utf-8')
+                import json
+                courses = json.loads(search_data)
+                
+                if courses:
+                    # Take the first (best) match
+                    best_match = courses[0]
+                    matched_courses[block] = {
+                        "id": best_match["id"],
+                        "name": best_match["name"],
+                        "category": best_match["category"],
+                        "experienced_count": best_match["experienced_count"]
+                    }
+                    logger.info(f"Matched {course_name} to {best_match['name']} for block {block}")
+                else:
+                    logger.warning(f"No match found for course: {course_name} in block {block}")
+                    
+            except Exception as e:
+                logger.error(f"Error searching for course {course_name}: {str(e)}")
+                continue
+        
+        return {
+            "success": True, 
+            "courses": matched_courses,
+            "raw_data": courses_data
+        }
+        
+    except Exception as e:
+        logger.error(f"Error in auto_complete_courses for {user_email}: {str(e)}")
+        return {"success": False, "error": str(e)}
+    finally:
+        driver.quit()
+        logger.info(f"Auto-complete courses completed for {user_email}")

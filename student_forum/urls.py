@@ -60,7 +60,8 @@ from forum.views.profile_views import (
     my_profile,
     profile_view,
     update_courses,
-    upload_profile_picture
+    upload_profile_picture,
+    auto_complete_courses_view
 )
 from forum.services.course_services import (
     course_search
@@ -164,6 +165,7 @@ urlpatterns = [
     path('my-profile/', my_profile, name='my_profile'),
     path('profile/<str:username>/', profile_view, name='profile'),
     path('update-courses/', update_courses, name='update_courses'),
+    path('auto-complete-courses/', auto_complete_courses_view, name='auto_complete_courses'),
     
     # Course management URLs
     path('courses/experience/add/', add_experience, name='add_experience'),

@@ -3,7 +3,10 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib import messages
 from django.core.exceptions import ObjectDoesNotExist
 from django.http import Http404, JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_POST
 import json
+import logging
 from forum.models import ( 
     UserProfile
 )
@@ -26,6 +29,11 @@ from forum.services.profile_service import (
     remove_user_experience,
     remove_user_help_request,
 )
+
+# Import the auto-complete task
+from forum.tasks import auto_complete_courses
+logger = logging.getLogger(__name__)
+
 
 @login_required
 def profile_view(request, username):
@@ -102,3 +110,33 @@ def update_courses(request):
             messages.error(request, msg)
         return redirect('profile', username=request.user.username)
     return redirect('profile', username=request.user.username)
+
+@login_required
+@require_POST
+def auto_complete_courses_view(request):
+    """
+    View to trigger auto-completion of courses from WolfNet
+    """
+    try:
+        # Check if user has wolfnet password configured
+        if not request.user.userprofile.wolfnet_password:
+            return JsonResponse({
+                'success': False, 
+                'error': 'WolfNet password not configured. Please set up your WolfNet credentials in preferences.'
+            })
+        
+        # Start the auto-complete task
+        task = auto_complete_courses.delay(request.user.school_email)
+        
+        # Get the result (this will wait for completion)
+        result = task.get(timeout=30)  # 2 minute timeout
+
+        logger.info(result)
+        
+        return JsonResponse(result)
+        
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'error': f'An error occurred: {str(e)}'
+        })

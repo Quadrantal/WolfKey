@@ -230,8 +230,13 @@
 
                         <!-- Block Courses Section -->
                         <div class="card mb-4">
-                            <div class="card-header">
+                            <div class="card-header d-flex justify-content-between align-items-center">
                                 <h5 class="mb-0">Fill in your schedule info</h5>
+                                {% if user == profile_user and user.userprofile.wolfnet_password %}
+                                <button type="button" class="btn btn-info btn-sm" id="autoCompleteBtn">
+                                    <i class="fas fa-magic"></i> Auto-Complete from WolfNet
+                                </button>
+                                {% endif %}
                             </div>
                             <div class="card-body">
                                 <form method="post" action="{% url 'update_courses' %}" id="blockCoursesForm">
@@ -485,6 +490,96 @@
 {% endblock %}
 
 {% block scripts %}
+<script>
+    // General function to update the block buttons container
+    window.updateBlockButtons = function(blockId, course, experiencedCourses, helpNeededCourses) {
+        const buttonsContainer = document.getElementById(`${blockId}_buttons`);
+        if (!buttonsContainer) return;
+        if (course) {
+            if (experiencedCourses.includes(course.id) || helpNeededCourses.includes(course.id)) {
+                buttonsContainer.style.display = 'none';
+            } else {
+                buttonsContainer.style.display = 'flex';
+            }
+        } else {
+            buttonsContainer.style.display = 'none';
+        }
+    }
+</script>
+<!-- Auto Complete Courses Handler -->
+{% if user == profile_user and user.userprofile.wolfnet_password %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const autoCompleteBtn = document.getElementById('autoCompleteBtn');
+        if (autoCompleteBtn) {
+            autoCompleteBtn.addEventListener('click', async function() {
+                // Disable button and show loading state
+                autoCompleteBtn.disabled = true;
+                autoCompleteBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Loading...';
+                
+                try {
+                    const response = await fetch('{% url "auto_complete_courses" %}', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                        }
+                    });
+                    
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        // Update course selectors with the fetched data
+                        updateCourseSelectors(data.courses);
+                        alert('Courses auto-completed successfully!');
+                    } else {
+                        alert('Error: ' + (data.error || 'Failed to auto-complete courses'));
+                    }
+                } catch (error) {
+                    console.error('Error:', error);
+                    alert('Network error occurred while auto-completing courses');
+                } finally {
+                    // Re-enable button
+                    autoCompleteBtn.disabled = false;
+                    autoCompleteBtn.innerHTML = '<i class="fas fa-magic"></i> Auto-Complete from WolfNet';
+                }
+            });
+        }
+    });
+    
+    function updateCourseSelectors(courses) {
+        const blocks = ['1A', '1B', '1D', '1E', '2A', '2B', '2C', '2D', '2E'];
+        
+        blocks.forEach(block => {
+            const course = courses[block];
+            if (course) {
+                // Find the course selector instance for this block
+                const blockId = `block_${block}`;
+                const selector = window.courseSelectors && window.courseSelectors[blockId];
+                
+                if (selector) {
+                    try {
+                        // Clear existing selection and add the new course
+                        selector.selectedCourses = [course];
+                        selector.updateSelectedCourses();
+                        selector.updateFormData();
+                        
+                        // Also update the buttons visibility using the general function
+                        const experiencedCourses = JSON.parse('{{ experienced_courses_json|escapejs }}');
+                        const helpNeededCourses = JSON.parse('{{ help_needed_courses_json|escapejs }}');
+                        window.updateBlockButtons(blockId, course, experiencedCourses, helpNeededCourses);
+                    } catch (error) {
+                        console.error(`Error updating selector for block ${block}:`, error);
+                    }
+                } else {
+                    console.warn(`Course selector not found for block ${block}`);
+                }
+            }
+        });
+    }
+</script>
+{% endif %}
+
 <!-- Compare Schedules Button Handler -->
 {% if can_compare %}
 <script>
@@ -684,31 +779,22 @@
 <!-- Course Selector Initialization -->
 <script type="module">
     import { CourseSelector } from '{% static "forum/js/course-selector.js" %}';
-
     
     document.addEventListener('DOMContentLoaded', () => {
         const initialCourses = JSON.parse('{{ initial_courses_json|escapejs }}');
         const experiencedCourses = JSON.parse('{{ experienced_courses_json|escapejs }}');
         const helpNeededCourses = JSON.parse('{{ help_needed_courses_json|escapejs }}');        const blocks = ['1A', '1B', '1D', '1E', '2A', '2B', '2C', '2D', '2E'];
 
+        // Store course selectors globally for auto-complete function
+        window.courseSelectors = {};
+
         blocks.forEach(block => {
             const blockId = `block_${block}`;
             const course = initialCourses[blockId];
 
-            // Show the button container initially
-            const buttonsContainer = document.getElementById(`${blockId}_buttons`);
-            if (buttonsContainer && course) {
-                buttonsContainer.style.display = 'flex';
-                // Check if the course is already in either the "Experienced" or "Help Needed" lists
-                if (experiencedCourses.includes(course.id) || helpNeededCourses.includes(course.id)) {
-                    // Hide buttons if the course is in one of the lists
-                    buttonsContainer.style.display = 'none';
-                }
-            }else if (!course) {
-                buttonsContainer.style.display = 'none';
-            }
+            updateBlockButtons(blockId, course, experiencedCourses, helpNeededCourses);
 
-            new CourseSelector({
+            const selector = new CourseSelector({
                 containerId: `${blockId}_selector`,
                 formName: 'blockCoursesForm',
                 maxCourses: 1,
@@ -719,6 +805,9 @@
                     buttonsContainer.style.display = selectedCourses.length > 0 ? 'flex' : 'none';
                 }
             });
+            
+            // Store the selector globally
+            window.courseSelectors[blockId] = selector;
         });
     });
     
