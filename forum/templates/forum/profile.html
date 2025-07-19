@@ -515,7 +515,7 @@
             autoCompleteBtn.addEventListener('click', async function() {
                 // Disable button and show loading state
                 autoCompleteBtn.disabled = true;
-                autoCompleteBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Loading...';
+                autoCompleteBtn.innerHTML = '<div class="loader"></div> Loading...';
                 
                 try {
                     const response = await fetch('{% url "auto_complete_courses" %}', {
