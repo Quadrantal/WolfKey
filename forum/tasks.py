@@ -75,11 +75,16 @@ def login_to_wolfnet(user_email, driver, wait):
             )
             stay_signed_in_btn.click()
         except Exception:
-            pass  # If not present, continue
+            pass
 
-        time.sleep(7)
-        logger.info(f"Successfully logged in for {user_email}")
-        return True
+        try:
+            wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "#activitiesContainer")))
+            time.sleep(1)
+            logger.info(f"Successfully logged in for {user_email}")
+            return True
+        except Exception as e:
+            logger.error(f"Post-login element not found for {user_email}: {str(e)}")
+            return False
     except Exception as e:
         logger.error(f"Failed to login for {user_email}: {str(e)}")
         return False
@@ -90,6 +95,7 @@ def check_user_grades_core(user_email):
     LOGIN_URL = "https://wpga.myschoolapp.com/"
     
     chrome_options = Options()
+    chrome_options.add_argument("--headless=new")
     chrome_options.add_argument("--no-sandbox")
     chrome_options.add_argument("--disable-dev-shm-usage")
     driver = webdriver.Chrome(options=chrome_options)
@@ -143,53 +149,84 @@ def check_user_grades_core(user_email):
         # For each sectionId, get markingPeriodId and then hydrategradebook JSON
         user_obj = User.objects.get(school_email=user_email)
 
-        for section_id in section_ids:
-            # Get marking periods
-            mp_url = f"https://wpga.myschoolapp.com/api/datadirect/GradeBookMarkingPeriodList?sectionId={section_id}"
-            mp_resp = requests.get(mp_url, cookies=cookies, headers=headers)
-            if mp_resp.status_code == 200:
-                mp_json = mp_resp.json()
-                for mp in mp_json:
-                    marking_period_id = mp.get("MarkingPeriodId")
-                    # Get hydrategradebook JSON
-                    hydrate_url = (
-                        f"https://wpga.myschoolapp.com/api/gradebook/hydrategradebook?"
-                        f"sectionId={section_id}&markingPeriodId={marking_period_id}"
-                        f"&sortAssignmentId=null&sortSkillPk=null&sortDesc=null&sortCumulative=null"
-                        f"&studentUserId={student_id}&fromProgress=true"
-                    )
-                    hydrate_resp = requests.get(hydrate_url, cookies=cookies, headers=headers)
-                    if hydrate_resp.status_code == 200:
-                        hydrate_json = hydrate_resp.json()
-                        assignments = []
-                        roster = hydrate_json.get("Roster", [])
-                        if roster:
-                            for a in roster[0].get("AssignmentGrades", []):
-                                assignments.append({
-                                    "assignment_id": a.get("AssignmentId"),
-                                    "name": a.get("AssignmentType", "").strip(),
-                                    "points_earned": a.get("PointsEarned"),
-                                    "max_points": a.get("MaxPoints"),
-                                    "comment": a.get("Comment", "").strip(),
-                                    "assignment_type": a.get("AssignmentType", "").strip(),
-                                    "assignment_type_id": a.get("AssignmentTypeId"),
-                                    "skills": [
-                                        {
-                                            "skill_id": s.get("SkillId"),
-                                            "skill_name": s.get("SkillName"),
-                                            "rating": s.get("Rating"),
-                                            "rating_desc": s.get("RatingDesc")
-                                        }
-                                        for s in a.get("AssignmentSkillList", [])
-                                    ]
-                                })
-                        # logger.info(f"Recent assignments for {user_email}: {assignments[-1:] if assignments else 'None'}")
+        # Get marking periods once (using the first section_id)
+        marking_period_id = None
+        if section_ids:
+            first_section_id = section_ids[0]
+            snapshot_qs = GradebookSnapshot.objects.filter(
+                user=user_obj,
+                section_id=first_section_id
+            ).order_by('-timestamp')
+            if snapshot_qs.exists():
+                snapshot = snapshot_qs.first()
+                mpid = getattr(snapshot, 'marking_period_id', None)
+                if mpid:
+                    marking_period_id = mpid
+            # If not found, fetch from API
+            if not marking_period_id:
+                mp_url = f"https://wpga.myschoolapp.com/api/datadirect/GradeBookMarkingPeriodList?sectionId={first_section_id}"
+                mp_resp = requests.get(mp_url, cookies=cookies, headers=headers)
+                if mp_resp.status_code == 200:
+                    mp_json = mp_resp.json()
+                    if mp_json:
+                        marking_period_id = mp_json[0].get("MarkingPeriodId")
+        if not marking_period_id:
+            logger.error(f"Could not fetch marking period id for {user_email}")
+            return
+
+        # Collect all email messages for all courses
+        all_email_messages = []
+        recipient = user_obj
+        sender = user_obj
+        notification_type = "grade_update"
+        
+        # Process sections asynchronously
+        import asyncio
+        import concurrent.futures
+        
+        def process_section(section_id):
+            """Process a single section synchronously with timeout and better error handling"""
+            section_messages = []
+            
+            try:
+                hydrate_url = (
+                    f"https://wpga.myschoolapp.com/api/gradebook/hydrategradebook?"
+                    f"sectionId={section_id}&markingPeriodId={marking_period_id}"
+                    f"&sortAssignmentId=null&sortSkillPk=null&sortDesc=null&sortCumulative=null"
+                    f"&studentUserId={student_id}&fromProgress=true"
+                )
+                # Add timeout to prevent hanging requests
+                hydrate_resp = requests.get(hydrate_url, cookies=cookies, headers=headers, timeout=30)
+                if hydrate_resp.status_code == 200:
+                    hydrate_json = hydrate_resp.json()
+                    assignments = []
+                    roster = hydrate_json.get("Roster", [])
+                    if roster:
+                        for a in roster[0].get("AssignmentGrades", []):
+                            assignments.append({
+                                "assignment_id": a.get("AssignmentId"),
+                                "name": a.get("AssignmentType", "").strip(),
+                                "points_earned": a.get("PointsEarned"),
+                                "max_points": a.get("MaxPoints"),
+                                "comment": a.get("Comment", "").strip(),
+                                "assignment_type": a.get("AssignmentType", "").strip(),
+                                "assignment_type_id": a.get("AssignmentTypeId"),
+                                "skills": [
+                                    {
+                                        "skill_id": s.get("SkillId"),
+                                        "skill_name": s.get("SkillName"),
+                                        "rating": s.get("Rating"),
+                                        "rating_desc": s.get("RatingDesc")
+                                    }
+                                    for s in a.get("AssignmentSkillList", [])
+                                ]
+                            })
                         # Fetch AssignmentPerformanceStudent JSON for assignment names
                         aps_url = (
                             f"https://wpga.myschoolapp.com/api/gradebook/AssignmentPerformanceStudent?"
                             f"sectionId={section_id}&markingPeriodId={marking_period_id}&studentId={student_id}"
                         )
-                        aps_resp = requests.get(aps_url, cookies=cookies, headers=headers)
+                        aps_resp = requests.get(aps_url, cookies=cookies, headers=headers, timeout=30)
                         assignment_names = {}
                         if aps_resp.status_code == 200:
                             aps_json = aps_resp.json()
@@ -211,28 +248,20 @@ def check_user_grades_core(user_email):
                             old_assignments = snapshot.json_data
                             changes = compare_assignments(old_assignments, assignments)
                             logger.info(f"Changes for {user_email} - section {section_id}, marking period {marking_period_id}: {len(changes)} changes found")
-                            
+
+                            course_name = section_id_to_course_name.get(str(section_id), "Unknown Course")
                             for change in changes:
                                 logger.info(f"Processing change for {user_email}: {change}")
-                                # Send notification for new/changed grade
                                 assignment = change["assignment"]
-                                recipient = user_obj
-                                sender = user_obj  # System or self
-                                notification_type = "grade_update"
                                 assignment_id = assignment.get("assignment_id")
                                 assignment_name = strip_tags(assignment_names.get(assignment_id) or assignment.get("name") or assignment.get("assignment_type"))
-                                
-                                # Determine grading system
                                 skills = assignment.get("skills", [])
                                 prof_skills = [s for s in skills if s.get("rating_desc", "")]
                                 has_proficiency = bool(prof_skills)
-                                
                                 if has_proficiency:
-                                    # Use first non-empty proficiency
                                     prof_list = [f"<strong>{s.get('skill_name')}:</strong> {s.get('rating_desc')}" for s in prof_skills]
-                                    grade_info = "\n".join(prof_list)
+                                    grade_info = "<br>".join(prof_list)
                                 else:
-                                    # Use percentage
                                     points_earned = assignment.get("points_earned")
                                     max_points = assignment.get("max_points")
                                     if points_earned is not None and max_points:
@@ -240,53 +269,34 @@ def check_user_grades_core(user_email):
                                             percent = round((points_earned / max_points) * 100, 2)
                                         except Exception:
                                             percent = None
-                                        grade_info = f"\n <strong>Grade:</strong> {points_earned}/{max_points} ({percent}%)" if percent is not None else f"Grade: {points_earned}/{max_points}"
+                                        grade_info = f"<br><strong>Grade:</strong> {points_earned}/{max_points} ({percent}%)" if percent is not None else f"Grade: {points_earned}/{max_points}"
                                     else:
                                         grade_info = "Grade information not available."
 
-                                message = f"Your assignment '{assignment_name}' was graded or updated. \n{grade_info}"
+                                message = f"<h3>{assignment_name} ({course_name}): </h3><br>"
                                 if change["type"] == "new":
-                                    message = f"New assignment '{assignment_name}' has been graded. \n{grade_info} \nComment: {assignment.get('comment')}"
+                                    message += f"New assignment graded.<br>{grade_info}<br>Comment: {assignment.get('comment')}"
                                 elif change["type"] == "skill_changed":
                                     skill = change["skill"]
-                                    message = f"Competency '{skill.get('skill_name')}' for assignment '{assignment_name}' was updated to '{skill.get('rating_desc')}'. {grade_info}"
+                                    message += f"Competency '<strong>{skill.get('skill_name')}</strong>' updated to '<strong>{skill.get('rating_desc')}</strong>'. {grade_info}"
                                 elif change["type"] == "points_changed":
-                                    message = f"Points for assignment '{assignment_name}' changed to {assignment.get('points_earned')}/{assignment.get('max_points')}. {grade_info}"
+                                    message += f"Points changed to {assignment.get('points_earned')}/{assignment.get('max_points')}. {grade_info}"
                                 elif change["type"] == "comment_changed":
-                                    message = f"Comment for assignment '{assignment_name}' was updated. {grade_info} \nComment: {assignment.get('comment')}"
-                                
-                                # Get course name for this section
-                                course_name = section_id_to_course_name.get(str(section_id), "Unknown Course")
-                                email_subject = f"WolfKey Grade Update: {course_name}"
-                                # HTML email body
-                                email_message = f"""
-                                    <html>
-                                    <body>
-                                        <h2>Course: {course_name}</h2>
-                                        <p>Hello {recipient.get_full_name()},</p>
-                                        <p>{message.replace(chr(10), '<br>')}</p>
-                                        <br>
-                                        <p>Best regards,<br>WolfKey Team</p>
-                                    </body>
-                                    </html>
-                                """
-                                logger.info(f"Sending grade update notification to {recipient.personal_email}: {message}")
-                                # Use the new email task for sending emails
-                                send_email_notification.delay(
-                                    recipient.personal_email,
-                                    email_subject,
-                                    email_message
-                                )
-                                # Send in-app notification without email
+                                    message += f"Comment updated.<br>{grade_info}<br>Comment: {assignment.get('comment')}"
+                                else:
+                                    message += f"Graded or updated.<br>{grade_info}"
+
+                                section_messages.append(message)
+
+                                # Send in-app notification (unchanged)
                                 from forum.services.notification_services import send_notification_service
                                 send_notification_service(
                                     recipient=recipient,
                                     sender=sender,
                                     notification_type=notification_type,
                                     message=message,
-                                    # Remove email parameters to avoid duplicate emails
                                 )
-                            
+
                             # Update snapshot
                             snapshot.json_data = assignments
                             snapshot.timestamp = django.utils.timezone.now()
@@ -300,18 +310,63 @@ def check_user_grades_core(user_email):
                                 json_data=assignments
                             )
                             logger.info(f"Created new snapshot for {user_email} - section {section_id}, marking period {marking_period_id}")
-                    else:
-                        logger.error(f"Failed to get hydrategradebook for {user_email} - section {section_id}, marking period {marking_period_id}")
-            else:
-                logger.error(f"Failed to get marking periods for {user_email} - section {section_id}")
+                else:
+                    logger.error(f"Failed to get hydrategradebook for {user_email} - section {section_id}, marking period {marking_period_id}")
+                
+            except requests.Timeout:
+                logger.error(f"Timeout while processing section {section_id} for {user_email}")
+            except Exception as e:
+                logger.error(f"Error processing section {section_id} for {user_email}: {str(e)}")
+                import traceback
+                logger.error(f"Full traceback: {traceback.format_exc()}")
+            
+            return section_messages
+        
+        # Process all sections in parallel using ThreadPoolExecutor with limited concurrency
+        # Reduced max_workers to prevent memory issues with multiple Chrome instances
+        with concurrent.futures.ThreadPoolExecutor(max_workers=2) as executor:
+            future_to_section = {executor.submit(process_section, section_id): section_id for section_id in section_ids}
+            
+            for future in concurrent.futures.as_completed(future_to_section):
+                section_id = future_to_section[future]
+                try:
+                    section_messages = future.result()
+                    if section_messages:
+                        all_email_messages.extend(section_messages)
+                except Exception as exc:
+                    logger.error(f"Section {section_id} generated an exception: {exc}")
+                    # Log more details about the exception
+                    import traceback
+                    logger.error(f"Full traceback for section {section_id}: {traceback.format_exc()}")
+
+        # Send one combined email for all changes in all courses
+        if all_email_messages:
+            email_subject = f"WolfKey Grade Update:"
+            email_body = f"""
+                <html>
+                <body>
+                    <h2>WolfKey Grade Updates</h2>
+                    <p>Hello {recipient.get_full_name()},</p>
+                    {''.join([f'<li>{msg}</li>' for msg in all_email_messages])}
+                    <br>
+                    <p>Best regards,<br>WolfKey Team</p>
+                </body>
+                </html>
+            """
+            logger.info(f"Sending combined grade update notification to {recipient.personal_email}: {all_email_messages}")
+            send_email_notification.delay(
+                recipient.personal_email,
+                email_subject,
+                email_body
+            )
     finally:
         driver.quit()
         logger.info(f"Grade check completed for {user_email}")
 
-@shared_task
-def check_single_user_grades(user_email):
+@shared_task(bind=True, queue='low', routing_key='low.grades')
+def check_single_user_grades(self, user_email):
     """
-    Check grades for a single user
+    Check grades for a single user - low priority background task
     """
     try:
         return check_user_grades_core(user_email)
@@ -319,10 +374,10 @@ def check_single_user_grades(user_email):
         logger.error(f"Error checking grades for {user_email}: {str(e)}")
         raise
 
-@shared_task
-def check_all_user_grades():
+@shared_task(bind=True, queue='low', routing_key='low.batch_grades')
+def check_all_user_grades(self):
     """
-    Schedule grade checking for all users in parallel
+    Schedule grade checking for all users in parallel - low priority batch job
     """
     users = User.objects.all()
     logger.info(f"Starting grade check for {users.count()} users")
@@ -337,10 +392,10 @@ def check_all_user_grades():
     logger.info(f"Scheduled {len(job_ids)} grade checking tasks")
     return {"scheduled_tasks": len(job_ids), "task_ids": job_ids}
 
-@shared_task
-def send_email_notification(recipient_email, subject, message):
+@shared_task(bind=True, queue='default', routing_key='default.email')
+def send_email_notification(self, recipient_email, subject, message):
     """
-    Send email notification - separate task for email queue
+    Send email notification - default priority task
     """
     from django.core.mail import send_mail
     from django.conf import settings
@@ -360,14 +415,15 @@ def send_email_notification(recipient_email, subject, message):
         logger.error(f"Failed to send email to {recipient_email}: {str(e)}")
         raise
 
-@shared_task
-def auto_complete_courses(user_email):
+@shared_task(bind=True, queue='high', routing_key='high.auto')
+def auto_complete_courses(self, user_email):
     """
-    Auto-complete courses from WolfNet schedule for a user
+    Auto-complete courses from WolfNet schedule for a user - high priority interactive task
     """
     logger.info(f"Starting auto-complete courses for user: {user_email}")
     
     chrome_options = Options()
+    chrome_options.add_argument("--headless=new")
     chrome_options.add_argument("--no-sandbox")
     chrome_options.add_argument("--disable-dev-shm-usage")
     driver = webdriver.Chrome(options=chrome_options)
