@@ -232,8 +232,8 @@
                         <div class="card mb-4">
                             <div class="card-header d-flex justify-content-between align-items-center">
                                 <h5 class="mb-0">Fill in your schedule info</h5>
-                                {% if user == profile_user and user.userprofile.wolfnet_password %}
-                                <button type="button" class="btn btn-info btn-sm" id="autoCompleteBtn">
+                                {% if user == profile_user %}
+                                <button type="button" class="btn btn-info btn-sm" id="autoCompleteBtn" {% if not has_wolfnet_password %}disabled title = "Not connected to WolfNet Account. Add password under preferences tab"{% endif %}>
                                     <i class="fas fa-magic"></i> Auto-Complete from WolfNet
                                 </button>
                                 {% endif %}
@@ -809,23 +809,22 @@
             window.courseSelectors[blockId] = selector;
         });
     });
-    
-    // WolfNet functionality
-    function clearWolfNetPassword() {
-        if (confirm('Are you sure you want to clear your WolfNet password? This will disable grade notifications and schedule integration.')) {
-            const form = document.getElementById('wolfnetForm');
-            const passwordInput = document.getElementById('id_wolfnet_password');
-            passwordInput.value = '';
-            
-            // Create a hidden input to indicate we want to clear the password
-            const clearInput = document.createElement('input');
-            clearInput.type = 'hidden';
-            clearInput.name = 'clear_wolfnet_password';
-            clearInput.value = 'true';
-            form.appendChild(clearInput);
-            
-            form.submit();
-        }
+</script>
+
+<script>
+function clearWolfNetPassword() {
+    if (confirm('Are you sure you want to clear your WolfNet password? This will disable grade notifications and schedule integration.')) {
+        const form = document.getElementById('wolfnetForm');
+        const passwordInput = document.getElementById('id_wolfnet_password');
+        passwordInput.value = '';
+        // Create a hidden input to indicate we want to clear the password
+        const clearInput = document.createElement('input');
+        clearInput.type = 'hidden';
+        clearInput.name = 'clear_wolfnet_password';
+        clearInput.value = 'true';
+        form.appendChild(clearInput);
+        form.submit();
     }
+}
 </script>
 {% endblock %}

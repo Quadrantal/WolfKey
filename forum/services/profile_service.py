@@ -42,6 +42,7 @@ def get_profile_context(request, username):
         'experienced_courses_json': experienced_courses_json,
         'help_needed_courses_json': help_needed_courses_json,
         'initial_courses_json': initial_courses_json,
+        'has_wolfnet_password' : bool(profile_user.userprofile.wolfnet_password)
     }
     
     # Add comparison data if viewing someone else's profile

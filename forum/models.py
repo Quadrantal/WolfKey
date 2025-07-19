@@ -346,7 +346,6 @@ class UserProfile(models.Model):
     def get_decrypted_wolfnet_password(self):
         """Get the decrypted WolfNet password for use in web scraping"""
         from .forms import WolfNetSettingsForm
-        logger.info(f"Wolfnet password encrypted: {self.wolfnet_password}")
         return WolfNetSettingsForm.decrypt_password(self.wolfnet_password)
     
     def save(self, *args, **kwargs):

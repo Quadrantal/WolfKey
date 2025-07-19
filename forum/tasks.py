@@ -93,7 +93,20 @@ def check_user_grades_core(user_email):
     """Core grade checking logic using Selenium"""
     logger.info(f"Starting grade check for user: {user_email}")
     LOGIN_URL = "https://wpga.myschoolapp.com/"
-    
+
+    # Check if user has WolfNet password
+    user_obj = User.objects.get(school_email=user_email)
+    profile = getattr(user_obj, 'userprofile', None)
+    wolfnet_password = None
+    if profile:
+        wolfnet_password = profile.wolfnet_password
+    if not wolfnet_password:
+        logger.warning(f"User {user_email} does not have a WolfNet password. Skipping grade check.")
+        return {
+            "success": False,
+            "error": "No WolfNet password found. Please add your WolfNet password in your profile settings to enable grade checking."
+        }
+
     chrome_options = Options()
     chrome_options.add_argument("--headless=new")
     chrome_options.add_argument("--no-sandbox")
@@ -323,7 +336,6 @@ def check_user_grades_core(user_email):
             return section_messages
         
         # Process all sections in parallel using ThreadPoolExecutor with limited concurrency
-        # Reduced max_workers to prevent memory issues with multiple Chrome instances
         with concurrent.futures.ThreadPoolExecutor(max_workers=2) as executor:
             future_to_section = {executor.submit(process_section, section_id): section_id for section_id in section_ids}
             
@@ -447,7 +459,6 @@ def auto_complete_courses(self, user_email):
         
         # Find all span.multi.title elements in the subnav
         title_spans = subnav.find_elements(By.CSS_SELECTOR, "span.multi.title")
-        logger.info(f"Found {len(title_spans)} span.multi.title elements")
 
         courses_data = {}
         for title_span in title_spans:
@@ -456,8 +467,6 @@ def auto_complete_courses(self, user_email):
                 text_direct = title_span.text.strip()
                 text_inner = title_span.get_attribute('innerText').strip() if title_span.get_attribute('innerText') else ''
                 text_content = title_span.get_attribute('textContent').strip() if title_span.get_attribute('textContent') else ''
-                logger.info(f"Title span outer HTML: {title_span.get_attribute('outerHTML')}")
-                logger.info(f"Title span .text: '{text_direct}' | innerText: '{text_inner}' | textContent: '{text_content}'")
 
                 # Use the first non-empty value
                 course_text = text_direct or text_inner or text_content
@@ -465,7 +474,6 @@ def auto_complete_courses(self, user_email):
                 # Only process if it matches the block course pattern
                 if " (" in course_text and course_text.endswith(")"):
                     block_match = re.search(r'\(([^)]+)\)$', course_text)
-                    logger.info(block_match)
                     if block_match:
                         block = block_match.group(1)
                         course_name_part = course_text.split(" (", 1)[0]
@@ -473,8 +481,6 @@ def auto_complete_courses(self, user_email):
                             course_name = course_name_part.split(" - ", 1)[0].strip()
                         else:
                             course_name = course_name_part.strip()
-                        logger.info(block)
-                        logger.info(course_name)
                         if re.match(r'^[12][A-E]|Flex\d*$', block):
                             if block.startswith("Flex"):
                                 continue  # Skip flex blocks

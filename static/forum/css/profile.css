@@ -237,6 +237,7 @@ input[type="range"]::-webkit-slider-runnable-track {
     border: none !important;
     padding: .375rem .75rem;
     color: white;
+    z-index: 3;
 }
 
 #autoCompleteBtn .fa-magic {
@@ -250,4 +251,10 @@ input[type="range"]::-webkit-slider-runnable-track {
 #autoCompleteBtn:hover .fa-magic,
 #autoCompleteBtn:focus .fa-magic {
     transform: scale(1.25);
+}
+
+#autoCompleteBtn:disabled, #autoCompleteBtn:disabled .fa-magic {
+    background: grey;
+    color: #b5b5b5;
+    pointer-events: all;
 }
