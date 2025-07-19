@@ -257,7 +257,7 @@
 .loader::after {    
   content:"";
   grid-area: 1/1;
-  --c:no-repeat radial-gradient(farthest-side,#10cb32 92%,#0000);
+  --c:no-repeat radial-gradient(farthest-side,#ffffff 92%,#0000);
   background: 
     var(--c) 50%  0, 
     var(--c) 50%  100%, 
