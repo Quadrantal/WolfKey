@@ -531,7 +531,6 @@
                     if (data.success) {
                         // Update course selectors with the fetched data
                         updateCourseSelectors(data.courses);
-                        alert('Courses auto-completed successfully!');
                     } else {
                         alert('Error: ' + (data.error || 'Failed to auto-complete courses'));
                     }
