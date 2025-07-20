@@ -41,7 +41,7 @@ pip install -r requirements.txt
 
 **Terminal 1: Celery Worker**
 ```bash
-celery -A student_forum worker --loglevel=info
+celery -A student_forum worker --loglevel=info --concurrency=3 -Q high,default,low
 ```
 
 **Terminal 2: Celery Beat (Scheduler)**

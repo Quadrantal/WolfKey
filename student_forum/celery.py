@@ -33,4 +33,7 @@ app.conf.beat_schedule = {
     },
 }
 
+CELERY_TASK_SOFT_TIME_LIMIT = 60 
+CELERY_TASK_TIME_LIMIT = 120 
+
 app.conf.timezone = 'UTC'

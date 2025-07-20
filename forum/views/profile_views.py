@@ -129,7 +129,7 @@ def auto_complete_courses_view(request):
         task = auto_complete_courses.delay(request.user.school_email)
         
         # Get the result (this will wait for completion)
-        result = task.get(timeout=30)  # 2 minute timeout
+        result = task.get(timeout=60)
 
         logger.info(result)
         

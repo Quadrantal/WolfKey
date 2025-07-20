@@ -56,16 +56,14 @@ def login_to_wolfnet(user_email, driver, wait):
         logger.info(f"Navigating to login page for {user_email}")
         driver.get(LOGIN_URL)
 
-        wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "#Username")))
-        username_input = driver.find_element(By.CSS_SELECTOR, "#Username")
+        username_input = wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, "#Username")))
         username_input.send_keys(user_email)
-        next_btn = driver.find_element(By.CSS_SELECTOR, "#nextBtn")
+        next_btn = wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, "#nextBtn")))
         next_btn.click()
 
-        wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "#i0118")))
-        password_input = driver.find_element(By.CSS_SELECTOR, "#i0118")
+        password_input = wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, "#i0118")))
         password_input.send_keys(PASSWORD)
-        submit_btn = driver.find_element(By.ID, "idSIButton9")
+        submit_btn = wait.until(EC.element_to_be_clickable((By.ID, "idSIButton9")))
         submit_btn.click()
 
         # Handle 'Stay signed in?' prompt if it appears
@@ -108,7 +106,7 @@ def check_user_grades_core(user_email):
         }
 
     chrome_options = Options()
-    chrome_options.add_argument("--headless=new")
+    # chrome_options.add_argument("--headless=new")
     chrome_options.add_argument("--no-sandbox")
     chrome_options.add_argument("--disable-dev-shm-usage")
     driver = webdriver.Chrome(options=chrome_options)
@@ -386,22 +384,20 @@ def check_single_user_grades(self, user_email):
         logger.error(f"Error checking grades for {user_email}: {str(e)}")
         raise
 
-@shared_task(bind=True, queue='low', routing_key='low.batch_grades')
-def check_all_user_grades(self):
+def check_all_user_grades_sequential():
     """
-    Schedule grade checking for all users in parallel - low priority batch job
+    Regular function to schedule grade checking for all users sequentially.
+    You can insert high-priority tasks between user grade checks if needed.
     """
-    users = User.objects.all()
-    logger.info(f"Starting grade check for {users.count()} users")
-    
-    # Create a task for each user
+    users = list(User.objects.filter(school_email__isnull=False).exclude(school_email=''))
+    logger.info(f"Starting sequential grade check for {len(users)} users")
     job_ids = []
-    for user in users:
-        if user.school_email:  # Only check users with school emails
-            job = check_single_user_grades.delay(user.school_email)
-            job_ids.append(job.id)
-    
-    logger.info(f"Scheduled {len(job_ids)} grade checking tasks")
+    for idx, user in enumerate(users):
+        logger.info(f"Checking grades for {user.school_email} (user {idx+1}/{len(users)})")
+        job = check_single_user_grades.delay(user.school_email)
+        result = job.get(timeout=60)
+        job_ids.append(job.id)
+    logger.info(f"Scheduled {len(job_ids)} grade checking tasks sequentially")
     return {"scheduled_tasks": len(job_ids), "task_ids": job_ids}
 
 @shared_task(bind=True, queue='default', routing_key='default.email')
@@ -435,7 +431,7 @@ def auto_complete_courses(self, user_email):
     logger.info(f"Starting auto-complete courses for user: {user_email}")
     
     chrome_options = Options()
-    chrome_options.add_argument("--headless=new")
+    # chrome_options.add_argument("--headless=new")
     chrome_options.add_argument("--no-sandbox")
     chrome_options.add_argument("--disable-dev-shm-usage")
     driver = webdriver.Chrome(options=chrome_options)
