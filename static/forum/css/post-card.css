@@ -46,6 +46,11 @@
   background: none;
 }
 
+#post-list .card{
+    border-bottom-color: #686868 !important;
+    border-bottom-width: 4px !important;
+}
+
 .follow-button {
   transition: all 0.2s ease;
   font-size: 22px;
