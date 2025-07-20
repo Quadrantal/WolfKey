@@ -86,9 +86,12 @@ export class SolutionEditor {
         const solutionContainer = container.closest('.solution-container');
         const defaultActions = solutionContainer?.querySelector('.default-actions');
         const editActions = solutionContainer?.querySelector('.edit-actions');
-
-        if (defaultActions) defaultActions.style.display = isEditing ? 'none' : 'block';
-        if (editActions) editActions.style.display = isEditing ? 'block' : 'none';
+        if (defaultActions) {
+            defaultActions.style.cssText = isEditing ? 'display: none !important;' : 'display: block !important;';
+        }
+        if (editActions) {
+            editActions.style.cssText = isEditing ? 'display: block !important;' : 'display: none !important;';
+        }
     }
 
 

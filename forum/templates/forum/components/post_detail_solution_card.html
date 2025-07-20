@@ -94,15 +94,15 @@
                 <div class="default-actions d-flex gap-2">
                     <button class="btn pill-btn btn-outline-secondary btn-sm"
                             onclick="showEditSolutionForm(Number('{{ solution.id }}'))">
-                        <i class="bi bi-pencil"></i> Edit
+                        <i class="bi bi-pencil"></i>
                     </button>
                     <button type="submit" class="btn pill-btn btn-outline-danger btn-sm">
-                        <i class="bi bi-trash"></i> Delete
+                        <i class="bi bi-trash"></i>
                     </button>
                 </div>
                 <div class="edit-actions mt-2" style="display: none;">
-                    <button class="btn btn-primary btn-sm" onclick="saveSolutionEdit(Number('{{ solution.id }}'))">Save</button>
-                    <button class="btn btn-secondary btn-sm" onclick="cancelSolutionEdit(Number('{{ solution.id }}'))">Cancel</button>
+                    <button class="btn pill-btn btn-sm" onclick="saveSolutionEdit(Number('{{ solution.id }}'))"><i class="bi bi-check-lg"></i> Save</button>
+                    <button class="btn pill-btn btn-secondary btn-sm" onclick="cancelSolutionEdit(Number('{{ solution.id }}'))"><i class="bi bi-x-lg"></i> Cancel</button>
                 </div>
             </div>
             {% endif %}
