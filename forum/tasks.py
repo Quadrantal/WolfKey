@@ -15,7 +15,6 @@ import django
 
 logger = logging.getLogger(__name__)
 
-# Grade checking functions
 def get_decrypted_wolfnet_password(user_email):
     user = User.objects.get(school_email=user_email)
     profile = user.userprofile
@@ -106,14 +105,13 @@ def check_user_grades_core(user_email):
         }
 
     chrome_options = Options()
-    # chrome_options.add_argument("--headless=new")
+    chrome_options.add_argument("--headless=new")
     chrome_options.add_argument("--no-sandbox")
     chrome_options.add_argument("--disable-dev-shm-usage")
     driver = webdriver.Chrome(options=chrome_options)
     wait = WebDriverWait(driver, 20)
 
     try:
-        # Use the new login function
         if not login_to_wolfnet(user_email, driver, wait):
             return
 
@@ -206,7 +204,6 @@ def check_user_grades_core(user_email):
                     f"&sortAssignmentId=null&sortSkillPk=null&sortDesc=null&sortCumulative=null"
                     f"&studentUserId={student_id}&fromProgress=true"
                 )
-                # Add timeout to prevent hanging requests
                 hydrate_resp = requests.get(hydrate_url, cookies=cookies, headers=headers, timeout=30)
                 if hydrate_resp.status_code == 200:
                     hydrate_json = hydrate_resp.json()
@@ -299,7 +296,6 @@ def check_user_grades_core(user_email):
 
                                 section_messages.append(message)
 
-                                # Send in-app notification (unchanged)
                                 from forum.services.notification_services import send_notification_service
                                 send_notification_service(
                                     recipient=recipient,
@@ -431,14 +427,13 @@ def auto_complete_courses(self, user_email):
     logger.info(f"Starting auto-complete courses for user: {user_email}")
     
     chrome_options = Options()
-    # chrome_options.add_argument("--headless=new")
+    chrome_options.add_argument("--headless=new")
     chrome_options.add_argument("--no-sandbox")
     chrome_options.add_argument("--disable-dev-shm-usage")
     driver = webdriver.Chrome(options=chrome_options)
     wait = WebDriverWait(driver, 20)
 
     try:
-        # Use the login function
         if not login_to_wolfnet(user_email, driver, wait):
             return {"success": False, "error": "Failed to login to WolfNet"}
 
@@ -504,17 +499,14 @@ def auto_complete_courses(self, user_email):
             })()
             
             try:
-                # Import course_search function locally to avoid circular imports
-                from forum.services.course_services import course_search
+                from forum.services.course_services import course_search #avoids circular imports
                 
-                # Use the course_search function to find matching courses
                 search_response = course_search(mock_request)
                 search_data = search_response.content.decode('utf-8')
                 import json
                 courses = json.loads(search_data)
                 
                 if courses:
-                    # Take the first (best) match
                     best_match = courses[0]
                     matched_courses[block] = {
                         "id": best_match["id"],
