@@ -75,7 +75,8 @@ from forum.views.save_views import (
 )
 from forum.views.notification_views import (
     all_notifications,
-    mark_notification_read
+    mark_notification_read,
+    mark_all_notifications_read
 )
 from forum.views.updates_views import acknowledge_update
 from forum.services.utils import upload_image
@@ -192,6 +193,7 @@ urlpatterns = [
     
     # Notification URLs
     path('notifications/', all_notifications, name='all_notifications'),
+    path('notifications/mark-all-read/', mark_all_notifications_read, name='mark_all_notifications_read'),
     path('notifications/<int:notification_id>/read/', mark_notification_read, name='mark_notification_read'),
     
     # Admin URL
