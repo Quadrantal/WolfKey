@@ -113,7 +113,10 @@ def check_user_grades_core(user_email):
 
     try:
         if not login_to_wolfnet(user_email, driver, wait):
-            return
+            return {
+                "success": False,
+                "error": "Login to WolfNet failed. Please check your credentials and try again."
+            }
 
         # Wait for courses to load
         wait.until(EC.presence_of_all_elements_located((By.CSS_SELECTOR, ".collapse")))
