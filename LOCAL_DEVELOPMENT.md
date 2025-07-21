@@ -6,22 +6,8 @@ The parallel grade checking system uses **Celery** with **Redis** to:
 - Check user grades in parallel (instead of sequentially)
 - Schedule automatic grade checks every 30 minutes
 - Handle email notifications in a separate queue
+- Handle auto complete courses when users requests it
 
-## ✅ What's Working
-
-- **Celery + Redis** for task queuing and parallel processing
-- **Automatic scheduling** every 30 minutes via Celery Beat
-- **Separate email queue** to avoid blocking grade checks
-- **Proper logging** instead of print statements
-- **Management command** for manual testing
-
-## 🗂️ Key Files
-
-- `forum/tasks.py` - All grade checking and email tasks
-- `student_forum/celery.py` - Celery configuration and scheduling
-- `student_forum/settings.py` - Redis/Celery settings
-- `forum/management/commands/check_grades.py` - Manual testing command
-- `Procfile` - Heroku deployment configuration
 
 ## Local Development
 
@@ -75,15 +61,16 @@ celery -A student_forum flower
 ## How It Works
 
 ### System Architecture
-1. **Celery Beat** schedules `check_all_user_grades` every 30 minutes
-2. **Main Task** creates individual `check_single_user_grades` tasks for each user
-3. **Worker Pool** processes multiple users in parallel
-4. **Email Queue** handles notifications separately
+1. **Celery Beat** automatically schedules both `check_all_user_grades` and `autocomplete_courses` tasks every 30 minutes, but you can also trigger grade checks manually with the management command.
+2. When triggered, the main grade-checking task quickly creates individual `check_single_user_grades` tasks for each user and hands them off to Celery, which uses separate queues for different types of tasks (e.g., high, default, low, email).
+3. The Celery worker pool processes tasks in parallel from these queues, so grade checking, autocomplete, and email notifications do not block the Django server or each other.
+4. Email notifications and autocomplete requests are handled in their own queues, ensuring independent and efficient processing.
 
 ### Task Types
 - `check_all_user_grades` - Schedules grade checking for all users (runs every 30 minutes)
 - `check_single_user_grades` - Checks grades for one specific user
 - `send_email_notification` - Sends email notifications in separate queue
+- `autocomplete_courses` - Returns user's courses from WolfNet
 
 ## Heroku Deployment
 
@@ -99,7 +86,7 @@ heroku config:get REDIS_URL
 ### Procfile Processes
 ```
 web: gunicorn student_forum.wsgi --log-file -
-worker: celery -A student_forum worker --loglevel=info
+worker: celery -A student_forum worker --loglevel=info --concurrency=3 -Q high,default,low
 beat: celery -A student_forum beat --loglevel=info
 ```
 
@@ -121,20 +108,6 @@ heroku logs -t --dyno worker
 heroku logs -t --dyno beat
 ```
 
-## Performance Benefits
-
-1. **Parallel Processing**: Multiple users' grades are checked simultaneously
-2. **Separate Email Queue**: Email sending doesn't block grade checking
-3. **Automatic Scheduling**: No manual intervention needed
-4. **Scalable**: Easy to add more workers as user base grows
-
-## Troubleshooting
-
-### Common Issues
-1. **Redis Connection Error**: Check `REDIS_URL` environment variable
-2. **Tasks Not Running**: Ensure worker and beat processes are running
-3. **Email Delays**: Check email task queue separately
-
 ### Debug Commands
 ```bash
 # Check Redis connection
@@ -151,14 +124,3 @@ print(f'Task ID: {task.id}')
 print(f'Status: {task.status}')
 "
 ```
-
-## 🔧 Performance Notes
-
-- **Local Development**: Single worker handles ~11 concurrent tasks
-- **Task Duration**: Each user check takes ~30 seconds
-- **Memory Usage**: Monitor Chrome processes, they can accumulate
-- **Redis Storage**: Results are stored temporarily in Redis
-
-## 📈 Ready for Production
-
-The system is now clean, efficient, and ready for Heroku deployment.
