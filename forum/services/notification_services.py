@@ -1,5 +1,4 @@
 from django.shortcuts import get_object_or_404
-from django.core.mail import send_mail
 from django.conf import settings
 from forum.models import UserCourseExperience, Notification, Post, Solution
 import logging
@@ -129,6 +128,7 @@ def send_comment_notifications_service(comment, solution, parent_comment=None):
 def send_notification_service(
     recipient, sender, notification_type, message, url=None, post=None, solution=None, email_subject=None, email_message=None
 ):
+    # Create the in-app notification
     Notification.objects.create(
         recipient=recipient,
         sender=sender,
@@ -137,17 +137,15 @@ def send_notification_service(
         solution=solution,
         message=message,
     )
+    
+    # Send email using the separate email task
     if email_subject and email_message:
-        try:
-            send_mail(
-                email_subject,
-                email_message,
-                settings.DEFAULT_FROM_EMAIL,
-                [recipient.personal_email],
-                fail_silently=False,
-            )
-        except Exception as e:
-            logger.error(f"Failed to send notification email to {recipient.personal_email}: {e}")
+        from forum.tasks import send_email_notification
+        send_email_notification.delay(
+            recipient.personal_email,
+            email_subject,
+            email_message
+        )
 
 def all_notifications_service(user):
     return user.notifications.all()

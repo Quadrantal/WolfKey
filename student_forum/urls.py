@@ -60,7 +60,8 @@ from forum.views.profile_views import (
     my_profile,
     profile_view,
     update_courses,
-    upload_profile_picture
+    upload_profile_picture,
+    auto_complete_courses_view
 )
 from forum.services.course_services import (
     course_search
@@ -74,7 +75,8 @@ from forum.views.save_views import (
 )
 from forum.views.notification_views import (
     all_notifications,
-    mark_notification_read
+    mark_notification_read,
+    mark_all_notifications_read
 )
 from forum.views.updates_views import acknowledge_update
 from forum.services.utils import upload_image
@@ -164,6 +166,7 @@ urlpatterns = [
     path('my-profile/', my_profile, name='my_profile'),
     path('profile/<str:username>/', profile_view, name='profile'),
     path('update-courses/', update_courses, name='update_courses'),
+    path('auto-complete-courses/', auto_complete_courses_view, name='auto_complete_courses'),
     
     # Course management URLs
     path('courses/experience/add/', add_experience, name='add_experience'),
@@ -190,6 +193,7 @@ urlpatterns = [
     
     # Notification URLs
     path('notifications/', all_notifications, name='all_notifications'),
+    path('notifications/mark-all-read/', mark_all_notifications_read, name='mark_all_notifications_read'),
     path('notifications/<int:notification_id>/read/', mark_notification_read, name='mark_notification_read'),
     
     # Admin URL

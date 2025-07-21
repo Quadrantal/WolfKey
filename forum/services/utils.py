@@ -14,7 +14,6 @@ from io import BytesIO
 ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/gif']
 ALLOWED_EXTENSIONS = ['.jpg', '.jpeg', '.png', '.gif']
 
-
 def process_post_preview(post):
     """
     Generate a preview text for a post by extracting and cleaning paragraph blocks from Editor.js content.

@@ -93,6 +93,10 @@ WolfKey is a collaborative student forum platform that allows users to ask quest
     python manage.py runserver
     ```
 
+10. **Configure Tasks (Optional)**
+
+    If you want to test email notifications, and functionality involving WolfNet integration, you would have to follow instructions in LOCAL_DEVELOPMENT.md
+
 ## Usage
 
 - Access the site at `http://localhost:8000/`

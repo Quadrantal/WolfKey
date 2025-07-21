@@ -1,0 +1,534 @@
+from celery import shared_task
+from forum.models import User, GradebookSnapshot
+import logging
+import time
+import re
+from selenium import webdriver
+from selenium.webdriver.common.by import By
+from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+import requests
+from django.utils.html import strip_tags
+from django.http import HttpRequest
+import django
+
+logger = logging.getLogger(__name__)
+
+def get_decrypted_wolfnet_password(user_email):
+    user = User.objects.get(school_email=user_email)
+    profile = user.userprofile
+    return profile.get_decrypted_wolfnet_password()
+
+def compare_assignments(old_assignments, new_assignments):
+    changes = []
+    old_map = {a["assignment_id"]: a for a in old_assignments}
+    for new_a in new_assignments:
+        aid = new_a["assignment_id"]
+        old_a = old_map.get(aid)
+        if not old_a:
+            changes.append({"type": "new", "assignment": new_a})
+            continue
+
+        old_skills = {s["skill_id"]: s for s in old_a.get("skills", [])}
+        for s in new_a["skills"]:
+            old_s = old_skills.get(s["skill_id"])
+            if not old_s or s["rating"] != old_s.get("rating") or s["rating_desc"] != old_s.get("rating_desc"):
+                changes.append({"type": "skill_changed", "assignment": new_a, "skill": s})
+
+        if new_a.get("points_earned") != old_a.get("points_earned") or new_a.get("max_points") != old_a.get("max_points"):
+            changes.append({"type": "points_changed", "assignment": new_a})
+        if new_a.get("comment") != old_a.get("comment"):
+            changes.append({"type": "comment_changed", "assignment": new_a})
+    return changes
+
+def login_to_wolfnet(user_email, driver, wait):
+    """Log into WolfNet and return the authenticated driver"""
+    LOGIN_URL = "https://wpga.myschoolapp.com/"
+    
+    PASSWORD = get_decrypted_wolfnet_password(user_email)
+    if not PASSWORD:
+        logger.error(f"No Wolfnet password found for {user_email}. Cannot login.")
+        return False
+    
+    try:
+        logger.info(f"Navigating to login page for {user_email}")
+        driver.get(LOGIN_URL)
+
+        username_input = wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, "#Username")))
+        username_input.send_keys(user_email)
+        next_btn = wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, "#nextBtn")))
+        next_btn.click()
+
+        password_input = wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, "#i0118")))
+        password_input.send_keys(PASSWORD)
+        submit_btn = wait.until(EC.element_to_be_clickable((By.ID, "idSIButton9")))
+        submit_btn.click()
+
+        # Handle 'Stay signed in?' prompt if it appears
+        try:
+            stay_signed_in_btn = wait.until(
+                EC.presence_of_element_located((By.ID, "idBtn_Back"))
+            )
+            stay_signed_in_btn.click()
+        except Exception:
+            pass
+
+        try:
+            wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "#activitiesContainer")))
+            time.sleep(1)
+            logger.info(f"Successfully logged in for {user_email}")
+            return True
+        except Exception as e:
+            logger.error(f"Post-login element not found for {user_email}: {str(e)}")
+            return False
+    except Exception as e:
+        logger.error(f"Failed to login for {user_email}: {str(e)}")
+        return False
+
+def check_user_grades_core(user_email):
+    """Core grade checking logic using Selenium"""
+    logger.info(f"Starting grade check for user: {user_email}")
+    LOGIN_URL = "https://wpga.myschoolapp.com/"
+
+    # Check if user has WolfNet password
+    user_obj = User.objects.get(school_email=user_email)
+    profile = getattr(user_obj, 'userprofile', None)
+    wolfnet_password = None
+    if profile:
+        wolfnet_password = profile.wolfnet_password
+    if not wolfnet_password:
+        logger.warning(f"User {user_email} does not have a WolfNet password. Skipping grade check.")
+        return {
+            "success": False,
+            "error": "No WolfNet password found. Please add your WolfNet password in your profile settings to enable grade checking."
+        }
+
+    chrome_options = Options()
+    chrome_options.add_argument("--headless=new")
+    chrome_options.add_argument("--no-sandbox")
+    chrome_options.add_argument("--disable-dev-shm-usage")
+    driver = webdriver.Chrome(options=chrome_options)
+    wait = WebDriverWait(driver, 20)
+
+    try:
+        if not login_to_wolfnet(user_email, driver, wait):
+            return {
+                "success": False,
+                "error": "Login to WolfNet failed. Please check your credentials and try again."
+            }
+
+        # Wait for courses to load
+        wait.until(EC.presence_of_all_elements_located((By.CSS_SELECTOR, ".collapse")))
+        course_divs = driver.find_elements(By.CSS_SELECTOR, ".collapse")
+        section_ids = []
+        section_id_to_course_name = {}
+        for div in course_divs:
+            div_id = div.get_attribute("id")
+            # Only process divs whose IDs match 'course' followed by digits (e.g., 'course114310942')
+            if div_id and re.match(r"^course\d+$", div_id):
+                sid = div_id.replace("course", "")
+                section_ids.append(sid)
+                try:
+                    parent = div.find_element(By.XPATH, "..")
+                    a_tag = parent.find_element(By.TAG_NAME, "a")
+                    h3 = a_tag.find_element(By.TAG_NAME, "h3")
+                    course_name = h3.text.strip()
+                except Exception:
+                    course_name = "Unknown Course"
+                section_id_to_course_name[sid] = course_name
+
+        # logger.info(f"Section IDs for {user_email}: {section_ids}")
+
+        # Get studentId from #profile-link
+        wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "#profile-link")))
+        profile_link = driver.find_element(By.CSS_SELECTOR, "#profile-link")
+        href = profile_link.get_attribute("href")
+        m = re.search(r"profile/(\d+)/contactcard", href)
+        student_id = m.group(1) if m else None
+        # logger.info(f"Student ID for {user_email}: {student_id}")
+
+        # Get cookies from Selenium to use in requests
+        selenium_cookies = driver.get_cookies()
+        cookies = {c['name']: c['value'] for c in selenium_cookies}
+
+        headers = {
+            "User-Agent": "Mozilla/5.0",
+            "Accept": "application/json, text/javascript, */*; q=0.01",
+            "Referer": "https://wpga.myschoolapp.com/",
+        }
+
+        # For each sectionId, get markingPeriodId and then hydrategradebook JSON
+        user_obj = User.objects.get(school_email=user_email)
+
+        # Get marking periods once (using the first section_id)
+        marking_period_id = None
+        if section_ids:
+            first_section_id = section_ids[0]
+            snapshot_qs = GradebookSnapshot.objects.filter(
+                user=user_obj,
+                section_id=first_section_id
+            ).order_by('-timestamp')
+            if snapshot_qs.exists():
+                snapshot = snapshot_qs.first()
+                mpid = getattr(snapshot, 'marking_period_id', None)
+                if mpid:
+                    marking_period_id = mpid
+            # If not found, fetch from API
+            if not marking_period_id:
+                mp_url = f"https://wpga.myschoolapp.com/api/datadirect/GradeBookMarkingPeriodList?sectionId={first_section_id}"
+                mp_resp = requests.get(mp_url, cookies=cookies, headers=headers)
+                if mp_resp.status_code == 200:
+                    mp_json = mp_resp.json()
+                    if mp_json:
+                        marking_period_id = mp_json[0].get("MarkingPeriodId")
+        if not marking_period_id:
+            logger.error(f"Could not fetch marking period id for {user_email}")
+            return
+
+        # Collect all email messages for all courses
+        all_email_messages = []
+        recipient = user_obj
+        sender = user_obj
+        notification_type = "grade_update"
+        
+        # Process sections asynchronously
+        import asyncio
+        import concurrent.futures
+        
+        def process_section(section_id):
+            """Process a single section synchronously with timeout and better error handling"""
+            section_messages = []
+            
+            try:
+                hydrate_url = (
+                    f"https://wpga.myschoolapp.com/api/gradebook/hydrategradebook?"
+                    f"sectionId={section_id}&markingPeriodId={marking_period_id}"
+                    f"&sortAssignmentId=null&sortSkillPk=null&sortDesc=null&sortCumulative=null"
+                    f"&studentUserId={student_id}&fromProgress=true"
+                )
+                hydrate_resp = requests.get(hydrate_url, cookies=cookies, headers=headers, timeout=30)
+                if hydrate_resp.status_code == 200:
+                    hydrate_json = hydrate_resp.json()
+                    assignments = []
+                    roster = hydrate_json.get("Roster", [])
+                    if roster:
+                        for a in roster[0].get("AssignmentGrades", []):
+                            assignments.append({
+                                "assignment_id": a.get("AssignmentId"),
+                                "name": a.get("AssignmentType", "").strip(),
+                                "points_earned": a.get("PointsEarned"),
+                                "max_points": a.get("MaxPoints"),
+                                "comment": a.get("Comment", "").strip(),
+                                "assignment_type": a.get("AssignmentType", "").strip(),
+                                "assignment_type_id": a.get("AssignmentTypeId"),
+                                "skills": [
+                                    {
+                                        "skill_id": s.get("SkillId"),
+                                        "skill_name": s.get("SkillName"),
+                                        "rating": s.get("Rating"),
+                                        "rating_desc": s.get("RatingDesc")
+                                    }
+                                    for s in a.get("AssignmentSkillList", [])
+                                ]
+                            })
+                        # Fetch AssignmentPerformanceStudent JSON for assignment names
+                        aps_url = (
+                            f"https://wpga.myschoolapp.com/api/gradebook/AssignmentPerformanceStudent?"
+                            f"sectionId={section_id}&markingPeriodId={marking_period_id}&studentId={student_id}"
+                        )
+                        aps_resp = requests.get(aps_url, cookies=cookies, headers=headers, timeout=30)
+                        assignment_names = {}
+                        if aps_resp.status_code == 200:
+                            aps_json = aps_resp.json()
+                            for entry in aps_json:
+                                aid = entry.get("AssignmentId")
+                                short_desc = entry.get("AssignmentShortDescription")
+                                if aid and short_desc:
+                                    assignment_names[aid] = short_desc
+
+                        # Compare with previous snapshot
+                        snapshot_qs = GradebookSnapshot.objects.filter(
+                            user=user_obj,
+                            section_id=section_id,
+                            marking_period_id=str(marking_period_id)
+                        ).order_by('-timestamp')
+
+                        if snapshot_qs.exists():
+                            snapshot = snapshot_qs.first()
+                            old_assignments = snapshot.json_data
+                            changes = compare_assignments(old_assignments, assignments)
+                            logger.info(f"Changes for {user_email} - section {section_id}, marking period {marking_period_id}: {len(changes)} changes found")
+
+                            course_name = section_id_to_course_name.get(str(section_id), "Unknown Course")
+                            for change in changes:
+                                # logger.info(f"Processing change for {user_email}: {change}")
+                                assignment = change["assignment"]
+                                assignment_id = assignment.get("assignment_id")
+                                assignment_name = strip_tags(assignment_names.get(assignment_id) or assignment.get("name") or assignment.get("assignment_type"))
+                                skills = assignment.get("skills", [])
+                                prof_skills = [s for s in skills if s.get("rating_desc", "")]
+                                has_proficiency = bool(prof_skills)
+                                if has_proficiency:
+                                    prof_list = [f"<strong>{s.get('skill_name')}:</strong> {s.get('rating_desc')}" for s in prof_skills]
+                                    grade_info = "<br>".join(prof_list)
+                                else:
+                                    points_earned = assignment.get("points_earned")
+                                    max_points = assignment.get("max_points")
+                                    if points_earned is not None and max_points:
+                                        try:
+                                            percent = round((points_earned / max_points) * 100, 2)
+                                        except Exception:
+                                            percent = None
+                                        grade_info = f"<br><strong>Grade:</strong> {points_earned}/{max_points} ({percent}%)" if percent is not None else f"Grade: {points_earned}/{max_points}"
+                                    else:
+                                        grade_info = "Grade information not available."
+
+                                message = f"<h3>{assignment_name} ({course_name}): </h3><br>"
+                                if change["type"] == "new":
+                                    message += f"New assignment graded.<br>{grade_info}<br>Comment: {assignment.get('comment')}"
+                                elif change["type"] == "skill_changed":
+                                    skill = change["skill"]
+                                    message += f"Competency '<strong>{skill.get('skill_name')}</strong>' updated to '<strong>{skill.get('rating_desc')}</strong>'. {grade_info}"
+                                elif change["type"] == "points_changed":
+                                    message += f"Points changed to {assignment.get('points_earned')}/{assignment.get('max_points')}. {grade_info}"
+                                elif change["type"] == "comment_changed":
+                                    message += f"Comment updated.<br>{grade_info}<br>Comment: {assignment.get('comment')}"
+                                else:
+                                    message += f"Graded or updated.<br>{grade_info}"
+
+                                section_messages.append(message)
+
+                                from forum.services.notification_services import send_notification_service
+                                send_notification_service(
+                                    recipient=recipient,
+                                    sender=sender,
+                                    notification_type=notification_type,
+                                    message=message,
+                                )
+
+                            snapshot.json_data = assignments
+                            snapshot.timestamp = django.utils.timezone.now()
+                            snapshot.save()
+                            logger.info(f"Updated snapshot for {user_email} - section {section_id}, marking period {marking_period_id}")
+                        else:
+                            GradebookSnapshot.objects.create(
+                                user=user_obj,
+                                section_id=section_id,
+                                marking_period_id=str(marking_period_id),
+                                json_data=assignments
+                            )
+                            logger.info(f"Created new snapshot for {user_email} - section {section_id}, marking period {marking_period_id}")
+                else:
+                    logger.error(f"Failed to get hydrategradebook for {user_email} - section {section_id}, marking period {marking_period_id}")
+                
+            except requests.Timeout:
+                logger.error(f"Timeout while processing section {section_id} for {user_email}")
+            except Exception as e:
+                logger.error(f"Error processing section {section_id} for {user_email}: {str(e)}")
+                import traceback
+                logger.error(f"Full traceback: {traceback.format_exc()}")
+            
+            return section_messages
+        
+        # Process sections in parallel
+        with concurrent.futures.ThreadPoolExecutor(max_workers=2) as executor:
+            future_to_section = {executor.submit(process_section, section_id): section_id for section_id in section_ids}
+            
+            for future in concurrent.futures.as_completed(future_to_section):
+                section_id = future_to_section[future]
+                try:
+                    section_messages = future.result()
+                    if section_messages:
+                        all_email_messages.extend(section_messages)
+                except Exception as exc:
+                    logger.error(f"Section {section_id} generated an exception: {exc}")
+                    # Log more details about the exception
+                    import traceback
+                    logger.error(f"Full traceback for section {section_id}: {traceback.format_exc()}")
+
+        if all_email_messages:
+            email_subject = f"WolfKey Grade Update:"
+            email_body = f"""
+                <html>
+                <body>
+                    <h2>WolfKey Grade Updates</h2>
+                    <p>Hello {recipient.get_full_name()},</p>
+                    {''.join([f'<li>{msg}</li>' for msg in all_email_messages])}
+                    <br>
+                    <p>Best regards,<br>WolfKey Team</p>
+                </body>
+                </html>
+            """
+            logger.info(f"Sending combined grade update notification to {recipient.personal_email}: {all_email_messages}")
+            send_email_notification.delay(
+                recipient.personal_email,
+                email_subject,
+                email_body
+            )
+    finally:
+        driver.quit()
+        logger.info(f"Grade check completed for {user_email}")
+
+@shared_task(bind=True, queue='low', routing_key='low.grades')
+def check_single_user_grades(self, user_email):
+    """
+    Check grades for a single user - low priority background task
+    """
+    try:
+        return check_user_grades_core(user_email)
+    except Exception as e:
+        logger.error(f"Error checking grades for {user_email}: {str(e)}")
+        raise
+
+def check_all_user_grades_sequential():
+    """
+    Regular function to schedule grade checking for all users one after the other finished
+    """
+    users = list(User.objects.filter(school_email__isnull=False).exclude(school_email=''))
+    logger.info(f"Starting sequential grade check for {len(users)} users")
+    job_ids = []
+    for idx, user in enumerate(users):
+        logger.info(f"Checking grades for {user.school_email} (user {idx+1}/{len(users)})")
+        job = check_single_user_grades.delay(user.school_email)
+        result = job.get(timeout=60)
+        job_ids.append(job.id)
+    return {"scheduled_tasks": len(job_ids), "task_ids": job_ids}
+
+@shared_task(bind=True, queue='default', routing_key='default.email')
+def send_email_notification(self, recipient_email, subject, message):
+    """
+    Send email notification - default priority task
+    """
+    from django.core.mail import send_mail
+    from django.conf import settings
+    
+    try:
+        send_mail(
+            subject,
+            message,
+            settings.DEFAULT_FROM_EMAIL,
+            [recipient_email],
+            fail_silently=False,
+            html_message=message
+        )
+        logger.info(f"Email sent successfully to {recipient_email}")
+        return f"Email sent to {recipient_email}"
+    except Exception as e:
+        logger.error(f"Failed to send email to {recipient_email}: {str(e)}")
+        raise
+
+@shared_task(bind=True, queue='high', routing_key='high.auto')
+def auto_complete_courses(self, user_email):
+    """
+    Auto-complete courses from WolfNet schedule for a user - high priority interactive task
+    """
+    logger.info(f"Starting auto-complete courses for user: {user_email}")
+    
+    chrome_options = Options()
+    chrome_options.add_argument("--headless=new")
+    chrome_options.add_argument("--no-sandbox")
+    chrome_options.add_argument("--disable-dev-shm-usage")
+    driver = webdriver.Chrome(options=chrome_options)
+    wait = WebDriverWait(driver, 20)
+
+    try:
+        if not login_to_wolfnet(user_email, driver, wait):
+            return {"success": False, "error": "Failed to login to WolfNet"}
+
+        # Wait for the page to load and find the first .subnav-multicol element
+        wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, ".subnav-multicol")))
+        subnav_elements = driver.find_elements(By.CSS_SELECTOR, ".subnav-multicol")
+        
+        if not subnav_elements:
+            logger.error(f"No .subnav-multicol elements found for {user_email}")
+            return {"success": False, "error": "No course navigation found"}
+        
+        # Take the first .subnav-multicol element
+        subnav = subnav_elements[0]
+        
+        # Find all span.multi.title elements in the subnav
+        title_spans = subnav.find_elements(By.CSS_SELECTOR, "span.multi.title")
+
+        courses_data = {}
+        for title_span in title_spans:
+            try:
+                # Try multiple ways to get the text
+                text_direct = title_span.text.strip()
+                text_inner = title_span.get_attribute('innerText').strip() if title_span.get_attribute('innerText') else ''
+                text_content = title_span.get_attribute('textContent').strip() if title_span.get_attribute('textContent') else ''
+
+                # Use the first non-empty value
+                course_text = text_direct or text_inner or text_content
+
+                # Only process if it matches the block course pattern
+                if " (" in course_text and course_text.endswith(")"):
+                    block_match = re.search(r'\(([^)]+)\)$', course_text)
+                    if block_match:
+                        block = block_match.group(1)
+                        course_name_part = course_text.split(" (", 1)[0]
+                        if " - " in course_name_part:
+                            course_name = course_name_part.split(" - ", 1)[0].strip()
+                        else:
+                            course_name = course_name_part.strip()
+                        if re.match(r'^[12][A-E]|Flex\d*$', block):
+                            if block.startswith("Flex"):
+                                continue  # Skip flex blocks
+                            courses_data[block] = {
+                                "name": course_name,
+                                "block": block,
+                                "raw_text": course_text
+                            }
+            except Exception as e:
+                logger.warning(f"Error parsing span.multi.title for {user_email}: {str(e)}")
+                continue
+        logger.info(f"Found {len(courses_data)} courses for {user_email}: {courses_data}")
+        
+        # Now search for each course in our database using course_search
+        matched_courses = {}
+        
+        for block, course_info in courses_data.items():
+            course_name = course_info["name"]
+            
+            # Create a mock request object for course_search
+            mock_request = type('MockRequest', (), {
+                'GET': {'q': course_name},
+                'method': 'GET'
+            })()
+            
+            try:
+                from forum.services.course_services import course_search #avoids circular imports
+                
+                search_response = course_search(mock_request)
+                search_data = search_response.content.decode('utf-8')
+                import json
+                courses = json.loads(search_data)
+                
+                if courses:
+                    best_match = courses[0]
+                    matched_courses[block] = {
+                        "id": best_match["id"],
+                        "name": best_match["name"],
+                        "category": best_match["category"],
+                        "experienced_count": best_match["experienced_count"]
+                    }
+                    logger.info(f"Matched {course_name} to {best_match['name']} for block {block}")
+                else:
+                    logger.warning(f"No match found for course: {course_name} in block {block}")
+                    
+            except Exception as e:
+                logger.error(f"Error searching for course {course_name}: {str(e)}")
+                continue
+        
+        return {
+            "success": True, 
+            "courses": matched_courses,
+            "raw_data": courses_data
+        }
+        
+    except Exception as e:
+        logger.error(f"Error in auto_complete_courses for {user_email}: {str(e)}")
+        return {"success": False, "error": str(e)}
+    finally:
+        driver.quit()
+        logger.info(f"Auto-complete courses completed for {user_email}")

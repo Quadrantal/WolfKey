@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.contrib.auth.models import Group, Permission
-from .models import Post, File, UserProfile, SavedPost, Solution, Course, CourseAlias, User, UserCourseExperience, UserCourseHelp,UpdateAnnouncement, DailySchedule, SavedSolution, FollowedPost
+from .models import Post, File, UserProfile, SavedPost, Solution, Course, CourseAlias, User, UserCourseExperience, UserCourseHelp,UpdateAnnouncement, DailySchedule, SavedSolution, FollowedPost, GradebookSnapshot
 
 
 # Register your models here.
@@ -14,6 +14,7 @@ admin.site.register(UserCourseExperience)
 admin.site.register(UserCourseHelp)
 admin.site.register(UpdateAnnouncement)
 admin.site.register(DailySchedule)
+admin.site.register(GradebookSnapshot)
 
 class UserProfileInline(admin.StackedInline):
     model = UserProfile
@@ -24,7 +25,7 @@ class UserProfileInline(admin.StackedInline):
     
     fieldsets = (
         (None, {
-            'fields': ('bio', 'profile_picture', 'background_hue', 'points', 'is_moderator')
+            'fields': ('bio', 'profile_picture', 'background_hue', 'points', 'is_moderator', 'wolfnet_password')
         }),
         ('Course Blocks', {
             'fields': (

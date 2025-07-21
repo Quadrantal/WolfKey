@@ -58,8 +58,6 @@ def edit_solution(request, solution_id):
                     'content': solution_data
                 })
 
-                print(result)
-
                 if 'error' in result:
                     messages.error(request, result['error'])
                 else:
@@ -154,8 +152,6 @@ def downvote_solution(request, solution_id):
 def accept_solution(request, solution_id):
     try:
         result = accept_solution_service(request.user, solution_id)
-
-        print(result)
         
         if 'error' in result:
             return JsonResponse({
@@ -188,8 +184,6 @@ def accept_solution(request, solution_id):
 def get_sorted_solutions(request, post_id):
     sort_by = request.GET.get('sort', 'votes')
     result = get_sorted_solutions_service(post_id, sort_by)
-
-    print(result)
     
     if 'error' in result:
         return JsonResponse({

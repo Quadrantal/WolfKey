@@ -8,6 +8,12 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.contrib.auth.models import BaseUserManager
 from django.utils import timezone
+import base64
+from django.conf import settings
+from cryptography.fernet import Fernet
+import logging
+
+logger = logging.getLogger(__name__)
 
 class UserManager(BaseUserManager):
     def create_user(self, school_email, first_name, last_name, password=None, **extra_fields):
@@ -123,6 +129,19 @@ class User(AbstractUser):
             SearchVector('last_name', weight='A')
         )
         User.objects.filter(id=self.id).update(search_vector=search_vector)
+
+class GradebookSnapshot(models.Model):
+    user = models.ForeignKey('User', on_delete=models.CASCADE, related_name='gradebook_snapshots')
+    section_id = models.CharField(max_length=32)
+    marking_period_id = models.CharField(max_length=32)
+    json_data = models.JSONField()
+    timestamp = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('user', 'section_id', 'marking_period_id', 'timestamp')
+
+    def __str__(self):
+        return f"Snapshot for {self.user.school_email} | Section {self.section_id} | MP {self.marking_period_id} @ {self.timestamp}"
     
 class Course(models.Model):
     name = models.CharField(max_length=100)
@@ -315,6 +334,26 @@ class UserProfile(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     background_hue = models.IntegerField(default=231)
+    
+    # WolfNet Integration
+    wolfnet_password = models.CharField(
+        max_length=255,
+        blank=True,
+        null=True,
+        help_text="Your WolfNet password for grade notifications and schedule integration"
+    )
+
+    def get_decrypted_wolfnet_password(self):
+        """Get the decrypted WolfNet password for use in web scraping"""
+        from .forms import WolfNetSettingsForm
+        return WolfNetSettingsForm.decrypt_password(self.wolfnet_password)
+    
+    def save(self, *args, **kwargs):
+        if self.wolfnet_password and not self.wolfnet_password.startswith('gAAAA'):  # Fernet tokens start with 'gAAAA'
+            key = base64.urlsafe_b64encode(settings.SECRET_KEY[:32].encode())
+            f = Fernet(key)
+            self.wolfnet_password = f.encrypt(self.wolfnet_password.encode()).decode()
+        super().save(*args, **kwargs)
 
     profile_picture = models.ImageField(
         upload_to='profile_pictures/',
