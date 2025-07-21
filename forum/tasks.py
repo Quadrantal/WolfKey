@@ -135,7 +135,7 @@ def check_user_grades_core(user_email):
                     course_name = "Unknown Course"
                 section_id_to_course_name[sid] = course_name
 
-        logger.info(f"Section IDs for {user_email}: {section_ids}")
+        # logger.info(f"Section IDs for {user_email}: {section_ids}")
 
         # Get studentId from #profile-link
         wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "#profile-link")))
@@ -143,7 +143,7 @@ def check_user_grades_core(user_email):
         href = profile_link.get_attribute("href")
         m = re.search(r"profile/(\d+)/contactcard", href)
         student_id = m.group(1) if m else None
-        logger.info(f"Student ID for {user_email}: {student_id}")
+        # logger.info(f"Student ID for {user_email}: {student_id}")
 
         # Get cookies from Selenium to use in requests
         selenium_cookies = driver.get_cookies()
@@ -259,7 +259,7 @@ def check_user_grades_core(user_email):
 
                             course_name = section_id_to_course_name.get(str(section_id), "Unknown Course")
                             for change in changes:
-                                logger.info(f"Processing change for {user_email}: {change}")
+                                # logger.info(f"Processing change for {user_email}: {change}")
                                 assignment = change["assignment"]
                                 assignment_id = assignment.get("assignment_id")
                                 assignment_name = strip_tags(assignment_names.get(assignment_id) or assignment.get("name") or assignment.get("assignment_type"))
@@ -304,7 +304,6 @@ def check_user_grades_core(user_email):
                                     message=message,
                                 )
 
-                            # Update snapshot
                             snapshot.json_data = assignments
                             snapshot.timestamp = django.utils.timezone.now()
                             snapshot.save()
@@ -329,7 +328,7 @@ def check_user_grades_core(user_email):
             
             return section_messages
         
-        # Process all sections in parallel using ThreadPoolExecutor with limited concurrency
+        # Process sections in parallel
         with concurrent.futures.ThreadPoolExecutor(max_workers=2) as executor:
             future_to_section = {executor.submit(process_section, section_id): section_id for section_id in section_ids}
             
@@ -345,7 +344,6 @@ def check_user_grades_core(user_email):
                     import traceback
                     logger.error(f"Full traceback for section {section_id}: {traceback.format_exc()}")
 
-        # Send one combined email for all changes in all courses
         if all_email_messages:
             email_subject = f"WolfKey Grade Update:"
             email_body = f"""
@@ -382,8 +380,7 @@ def check_single_user_grades(self, user_email):
 
 def check_all_user_grades_sequential():
     """
-    Regular function to schedule grade checking for all users sequentially.
-    You can insert high-priority tasks between user grade checks if needed.
+    Regular function to schedule grade checking for all users one after the other finished
     """
     users = list(User.objects.filter(school_email__isnull=False).exclude(school_email=''))
     logger.info(f"Starting sequential grade check for {len(users)} users")
@@ -393,7 +390,6 @@ def check_all_user_grades_sequential():
         job = check_single_user_grades.delay(user.school_email)
         result = job.get(timeout=60)
         job_ids.append(job.id)
-    logger.info(f"Scheduled {len(job_ids)} grade checking tasks sequentially")
     return {"scheduled_tasks": len(job_ids), "task_ids": job_ids}
 
 @shared_task(bind=True, queue='default', routing_key='default.email')
@@ -480,7 +476,6 @@ def auto_complete_courses(self, user_email):
                                 "block": block,
                                 "raw_text": course_text
                             }
-                            logger.info(f"Found course for {user_email}: {course_name} in block {block}")
             except Exception as e:
                 logger.warning(f"Error parsing span.multi.title for {user_email}: {str(e)}")
                 continue

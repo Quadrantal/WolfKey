@@ -45,7 +45,6 @@ def delete_comment(request, comment_id):
 
 def get_comments(request, solution_id):
     result = get_comments_service(request, solution_id)
-    print("REsult", result)
     if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
         return JsonResponse({
             'comments': result['comments_data'],
