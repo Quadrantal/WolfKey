@@ -410,12 +410,17 @@
                                     <input type="hidden" name="form_type" value="wolfnet_settings">
                                     <div class="mb-3">
                                         <label for="id_wolfnet_password" class="form-label">WolfNet Password</label>
-                                        <input type="password" 
-                                               name="wolfnet_password" 
-                                               id="id_wolfnet_password" 
-                                               class="form-control" 
-                                               placeholder="Enter your WolfNet password"
-                                               value="{% if request.user.userprofile.wolfnet_password %}••••••••{% endif %}">
+                                        <div style="position:relative;">
+                                            <input type="password" 
+                                                   name="wolfnet_password" 
+                                                   id="id_wolfnet_password" 
+                                                   class="form-control" 
+                                                   placeholder="Enter your WolfNet password"
+                                                   value="{% if request.user.userprofile.wolfnet_password %}Password exists; hidden for security{% endif %}">
+                                            <button type="button" id="toggleWolfnetPassword" class="btn btn-outline-secondary" tabindex="-1" aria-label="Show/Hide Password" style="position:absolute; right:10px; top:50%; transform:translateY(-50%);">
+                                                <i class="fas fa-eye"></i>
+                                            </button>
+                                        </div>
                                         <small class="text-muted">
                                             Your WolfNet password will be securely stored and used for:
                                             <ul class="mt-2 mb-0">
@@ -542,6 +547,18 @@
                     autoCompleteBtn.disabled = false;
                     autoCompleteBtn.innerHTML = '<i class="fas fa-magic"></i> Auto-Complete from WolfNet';
                 }
+            });
+        }
+    });
+
+    document.addEventListener('DOMContentLoaded', function () {
+        const toggleBtn = document.getElementById('toggleWolfnetPassword');
+        const passwordInput = document.getElementById('id_wolfnet_password');
+        if (toggleBtn && passwordInput) {
+            toggleBtn.addEventListener('click', function () {
+                const type = passwordInput.type === 'password' ? 'text' : 'password';
+                passwordInput.type = type;
+                this.innerHTML = type === 'password' ? '<i class="fas fa-eye"></i>' : '<i class="fas fa-eye-slash"></i>';
             });
         }
     });
