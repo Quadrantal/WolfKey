@@ -240,18 +240,10 @@ class CustomUserCreationForm(UserCreationForm):
         }),
         help_text="<strong> Optional </strong> personal email address. NOTE: You can not reset your password without this!"
     )
-    phone_number = forms.CharField(
-        required=False,
-        widget=forms.TextInput(attrs={
-            'class': 'form-control',
-            'placeholder': '+1234567890'
-        }),
-        help_text="<strong> Optional </strong> phone number in international format (e.g., +12345678900)"
-    )
 
     class Meta:
         model = User
-        fields = ('first_name', 'last_name', 'school_email', 'personal_email', 'phone_number', 'password1', 'password2')
+        fields = ('first_name', 'last_name', 'school_email', 'personal_email', 'password1', 'password2')
 
     def clean_school_email(self):
         email = self.cleaned_data.get('school_email')
@@ -260,16 +252,6 @@ class CustomUserCreationForm(UserCreationForm):
         if User.objects.filter(school_email=email).exists():
             raise forms.ValidationError("This school email is already registered")
         return email
-
-    def clean_phone_number(self):
-        phone = self.cleaned_data.get('phone_number')
-        if phone:
-            # Remove any spaces or special characters except +
-            phone = ''.join(c for c in phone if c.isdigit() or c == '+')
-            # Validate phone number format
-            if not re.match(r'^\+?1?\d{9,15}$', phone):
-                raise forms.ValidationError("Please enter a valid phone number in international format")
-        return phone
     
     def save(self, commit=True):
         user = super().save(commit=False)
