@@ -53,6 +53,14 @@
     background-color: #6C757D !important;
 }
 
+.pill-btn.btn-outline-green {
+    background-color: #10B981 !important;
+}
+
+.pill-btn.btn-outline-yellow {
+    background-color: #FFC107 !important;
+}
+
 .pill-btn:hover, .pill-btn:focus {
     filter: brightness(0.95);
     text-decoration: none;

@@ -28,7 +28,7 @@ app.autodiscover_tasks()
 # Celery Beat Schedule for periodic tasks
 app.conf.beat_schedule = {
     'check-all-user-grades': {
-        'task': 'forum.tasks.check_all_user_grades',
+        'task': 'forum.tasks.periodic_grade_check_trigger',
         'schedule': 30.0 * 60,  # Every 30 minutes
     },
 }

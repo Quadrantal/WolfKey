@@ -15,10 +15,21 @@ def register(request):
         form = CustomUserCreationForm(request.POST)
         
         if form.is_valid():
-            current_courses = request.POST.get('current_courses', '').split(',')
-            experienced_courses = request.POST.get('experienced_courses', '').split(',')
+            wolfnet_password = request.POST.get('wolfnet_password', '').strip()
             
-            user, error = register_user(request, form, current_courses, experienced_courses)
+            # Get course experience data
+            help_courses = request.POST.get('help_courses', '').split(',')
+            experience_courses = request.POST.get('experience_courses', '').split(',')
+            
+            # Get schedule data if WolfNet password was provided
+            schedule_data = {}
+            blocks = ['1A', '1B', '1D', '1E', '2A', '2B', '2C', '2D', '2E']
+            for block in blocks:
+                block_course = request.POST.get(f'block_{block}', '')
+                if block_course:
+                    schedule_data[f'block_{block}'] = block_course
+            
+            user, error = register_user(request, form, help_courses, experience_courses, wolfnet_password, schedule_data)
             
             if error:
                 messages.error(request, error)
@@ -26,26 +37,26 @@ def register(request):
                 messages.success(request, 'Welcome to WolfKey!')
                 return redirect('all_posts')
         else:
-            # Form has errors, make user fix fields and while doing so, keep what they have selected previously. 
-            current_course_ids = request.POST.get('current_courses', '').split(',')
-            experienced_course_ids = request.POST.get('experienced_courses', '').split(',')
+            # Form has errors, preserve user selections
+            help_course_ids = request.POST.get('help_courses', '').split(',')
+            experience_course_ids = request.POST.get('experience_courses', '').split(',')
 
-            current_course_ids = [int(id) for id in current_course_ids if id]
-            experienced_course_ids = [int(id) for id in experienced_course_ids if id]
+            help_course_ids = [int(id) for id in help_course_ids if id.isdigit()]
+            experience_course_ids = [int(id) for id in experience_course_ids if id.isdigit()]
 
-            current_courses = list(Course.objects.filter(id__in=current_course_ids).values('id', 'name', 'code'))
-            experienced_courses = list(Course.objects.filter(id__in=experienced_course_ids).values('id', 'name', 'code'))
+            help_courses = list(Course.objects.filter(id__in=help_course_ids).values('id', 'name', 'code'))
+            experience_courses = list(Course.objects.filter(id__in=experience_course_ids).values('id', 'name', 'code'))
 
             return render(request, 'forum/register.html', {
                 'form': form,
                 'courses': Course.objects.all().order_by('name'),
                 'form_errors': form.errors.as_json(),
-                'selected_current_courses': json.dumps(current_courses),
-                'selected_experienced_courses': json.dumps(experienced_courses) 
+                'selected_help_courses': json.dumps(help_courses),
+                'selected_experience_courses': json.dumps(experience_courses) 
             })
     else:
         form = CustomUserCreationForm()
-    
+
     courses = Course.objects.all().order_by('name')
     return render(request, 'forum/register.html', {
         'form': form,

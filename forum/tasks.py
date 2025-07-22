@@ -42,14 +42,17 @@ def compare_assignments(old_assignments, new_assignments):
             changes.append({"type": "comment_changed", "assignment": new_a})
     return changes
 
-def login_to_wolfnet(user_email, driver, wait):
+def login_to_wolfnet(user_email, driver, wait, password=None):
     """Log into WolfNet and return the authenticated driver"""
     LOGIN_URL = "https://wpga.myschoolapp.com/"
     
-    PASSWORD = get_decrypted_wolfnet_password(user_email)
-    if not PASSWORD:
-        logger.error(f"No Wolfnet password found for {user_email}. Cannot login.")
-        return False
+    if password:
+        PASSWORD = password
+    else:
+        PASSWORD = get_decrypted_wolfnet_password(user_email)
+        if not PASSWORD:
+            logger.error(f"No Wolfnet password found for {user_email}. Cannot login.")
+            return False
     
     try:
         logger.info(f"Navigating to login page for {user_email}")
@@ -387,13 +390,21 @@ def check_all_user_grades_sequential():
     """
     users = list(User.objects.filter(school_email__isnull=False).exclude(school_email=''))
     logger.info(f"Starting sequential grade check for {len(users)} users")
-    job_ids = []
+    results = []
     for idx, user in enumerate(users):
         logger.info(f"Checking grades for {user.school_email} (user {idx+1}/{len(users)})")
-        job = check_single_user_grades.delay(user.school_email)
-        result = job.get(timeout=60)
-        job_ids.append(job.id)
-    return {"scheduled_tasks": len(job_ids), "task_ids": job_ids}
+        result = check_user_grades_core(user.school_email)
+        results.append(result)
+    return {"checked_users": len(results), "results": results}
+
+@shared_task
+def periodic_grade_check_trigger():
+    """
+    Simple task that triggers the sequential grade checking function.
+    This is called by Celery Beat to start the grade checking process.
+    """
+    logger.info("Starting periodic grade check trigger")
+    return check_all_user_grades_sequential()
 
 @shared_task(bind=True, queue='default', routing_key='default.email')
 def send_email_notification(self, recipient_email, subject, message):
@@ -419,7 +430,7 @@ def send_email_notification(self, recipient_email, subject, message):
         raise
 
 @shared_task(bind=True, queue='high', routing_key='high.auto')
-def auto_complete_courses(self, user_email):
+def auto_complete_courses(self, user_email, password=None):
     """
     Auto-complete courses from WolfNet schedule for a user - high priority interactive task
     """
@@ -433,7 +444,7 @@ def auto_complete_courses(self, user_email):
     wait = WebDriverWait(driver, 20)
 
     try:
-        if not login_to_wolfnet(user_email, driver, wait):
+        if not login_to_wolfnet(user_email, driver, wait, password):
             return {"success": False, "error": "Failed to login to WolfNet"}
 
         # Wait for the page to load and find the first .subnav-multicol element

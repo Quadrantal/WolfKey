@@ -1,30 +1,29 @@
 {% extends 'forum/base.html' %}
 
 {% block head %}
-
 {% load static %}
 <link rel="stylesheet" href="{% static 'forum/css/course-selector.css' %}">
 <link rel="stylesheet" href="{% static 'forum/css/register.css' %}">
-
+<link rel="stylesheet" href="{% static 'forum/css/asset.css' %}">
+<link rel="stylesheet" href="{% static 'forum/css/profile.css' %}">
 {% endblock %}
 
 {% block content %}
 <div class="main-container">
     <h1 class="page-title">WolfKey</h1>
-    <p class="page-subtitle">Your academic journey begins with a few simple steps</p>
 
     <div class="progress-container">
         <div class="step-item">
             <div class="step-circle active" data-step="1">1</div>
-            <div class="step-label active">Choose Role</div>
+            <div class="step-label active">Personal Info</div>
         </div>
         <div class="step-item">
             <div class="step-circle" data-step="2">2</div>
-            <div class="step-label">Personal Info</div>
+            <div class="step-label">WolfNet Integration</div>
         </div>
         <div class="step-item">
             <div class="step-circle" data-step="3">3</div>
-            <div class="step-label">Course Info</div>
+            <div class="step-label">Course Experience</div>
         </div>
         <div class="step-item">
             <div class="step-circle" data-step="4">4</div>
@@ -36,6 +35,7 @@
         <form id="onboardingForm" method="post">
             {% csrf_token %}
             
+            <!-- Step 1: Personal Information -->
             <div class="form-step active" data-step="1">
                 <div class="user-icon">
                     <div class="icon">
@@ -43,42 +43,24 @@
                     </div>
                 </div>
                 <div class="heading-section">
-                    <h3>Tell us who you are</h3>
-                    <p>Choose your role to personalize your experience</p>
-                </div>
-                <div class="role-selection">
-                    <label class="role-option">
-                        <input type="radio" name="role" value="student" class="role-radio">
-                        <i class="fas fa-graduation-cap role-option-icon"></i>
-                        <span>Student</span>
-                    </label>
-                    <label class="role-option">
-                        <input type="radio" name="role" value="teacher" class="role-radio">
-                        <i class="fas fa-chalkboard-teacher role-option-icon"></i>
-                        <span>Teacher</span>
-                    </label>
-                </div>
-                <div class="continue-btn">
-                    <button type="button" class="btn btn-primary" id="nextBtn">Continue <i class="fas fa-arrow-right"></i></button>
-                </div>
-            </div>
-
-            <div class="form-step" data-step="2">
-                <h3 class="mb-4">General Information</h3>
-                <div class="mb-3">
-                    {{ form.first_name }}
-                    {% if form.first_name.help_text %}
-                        <small class="help-text">{{ form.first_name.help_text }}</small>
-                    {% endif %}
-                    <div class="error-message" id="error-first_name"></div>
+                    <p>Let's start with some information</p>
                 </div>
                 
-                <div class="mb-3">
-                    {{ form.last_name }}
-                    {% if form.last_name.help_text %}
-                        <small class="help-text">{{ form.last_name.help_text }}</small>
-                    {% endif %}
-                    <div class="error-message" id="error-last_name"></div>
+                <div class="row">
+                    <div class="col-6 mb-3">
+                        {{ form.first_name }}
+                        {% if form.first_name.help_text %}
+                            <small class="help-text">{{ form.first_name.help_text }}</small>
+                        {% endif %}
+                        <div class="error-message" id="error-first_name"></div>
+                    </div>
+                    <div class="col-6 mb-3">
+                        {{ form.last_name }}
+                        {% if form.last_name.help_text %}
+                            <small class="help-text">{{ form.last_name.help_text }}</small>
+                        {% endif %}
+                        <div class="error-message" id="error-last_name"></div>
+                    </div>
                 </div>
                 
                 <div class="mb-3">
@@ -92,7 +74,7 @@
                 <div class="mb-3">
                     {{ form.personal_email }}
                     {% if form.personal_email.help_text %}
-                        <small class="help-text">{{ form.personal_email.help_text |safe  }}</small>
+                        <small class="help-text">{{ form.personal_email.help_text |safe }}</small>
                     {% endif %}
                     <div class="error-message" id="error-personal_email"></div>
                 </div>
@@ -103,10 +85,7 @@
                         <small class="help-text">{{ form.phone_number.help_text | safe}}</small>
                     {% endif %}
                     <div class="error-message" id="error-phone_number"></div>
-
                 </div>
-                
-                <h3 class="mb-4">Password</h3>
                 
                 <div class="mb-3">
                     {{ form.password1 }}
@@ -114,7 +93,6 @@
                         <small class="help-text">{{ form.password1.help_text }}</small>
                     {% endif %}
                     <div class="error-message" id="error-password1"></div>
-
                 </div>
                 
                 <div class="mb-3">
@@ -123,39 +101,155 @@
                         <small class="help-text">{{ form.password2.help_text }}</small>
                     {% endif %} 
                     <div class="error-message" id="error-password2"></div>
-
                 </div>
 
-                <div class="d-flex justify-content-between mt-4">
-                    <button type="button" class="btn btn-outline-secondary" id="prevBtn">Previous</button>
-                    <button type="button" class="btn btn-primary" id="nextBtn2">Continue <i class="fas fa-arrow-right"></i></button>
+                <div class="continue-btn">
+                    <button type="button" class="btn btn-primary" id="nextBtn1">Continue <i class="fas fa-arrow-right"></i></button>
                 </div>
             </div>
 
-            <div class="form-step" data-step="3">
-                <h3 class="mb-4">Hard Courses</h3>
-                <p class="text-muted">Select the courses you might have trouble in. Courses that you have low grades in, or new clubs this year.</p>
-                <div id="currentCoursesSelector"></div>
-                <div id="currentCoursesError" style="color: red;"></div>
-                <input type="hidden" name="current_courses" id="current_courses_input">
-                <h3 class="mb-4 mt-4">Past Experience</h3>
-                <p class="text-muted">Select courses you're proficient in. Courses or clubs that you're doing good in.</p>
-                <div id="experiencedCoursesSelector"></div>
-                <div id="experiencedCoursesError" style="color: red;"></div>
-                <input type="hidden" name="experienced_courses" id="experienced_courses_input">
+            <!-- Step 2: WolfNet Integration -->
+            <div class="form-step" data-step="2">
+                <div class="user-icon">
+                    <div class="icon">
+                        <i class="fas fa-shield-alt"></i>
+                    </div>
+                </div>
+                <div class="heading-section">
+                    <h3>WolfNet Integration</h3>
+                    <p>Connect your WolfNet account for automatic schedule and grade updates</p>
+                </div>
+                
+                <div class="card mb-4" style="background: #f8f9fa; border: 1px solid #e9ecef;">
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label for="id_wolfnet_password" class="form-label">WolfNet Password</label>
+                            <div style="position:relative;">
+                                <input type="password" 
+                                       name="wolfnet_password" 
+                                       id="id_wolfnet_password" 
+                                       class="form-control" 
+                                       placeholder="Enter your WolfNet password (optional)">
+                                <button type="button" id="toggleWolfnetPassword" class="btn btn-outline-secondary" tabindex="-1" aria-label="Show/Hide Password" style="position:absolute; right:10px; top:50%; transform:translateY(-50%);">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                            </div>
+                            <small class="text-muted">
+                                <i class="fas fa-lock text-success"></i> Your password will be <strong>securely encrypted</strong> and used for:
+                                <ul class="mt-2 mb-0">
+                                    <li>Automatic schedule retrieval and updates</li>
+                                    <li>Email notifications when assignments are graded</li>
+                                </ul>
+                            </small>
+                        </div>
+                        
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle"></i>
+                            <strong>Optional:</strong> You can skip this step and add your WolfNet password later in your profile settings.
+                        </div>
+                    </div>
+                </div>
 
+                <div class="d-flex justify-content-between">
+                    <button type="button" class="btn btn-outline-secondary" id="prevBtn1">
+                        <i class="fas fa-arrow-left"></i> Previous
+                    </button>
+                    <div>
+                        <button type="button" class="btn btn-outline-primary me-2" id="skipBtn2">Skip for Now</button>
+                        <button type="button" class="btn btn-primary" id="nextBtn2">Continue <i class="fas fa-arrow-right"></i></button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 3: Course Experience -->
+            <div class="form-step" data-step="3">
+                <div class="user-icon">
+                    <div class="icon">
+                        <i class="fas fa-graduation-cap"></i>
+                    </div>
+                </div>
+                <div class="heading-section">
+                    <h3>Course Experience</h3>
+                </div>
+
+
+                <h6 class="mb-0 text-warning"><i class="fas fa-hand-paper"></i> Courses You'd Like Help With</h6>
+                <div class="card-body">
+                    <p class="small text-muted">Select courses where you'd appreciate help</p>
+                    <div id="helpCoursesSelector"></div>
+                    <input type="hidden" name="help_courses" id="help_courses_input">
+                </div>
+            
+                <h6 class="mb-0 text-success"><i class="fas fa-star"></i> Courses You're Proficient In</h6>
+                <div class="card-body">
+                    <p class="small text-muted">Select courses where you excel and could help others</p>
+                    <div id="experienceCoursesSelector"></div>
+                    <input type="hidden" name="experience_courses" id="experience_courses_input">
+                </div>
 
                 <div class="d-flex justify-content-between mt-4">
-                    <button type="button" class="btn btn-outline-secondary" id="prevBtn2">Previous</button>
+                    <button type="button" class="btn btn-outline-secondary" id="prevBtn2">
+                        <i class="fas fa-arrow-left"></i> Previous
+                    </button>
                     <button type="button" class="btn btn-primary" id="nextBtn3">Continue <i class="fas fa-arrow-right"></i></button>
                 </div>
             </div>
 
-            <div class="form-step" data-step="4">
-                <h3 class="mb-4 text-center">Welcome Aboard! 🎉</h3>
-                <p class="text-center">You're all set to join WolfKey!</p>
-                <div class="text-center mt-4">
-                    <button type="submit" class="btn btn-primary btn-lg">Complete Registration</button>
+            <!-- Step 4: Schedule Review (Only if WolfNet password provided) -->
+            <div class="form-step" data-step="4" id="scheduleStep" style="display: none;">
+                <div class="user-icon">
+                    <div class="icon">
+                        <i class="fas fa-calendar-alt"></i>
+                    </div>
+                </div>
+                <div class="heading-section">
+                    <h3>Schedule Review</h3>
+                    <p>Review and modify your automatically retrieved schedule</p>
+                </div>
+
+                <!-- Loading state -->
+                <div id="scheduleLoading" class="text-center py-5">
+                    <div class="loader mb-3"></div>
+                    <h5>Retrieving your schedule from WolfNet...</h5>
+                    <p class="text-muted">This may take a moment</p>
+                </div>
+
+                <!-- Schedule content -->
+                <div id="scheduleContent" style="display: none;">
+                    <form id="scheduleForm">
+                        {% include 'forum/partials/schedule_block.html' %}
+                        <div class="text-center mt-4">
+                            <button type="button" class="btn btn-primary" id="saveScheduleBtn">
+                                <i class="fas fa-save"></i> Save Schedule
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="d-flex justify-content-between mt-4" id="scheduleNavigation" style="display: none;">
+                    <button type="button" class="btn btn-outline-secondary" id="prevBtn3">
+                        <i class="fas fa-arrow-left"></i> Previous
+                    </button>
+                    <button type="button" class="btn btn-primary" id="finalizeBtn">
+                        <i class="fas fa-check"></i> Complete Registration
+                    </button>
+                </div>
+            </div>
+
+            <!-- Final Step: Completion -->
+            <div class="form-step" data-step="complete">
+                <div class="text-center py-5">
+                    <div class="user-icon">
+                        <div class="icon" style="background: linear-gradient(135deg, #28a745, #20c997); color: white;">
+                            <i class="fas fa-check"></i>
+                        </div>
+                    </div>
+                    <h3 class="mb-4 text-success">Welcome to WolfKey! 🎉</h3>
+                    <div class="mt-4">
+                        <button type="submit" class="btn btn-success btn-lg">
+                            <i class="fas fa-rocket"></i> Enter WolfKey
+                        </button>
+                    </div>
                 </div>
             </div>
         </form>
@@ -163,200 +257,373 @@
 </div>
 
 {% load static %}
-<script src="{% static 'forum/js/course-selector.js' %}"></script>
 <script type="module">
     import { CourseSelector } from '{% static "forum/js/course-selector.js" %}';
-        document.addEventListener('DOMContentLoaded', function() {
+    
+    document.addEventListener('DOMContentLoaded', function() {
         const form = document.getElementById('onboardingForm');
         const steps = document.querySelectorAll('.form-step');
         const stepCircles = document.querySelectorAll('.step-circle');
         const stepLabels = document.querySelectorAll('.step-label');
-        const nextBtn = document.getElementById('nextBtn');
-        const nextBtn2 = document.getElementById('nextBtn2');
-        const nextBtn3 = document.getElementById('nextBtn3');
-        const prevBtn = document.getElementById('prevBtn');
-        const prevBtn2 = document.getElementById('prevBtn2');
+        
         let currentStep = 1;
+        let wolfnetPassword = '';
+        let scheduleTask = null;
+        let courseSelectors = {};
+        let retrievedCourses = null; // Store courses retrieved early
 
-        function updateSteps() {
-            steps.forEach(step => step.classList.remove('active'));
-            stepCircles.forEach(circle => circle.classList.remove('active'));
-            stepLabels.forEach(label => label.classList.remove('active'));
+        // Initialize course selectors for step 3
+        function initializeCourseSelectors() {
+            console.log("Intializing course selectors");
             
-            document.querySelector(`.form-step[data-step="${currentStep}"]`).classList.add('active');
-            document.querySelector(`.step-circle[data-step="${currentStep}"]`).classList.add('active');
-            document.querySelector(`.step-circle[data-step="${currentStep}"]`).parentElement.querySelector('.step-label').classList.add('active');
-        }
-
-        function showAllSteps() {
-            steps.forEach(step => step.classList.add('active'));
-            stepCircles.forEach(circle => circle.classList.add('active'));
-            stepLabels.forEach(label => label.classList.add('active'));
-        }
-
-        function hideAllStepsExceptCurrent() {
-            steps.forEach(step => step.classList.remove('active'));
-            stepCircles.forEach(circle => circle.classList.remove('active'));
-            stepLabels.forEach(label => label.classList.remove('active'));
-            
-            document.querySelector(`.form-step[data-step="${currentStep}"]`).classList.add('active');
-            document.querySelector(`.step-circle[data-step="${currentStep}"]`).classList.add('active');
-            document.querySelector(`.step-circle[data-step="${currentStep}"]`).parentElement.querySelector('.step-label').classList.add('active');
-        }
-
-        nextBtn.addEventListener('click', () => {
-            currentStep = 2;
-            updateSteps();
-        });
-
-        nextBtn2.addEventListener('click', () => {
-            currentStep = 3;
-            updateSteps();
-        });
-
-        nextBtn3.addEventListener('click', () => {
-            currentStep = 4;
-            updateSteps();
-        });
-
-        prevBtn.addEventListener('click', () => {
-            currentStep = 1;
-            updateSteps();
-        });
-
-        prevBtn2.addEventListener('click', () => {
-            currentStep = 2;
-            updateSteps();
-        });
-
-        // Role selection functionality
-        const roleOptions = document.querySelectorAll('.role-option');
-        roleOptions.forEach(option => {
-            option.addEventListener('click', () => {
-                roleOptions.forEach(opt => opt.classList.remove('selected'));
-                option.classList.add('selected');
-                option.querySelector('input[type="radio"]').checked = true;
+            courseSelectors.help = new CourseSelector({
+                containerId: 'helpCoursesSelector',
+                maxCourses: 5,
+                initialSelection: [],
+                formName: "onboardingForm"
             });
-        });
 
-        // Initialize current courses selector
-        const currentCoursesSelector = new CourseSelector({
-            containerId: 'currentCoursesSelector',
-            maxCourses: 20,
-            onSelectionChange: (courses) => {
-                validateCurrentCourses(courses);
-            },
-            initialSelection: {% if selected_current_courses %}{{ selected_current_courses|safe }}{% else %}[]{% endif %},
-            formName: "onboardingForm"
-        });
-
-        // Initialize experienced courses selector
-        const experiencedCoursesSelector = new CourseSelector({
-            containerId: 'experiencedCoursesSelector',
-            maxCourses: 20,
-            onSelectionChange: (courses) => {
-                validateExperiencedCourses(courses);
-            },
-            initialSelection: {% if selected_experienced_courses %}{{ selected_experienced_courses|safe }}{% else %}[]{% endif %},
-            formName: "onboardingForm"
-        });
-
-
-        function validateCurrentCourses(courses) {
-            const errorDiv = document.getElementById('currentCoursesError');
-            const currentCourses = currentCoursesSelector.getSelectedCourses();
-            // console.log(currentCourses)
-            if (courses.length < 3) {
-                errorDiv.textContent = 'You must select at least 3 courses you need help with.';
-            } else {
-                errorDiv.textContent = '';
-            }
-            document.getElementById('current_courses_input').value = currentCourses.map(course => course.id).join(',');
+            courseSelectors.experience = new CourseSelector({
+                containerId: 'experienceCoursesSelector',
+                maxCourses: 5,
+                initialSelection: [],
+                formName: "onboardingForm"
+            });
         }
 
-        function validateExperiencedCourses(courses) {
-            const experiencedCourses = experiencedCoursesSelector.getSelectedCourses();
-
-            const errorDiv = document.getElementById('experiencedCoursesError');
-            if (courses.length < 5) {
-                errorDiv.textContent = 'You must select at least 5 experienced courses.';
-            } else {
-                errorDiv.textContent = '';
+        // Initialize schedule selectors for step 4
+        function initializeScheduleSelectors() {
+            const blocks = ['1A', '1B', '1D', '1E', '2A', '2B', '2C', '2D', '2E'];
+            
+            blocks.forEach(block => {
+                const blockId = `block_${block}`;
+                courseSelectors[blockId] = new CourseSelector({
+                    containerId: `${blockId}_selector`,
+                    block: block,
+                    maxCourses: 1,
+                    initialSelection: [],
+                    formName: "onboardingForm",
+                    onSelectionChange: (courses) => updateBlockButtons(blockId, courses[0] || null, [], [])
+                });
+            });
+            
+            // Apply retrieved courses if they exist
+            if (retrievedCourses) {
+                updateCourseSelectors(retrievedCourses);
             }
-            document.getElementById('experienced_courses_input').value = experiencedCourses.map(course => course.id).join(',');
-
         }
 
-        // Show all steps before form submission
-        form.addEventListener('submit', (e) => {
-            // alert("Hi");
-            showAllSteps();
-            setTimeout(() => {
-                if (!form.checkValidity()) {
-                    console.log('Selected Courses:', selectedCourses);
-                    e.preventDefault();
-                    hideAllStepsExceptCurrent();
+        // Update step UI
+        function updateSteps() {
+            steps.forEach(step => {
+                step.classList.remove('active');
+                step.style.display = 'none';
+            });
+            stepCircles.forEach(circle => circle.classList.remove('active'));
+            stepLabels.forEach(label => label.classList.remove('active'));
+            
+            // Show current step
+            const currentStepElement = document.querySelector(`.form-step[data-step="${currentStep}"]`) || 
+                                      document.querySelector(`.form-step[data-step="complete"]`);
+            if (currentStepElement) {
+                currentStepElement.classList.add('active');
+                currentStepElement.style.display = 'block';
+            }
+            
+            // Update progress circles and bar
+            const progressContainer = document.querySelector('.progress-container');
+            const stepNumber = currentStep === 'complete' ? 4 : currentStep;
+            progressContainer.setAttribute('data-progress', stepNumber);
+            
+            stepCircles.forEach((circle, index) => {
+                if (index + 1 <= stepNumber) {
+                    circle.classList.add('active');
+                    circle.parentElement.querySelector('.step-label').classList.add('active');
                 }
-            }, 0);
-        });
+            });
+        }
 
-        displayFormErrors();
-        function displayFormErrors() {
-            try {
-                const errorMessages = JSON.parse('{{ form_errors|safe }}');
-                if (Object.keys(errorMessages).length > 0) {
-                    alert("Please correct the errors in the form.");
+        // Validate current step
+        function validateStep(step) {
+            if (step === 1) {
+                const requiredFields = ['first_name', 'last_name', 'school_email', 'password1', 'password2'];
+                for (let field of requiredFields) {
+                    const input = document.querySelector(`[name="${field}"]`);
+                    if (!input || !input.value.trim()) {
+                        showError(field, 'This field is required');
+                        return false;
+                    }
                 }
-                console.log("Parsed error messages:", errorMessages);
                 
-                // Clear any existing error messages
-                document.querySelectorAll('.error-message').forEach(el => {
-                    el.style.display = 'none';
-                    el.textContent = '';
-                });
-                document.querySelectorAll('.is-invalid').forEach(el => {
-                    el.classList.remove('is-invalid');
-                });
+                // Validate passwords match
+                const password1 = document.querySelector('[name="password1"]').value;
+                const password2 = document.querySelector('[name="password2"]').value;
+                if (password1 !== password2) {
+                    showError('password2', 'Passwords do not match');
+                    return false;
+                }
+            }
+            return true;
+        }
 
-                // Display new error messages
-                Object.entries(errorMessages).forEach(([field, fieldErrors]) => {
-                    // Get the error element for this field
-                    const errorElement = document.getElementById(`error-${field}`);
-                    if (errorElement) {
-                        // Extract the error message from the messages array
-                        const errorMessage = fieldErrors[0].message;
-                        errorElement.textContent = errorMessage;
-                        errorElement.style.display = 'block';
-                        
-                        // Add invalid class to the input
-                        const inputElement = form.querySelector(`[name="${field}"]`);
-                        if (inputElement) {
-                            inputElement.classList.add('is-invalid');
-                        }
-                        
-                        // Navigate to the step containing the error
-                        const step = inputElement?.closest('.form-step');
-                        if (step) {
-                            currentStep = parseInt(step.dataset.step);
-                            updateSteps();
-                        }
+        // Show validation error
+        function showError(fieldName, message) {
+            const errorElement = document.getElementById(`error-${fieldName}`);
+            if (errorElement) {
+                errorElement.textContent = message;
+                errorElement.style.display = 'block';
+                
+                const input = document.querySelector(`[name="${fieldName}"]`);
+                if (input) {
+                    input.classList.add('is-invalid');
+                }
+            }
+        }
+
+        // Clear validation errors
+        function clearErrors() {
+            document.querySelectorAll('.error-message').forEach(el => {
+                el.style.display = 'none';
+                el.textContent = '';
+            });
+            document.querySelectorAll('.is-invalid').forEach(el => {
+                el.classList.remove('is-invalid');
+            });
+        }
+
+        // Start WolfNet course auto-complete
+        async function startCourseAutoComplete() {
+            if (!wolfnetPassword) return;
+            
+            try {
+                // Create a temporary form to store the password
+                const tempData = new FormData();
+                tempData.append('wolfnet_password', wolfnetPassword);
+                tempData.append('school_email', document.querySelector('[name="school_email"]').value);
+                tempData.append('csrfmiddlewaretoken', document.querySelector('[name=csrfmiddlewaretoken]').value);
+                
+                const response = await fetch('/auto-complete-courses-registration/', {
+                    method: 'POST',
+                    body: tempData
+                });
+                
+                const result = await response.json();
+                
+                if (result.success && result.courses) {
+                    retrievedCourses = result.courses;
+                    // If selectors are already initialized, apply the courses immediately
+                    if (courseSelectors['block_1A']) {
+                        updateCourseSelectors(retrievedCourses);
+                    }
+                    // If we're on the schedule step, show content
+                    if (currentStep === 4) {
+                        showScheduleContent();
+                    }
+                } else {
+                    // Only show error if we're on the schedule step
+                    if (currentStep === 4) {
+                        showScheduleError(result.error || 'Failed to retrieve courses');
+                    }
+                }
+            } catch (error) {
+                console.error('Auto-complete error:', error);
+                // Only show error if we're on the schedule step
+                if (currentStep === 4) {
+                    showScheduleError('Failed to retrieve courses from WolfNet');
+                }
+            }
+        }
+
+        // Update course selectors with retrieved courses
+        function updateCourseSelectors(courses) {
+            const blocks = ['1A', '1B', '1D', '1E', '2A', '2B', '2C', '2D', '2E'];
+
+            console.log("Courses: ", courses);
+            
+            blocks.forEach(block => {
+                const blockId = `block_${block}`;
+                const course = courses[block];
+                if (course && courseSelectors[blockId]) {
+                    courseSelectors[blockId].addCourse(course);
+                    updateBlockButtons(blockId, course, [], []);
+                }
+            });
+        }
+
+        // Show schedule content and hide loading
+        function showScheduleContent() {
+            document.getElementById('scheduleLoading').style.display = 'none';
+            document.getElementById('scheduleContent').style.display = 'block';
+            document.getElementById('scheduleNavigation').style.display = 'flex';
+        }
+
+        // Show schedule error
+        function showScheduleError(message) {
+            document.getElementById('scheduleLoading').innerHTML = `
+                <div class="alert alert-warning">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <strong>Could not retrieve schedule:</strong> ${message}
+                    <br><br>
+                    <button type="button" class="btn btn-outline-primary" onclick="skipScheduleStep()">
+                        Continue Without Schedule
+                    </button>
+                </div>
+            `;
+        }
+
+        // Skip schedule step
+        window.skipScheduleStep = function() {
+            currentStep = 'complete';
+            updateSteps();
+        };
+
+        // Button event handlers
+        if (document.getElementById('nextBtn1')) {
+            document.getElementById('nextBtn1').addEventListener('click', function() {
+                clearErrors();
+                if (validateStep(1)) {
+                    currentStep = 2;
+                    updateSteps();
+                }
+            });
+        }
+
+        if (document.getElementById('nextBtn2')) {
+            document.getElementById('nextBtn2').addEventListener('click', function() {
+                wolfnetPassword = document.getElementById('id_wolfnet_password').value;
+                currentStep = 3;
+                updateSteps();
+                // Initialize course selectors when reaching step 3
+                initializeCourseSelectors();
+                // Start course auto-complete early if password is provided
+                if (wolfnetPassword) {
+                    startCourseAutoComplete();
+                }
+            });
+        }
+
+        if (document.getElementById('skipBtn2')) {
+            document.getElementById('skipBtn2').addEventListener('click', function() {
+                wolfnetPassword = '';
+                currentStep = 3;
+                updateSteps();
+                // Initialize course selectors when reaching step 3
+                initializeCourseSelectors();
+            });
+        }
+
+        if (document.getElementById('nextBtn3')) {
+            document.getElementById('nextBtn3').addEventListener('click', function() {
+                if (wolfnetPassword) {
+                    // Show schedule step
+                    currentStep = 4;
+                    document.querySelector('.form-step[data-step="4"]').style.display = 'block';
+                    updateSteps();
+                    initializeScheduleSelectors();
+                    
+                    // If courses were already retrieved, show content immediately
+                    if (retrievedCourses) {
+                        showScheduleContent();
+                    } else {
+                        // Start auto-complete if not already started (fallback)
+                        startCourseAutoComplete();
+                    }
+                } else {
+                    // Skip to completion
+                    currentStep = 'complete';
+                    updateSteps();
+                }
+            });
+        }
+
+        if (document.getElementById('prevBtn1')) {
+            document.getElementById('prevBtn1').addEventListener('click', function() {
+                currentStep = 1;
+                updateSteps();
+            });
+        }
+
+        if (document.getElementById('prevBtn2')) {
+            document.getElementById('prevBtn2').addEventListener('click', function() {
+                currentStep = 2;
+                updateSteps();
+            });
+        }
+
+        if (document.getElementById('prevBtn3')) {
+            document.getElementById('prevBtn3').addEventListener('click', function() {
+                currentStep = 3;
+                updateSteps();
+            });
+        }
+
+        if (document.getElementById('finalizeBtn')) {
+            document.getElementById('finalizeBtn').addEventListener('click', function() {
+                currentStep = 'complete';
+                updateSteps();
+            });
+        }
+
+        // Save schedule button
+        if (document.getElementById('saveScheduleBtn')) {
+            document.getElementById('saveScheduleBtn').addEventListener('click', function() {
+                // Here you would save the schedule data
+                currentStep = 'complete';
+                updateSteps();
+            });
+        }
+
+        // Password toggle
+        if (document.getElementById('toggleWolfnetPassword')) {
+            document.getElementById('toggleWolfnetPassword').addEventListener('click', function() {
+                const passwordInput = document.getElementById('id_wolfnet_password');
+                const icon = this.querySelector('i');
+                
+                if (passwordInput.type === 'password') {
+                    passwordInput.type = 'text';
+                    icon.classList.replace('fa-eye', 'fa-eye-slash');
+                } else {
+                    passwordInput.type = 'password';
+                    icon.classList.replace('fa-eye-slash', 'fa-eye');
+                }
+            });
+        }
+
+        // Block buttons update function (similar to profile.html)
+        window.updateBlockButtons = function(blockId, course, experiencedCourses, helpNeededCourses) {
+            const buttonsContainer = document.getElementById(`${blockId}_buttons`);
+            if (!buttonsContainer) return;
+            
+            if (course) {
+                buttonsContainer.style.display = 'block';
+            } else {
+                buttonsContainer.style.display = 'none';
+            }
+        };
+
+        // Form submission
+        if (form) {
+            form.addEventListener('submit', function(e) {
+                // Collect all schedule data
+                const blocks = ['1A', '1B', '1D', '1E', '2A', '2B', '2C', '2D', '2E'];
+                blocks.forEach(block => {
+                    const blockId = `block_${block}`;
+                    const selector = courseSelectors[blockId];
+                    if (selector && selector.getSelectedCourses && selector.getSelectedCourses().length > 0) {
+                        const hiddenInput = document.createElement('input');
+                        hiddenInput.type = 'hidden';
+                        hiddenInput.name = blockId;
+                        hiddenInput.value = selector.getSelectedCourses()[0].id;
+                        form.appendChild(hiddenInput);
                     }
                 });
-            } catch (e) {
-                console.error("Error parsing form errors:", e);
-            }
+                
+                console.log('Submitting registration form...');
+            });
         }
-        validateCurrentCourses(currentCoursesSelector.getSelectedCourses());
-        validateExperiencedCourses(experiencedCoursesSelector.getSelectedCourses());
 
-        form.addEventListener('keypress', function(event) {
-            if (event.key === 'Enter') {
-                event.preventDefault();
-                console.log("Enters");
-                return false;
-            }
-        });
+        // Initialize
+        updateSteps();
     });
-
 </script>
 {% endblock %}

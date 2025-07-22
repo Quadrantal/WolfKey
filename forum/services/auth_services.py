@@ -38,34 +38,57 @@ def get_user_profile_data(user):
         }
     }
 
-def register_user(request, form, current_courses, experienced_courses):
+def register_user(request, form, help_courses, experience_courses, wolfnet_password=None, schedule_data=None):
     """
     Centralized service for user registration
     Returns (user, error_message) tuple
     """
     try:
-        if len(experienced_courses) < 5:
-            return None, 'You must select at least 5 experienced courses.'
+        # Lower the threshold for registration - these are optional now
+        if len(experience_courses) > 0 and len(experience_courses) < 2:
+            return None, 'If selecting experience courses, please select at least 2.'
             
-        if len(current_courses) < 3:
-            return None, 'You must select at least 3 courses you need help with.'
+        if len(help_courses) > 0 and len(help_courses) < 2:
+            return None, 'If selecting help courses, please select at least 2.'
 
         user = form.save()
         
-        # Add current courses as help needed
-        for course_id in current_courses:
-            UserCourseHelp.objects.create(
-                user=user,
-                course_id=course_id,
-                active=True
-            )
+        # Set WolfNet password if provided
+        if wolfnet_password:
+            from forum.forms import WolfNetSettingsForm
+            wolfnet_form = WolfNetSettingsForm()
+            encrypted_password = wolfnet_form.encrypt_password(wolfnet_password)
+            user.userprofile.wolfnet_password = encrypted_password
+            user.userprofile.save()
+        
+        # Set schedule courses if provided
+        if schedule_data:
+            from forum.models import Course
+            for block_key, course_id in schedule_data.items():
+                if course_id.isdigit():
+                    try:
+                        course = Course.objects.get(id=int(course_id))
+                        setattr(user.userprofile, block_key, course)
+                    except Course.DoesNotExist:
+                        pass
+            user.userprofile.save()
+        
+        # Add help courses
+        for course_id in help_courses:
+            if course_id.isdigit():
+                UserCourseHelp.objects.create(
+                    user=user,
+                    course_id=int(course_id),
+                    active=True
+                )
             
-        # Add experienced courses
-        for course_id in experienced_courses:
-            UserCourseExperience.objects.create(
-                user=user,
-                course_id=course_id
-            )
+        # Add experience courses
+        for course_id in experience_courses:
+            if course_id.isdigit():
+                UserCourseExperience.objects.create(
+                    user=user,
+                    course_id=int(course_id)
+                )
         
         login(request, user)
         return user, None

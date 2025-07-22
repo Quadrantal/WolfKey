@@ -1,5 +1,5 @@
 from django.core.management.base import BaseCommand
-from forum.tasks import check_all_user_grades_sequential, check_single_user_grades
+from forum.tasks import check_all_user_grades_sequential, check_single_user_grades, periodic_grade_check_trigger
 
 class Command(BaseCommand):
     help = 'Manually trigger grade checking for users'
@@ -16,5 +16,5 @@ class Command(BaseCommand):
             self.stdout.write(self.style.SUCCESS(f'Task scheduled with ID: {task.id}'))
         else:
             self.stdout.write('Checking grades for all users sequentially...')
-            result = check_all_user_grades_sequential()
-            self.stdout.write(self.style.SUCCESS(f"Scheduled {result['scheduled_tasks']} grade checking tasks."))
+            result = periodic_grade_check_trigger.delay()
+            self.stdout.write(self.style.SUCCESS(f"Scheduled  grade checking tasks."))
