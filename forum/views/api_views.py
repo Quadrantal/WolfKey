@@ -141,7 +141,7 @@ def api_post_detail(request, post_id):
             'author': post.author.get_full_name(),
             'created_at': post.created_at.isoformat(),
             'solutions': processed_solutions,
-            'courses': [{'id': c.id, 'name': c.name, 'code': c.code} for c in post.courses.all()],
+            'courses': [{'id': c.id, 'name': c.name} for c in post.courses.all()],
         }
 
         return JsonResponse(response_data)

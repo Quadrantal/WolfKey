@@ -517,3 +517,14 @@
     flex-direction: column;
     gap: 5px;
 }
+
+#nextBtn3:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+.text-success {
+    color: #28a745 !important;
+}
+.text-muted {
+    color: #6c757d !important;
+}

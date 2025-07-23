@@ -137,7 +137,7 @@
     transform: translate(-50%, -50%);
     width: 20px;
     height: 20px;
-    border: 2px solid #f3f3f3;
+    border: 2px solid #898989;
     border-top: 2px solid var(--primary-color);
     border-radius: 50%;
     animation: spin 1s linear infinite;
@@ -265,7 +265,7 @@
 .loader::after {    
   content:"";
   grid-area: 1/1;
-  --c:no-repeat radial-gradient(farthest-side,#ffffff 92%,#0000);
+  --c:no-repeat radial-gradient(farthest-side,#5d1bce 92%,#0000);
   background: 
     var(--c) 50%  0, 
     var(--c) 50%  100%, 

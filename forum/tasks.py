@@ -68,23 +68,37 @@ def login_to_wolfnet(user_email, driver, wait, password=None):
         submit_btn = wait.until(EC.element_to_be_clickable((By.ID, "idSIButton9")))
         submit_btn.click()
 
-        # Handle 'Stay signed in?' prompt if it appears
+        # Wait for either success (stay signed in prompt) or error (password error)
         try:
-            stay_signed_in_btn = wait.until(
-                EC.presence_of_element_located((By.ID, "idBtn_Back"))
+            element = wait.until(
+                EC.any_of(
+                    EC.presence_of_element_located((By.ID, "idBtn_Back")),  # Stay signed in button (success)
+                    EC.presence_of_element_located((By.CSS_SELECTOR, "#passwordError, .error, .alert-error")),  # Error elements
+                    EC.presence_of_element_located((By.CSS_SELECTOR, "#activitiesContainer"))  # Direct dashboard access
+                )
             )
-            stay_signed_in_btn.click()
-        except Exception:
-            pass
-
-        try:
-            wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "#activitiesContainer")))
-            time.sleep(1)
-            logger.info(f"Successfully logged in for {user_email}")
-            return True
+            
+            # Check which element we got
+            if element.get_attribute("id") == "idBtn_Back":
+                # Stay signed in prompt - login was successful
+                element.click()
+                wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "#activitiesContainer")))
+                time.sleep(1)
+                logger.info(f"Successfully logged in for {user_email} after handling stay signed in prompt")
+                return True
+            elif "activitiesContainer" in element.get_attribute("id"):
+                # Direct dashboard access - login was successful
+                logger.info(f"Successfully logged in for {user_email}")
+                time.sleep(1)
+                return True
+            else:
+                logger.error(f"Wrong WolfNet password detected for {user_email}")
+                return "wrong_password"
+                    
         except Exception as e:
-            logger.error(f"Post-login element not found for {user_email}: {str(e)}")
-            return False
+            # If none of the expected elements appear within timeout, assume password error
+            logger.error(f"Login timeout or unexpected state for {user_email}: {str(e)}")
+            return "wrong_password"
     except Exception as e:
         logger.error(f"Failed to login for {user_email}: {str(e)}")
         return False
@@ -115,11 +129,11 @@ def check_user_grades_core(user_email):
     wait = WebDriverWait(driver, 20)
 
     try:
-        if not login_to_wolfnet(user_email, driver, wait):
-            return {
-                "success": False,
-                "error": "Login to WolfNet failed. Please check your credentials and try again."
-            }
+        login_result = login_to_wolfnet(user_email, driver, wait)
+        if login_result == "wrong_password":
+            return {"success": False, "error": "wrong_password"}
+        elif not login_result:
+            return {"success": False, "error": "Failed to login to WolfNet"}
 
         # Wait for courses to load
         wait.until(EC.presence_of_all_elements_located((By.CSS_SELECTOR, ".collapse")))
@@ -444,7 +458,10 @@ def auto_complete_courses(self, user_email, password=None):
     wait = WebDriverWait(driver, 20)
 
     try:
-        if not login_to_wolfnet(user_email, driver, wait, password):
+        login_result = login_to_wolfnet(user_email, driver, wait, password)
+        if login_result == "wrong_password":
+            return {"success": False, "error": "wrong_password"}
+        elif not login_result:
             return {"success": False, "error": "Failed to login to WolfNet"}
 
         # Wait for the page to load and find the first .subnav-multicol element
@@ -538,7 +555,7 @@ def auto_complete_courses(self, user_email, password=None):
         }
         
     except Exception as e:
-        logger.error(f"Error in auto_complete_courses for {user_email}: {str(e)}")
+        logger.error(f"Error in auto_complete_courses for {user_email}: {str(e.with_traceback)}")
         return {"success": False, "error": str(e)}
     finally:
         driver.quit()

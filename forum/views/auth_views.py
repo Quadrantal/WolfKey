@@ -30,30 +30,56 @@ def register(request):
                     schedule_data[f'block_{block}'] = block_course
             
             user, error = register_user(request, form, help_courses, experience_courses, wolfnet_password, schedule_data)
-            
+            print(error)
             if error:
+                print("Detect errorr")
                 messages.error(request, error)
             else:
                 messages.success(request, 'Welcome to WolfKey!')
                 return redirect('all_posts')
         else:
-            # Form has errors, preserve user selections
-            help_course_ids = request.POST.get('help_courses', '').split(',')
-            experience_course_ids = request.POST.get('experience_courses', '').split(',')
+            for field, errors in form.errors.items():
+                for error in errors:
+                    if field == '__all__':
+                        messages.error(request, error)
+                    else:
+                        field_name = form.fields[field].label or field.replace('_', ' ').title()
+                        messages.error(request, f"{field_name}: {error}")
+        
+        help_course_ids = request.POST.get('help_courses', '').split(',')
+        experience_course_ids = request.POST.get('experience_courses', '').split(',')
 
-            help_course_ids = [int(id) for id in help_course_ids if id.isdigit()]
-            experience_course_ids = [int(id) for id in experience_course_ids if id.isdigit()]
+        help_course_ids = [int(id) for id in help_course_ids if id.isdigit()]
+        experience_course_ids = [int(id) for id in experience_course_ids if id.isdigit()]
 
-            help_courses = list(Course.objects.filter(id__in=help_course_ids).values('id', 'name', 'code'))
-            experience_courses = list(Course.objects.filter(id__in=experience_course_ids).values('id', 'name', 'code'))
+        help_courses = list(Course.objects.filter(id__in=help_course_ids).values('id', 'name'))
+        experience_courses = list(Course.objects.filter(id__in=experience_course_ids).values('id', 'name'))
 
-            return render(request, 'forum/register.html', {
-                'form': form,
-                'courses': Course.objects.all().order_by('name'),
-                'form_errors': form.errors.as_json(),
-                'selected_help_courses': json.dumps(help_courses),
-                'selected_experience_courses': json.dumps(experience_courses) 
-            })
+        wolfnet_password = request.POST.get('wolfnet_password', '').strip()
+        
+        schedule_data = {}
+        blocks = ['1A', '1B', '1D', '1E', '2A', '2B', '2C', '2D', '2E']
+        for block in blocks:
+            block_course = request.POST.get(f'block_{block}', '')
+            if block_course:
+                try:
+                    course = Course.objects.get(id=int(block_course))
+                    schedule_data[block] = {
+                        'id': course.id,
+                        'name': course.name,
+                    }
+                except (Course.DoesNotExist, ValueError):
+                    pass
+
+        return render(request, 'forum/register.html', {
+            'form': form,
+            'courses': Course.objects.all().order_by('name'),
+            'form_errors': form.errors.as_json(),
+            'selected_help_courses': json.dumps(help_courses),
+            'selected_experience_courses': json.dumps(experience_courses),
+            'saved_wolfnet_password': wolfnet_password,
+            'saved_schedule_data': json.dumps(schedule_data)
+        })
     else:
         form = CustomUserCreationForm()
 
