@@ -30,9 +30,7 @@ def register(request):
                     schedule_data[f'block_{block}'] = block_course
             
             user, error = register_user(request, form, help_courses, experience_courses, wolfnet_password, schedule_data)
-            print(error)
             if error:
-                print("Detect errorr")
                 messages.error(request, error)
             else:
                 messages.success(request, 'Welcome to WolfKey!')
