@@ -394,6 +394,7 @@
   margin-top: 4px;
   padding: 6px 0;
   overflow: hidden;
+  padding: .5rem .125rem;
 }
 
 .sort-dropdown-menu.show {
@@ -409,17 +410,18 @@
   display: block;
   text-decoration: none;
   transition: background-color 0.2s ease;
-  border-radius: 6px;
+  border-radius: 12px;
+  padding: 0.5rem 1rem;
 }
 
 .sort-option:hover {
-  background-color: #ebf8ff;
+  background-color: #e8f2fb;
   color: #3182ce;
 }
 
 .sort-option.active {
-  background-color: #bee3f8;
-  color: #2b6cb0;
+  background-color: #2b6cb0;
+  color: #e8f2fb;
   font-weight: 500;
 }
 

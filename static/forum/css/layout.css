@@ -189,10 +189,10 @@ li {
   
   /* Dropdown menu styling */
   .dropdown-menu {
-    background-color: #ffffff; /* Background color */
-    border: 1px solid #eaeaea; /* Border color */
-    border-radius: 0.25rem; /* Rounded corners */
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Slight shadow for depth */
+    background-color: #ffffff;
+    border: 1px solid #eaeaea;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    border-radius: 12px;
   }
   
   /* Dropdown item styling */
@@ -201,10 +201,11 @@ li {
     color: #333333; /* Text color */
     padding: 0.5rem 1rem; /* Spacing */
     transition: background-color 0.2s, color 0.2s; /* Smooth hover effect */
+    border-radius: 12px;
   }
   
   .dropdown-menu .dropdown-item:hover {
-    background-color: #f8f9fa; /* Light hover background */
+    background-color: #e8f2fb; /* Light hover background */
     color: #007bff; /* Hover text color */
   }
   
