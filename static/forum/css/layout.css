@@ -9,32 +9,41 @@
 .ask-button {
     z-index: 1;
     position: relative;
-    overflow: hidden;
+    overflow: hidden !important;
     border: none !important;
     border-radius: 6px;
     line-height: 2rem;
+    padding: .375rem .75rem !important;
+    border-radius: 6px !important;
+    color: white
+}
+
+.ask-button:hover {
+    color: white;
 }
 
 .ask-button::before {
-    content: "";
-    position: absolute;
-    top: -3px;
-    left: -3px;
-    right: -3px;
-    bottom: -3px;
-    background: linear-gradient(45deg, #ffd800, #ff5520, #750cf2, #0cbcf2);
+    content: "" !important;
+    position: absolute !important;
+    top: -3px !important ;
+    left: -3px !important;
+    right: -3px !important;
+    bottom: -3px !important;
+    background: linear-gradient(45deg, #ffd800, #ff5520, #750cf2, #0cbcf2) !important;
     z-index: -2;
     border-radius: inherit;
+    width: auto !important;
+    height: auto !important;
 }
 
 .ask-button::after{
-    content: "";
-    position: absolute;
-    top: 3px;
-    left: 3px;
-    right: 3px;
-    bottom: 3px;
-    background-color: #310599;
+    content: "" !important;
+    position: absolute !important;
+    top: 3px!important ;
+    left: 3px !important;
+    right: 3px!important;
+    bottom: 3px !important;
+    background-color: #310599 !important;
     z-index: -1;
     border-radius: 6px;
 }
