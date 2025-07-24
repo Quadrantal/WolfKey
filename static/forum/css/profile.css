@@ -80,8 +80,9 @@ input[type="range"]::-webkit-slider-runnable-track {
 
   #profile-tab{
     color: black;
-    border-top-left-radius: 6px;
-    border-top-right-radius: 6px;
+    border-top-left-radius: 8px;
+    border-top-right-radius: 8px;
+    border: none !important;
   }
 
 #preferences-tab{
@@ -95,11 +96,13 @@ input[type="range"]::-webkit-slider-runnable-track {
 
 
 #profile-tab:hover,
-#preferences-tab:hover {
+#preferences-tab:hover,
+#schedule-tab:hover{
     background-color: #f1f1f1;
     transition: background-color 0.3s ease, color 0.3s ease;
+    border-top-left-radius: 8px;
+    border-top-right-radius: 8px;
 }
-
 #profileTabs {
     border-bottom: 1px solid white;
 }
@@ -247,4 +250,28 @@ input[type="range"]::-webkit-slider-runnable-track {
     background: grey;
     color: #b5b5b5;
     pointer-events: all;
+}
+
+/* Simple change detection button */
+.change-detected {
+    background: linear-gradient(135deg, #007bff, #0056b3) !important;
+    border-color: #007bff !important;
+    color: white !important;
+    animation: scale-pulse 0.5s ease-in-out infinite alternate;
+    transition: background 0.3s ease, transform 0.2s ease !important;
+}
+
+.change-detected:hover {
+    background: linear-gradient(135deg, #0056b3, #007bff) !important;
+    transform: scale(1.05) !important;
+    animation: none;
+}
+
+@keyframes scale-pulse {
+    0% {
+        transform: scale(1);
+    }
+    100% {
+        transform: scale(1.05);
+    }
 }

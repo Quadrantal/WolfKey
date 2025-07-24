@@ -33,11 +33,11 @@
                             {% endif %}
                             <!-- Dropdown Menu -->
                             <div class="dropdown-menu" id="profilePictureMenu">
-                                <form action="{% url 'upload_profile_picture' %}" method="post" enctype="multipart/form-data" class="p-2">
+                                <form action="{% url 'upload_profile_picture' %}" method="post" enctype="multipart/form-data" class="p-2" id="profilePictureForm">
                                     {% csrf_token %}
                                     <label for="profile_picture" class="form-label">Upload New Profile Picture:</label>
                                     <input type="file" name="profile_picture" id="profile_picture" class="form-control mb-2">
-                                    <button type="submit" class="btn btn-primary btn-sm">Upload</button>
+                                    <button type="submit" class="btn btn-primary btn-sm" disabled>Upload</button>
                                 </form>
                             </div>
                         </div>
@@ -92,13 +92,13 @@
                             </div>
                             <div class="card-body">
                                 {% if user == profile_user %}
-                                <form method="post">
+                                <form method="post" id="bioForm">
                                     {% csrf_token %}
                                     <div class="mb-3">
                                         <textarea name="bio" id="bio" class="form-control" maxlength="500" rows="4">{{ profile_user.userprofile.bio }}</textarea>
                                         <small class="text-muted">Max 500 characters. Avoid inappropriate language.</small>
                                     </div>
-                                    <button type="submit" class="btn btn-primary">Save Bio</button>
+                                    <button type="submit" class="btn btn-primary" disabled>Save Bio</button>
                                 </form>
                                 {% else %}
                                 <p>{{ profile_user.userprofile.bio|default:"No bio provided." }}</p>
@@ -125,13 +125,13 @@
                                 <h5 class="mb-0">Customize Background</h5>
                             </div>
                             <div class="card-body">
-                                <form method="post">
+                                <form method="post" id="backgroundForm">
                                     {% csrf_token %}
                                     <div class="mb-3">
                                         <label for="background_hue" class="form-label">Background Color Hue</label>
                                         <input type="range" name="background_hue" id="background_hue" class="form-range background_hue_slider" min="0" max="360" value="{{ profile_user.userprofile.background_hue }}" oninput="setBackground(this.value)">
                                     </div>
-                                    <button type="submit" class="btn btn-primary">Save Changes</button>
+                                    <button type="submit" class="btn btn-primary" disabled>Save Changes</button>
                                 </form>
                             </div>
                         </div>
@@ -244,7 +244,7 @@
                                     {% include 'forum/partials/schedule_block.html' %}
                                     <div class="row">
                                         <div class="col-md-12 mb-1" style="text-align: center">
-                                            <button type="submit" class="btn btn-primary">Save Courses</button>
+                                            <button type="submit" class="btn btn-primary" disabled>Save Courses</button>
                                         </div>                                        
                                     </div>
                                 </form>
@@ -281,7 +281,7 @@
                                         <label for="id_phone_number" class="form-label">Phone Number</label>
                                         <input type="text" name="phone_number" id="id_phone_number" class="form-control" value="{{ request.user.phone_number }}">
                                     </div>
-                                    <button type="submit" class="btn btn-primary">Save Info</button>
+                                    <button type="submit" class="btn btn-primary" disabled>Save Info</button>
                                 </form>
                             </div>
                         </div>
@@ -316,7 +316,7 @@
                                         </small>
                                     </div>
                                     <div class="d-flex gap-2">
-                                        <button type="submit" class="btn btn-primary">Save WolfNet Settings</button>
+                                        <button type="submit" class="btn btn-primary" disabled>Save WolfNet Settings</button>
                                         {% if request.user.userprofile.wolfnet_password %}
                                         <button type="button" class="btn btn-outline-danger" onclick="clearWolfNetPassword()">Clear Password</button>
                                         {% endif %}
@@ -569,6 +569,165 @@
     });
 </script>
 
+<!-- Form Change Tracking and Alert System -->
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Track changes across all forms
+        let hasUnsavedChanges = false;
+        let originalFormData = {};
+        
+        // Get all forms that should be tracked
+        const trackedForms = [
+            'personalInfoForm',
+            'wolfnetForm',
+            'blockCoursesForm',
+            'bioForm',
+            'backgroundForm'
+        ];
+        
+        // Store original form data and add change listeners
+        trackedForms.forEach(formId => {
+            const form = document.getElementById(formId);
+            if (form) {
+                // Store original data
+                originalFormData[formId] = new FormData(form);
+                
+                // Add change listeners to all inputs (except course selectors which are handled separately)
+                const inputs = form.querySelectorAll('input:not([data-course-selector]), textarea:not([data-course-selector]), select:not([data-course-selector])');
+                inputs.forEach(input => {
+                    input.addEventListener('change', () => {
+                        checkForChanges(form, formId);
+                    });
+                    input.addEventListener('input', () => {
+                        checkForChanges(form, formId);
+                    });
+                });
+                
+                // Handle form submission
+                form.addEventListener('submit', () => {
+                    hasUnsavedChanges = false;
+                    // Remove change-detected class and disable submit buttons
+                    const submitBtns = form.querySelectorAll('button[type="submit"]');
+                    submitBtns.forEach(btn => {
+                        btn.classList.remove('change-detected');
+                        btn.disabled = true;
+                    });
+                });
+            }
+        });
+        
+        // Function to check for changes in a specific form
+        function checkForChanges(form, formId) {
+            const currentData = new FormData(form);
+            const originalData = originalFormData[formId];
+            let hasChanges = false;
+            
+            // Special handling for file inputs
+            const fileInputs = form.querySelectorAll('input[type="file"]');
+            fileInputs.forEach(fileInput => {
+                if (fileInput.files && fileInput.files.length > 0) {
+                    hasChanges = true;
+                }
+            });
+            
+            // Compare current data with original (skip file inputs as they're handled above)
+            if (!hasChanges) {
+                for (let [key, value] of currentData.entries()) {
+                    const input = form.querySelector(`[name="${key}"]`);
+                    if (input && input.type !== 'file' && originalData.get(key) !== value) {
+                        hasChanges = true;
+                        break;
+                    }
+                }
+            }
+            
+            // Check if any original fields are missing in current data (skip file inputs)
+            if (!hasChanges) {
+                for (let [key, value] of originalData.entries()) {
+                    const input = form.querySelector(`[name="${key}"]`);
+                    if (input && input.type !== 'file' && currentData.get(key) !== value) {
+                        hasChanges = true;
+                        break;
+                    }
+                }
+            }
+            
+            // Update submit button styling and enabled state
+            const submitBtn = form.querySelector('button[type="submit"]');
+            if (submitBtn) {
+                if (hasChanges) {
+                    submitBtn.classList.add('change-detected');
+                    submitBtn.disabled = false;
+                    hasUnsavedChanges = true;
+                } else {
+                    submitBtn.classList.remove('change-detected');
+                    submitBtn.disabled = true;
+                    checkAllFormsForChanges();
+                }
+            }
+        }
+        
+        // Function to check if any form has unsaved changes
+        function checkAllFormsForChanges() {
+            hasUnsavedChanges = false;
+            trackedForms.forEach(formId => {
+                const form = document.getElementById(formId);
+                if (form) {
+                    const submitBtn = form.querySelector('button[type="submit"]');
+                    if (submitBtn && submitBtn.classList.contains('change-detected')) {
+                        hasUnsavedChanges = true;
+                    }
+                }
+            });
+        }
+        
+        // Expose function to update unsaved changes state from course selectors
+        window.updateUnsavedChanges = function(hasChanges) {
+            if (hasChanges) {
+                hasUnsavedChanges = true;
+            } else {
+                checkAllFormsForChanges();
+            }
+        };
+        
+        // Warn user before leaving page with unsaved changes
+        window.addEventListener('beforeunload', function (e) {
+            if (hasUnsavedChanges) {
+                const message = 'You have unsaved changes. Are you sure you want to leave?';
+                e.preventDefault();
+                e.returnValue = message;
+                return message;
+            }
+        });
+        
+        // Handle internal navigation (like tab switching)
+        document.querySelectorAll('a[href], .nav-link').forEach(link => {
+            link.addEventListener('click', function(e) {
+                if (hasUnsavedChanges) {
+                    // Always prevent default first
+                    e.preventDefault();
+                    e.stopPropagation();
+                    
+                    if (this.classList.contains('nav-link')) {
+                        const confirmLeave = confirm('You have unsaved changes. Are you sure you want to switch tabs?');
+                        if (confirmLeave) {
+                            hasUnsavedChanges = false;
+                            const tab = new bootstrap.Tab(this);
+                            tab.show();
+                        }
+                    } else {
+                        const confirmLeave = confirm('You have unsaved changes. Are you sure you want to leave this page?');
+                        if (confirmLeave) {
+                            hasUnsavedChanges = false;
+                            window.location.href = this.href;
+                        }
+                    }
+                }
+            });
+        });
+    });
+</script>
+
 <!-- Course Experience/Help Buttons -->
 <script>
     document.addEventListener('DOMContentLoaded', function () {
@@ -685,10 +844,13 @@
     document.addEventListener('DOMContentLoaded', () => {
         const initialCourses = JSON.parse('{{ initial_courses_json|escapejs }}');
         const experiencedCourses = JSON.parse('{{ experienced_courses_json|escapejs }}');
-        const helpNeededCourses = JSON.parse('{{ help_needed_courses_json|escapejs }}');        const blocks = ['1A', '1B', '1D', '1E', '2A', '2B', '2C', '2D', '2E'];
+        const helpNeededCourses = JSON.parse('{{ help_needed_courses_json|escapejs }}');        
+        const blocks = ['1A', '1B', '1D', '1E', '2A', '2B', '2C', '2D', '2E'];
 
         // Store course selectors globally for auto-complete function
         window.courseSelectors = {};
+        
+        const originalCourseSelections = JSON.parse(JSON.stringify(initialCourses));
 
         blocks.forEach(block => {
             const blockId = `block_${block}`;
@@ -705,12 +867,74 @@
                 onSelectionChange: (selectedCourses) => {
                     const buttonsContainer = document.getElementById(`${blockId}_buttons`);
                     buttonsContainer.style.display = selectedCourses.length > 0 ? 'flex' : 'none';
+                    
+                    // Check if course selection has changed from original
+                    const currentCourse = selectedCourses.length > 0 ? selectedCourses[0] : null;
+                    const originalCourse = originalCourseSelections[blockId];
+                    
+                    let hasChanged = false;
+                    if (!currentCourse && !originalCourse) {
+                        hasChanged = false;
+                    } else if (!currentCourse || !originalCourse) {
+                        hasChanged = true;
+                    } else {
+                        hasChanged = currentCourse.id !== originalCourse.id;
+                    }
+                    
+                    // Update the submit button for the course form
+                    const courseForm = document.getElementById('blockCoursesForm');
+                    const courseSubmitBtn = courseForm.querySelector('button[type="submit"]');
+                    
+                    if (hasChanged) {
+                        if (courseSubmitBtn) {
+                            courseSubmitBtn.classList.add('change-detected');
+                            courseSubmitBtn.disabled = false;
+                        }
+                        // Update global change tracker
+                        if (window.updateUnsavedChanges) {
+                            window.updateUnsavedChanges(true);
+                        }
+                    } else {
+                        // Check if any other blocks have changes
+                        let anyBlockChanged = false;
+                        blocks.forEach(otherBlock => {
+                            const otherBlockId = `block_${otherBlock}`;
+                            const otherSelector = window.courseSelectors[otherBlockId];
+                            if (otherSelector) {
+                                const otherCurrent = otherSelector.selectedCourses.length > 0 ? otherSelector.selectedCourses[0] : null;
+                                const otherOriginal = originalCourseSelections[otherBlockId];
+                                
+                                if (!otherCurrent && !otherOriginal) {
+                                    // No change
+                                } else if (!otherCurrent || !otherOriginal) {
+                                    anyBlockChanged = true;
+                                } else if (otherCurrent.id !== otherOriginal.id) {
+                                    anyBlockChanged = true;
+                                }
+                            }
+                        });
+                        
+                        if (!anyBlockChanged) {
+                            if (courseSubmitBtn) {
+                                courseSubmitBtn.classList.remove('change-detected');
+                                courseSubmitBtn.disabled = true;
+                            }
+                            if (window.updateUnsavedChanges) {
+                                window.updateUnsavedChanges(false);
+                            }
+                        }
+                    }
                 }
             });
             
-            // Store the selector globally
             window.courseSelectors[blockId] = selector;
         });
+        
+        // Expose function to update unsaved changes state from course selectors
+        window.updateUnsavedChanges = function(hasChanges) {
+            // This will be called by course selectors to update the global state
+            // The main change tracking script will handle the rest
+        };
     });
 </script>
 
