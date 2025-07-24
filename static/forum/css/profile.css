@@ -78,12 +78,12 @@ input[type="range"]::-webkit-slider-runnable-track {
       ) !important;  
   }
 
-  #profile-tab{
+#profile-tab, #preferences-tab, #schedule-tab{
     color: black;
     border-top-left-radius: 8px;
     border-top-right-radius: 8px;
     border: none !important;
-  }
+}
 
 #preferences-tab{
     color: black;
