@@ -101,6 +101,10 @@ from forum.api.auth import(
     api_upload_image,
     search_users_api
 )
+from forum.api.wolfnet_integration import(
+    auto_complete_courses_api,
+    auto_complete_courses_registration_api
+)
 from forum.services.schedule_services import (
     is_ceremonial_uniform_required
 )
@@ -216,6 +220,10 @@ urlpatterns = [
     path('api/posts/', api_create_post, name='api_create_post'),
     path('api/posts/<int:post_id>/update/', api_update_post, name='api_update_post'),
     path('api/posts/<int:post_id>/delete/', api_delete_post, name='api_delete_post'),
+    
+    # Auto-complete courses API endpoints
+    path('api/auto-complete-courses/', auto_complete_courses_api, name='api_auto_complete_courses'),
+    path('api/auto-complete-courses-registration/', auto_complete_courses_registration_api, name='api_auto_complete_courses_registration'),
 ]
 
 if settings.DEBUG:

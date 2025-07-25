@@ -30,8 +30,12 @@ from forum.services.profile_service import (
     remove_user_help_request,
 )
 
-# Import the auto-complete task
-from forum.tasks import auto_complete_courses
+# Import the auto-complete service
+from forum.services.auto_complete_service import (
+    auto_complete_user_courses,
+    auto_complete_courses_registration as auto_complete_courses_registration_service
+)
+
 logger = logging.getLogger(__name__)
 
 
@@ -118,21 +122,7 @@ def auto_complete_courses_view(request):
     View to trigger auto-completion of courses from WolfNet for logged-in users
     """
     try:
-        # Check if user has wolfnet password configured
-        if not request.user.userprofile.wolfnet_password:
-            return JsonResponse({
-                'success': False, 
-                'error': 'WolfNet password not configured. Please set up your WolfNet credentials in preferences.'
-            })
-        
-        # Start the auto-complete task (password will be retrieved from user profile)
-        task = auto_complete_courses.delay(request.user.school_email)
-        
-        # Get the result (this will wait for completion)
-        result = task.get(timeout=60)
-
-        logger.info(result)
-        
+        result = auto_complete_user_courses(request.user)
         return JsonResponse(result)
         
     except Exception as e:
@@ -151,26 +141,7 @@ def auto_complete_courses_registration(request):
         wolfnet_password = request.POST.get('wolfnet_password')
         school_email = request.POST.get('school_email')
         
-        if not wolfnet_password:
-            return JsonResponse({
-                'success': False, 
-                'error': 'WolfNet password required for auto-completion.'
-            })
-            
-        if not school_email:
-            return JsonResponse({
-                'success': False, 
-                'error': 'School email required for auto-completion.'
-            })
-        
-        # Start the auto-complete task
-        task = auto_complete_courses.delay(school_email, wolfnet_password)
-        
-        # Get the result (this will wait for completion)
-        result = task.get(timeout=60)
-
-        logger.info(result)
-        
+        result = auto_complete_courses_registration_service(school_email, wolfnet_password)
         return JsonResponse(result)
         
     except Exception as e:
