@@ -96,9 +96,14 @@
                             onclick="showEditSolutionForm(Number('{{ solution.id }}'))">
                         <i class="bi bi-pencil"></i>
                     </button>
-                    <button type="submit" class="btn pill-btn btn-outline-danger btn-sm">
-                        <i class="bi bi-trash"></i>
-                    </button>
+
+                    <form id="delete-solution-form-{{ solution.id }}"  method="post" action="{% url 'delete_solution' solution.id %}" class="delete-solution-form d-inline">
+                        {% csrf_token %}
+                        <input type="hidden" name="solution_id" value="{{ solution.id }}">
+                        <button type="submit" class="btn pill-btn btn-outline-danger btn-sm">
+                            <i class="bi bi-trash"></i> 
+                        </button>
+                    </form>
                 </div>
                 <div class="edit-actions mt-2" style="display: none;">
                     <button class="btn pill-btn btn-sm" onclick="saveSolutionEdit(Number('{{ solution.id }}'))"><i class="bi bi-check-lg"></i> Save</button>

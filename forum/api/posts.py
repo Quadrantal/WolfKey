@@ -1,21 +1,43 @@
 from rest_framework.decorators import api_view, authentication_classes, permission_classes
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
-from django.http import JsonResponse
-from django.db.models import Q, F, Case, When, IntegerField
-from django.core.paginator import Paginator
+from rest_framework.response import Response
+from rest_framework import status
 from django.shortcuts import get_object_or_404
 import json
 
 from forum.models import Post, Course
-from forum.services.course_services import get_user_courses
-from forum.services.utils import process_post_preview, add_course_context, detect_bad_words
+from forum.services.feed_services import get_for_you_posts, get_all_posts, paginate_posts
 from forum.services.post_services import (
     create_post_service,
     update_post_service,
     delete_post_service,
     get_post_detail_service
 )
+from forum.serializers import (
+    PostListSerializer,
+    PostDetailSerializer,
+    UserSerializer
+)
+
+def convert_string_to_bool(value):
+    """Convert string representations of truth to True or False."""
+    if isinstance(value, bool):
+        return value
+    if isinstance(value, str):
+        return value.lower() in ('true', '1', 'yes', 'on')
+    return bool(value)
+
+def process_post_data_upload(data):
+    """Process post data to convert string booleans to actual booleans."""
+    processed_data = data.copy()
+    
+    boolean_fields = ['is_anonymous']
+    for field in boolean_fields:
+        if field in processed_data:
+            processed_data[field] = convert_string_to_bool(processed_data[field])
+    
+    return processed_data
 
 @api_view(['GET'])
 @authentication_classes([TokenAuthentication])
@@ -23,79 +45,108 @@ from forum.services.post_services import (
 def for_you_api(request):
     try:
         page = int(request.GET.get('page', 1))
-        limit = int(request.GET.get('limit', 10))
+        per_page = int(request.GET.get('limit', 10))
 
-        experienced_courses, help_needed_courses = get_user_courses(request.user)
-
-        posts_qs = Post.objects.filter(
-            Q(courses__in=experienced_courses) |
-            Q(courses__in=help_needed_courses) |
-            Q(author=request.user)
-        ).distinct().order_by('-created_at')
-
-        paginator = Paginator(posts_qs, limit)
-        page_obj = paginator.get_page(page)
-
-        post_list = []
-        for post in page_obj:
-            add_course_context(post, experienced_courses, help_needed_courses)
-            post.preview_text = process_post_preview(post)
-            
-            post_list.append({
-                "id": post.id,
-                "author_name": post.author.get_full_name(),
-                "title": post.title,
-                "preview_text": post.preview_text,
-                "created_at": post.created_at.isoformat(),
-                "tag": post.course_context,
-                "reply_count": post.replies.count() if hasattr(post, 'replies') else 0,
-            })
-
-        return JsonResponse({
-            "posts": post_list,
-            "has_next": page_obj.has_next()
+        posts, page_obj = get_for_you_posts(request.user, page, per_page)
+        
+        serializer = PostListSerializer(posts, many=True, context={'request': request})
+        
+        return Response({
+            "posts": serializer.data,
+            "has_next": page_obj.has_next(),
+            "page": page_obj.number,
+            "total_pages": page_obj.paginator.num_pages
         })
     except Exception as e:
-        return JsonResponse({'error': str(e)}, status=500)
+        return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+@api_view(['GET'])
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
+def all_posts_api(request):
+    try:
+        page = int(request.GET.get('page', 1))
+        per_page = int(request.GET.get('limit', 10))
+        query = request.GET.get('q', '')
+
+        result = get_all_posts(request.user, query, page, per_page)
+        page_obj = result['page_obj']
+        
+        serializer = PostListSerializer(page_obj.object_list, many=True, context={'request': request})
+        
+        return Response({
+            "posts": serializer.data,
+            "has_next": result['has_next'],
+            "page": page_obj.number,
+            "total_pages": page_obj.paginator.num_pages,
+            "query": query
+        })
+    except Exception as e:
+        return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 @api_view(['GET'])
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
 def post_detail_api(request, post_id):
-    result = get_post_detail_service(post_id)
-    if 'error' in result:
-        return JsonResponse(result, status=500)
-    return JsonResponse(result)
+    try:
+        post = get_object_or_404(Post, id=post_id)
+        serializer = PostDetailSerializer(post, context={'request': request})
+        return Response(serializer.data)
+    except Exception as e:
+        return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 @api_view(['POST'])
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
 def create_post_api(request):
     try:
-        data = json.loads(request.body)
-        result = create_post_service(request.user, data)
-        return JsonResponse(result, status=201 if 'id' in result else 400)
+        processed_data = process_post_data_upload(request.data)
+        
+        content_json = request.data.get('content')
+        content_data = json.loads(content_json) if content_json else {}
+        processed_data['content'] = content_data
+        
+        result = create_post_service(request.user, processed_data)
+        if 'error' in result:
+            return Response(result, status=status.HTTP_400_BAD_REQUEST)
+        
+        post = Post.objects.get(id=result['id'])
+        serializer = PostDetailSerializer(post, context={'request': request})
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
     except Exception as e:
-        return JsonResponse({'error': str(e)}, status=500)
+        return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 @api_view(['PUT', 'PATCH'])
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
 def update_post_api(request, post_id):
     try:
-        data = json.loads(request.body)
-        result = update_post_service(request.user, post_id, data)
+        processed_data = process_post_data_upload(request.data)
+        
+        content_json = request.data.get('content')
+        if content_json:
+            content_data = json.loads(content_json)
+            processed_data['content'] = content_data
+        
+        result = update_post_service(request.user, post_id, processed_data)
         if 'error' in result:
-            return JsonResponse(result, status=403 if 'permission' in result['error'] else 400)
-        return JsonResponse(result)
+            status_code = status.HTTP_403_FORBIDDEN if 'permission' in result['error'] else status.HTTP_400_BAD_REQUEST
+            return Response(result, status=status_code)
+        
+        post = Post.objects.get(id=post_id)
+        serializer = PostDetailSerializer(post, context={'request': request})
+        return Response(serializer.data)
     except Exception as e:
-        return JsonResponse({'error': str(e)}, status=500)
+        return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 @api_view(['DELETE'])
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
 def delete_post_api(request, post_id):
-    result = delete_post_service(request.user, post_id)
-    if 'error' in result:
-        return JsonResponse(result, status=403)
-    return JsonResponse(result)
+    try:
+        result = delete_post_service(request.user, post_id)
+        if 'error' in result:
+            return Response(result, status=status.HTTP_403_FORBIDDEN)
+        return Response({'message': 'Post deleted successfully'}, status=status.HTTP_204_NO_CONTENT)
+    except Exception as e:
+        return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

@@ -47,6 +47,7 @@ INSTALLED_APPS = [
     'storages',
     'django_editorjs_fields',
     'rest_framework',
+    'rest_framework.authtoken',
     'corsheaders'
 ]
 

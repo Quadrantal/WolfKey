@@ -112,6 +112,12 @@ def update_post_service(user, post_id, data):
             detect_bad_words(content)
             post.content = content
 
+        if 'title' in data:
+            post.title = data['title']
+
+        if 'is_anonymous' in data:
+            post.is_anonymous = data['is_anonymous']
+
         if 'courses' in data:
             course_ids = data['courses']
             courses = Course.objects.filter(id__in=course_ids)
@@ -119,6 +125,8 @@ def update_post_service(user, post_id, data):
 
         post.save()
         return {'message': 'Post updated successfully'}
+    except ValueError as e:
+        return {'error': f"{str(e)}"}
     except Exception as e:
         return {'error': str(e)}
 

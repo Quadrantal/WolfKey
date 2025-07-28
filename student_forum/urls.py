@@ -99,8 +99,12 @@ from forum.api.auth import(
     api_login,
     api_register,
     api_upload_image,
-    search_users_api
+    search_users_api,
+    api_refresh_token,
+    api_verify_token,
+    api_logout
 )
+from forum.views.auth_views import register, login_view, logout_view
 from forum.api.wolfnet_integration import(
     auto_complete_courses_api,
     auto_complete_courses_registration_api
@@ -108,19 +112,27 @@ from forum.api.wolfnet_integration import(
 from forum.services.schedule_services import (
     is_ceremonial_uniform_required
 )
-from forum.views.api_views import(
-    get_csrf_token,
-    api_logout,
-    for_you_api,
-    api_post_detail,
-    api_delete_post,
-    api_create_post,
-    api_update_post
-)
 
 from django.views.generic import RedirectView
 
 from forum.views.about_view import about_view
+
+from forum.api.feed import api_for_you, api_all_posts
+
+from forum.api.posts import (
+    post_detail_api,
+    create_post_api,
+    update_post_api,
+    delete_post_api
+)
+
+from forum.api.solutions import (
+    create_solution_api,
+    update_solution_api,
+    delete_solution_api,
+    vote_solution_api,
+    accept_solution_api
+)
 
 urlpatterns = [
 
@@ -210,16 +222,30 @@ urlpatterns = [
     path('reset/<uidb64>/<token>/', CustomPasswordResetConfirmView.as_view(), name='password_reset_confirm'),
     path('reset/done/', CustomPasswordResetCompleteView.as_view(), name='password_reset_complete'),
 
-    path('api/logout/', api_logout, name='api_logout'),
+    # Authentication API endpoints
+    path('api/auth/login/', api_login, name='api_login'),
+    path('api/auth/register/', api_register, name='api_register'),
+    path('api/auth/logout/', api_logout, name='api_logout'),
+    path('api/auth/refresh-token/', api_refresh_token, name='api_refresh_token'),
+    path('api/auth/verify-token/', api_verify_token, name='api_verify_token'),
+    path('api/upload-image/', api_upload_image, name='api_upload_image'),
+    
     path('api/schedules/daily/<str:target_date>/', get_daily_schedule),
     path('api/schedules/uniform/<str:target_date>/', is_ceremonial_uniform_required),
-    path('api/schedules/uniform/<str:target_date>/', is_ceremonial_uniform_required),
-    path('api/for-you/', for_you_api, name='for_you_api'),
-    path('api/csrf/', get_csrf_token),
-    path('api/posts/<int:post_id>/', api_post_detail, name='api_post_detail'),
-    path('api/posts/', api_create_post, name='api_create_post'),
-    path('api/posts/<int:post_id>/update/', api_update_post, name='api_update_post'),
-    path('api/posts/<int:post_id>/delete/', api_delete_post, name='api_delete_post'),
+
+    path('api/for-you/', api_for_you, name='api_for_you'),
+    path('api/posts/create/', create_post_api, name='api_create_post'),
+    path('api/posts/<int:post_id>/', post_detail_api, name='api_post_detail'),
+    path('api/posts/<int:post_id>/edit/', update_post_api, name='api_update_post'),
+    path('api/posts/<int:post_id>/delete/', delete_post_api, name='api_delete_post'),
+    
+    # Solution API endpoints
+    path('api/posts/<int:post_id>/solutions/create/', create_solution_api, name='api_create_solution'),
+    path('api/solutions/<int:solution_id>/edit/', update_solution_api, name='api_update_solution'),
+    path('api/solutions/<int:solution_id>/delete/', delete_solution_api, name='api_delete_solution'),
+    path('api/solutions/<int:solution_id>/vote/', vote_solution_api, name='api_vote_solution'),
+    path('api/solutions/<int:solution_id>/accept/', accept_solution_api, name='api_accept_solution'),
+    path('api/all-posts/', api_all_posts, name='api_all_posts'),
     
     # Auto-complete courses API endpoints
     path('api/auto-complete-courses/', auto_complete_courses_api, name='api_auto_complete_courses'),
