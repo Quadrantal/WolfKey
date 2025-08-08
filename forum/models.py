@@ -4,7 +4,7 @@ from django.core.validators import RegexValidator
 from django.contrib.postgres.search import SearchVectorField, SearchVector
 from django.urls import reverse
 import os
-from django.db.models.signals import post_save
+from django.db.models.signals import post_save, pre_delete
 from django.dispatch import receiver
 from django.contrib.auth.models import BaseUserManager
 from django.utils import timezone
@@ -198,6 +198,32 @@ class Post(models.Model):
     
     def get_author(self):
         return "Anonymous" if self.is_anonymous else self.author
+    
+    def get_first_image_url(self):
+        """Extract the first image URL from the post content JSON"""
+        try:
+            import json
+            
+            content = self.content
+            if isinstance(content, str):
+                content = json.loads(content)
+            
+            if not isinstance(content, dict) or 'blocks' not in content:
+                return None
+            
+            for block in content.get('blocks', []):
+                if isinstance(block, dict) and block.get('type') == 'image':
+                    if 'data' in block and 'file' in block['data']:
+                        file_data = block['data']['file']
+                        if isinstance(file_data, dict) and 'url' in file_data:
+                            return file_data['url']
+                        elif isinstance(file_data, str):
+                            return file_data
+            
+            return None
+            
+        except (json.JSONDecodeError, AttributeError, TypeError):
+            return None
     
 class SavedPost(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="saved_posts")
@@ -425,6 +451,36 @@ def save_user_profile(sender, instance, **kwargs):
         instance.userprofile.save()
     except UserProfile.DoesNotExist:
         UserProfile.objects.create(user=instance)
+
+@receiver(pre_delete, sender='forum.Solution')
+def delete_solution_files(sender, instance, **kwargs):
+    """Delete files referenced in solution content before deleting the solution"""
+    if instance.content:
+        from forum.services.utils import extract_and_delete_files_from_content
+        try:
+            extract_and_delete_files_from_content(instance.content)
+        except Exception as e:
+            logger.error(f"Error deleting files for solution {instance.id}: {str(e)}")
+
+@receiver(pre_delete, sender='forum.Comment')
+def delete_comment_files(sender, instance, **kwargs):
+    """Delete files referenced in comment content before deleting the comment"""
+    if instance.content:
+        from forum.services.utils import extract_and_delete_files_from_content
+        try:
+            extract_and_delete_files_from_content(instance.content)
+        except Exception as e:
+            logger.error(f"Error deleting files for comment {instance.id}: {str(e)}")
+
+@receiver(pre_delete, sender='forum.Post')
+def delete_post_files(sender, instance, **kwargs):
+    """Delete files referenced in post content before deleting the post"""
+    if instance.content:
+        from forum.services.utils import extract_and_delete_files_from_content
+        try:
+            extract_and_delete_files_from_content(instance.content)
+        except Exception as e:
+            logger.error(f"Error deleting files for post {instance.id}: {str(e)}")
 
 class Notification(models.Model):
     NOTIFICATION_TYPES = (

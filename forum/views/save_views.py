@@ -7,36 +7,6 @@ from forum.services.solution_services import save_solution_service
 import json
 
 @login_required
-def follow_post(request, post_id):
-    post = get_object_or_404(Post, id=post_id)
-    followed, created = FollowedPost.objects.get_or_create(user=request.user, post=post)
-    
-    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-        followers_count = post.followers.count()
-        return JsonResponse({
-            'success': True, 
-            'followed': True,
-            'followers_count': followers_count
-        })
-    
-    return redirect('post_detail', post_id=post.id)
-
-@login_required
-def unfollow_post(request, post_id):
-    post = get_object_or_404(Post, id=post_id)
-    FollowedPost.objects.filter(user=request.user, post=post).delete()
-    
-    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-        followers_count = post.followers.count()
-        return JsonResponse({
-            'success': True, 
-            'followed': False,
-            'followers_count': followers_count
-        })
-    
-    return redirect('post_detail', post_id=post.id)
-
-@login_required
 def followed_posts(request):
     posts = Post.objects.filter(followers__user=request.user)
 

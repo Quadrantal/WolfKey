@@ -1,6 +1,6 @@
 from django.shortcuts import get_object_or_404
 from forum.models import Post, Solution, SolutionUpvote, SolutionDownvote, SavedSolution
-from forum.services.utils import detect_bad_words
+from forum.services.utils import detect_bad_words, extract_and_delete_files_from_content
 from forum.services.notification_services import send_solution_notification_service
 from django.db.models import F
 import json
@@ -69,6 +69,11 @@ def update_solution_service(user, solution_id, data):
 def delete_solution_service(user, solution_id):
     try:
         solution = get_object_or_404(Solution, id=solution_id, author=user)
+        
+        # Extract and delete any files referenced in the solution content
+        if solution.content:
+            extract_and_delete_files_from_content(solution.content)
+        
         solution.delete()
         return {'message': 'Solution deleted successfully'}
     except Exception as e:
@@ -140,6 +145,7 @@ def accept_solution_service(user, solution_id):
             # Unaccept the solution
             previous_solution_id = solution.id
             post.accepted_solution = None
+            post.solved = False
             post.save()
             return {
                 'success': True,
@@ -152,6 +158,7 @@ def accept_solution_service(user, solution_id):
             # Accept the new solution
             previous_solution_id = post.accepted_solution.id if post.accepted_solution else None
             post.accepted_solution = solution
+            post.solved = True
             post.save()
             return {
                 'success': True,

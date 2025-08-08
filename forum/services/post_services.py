@@ -1,6 +1,6 @@
 from django.shortcuts import get_object_or_404
 from django.db.models import F, Case, When, IntegerField
-from forum.models import Post, Course
+from forum.models import Post, Course, PostLike, FollowedPost
 from forum.services.utils import detect_bad_words, selective_quote_replace
 from forum.services.notification_services import send_course_notifications_service
 import json
@@ -52,6 +52,10 @@ def get_post_detail_service(post_id, user=None):
                 })
             except Exception as e:
                 logger.error(f"Error processing solution {solution.id}: {e}")
+
+        post = Post.objects.get(id=post_id)
+        post.views += 1
+        post.save()
 
         return {
             'id': post.id,
@@ -140,4 +144,126 @@ def delete_post_service(user, post_id):
         post.delete()
         return {'message': 'Post deleted successfully'}
     except Exception as e:
+        return {'error': str(e)}
+
+def like_post_service(user, post_id):
+    """
+    Service to like a post
+    """
+    try:
+        post = get_object_or_404(Post, id=post_id)
+        like, created = PostLike.objects.get_or_create(user=user, post=post)
+        
+        return {
+            'success': True,
+            'liked': True,
+            'like_count': post.like_count(),
+            'created': created
+        }
+    except Exception as e:
+        logger.error(f"Error liking post {post_id}: {str(e)}")
+        return {'error': str(e)}
+
+def unlike_post_service(user, post_id):
+    """
+    Service to unlike a post
+    """
+    try:
+        post = get_object_or_404(Post, id=post_id)
+        deleted_count, _ = PostLike.objects.filter(user=user, post=post).delete()
+        
+        return {
+            'success': True,
+            'liked': False,
+            'like_count': post.like_count(),
+            'was_liked': deleted_count > 0
+        }
+    except Exception as e:
+        logger.error(f"Error unliking post {post_id}: {str(e)}")
+        return {'error': str(e)}
+
+def follow_post_service(user, post_id):
+    """
+    Service to follow a post
+    """
+    try:
+        post = get_object_or_404(Post, id=post_id)
+        followed, created = FollowedPost.objects.get_or_create(user=user, post=post)
+        
+        return {
+            'success': True,
+            'followed': True,
+            'followers_count': post.followers.count(),
+            'created': created
+        }
+    except Exception as e:
+        logger.error(f"Error following post {post_id}: {str(e)}")
+        return {'error': str(e)}
+
+def unfollow_post_service(user, post_id):
+    """
+    Service to unfollow a post
+    """
+    try:
+        post = get_object_or_404(Post, id=post_id)
+        deleted_count, _ = FollowedPost.objects.filter(user=user, post=post).delete()
+        
+        return {
+            'success': True,
+            'followed': False,
+            'followers_count': post.followers.count(),
+            'was_following': deleted_count > 0
+        }
+    except Exception as e:
+        logger.error(f"Error unfollowing post {post_id}: {str(e)}")
+        return {'error': str(e)}
+
+def get_post_share_info_service(post_id, request):
+    """
+    Service to get post share information
+    """
+    try:
+        post = get_object_or_404(Post, id=post_id)
+        
+        # Build absolute URL for the post
+        post_url = request.build_absolute_uri(f'/post/{post_id}/')
+        
+        return {
+            'success': True,
+            'post_id': post.id,
+            'post_title': post.title,
+            'post_url': post_url,
+            'author': post.author.get_full_name() if not post.is_anonymous else 'Anonymous',
+            'created_at': post.created_at.isoformat(),
+            'preview_text': post.preview_text[:250] if hasattr(post, 'preview_text') else (post.title[:250] if post.title else '')
+        }
+    except Exception as e:
+        logger.error(f"Error getting share info for post {post_id}: {str(e)}")
+        return {'error': str(e)}
+
+def get_post_share_info_service(post_id, request):
+    """
+    Service to get post share information including URL
+    """
+    try:
+        post = get_object_or_404(Post, id=post_id)
+        
+        # Build absolute URL for sharing
+        if request:
+            base_url = request.build_absolute_uri('/').rstrip('/')
+            post_url = f"{base_url}/posts/{post_id}/"
+        else:
+            post_url = f"/posts/{post_id}/"
+        
+        return {
+            'success': True,
+            'post_id': post_id,
+            'post_title': post.title,
+            'post_url': post_url,
+            'author': post.author.get_full_name() if not post.is_anonymous else 'Anonymous',
+            'created_at': post.created_at.isoformat(),
+            'preview_text': post.preview_text[:200] + '...' if len(post.preview_text) > 200 else post.preview_text
+        }
+    except Exception as e:
+        logger.error(f"Error getting share info for post {post_id}: {str(e)}")
         return {'error': str(e)}

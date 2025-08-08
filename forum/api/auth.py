@@ -71,19 +71,29 @@ def api_register(request):
         if not form.is_valid():
             return JsonResponse({'error': form.errors}, status=400)
             
-        current_courses = data.get('current_courses', [])
+        help_needed_courses = data.get('help_needed_courses', [])
         experienced_courses = data.get('experienced_courses', [])
         
-        user, error = register_user(request, form, current_courses, experienced_courses)
+        user, error = register_user(request, form, help_needed_courses, experienced_courses)
         
         if error:
             return JsonResponse({'error': error}, status=400)
         
+        token, _ = Token.objects.get_or_create(user=user)
+        
         user_serializer = UserSerializer(user)
             
         return JsonResponse({
+            'success': True,
             'message': 'Registration successful',
-            'user': user_serializer.data
+            'data': {
+                'auth': {
+                    'token': token.key,
+                    'token_type': 'Bearer',
+                    'expires_in': 86400 * 30,  # 30 days in seconds
+                },
+                'user': user_serializer.data,
+            }
         }, status=201)
         
     except json.JSONDecodeError:

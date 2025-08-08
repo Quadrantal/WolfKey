@@ -8,16 +8,20 @@ from forum.tasks import auto_complete_courses
 logger = logging.getLogger(__name__)
 
 
-def auto_complete_user_courses(user, wolfnet_password=None):
+def auto_complete_user_courses_service(user, wolfnet_password=None):
     """
-    Auto-complete courses for a logged-in user
+    Auto-complete courses for a logged-in user from their WolfNet schedule
+    
+    This function retrieves a user's course schedule from WolfNet and attempts to match
+    the courses with those in the local database. It uses either a provided password
+    or the user's stored WolfNet password.
     
     Args:
-        user: Django User instance
-        wolfnet_password: Optional wolfnet password (if not provided, will use stored one)
-    
-    Returns:
-        dict: Result with success status and data/error
+        user (User): Django User instance - the authenticated user whose courses to fetch
+        wolfnet_password (str, optional): WolfNet password to use for authentication.
+                                        If not provided, will use the password stored
+                                        in the user's profile. Defaults to None.
+
     """
     try:
         # Use provided password or get from user profile
@@ -60,23 +64,30 @@ def auto_complete_user_courses(user, wolfnet_password=None):
         }
 
 
-def auto_complete_courses_registration(school_email, wolfnet_password):
+def auto_complete_courses_registration_service(school_email, wolfnet_password):
     """
-    Auto-complete courses during registration process
+    Auto-complete courses during the user registration process from WolfNet
+    
+    This function is specifically designed for use during user registration when
+    the user provides their WolfNet credentials to automatically populate their
+    course schedule. It retrieves the course schedule from WolfNet and matches
+    courses with the local database.
     
     Args:
-        school_email: User's school email
-        wolfnet_password: User's WolfNet password
-    
-    Returns:
-        dict: Result with success status and data/error
+        school_email (str): The user's school email address (e.g., 'student@school.edu').
+                           This is used as the username for WolfNet authentication.
+                           Must be a valid, non-empty string.
+        wolfnet_password (str): The user's WolfNet password for authentication.
+                              This is required and must be a valid, non-empty string.
+                              The password is used only for this operation and is not
+                              stored permanently during registration.
     """
     try:
         if not wolfnet_password:
             return {
                 'success': False, 
                 'error': 'WolfNet password required for auto-completion.'
-            }
+        }
             
         if not school_email:
             return {
@@ -84,6 +95,7 @@ def auto_complete_courses_registration(school_email, wolfnet_password):
                 'error': 'School email required for auto-completion.'
             }
         
+        print("aweoifjaoifjajfio")
         # Start the auto-complete task
         task = auto_complete_courses.delay(school_email, wolfnet_password)
         

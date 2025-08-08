@@ -107,20 +107,3 @@ heroku logs -t --dyno worker
 # View beat logs  
 heroku logs -t --dyno beat
 ```
-
-### Debug Commands
-```bash
-# Check Redis connection
-redis-cli ping
-
-# View detailed logs
-celery -A student_forum worker --loglevel=debug
-
-# Check task status
-python -c "
-from forum.tasks import check_all_user_grades
-task = check_all_user_grades.delay()
-print(f'Task ID: {task.id}')
-print(f'Status: {task.status}')
-"
-```

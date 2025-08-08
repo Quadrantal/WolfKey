@@ -65,9 +65,9 @@ def register_user(request, form, help_courses, experience_courses, wolfnet_passw
         if schedule_data:
             from forum.models import Course
             for block_key, course_id in schedule_data.items():
-                if course_id.isdigit():
+                if isinstance(course_id, int):
                     try:
-                        course = Course.objects.get(id=int(course_id))
+                        course = Course.objects.get(id=course_id)
                         setattr(user.userprofile, block_key, course)
                     except Course.DoesNotExist:
                         pass
@@ -75,19 +75,19 @@ def register_user(request, form, help_courses, experience_courses, wolfnet_passw
         
         # Add help courses
         for course_id in help_courses:
-            if course_id.isdigit():
+            if isinstance(course_id, int):
                 UserCourseHelp.objects.create(
                     user=user,
-                    course_id=int(course_id),
+                    course_id=course_id,
                     active=True
                 )
             
         # Add experience courses
         for course_id in experience_courses:
-            if course_id.isdigit():
+            if isinstance(course_id, int):
                 UserCourseExperience.objects.create(
                     user=user,
-                    course_id=int(course_id)
+                    course_id=course_id
                 )
         
         login(request, user)

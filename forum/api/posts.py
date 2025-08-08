@@ -12,7 +12,12 @@ from forum.services.post_services import (
     create_post_service,
     update_post_service,
     delete_post_service,
-    get_post_detail_service
+    get_post_detail_service,
+    like_post_service,
+    unlike_post_service,
+    follow_post_service,
+    unfollow_post_service,
+    get_post_share_info_service
 )
 from forum.serializers import (
     PostListSerializer,
@@ -91,6 +96,8 @@ def post_detail_api(request, post_id):
     try:
         post = get_object_or_404(Post, id=post_id)
         serializer = PostDetailSerializer(post, context={'request': request})
+        post.views += 1
+        post.save()
         return Response(serializer.data)
     except Exception as e:
         return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
@@ -148,5 +155,80 @@ def delete_post_api(request, post_id):
         if 'error' in result:
             return Response(result, status=status.HTTP_403_FORBIDDEN)
         return Response({'message': 'Post deleted successfully'}, status=status.HTTP_204_NO_CONTENT)
+    except Exception as e:
+        return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+@api_view(['POST'])
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
+def like_post_api(request, post_id):
+    """
+    API endpoint to like a post
+    """
+    try:
+        result = like_post_service(request.user, post_id)
+        if 'error' in result:
+            return Response(result, status=status.HTTP_400_BAD_REQUEST)
+        return Response(result, status=status.HTTP_200_OK)
+    except Exception as e:
+        return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+@api_view(['POST'])
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
+def unlike_post_api(request, post_id):
+    """
+    API endpoint to unlike a post
+    """
+    try:
+        result = unlike_post_service(request.user, post_id)
+        if 'error' in result:
+            return Response(result, status=status.HTTP_400_BAD_REQUEST)
+        return Response(result, status=status.HTTP_200_OK)
+    except Exception as e:
+        return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+@api_view(['POST'])
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
+def follow_post_api(request, post_id):
+    """
+    API endpoint to follow a post
+    """
+    try:
+        result = follow_post_service(request.user, post_id)
+        if 'error' in result:
+            return Response(result, status=status.HTTP_400_BAD_REQUEST)
+        return Response(result, status=status.HTTP_200_OK)
+    except Exception as e:
+        return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+@api_view(['POST'])
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
+def unfollow_post_api(request, post_id):
+    """
+    API endpoint to unfollow a post
+    """
+    try:
+        result = unfollow_post_service(request.user, post_id)
+        if 'error' in result:
+            return Response(result, status=status.HTTP_400_BAD_REQUEST)
+        return Response(result, status=status.HTTP_200_OK)
+    except Exception as e:
+        return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+@api_view(['GET'])
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
+def get_post_share_info_api(request, post_id):
+    """
+    API endpoint to get post share information
+    """
+    try:
+        result = get_post_share_info_service(post_id, request)
+        if 'error' in result:
+            return Response(result, status=status.HTTP_400_BAD_REQUEST)
+        return Response(result, status=status.HTTP_200_OK)
     except Exception as e:
         return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

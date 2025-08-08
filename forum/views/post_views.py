@@ -12,7 +12,11 @@ from forum.services.post_services import (
     create_post_service,
     update_post_service,
     delete_post_service,
-    get_post_detail_service
+    get_post_detail_service,
+    like_post_service,
+    unlike_post_service,
+    follow_post_service,
+    unfollow_post_service
 )
 
 logger = logging.getLogger(__name__)
@@ -72,9 +76,6 @@ def post_detail(request, post_id):
             is_read=False
         ).update(is_read=True)
 
-    post = Post.objects.get(id=post_id)  # Get the actual post object
-    post.views += 1
-    post.save()
 
     # Prepare forms and additional context
     solution_form = SolutionForm()
@@ -163,7 +164,7 @@ def edit_post(request, post_id):
         
         post_content = json.dumps(content)
 
-        selected_courses = list(post.courses.values('id', 'name', 'code', 'category'))
+        selected_courses = list(post.courses.values('id', 'name', 'category'))
         selected_courses_json = json.dumps(selected_courses)
     except Exception as e:
         print(e)
@@ -201,15 +202,59 @@ def delete_post(request, post_id):
 @login_required
 def like_post(request, post_id):
     if request.method == 'POST':
-        post = get_object_or_404(Post, id=post_id)
-        like, created = PostLike.objects.get_or_create(user=request.user, post=post)
-        return JsonResponse({'success': True, 'liked': True, 'like_count': post.like_count()})
+        result = like_post_service(request.user, post_id)
+        if 'error' in result:
+            return JsonResponse({'success': False, 'error': result['error']}, status=400)
+        return JsonResponse({
+            'success': result['success'],
+            'liked': result['liked'],
+            'like_count': result['like_count']
+        })
     return JsonResponse({'success': False}, status=400)
 
 @login_required
 def unlike_post(request, post_id):
     if request.method == 'POST':
-        post = get_object_or_404(Post, id=post_id)
-        PostLike.objects.filter(user=request.user, post=post).delete()
-        return JsonResponse({'success': True, 'liked': False, 'like_count': post.like_count()})
+        result = unlike_post_service(request.user, post_id)
+        if 'error' in result:
+            return JsonResponse({'success': False, 'error': result['error']}, status=400)
+        return JsonResponse({
+            'success': result['success'],
+            'liked': result['liked'],
+            'like_count': result['like_count']
+        })
+    return JsonResponse({'success': False}, status=400)
+
+@login_required
+def follow_post(request, post_id):
+    if request.method == 'POST':
+        result = follow_post_service(request.user, post_id)
+        if 'error' in result:
+            return JsonResponse({'success': False, 'error': result['error']}, status=400)
+        
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return JsonResponse({
+                'success': result['success'],
+                'followed': result['followed'],
+                'followers_count': result['followers_count']
+            })
+        
+        return redirect('post_detail', post_id=post_id)
+    return JsonResponse({'success': False}, status=400)
+
+@login_required
+def unfollow_post(request, post_id):
+    if request.method == 'POST':
+        result = unfollow_post_service(request.user, post_id)
+        if 'error' in result:
+            return JsonResponse({'success': False, 'error': result['error']}, status=400)
+        
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return JsonResponse({
+                'success': result['success'],
+                'followed': result['followed'],
+                'followers_count': result['followers_count']
+            })
+        
+        return redirect('post_detail', post_id=post_id)
     return JsonResponse({'success': False}, status=400)

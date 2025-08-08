@@ -47,6 +47,12 @@
                     </p>
                     <h4 class="card-title post-card-title">{{ post.title }}</h4>
                     <p class="card-text mt-2 post-card-text">{{ post.preview_text|truncatewords:250 }}</p>
+                    
+                    {% if post.get_first_image_url %}
+                        <div class="post-image-preview mt-2 mb-2 text-center">
+                            <img src="{{ post.get_first_image_url }}" alt="Post image" class="img-fluid rounded" style="max-height: 400px; object-fit: cover;">
+                        </div>
+                    {% endif %}
                 </div>
             </div>
             
@@ -75,16 +81,16 @@
         <div class="post-interactions">
             {% if user.is_authenticated %}
                 <button type="button"
-                    class="button like-button d-inline {% if is_liked_by_user %}active{% endif %}"
+                    class="button like-button d-inline {% if post.is_liked_by_user %}active{% endif %}"
                     data-post-id="{{ post.id }}"
-                    data-liked="{{ is_liked_by_user|yesno:'true,false' }}"
+                    data-liked="{{ post.is_liked_by_user|yesno:'true,false' }}"
                     data-like-url="{% url 'like_post' post.id %}"
                     data-unlike-url="{% url 'unlike_post' post.id %}"
                     data-csrf="{{ csrf_token }}"
                     aria-label="Like"
                 >
                     <span class="like-icon">
-                        {% if is_liked_by_user %}
+                        {% if post.is_liked_by_user %}
                             <!-- Unlike SVG -->
                             <svg aria-label="Unlike" fill="currentColor" height="24" viewBox="0 0 48 48" width="24"><path d="M34.6 3.1c-4.5 0-7.9 1.8-10.6 5.6-2.7-3.7-6.1-5.5-10.6-5.5C6 3.1 0 9.6 0 17.6c0 7.3 5.4 12 10.6 16.5.6.5 1.3 1.1 1.9 1.7l2.3 2c4.4 3.9 6.6 5.9 7.6 6.5.5.3 1.1.5 1.6.5s1.1-.2 1.6-.5c1-.6 2.8-2.2 7.8-6.8l2-1.8c.7-.6 1.3-1.2 2-1.7C42.7 29.6 48 25 48 17.6c0-8-6-14.5-13.4-14.5z"></path></svg>
                         {% else %}
@@ -95,15 +101,15 @@
                     <span class="like-count">{{ post.like_count }}</span>
                 </button>
                 <button type="button"
-                    class="button follow-button d-inline {% if is_following %}active{% endif %}"
+                    class="button follow-button d-inline {% if post.is_following %}active{% endif %}"
                     data-post-id="{{ post.id }}"
-                    data-followed="{{ is_following|yesno:'true,false' }}"
+                    data-followed="{{ post.is_following|yesno:'true,false' }}"
                     data-follow-url="{% url 'follow_post' post.id %}"
                     data-unfollow-url="{% url 'unfollow_post' post.id %}"
                     data-csrf="{{ csrf_token }}"
                     aria-label="Follow"
                 >
-                    <i class="bi {% if is_following %}bi-bell-fill{% else %}bi-bell{% endif %} me-1 follow-icon"></i>
+                    <i class="bi {% if post.is_following %}bi-bell-fill{% else %}bi-bell{% endif %} me-1 follow-icon"></i>
                     <span class="follow-count">{{ post.followers.count }}</span>
                 </button>
             {% endif %}

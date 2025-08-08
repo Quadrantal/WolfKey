@@ -6,7 +6,6 @@ def get_user_schedule_service(user_id):
     try:
         user = User.objects.get(id=user_id)
         
-        # Get user's profile to access their schedule
         try:
             profile = user.userprofile
             schedule_data = {

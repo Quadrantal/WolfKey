@@ -10,6 +10,7 @@ from django.views.decorators.csrf import csrf_exempt
 from forum.services.course_services import get_user_courses
 from PIL import Image
 from io import BytesIO
+from urllib.parse import urlparse
 
 ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/gif']
 ALLOWED_EXTENSIONS = ['.jpg', '.jpeg', '.png', '.gif']
@@ -45,10 +46,30 @@ def process_post_preview(post):
         return ' '.join(text.split())
     
 def annotate_post_card_context(posts, user):
+    from forum.models import FollowedPost
+    
     experienced_courses, help_needed_courses = get_user_courses(user)
+    
+    post_ids = [post.id for post in posts]
+    
+    liked_post_ids = set()
+    followed_post_ids = set()
+    
+    if user.is_authenticated:
+        liked_post_ids = set(
+            user.liked_posts.filter(post_id__in=post_ids).values_list('post_id', flat=True)
+        )
+        
+        followed_post_ids = set(
+            user.followed_posts.filter(post_id__in=post_ids).values_list('post_id', flat=True)
+        )
+    
     for post in posts:
         post.preview_text = process_post_preview(post)
         add_course_context(post, experienced_courses, help_needed_courses)
+        
+        post.is_liked_by_user = post.id in liked_post_ids
+        post.is_following = post.id in followed_post_ids
     
     return posts
 
@@ -255,3 +276,80 @@ def detect_bad_words(content):
                     raise ValueError(f"Bad word detected in list item in block of type '{block_type}'.")
     else:
         raise ValueError("Unsupported content format for bad word detection.")
+
+def extract_files_from_editorjs_content(content):
+    """
+    Extract file URLs from EditorJS content blocks.
+    
+    Args:
+        content: EditorJS content (dict with 'blocks' key or similar structure)
+        
+    Returns:
+        list: List of file URLs found in the content
+    """
+    file_urls = []
+    
+    if not isinstance(content, dict):
+        return file_urls
+    
+    blocks = content.get('blocks', [])
+    if not isinstance(blocks, list):
+        return file_urls
+    
+    for block in blocks:
+        if not isinstance(block, dict):
+            continue
+            
+        block_type = block.get('type', '')
+        block_data = block.get('data', {})
+        
+        if block_type == 'image':
+            # Image data can be in 'file' or 'url' field
+            image_url = block_data.get('file', {}).get('url') or block_data.get('url')
+            if image_url:
+                file_urls.append(image_url)
+    
+    return file_urls
+
+def delete_files_from_urls(file_urls):
+    """
+    Delete files from the filesystem given their URLs.
+    
+    Args:
+        file_urls: List of file URLs to delete
+    """
+    from urllib.parse import urlparse
+    
+    for url in file_urls:
+        if not url:
+            continue
+            
+        try:
+            parsed_url = urlparse(url)
+            file_path = parsed_url.path
+            
+            if file_path.startswith('/'):
+                file_path = file_path[1:]
+            
+            if file_path.startswith('media/'):
+                file_path = file_path[6:]
+            
+            if default_storage.exists(file_path):
+                default_storage.delete(file_path)
+                print(f"Deleted file: {file_path}")
+            else:
+                print(f"File not found: {file_path}")
+                
+        except Exception as e:
+            print(f"Error deleting file {url}: {str(e)}")
+
+def extract_and_delete_files_from_content(content):
+    """
+    Extract and delete all files referenced in EditorJS content.
+    
+    Args:
+        content: EditorJS content (dict with 'blocks' key)
+    """
+    file_urls = extract_files_from_editorjs_content(content)
+    if file_urls:
+        delete_files_from_urls(file_urls)

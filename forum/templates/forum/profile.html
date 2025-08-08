@@ -346,7 +346,20 @@
             <form id="addExperienceForm" method="post" action="{% url 'add_experience' %}">
                 <div class="modal-body">
                     {% csrf_token %}
-                    {{ experience_form.as_p }}
+                    <div class="mb-3">
+                        <label for="experience_course" class="form-label">Select a course you have experience with:</label>
+                        <select name="course" id="experience_course" class="form-select" required>
+                            <option value="">-- Select a course --</option>
+                            {% regroup all_courses by category as courses_by_category %}
+                            {% for category in courses_by_category %}
+                                <optgroup label="{{ category.grouper }}">
+                                    {% for course in category.list %}
+                                        <option value="{{ course.id }}">{{ course.name }}</option>
+                                    {% endfor %}
+                                </optgroup>
+                            {% endfor %}
+                        </select>
+                    </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
@@ -368,7 +381,20 @@
             <form id="addHelpForm" method="post" action="{% url 'add_help_request' %}">
                 <div class="modal-body">
                     {% csrf_token %}
-                    {{ help_form.as_p }}
+                    <div class="mb-3">
+                        <label for="help_course" class="form-label">Select a course you need help with:</label>
+                        <select name="course" id="help_course" class="form-select" required>
+                            <option value="">-- Select a course --</option>
+                            {% regroup all_courses by category as courses_by_category %}
+                            {% for category in courses_by_category %}
+                                <optgroup label="{{ category.grouper }}">
+                                    {% for course in category.list %}
+                                        <option value="{{ course.id }}">{{ course.name }}</option>
+                                    {% endfor %}
+                                </optgroup>
+                            {% endfor %}
+                        </select>
+                    </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
@@ -396,6 +422,79 @@
             buttonsContainer.style.display = 'none';
         }
     }
+
+    // Handle modal form submissions
+    document.addEventListener('DOMContentLoaded', function() {
+        // Handle Add Experience form
+        const addExperienceForm = document.getElementById('addExperienceForm');
+        if (addExperienceForm) {
+            addExperienceForm.addEventListener('submit', async function(e) {
+                e.preventDefault();
+                
+                const formData = new FormData(this);
+                try {
+                    const response = await fetch(this.action, {
+                        method: 'POST',
+                        body: formData,
+                        headers: {
+                            'X-CSRFToken': formData.get('csrfmiddlewaretoken'),
+                        }
+                    });
+                    
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        // Close modal
+                        const modal = bootstrap.Modal.getInstance(document.getElementById('addExperienceModal'));
+                        modal.hide();
+                        
+                        // Reload page to show the new experience
+                        window.location.reload();
+                    } else {
+                        alert('Error: ' + (data.error || 'Failed to add course experience'));
+                    }
+                } catch (error) {
+                    console.error('Error:', error);
+                    alert('Network error occurred while adding course experience');
+                }
+            });
+        }
+
+        // Handle Add Help Request form
+        const addHelpForm = document.getElementById('addHelpForm');
+        if (addHelpForm) {
+            addHelpForm.addEventListener('submit', async function(e) {
+                e.preventDefault();
+                
+                const formData = new FormData(this);
+                try {
+                    const response = await fetch(this.action, {
+                        method: 'POST',
+                        body: formData,
+                        headers: {
+                            'X-CSRFToken': formData.get('csrfmiddlewaretoken'),
+                        }
+                    });
+                    
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        // Close modal
+                        const modal = bootstrap.Modal.getInstance(document.getElementById('addHelpModal'));
+                        modal.hide();
+                        
+                        // Reload page to show the new help request
+                        window.location.reload();
+                    } else {
+                        alert('Error: ' + (data.error || 'Failed to add help request'));
+                    }
+                } catch (error) {
+                    console.error('Error:', error);
+                    alert('Network error occurred while adding help request');
+                }
+            });
+        }
+    });
 </script>
 <!-- Auto Complete Courses Handler -->
 {% if user == profile_user and user.userprofile.wolfnet_password %}
@@ -423,7 +522,24 @@
                         // Update course selectors with the fetched data
                         updateCourseSelectors(data.courses);
                     } else {
-                        alert('Error: ' + (data.error || 'Failed to auto-complete courses'));
+                        const errorType = data.error_type || 'general';
+                        let errorMessage = data.error || 'Failed to auto-complete courses';
+                        
+                        if (errorType === 'authentication') {
+                            if (data.error === 'wrong_password') {
+                                alert('Your WolfNet password appears to be incorrect. Please update it in the Preferences tab and try again.');
+                            } else {
+                                alert('Authentication failed: ' + errorMessage + '. Please check your WolfNet password in the Preferences tab.');
+                            }
+                        } else if (errorType === 'page_loading') {
+                            alert('WolfNet page failed to load properly. Please try again in a moment.');
+                        } else if (errorType === 'page_structure') {
+                            alert('Unable to find course information on WolfNet page. The page structure may have changed.');
+                        } else if (errorType === 'no_courses') {
+                            alert('No courses found in your WolfNet schedule. Make sure you have courses enrolled.');
+                        } else {
+                            alert('Error: ' + errorMessage);
+                        }
                     }
                 } catch (error) {
                     console.error('Error:', error);

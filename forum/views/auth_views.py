@@ -18,8 +18,12 @@ def register(request):
             wolfnet_password = request.POST.get('wolfnet_password', '').strip()
             
             # Get course experience data
-            help_courses = request.POST.get('help_courses', '').split(',')
-            experience_courses = request.POST.get('experience_courses', '').split(',')
+            help_courses_raw = request.POST.get('help_courses', '').split(',')
+            experience_courses_raw = request.POST.get('experience_courses', '').split(',')
+            
+            # Convert to integers, filtering out invalid values
+            help_courses = [int(course_id) for course_id in help_courses_raw if course_id.strip().isdigit()]
+            experience_courses = [int(course_id) for course_id in experience_courses_raw if course_id.strip().isdigit()]
             
             # Get schedule data if WolfNet password was provided
             schedule_data = {}
@@ -27,7 +31,11 @@ def register(request):
             for block in blocks:
                 block_course = request.POST.get(f'block_{block}', '')
                 if block_course:
-                    schedule_data[f'block_{block}'] = block_course
+                    try:
+                        schedule_data[f'block_{block}'] = int(block_course)
+                    except (ValueError, TypeError):
+                        # Skip invalid course IDs
+                        pass
             
             user, error = register_user(request, form, help_courses, experience_courses, wolfnet_password, schedule_data)
             if error:

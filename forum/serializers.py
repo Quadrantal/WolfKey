@@ -76,12 +76,21 @@ class PostListSerializer(serializers.ModelSerializer):
     created_at = serializers.SerializerMethodField()
     courses = serializers.SerializerMethodField()
     reply_count = serializers.SerializerMethodField()
+    is_liked = serializers.SerializerMethodField()
+    is_following = serializers.SerializerMethodField()
+    like_count = serializers.SerializerMethodField()
+    solution_count = serializers.SerializerMethodField()
+    comment_count = serializers.SerializerMethodField()
+    solved = serializers.SerializerMethodField()
+    first_image_url = serializers.SerializerMethodField()
     
     class Meta:
         model = Post
         fields = [
             'id', 'title', 'author', 'author_name', 'preview_text', 
-            'created_at', 'courses', 'reply_count'
+            'created_at', 'courses', 'reply_count', 'views', 'like_count', 
+            'is_liked', 'solution_count', 'comment_count', 'solved', 'is_following',
+            'first_image_url'
         ]
     
     def get_author_name(self, obj):
@@ -100,6 +109,36 @@ class PostListSerializer(serializers.ModelSerializer):
     
     def get_reply_count(self, obj):
         return getattr(obj, 'total_response_count', 0)
+    
+    def get_is_liked(self, obj):
+        request = self.context.get('request')
+        if request and request.user.is_authenticated:
+            return obj.is_liked_by(request.user)
+        return False
+    
+    def get_is_following(self, obj):
+        """Check if the current user is following this post"""
+        request = self.context.get('request')
+        if request and request.user.is_authenticated:
+            from .models import FollowedPost
+            return FollowedPost.objects.filter(user=request.user, post=obj).exists()
+        return False
+    
+    def get_like_count(self, obj):
+        return obj.like_count()
+    
+    def get_solution_count(self, obj):
+        return getattr(obj, 'solution_count', obj.solutions.count())
+    
+    def get_comment_count(self, obj):
+        return getattr(obj, 'comment_count', 0)
+    
+    def get_solved(self, obj):
+        return obj.solved
+    
+    def get_first_image_url(self, obj):
+        """Extract the first image URL from the post content JSON"""
+        return obj.get_first_image_url()
 
 class PostDetailSerializer(serializers.ModelSerializer):
     """Serializer for individual post views"""
@@ -248,14 +287,7 @@ class SolutionSerializer(serializers.ModelSerializer):
     def get_comments(self, obj):
         """Get formatted comments for this solution"""
         comments = obj.comments.select_related('author').order_by('created_at')
-        return [{
-            'id': comment.id,
-            'content': comment.content,
-            'author': comment.author.get_full_name(),
-            'created_at': comment.created_at.isoformat(),
-            'parent_id': comment.parent_id,
-            'depth': comment.get_depth(),
-        } for comment in comments]
+        return CommentSerializer(comments, many=True, context=self.context).data
     
     def get_is_accepted(self, obj):
         return hasattr(obj, 'accepted_for') and obj.accepted_for is not None

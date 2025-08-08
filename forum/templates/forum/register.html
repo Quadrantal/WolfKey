@@ -514,8 +514,33 @@
                         showScheduleContent();
                     }
                 } else {
-                    // Store the error to show later when user reaches step 4
-                    scheduleError = result.error || 'Failed to retrieve courses';
+                    // Handle different error types
+                    const errorType = result.error_type || 'general';
+                    let errorMessage = result.error || 'Failed to retrieve courses';
+                    
+                    if (errorType === 'authentication') {
+                        // For authentication errors, clear the password so it won't be submitted
+                        if (result.error === 'wrong_password') {
+                            scheduleError = {
+                                error_type: errorType,
+                                message: errorMessage
+                            }
+                            wolfnetPassword = ''; // Clear password for submission
+                        } else {
+                            scheduleError = {
+                                error_type: errorType,
+                                message: errorMessage
+                            };
+                            wolfnetPassword = ''; // Clear password for submission
+                        }
+                    } else {
+                        // For non-authentication errors, keep the password for submission
+                        scheduleError = {
+                            error_type: errorType,
+                            message: errorMessage
+                        };
+                    }
+                    
                     console.log('Schedule error stored:', scheduleError);
                     // Only show error if we're on the schedule step
                     if (currentStep === 4) {
@@ -524,8 +549,11 @@
                 }
             } catch (error) {
                 console.error('Auto-complete error:', error);
-                // Store the error to show later when user reaches step 4
-                scheduleError = 'Failed to retrieve courses from WolfNet';
+                // For network/general errors, keep the password for submission
+                scheduleError = {
+                    type: 'network',
+                    message: 'Failed to retrieve courses from WolfNet'
+                };
                 // Only show error if we're on the schedule step
                 if (currentStep === 4) {
                     showScheduleError(scheduleError);
@@ -618,10 +646,55 @@
         }
 
         // Show schedule error
-        function showScheduleError(message) {
-            let displayMessage = message;
-            if (message === 'wrong_password') {
-                displayMessage = 'Your WolfNet password is incorrect.';
+        function showScheduleError(error) {
+            let displayMessage = '';
+            let showBackButton = true;
+            let showSkipButton = true;
+
+            console.log(error);
+            
+            if (typeof error === 'object' && error.error_type) {
+                switch (error.error_type) {
+                    case 'authentication':
+                        displayMessage = 'WolfNet Authentication failed. Password incorrect.';
+                        break;
+                    case 'page_loading':
+                        displayMessage = 'WolfNet page failed to load properly. This may be a temporary issue - you can try again later or continue without auto-completing your schedule.';
+                        showBackButton = false; // No need to go back for page loading issues
+                        break;
+                    case 'page_structure':
+                        displayMessage = 'Unable to find course information on WolfNet page. You can continue without auto-completing your schedule.';
+                        showBackButton = false;
+                        break;
+                    case 'no_courses':
+                        displayMessage = 'No courses found in your WolfNet schedule. Make sure you have courses enrolled, or continue without auto-completing your schedule.';
+                        showBackButton = false;
+                        break;
+                    case 'network':
+                        displayMessage = 'Network error occurred while connecting to WolfNet. Please check your connection and try again, or continue without auto-completing your schedule.';
+                        break;
+                    default:
+                        displayMessage = error.message || 'An unexpected error occurred while retrieving your schedule.';
+                }
+            } else {
+                displayMessage = 'An unexpected error occurred while retrieving your schedule.';
+            }
+            
+            let buttonsHtml = '';
+            if (showBackButton) {
+                buttonsHtml += `
+                    <button type="button" class="btn btn-primary" onclick="goBackToWolfnetPassword()">
+                        <i class="fas fa-arrow-left"></i> Go Back to WolfNet Password
+                    </button>
+                    <br><br>
+                `;
+            }
+            if (showSkipButton) {
+                buttonsHtml += `
+                    <button type="button" class="btn btn-outline-secondary btn-sm" onclick="skipScheduleStep()">
+                        Continue Without Schedule
+                    </button>
+                `;
             }
             
             document.getElementById('scheduleLoading').innerHTML = `
@@ -629,13 +702,7 @@
                     <i class="fas fa-exclamation-triangle"></i>
                     <strong>Could not retrieve schedule:</strong> ${displayMessage}
                     <br><br>
-                    <button type="button" class="btn btn-primary" onclick="goBackToWolfnetPassword()">
-                        <i class="fas fa-arrow-left"></i> Go Back to WolfNet Password
-                    </button>
-                    <br><br>
-                    <button type="button" class="btn btn-outline-secondary btn-sm" onclick="skipScheduleStep()">
-                        Continue Without Schedule
-                    </button>
+                    ${buttonsHtml}
                 </div>
             `;
 
@@ -818,14 +885,44 @@
                     if (courseSelectors.help && courseSelectors.help.getSelectedCourses) {
                         const helpCourses = courseSelectors.help.getSelectedCourses().map(course => course.id).join(',');
                         document.getElementById('help_courses_input').value = helpCourses;
-                        console.log('Help courses:', helpCourses);
                     }
                     
                     if (courseSelectors.experience && courseSelectors.experience.getSelectedCourses) {
                         const experienceCourses = courseSelectors.experience.getSelectedCourses().map(course => course.id).join(',');
                         document.getElementById('experience_courses_input').value = experienceCourses;
-                        console.log('Experience courses:', experienceCourses);
                     }
+                    
+                    // Add WolfNet success indicator
+                    // Only include wolfnet_password if integration was successful OR error was not authentication-related
+                    const wolfnetSuccessInput = document.createElement('input');
+                    wolfnetSuccessInput.type = 'hidden';
+                    wolfnetSuccessInput.name = 'wolfnet_success';
+                    
+                    if (!scheduleError) {
+                        // No error - integration was successful
+                        wolfnetSuccessInput.value = 'true';
+                    } else if (typeof scheduleError === 'string' && (scheduleError === 'wrong_password' || scheduleError === 'authentication_failed')) {
+                        // Authentication error - don't save password
+                        wolfnetSuccessInput.value = 'false';
+                        // Clear the password field so it won't be submitted
+                        const passwordField = document.getElementById('id_wolfnet_password');
+                        if (passwordField) {
+                            passwordField.value = '';
+                        }
+                    } else if (typeof scheduleError === 'object' && scheduleError.type === 'authentication') {
+                        // Authentication error - don't save password
+                        wolfnetSuccessInput.value = 'false';
+                        // Clear the password field so it won't be submitted
+                        const passwordField = document.getElementById('id_wolfnet_password');
+                        if (passwordField) {
+                            passwordField.value = '';
+                        }
+                    } else {
+                        // Non-authentication error - keep password for future attempts
+                        wolfnetSuccessInput.value = 'partial';
+                    }
+                    
+                    form.appendChild(wolfnetSuccessInput);
                     
                     // Collect all schedule data
                     const blocks = ['1A', '1B', '1D', '1E', '2A', '2B', '2C', '2D', '2E'];

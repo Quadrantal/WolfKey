@@ -30,11 +30,11 @@ def get_profile_context(request, username):
     experienced_courses_json = json.dumps([experience.course.id for experience in experienced_courses])
     help_needed_courses_json = json.dumps([help.course.id for help in help_needed_courses])
 
+    all_courses = Course.objects.all().order_by('category', 'name')
+
     context = {
         'profile_user': profile_user,
         'recent_posts': recent_posts,
-        'experience_form': UserCourseExperienceForm(user=profile_user),
-        'help_form': UserCourseHelpForm(user=profile_user),
         'posts_count': posts_count,
         'solutions_count': solutions_count,
         'experienced_courses': experienced_courses,
@@ -42,7 +42,8 @@ def get_profile_context(request, username):
         'experienced_courses_json': experienced_courses_json,
         'help_needed_courses_json': help_needed_courses_json,
         'initial_courses_json': initial_courses_json,
-        'has_wolfnet_password' : bool(profile_user.userprofile.wolfnet_password)
+        'has_wolfnet_password' : bool(profile_user.userprofile.wolfnet_password),
+        'all_courses': all_courses
     }
     
     # Add comparison data if viewing someone else's profile
@@ -53,14 +54,14 @@ def get_profile_context(request, username):
                 'username': request.user.username,
                 'full_name': request.user.get_full_name(),
                 'school_email': request.user.school_email,
-                'profile_picture_url': request.user.userprofile.profile_picture.url,
+                'profile_picture_url': request.user.userprofile.profile_picture.url if request.user.userprofile.profile_picture else None,
             },
             {
                 'id': profile_user.id,
                 'username': profile_user.username,
                 'full_name': profile_user.get_full_name(),
                 'school_email': profile_user.school_email,
-                'profile_picture_url': profile_user.userprofile.profile_picture.url,
+                'profile_picture_url': profile_user.userprofile.profile_picture.url if profile_user.userprofile.profile_picture else None,
             }
         ]
         context['initial_users'] = json.dumps(initial_users)
@@ -124,6 +125,13 @@ def update_wolfnet_settings(request, profile_user):
 
 def update_profile_picture(request):
     profile = request.user.userprofile
+    
+    if profile.profile_picture:
+        try:
+            profile.profile_picture.delete(save=False)
+        except Exception as e:
+            print(f"Warning: Could not delete previous profile picture: {str(e)}")
+    
     profile.profile_picture = request.FILES['profile_picture']
     profile.save()
 
@@ -147,24 +155,57 @@ def update_profile_courses(request):
         return False, f"Error updating courses: {str(e)}"
 
 def add_user_experience(request):
-    form = UserCourseExperienceForm(request.POST, user=request.user)
-    if form.is_valid():
-        experience = form.save(commit=False)
-        experience.user = request.user
-        experience.save()
+    try:
+        course_id = request.POST.get('course')
+        if not course_id:
+            return False, 'Course ID is required.'
+        
+        # Check if course exists
+        try:
+            course = Course.objects.get(id=course_id)
+        except Course.DoesNotExist:
+            return False, 'Course not found.'
+        
+        # Check if experience already exists
+        if UserCourseExperience.objects.filter(user=request.user, course=course).exists():
+            return False, 'You already have experience with this course.'
+        
+        # Create the experience
+        UserCourseExperience.objects.create(
+            user=request.user,
+            course=course
+        )
         return True, None
-    else:
-        return False, 'Form is invalid.'
+        
+    except Exception as e:
+        return False, f'Error adding course experience: {str(e)}'
 
 def add_user_help_request(request):
-    form = UserCourseHelpForm(request.POST, user=request.user)
-    if form.is_valid():
-        help_request = form.save(commit=False)
-        help_request.user = request.user
-        help_request.save()
+    try:
+        course_id = request.POST.get('course')
+        if not course_id:
+            return False, 'Course ID is required.'
+        
+        # Check if course exists
+        try:
+            course = Course.objects.get(id=course_id)
+        except Course.DoesNotExist:
+            return False, 'Course not found.'
+        
+        # Check if help request already exists
+        if UserCourseHelp.objects.filter(user=request.user, course=course, active=True).exists():
+            return False, 'You already have an active help request for this course.'
+        
+        # Create the help request
+        UserCourseHelp.objects.create(
+            user=request.user,
+            course=course,
+            active=True
+        )
         return True, None
-    else:
-        return False, 'Form is invalid.'
+        
+    except Exception as e:
+        return False, f'Error adding help request: {str(e)}'
 
 def remove_user_experience(request, experience_id):
     try:

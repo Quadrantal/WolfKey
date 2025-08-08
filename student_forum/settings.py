@@ -31,7 +31,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv('DEBUG', 'False') == 'True'
 
-ALLOWED_HOSTS = ['wolfkey-de5aac68fc04.herokuapp.com', '127.0.0.1', 'wolfkey.net', 'www.wolfkey.net', 'localhost:19000', 'localhost:8000', 'localhost', 'localhost:8001']
+ALLOWED_HOSTS = ['*']
 
 # Application definition
 
@@ -199,8 +199,9 @@ LOGGING = {
 CORS_ALLOWED_ORIGINS = [
     'http://127.0.0.1:8081',
     "http://localhost:8081",
-    "exp://localhost:19000",  # Expo development server
-    "http://localhost:19006",  # Expo web
+    "exp://localhost:19000",
+    "http://localhost:19006",
+    'http://10.0.0.38:8000'
 ]
 
 CORS_ALLOW_CREDENTIALS = True
@@ -213,6 +214,7 @@ CSRF_TRUSTED_ORIGINS = [
     "http://localhost:8081",
     "http://localhost:19000",
     "http://localhost:19006"
+    'http://10.0.0.38:8000'
 ]
 
 CORS_ALLOW_METHODS = [

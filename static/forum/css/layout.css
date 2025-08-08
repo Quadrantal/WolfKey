@@ -179,43 +179,41 @@ li {
 .dropdown .btn {
     background-color: transparent;
     border: none;
-    font-size: 1.2rem; /* Adjust the icon size */
+    font-size: 1.2rem;
     cursor: pointer;
   }
   
   .dropdown .btn:hover {
-    color: #007bff; /* Change icon color on hover */
+    color: #007bff;
   }
   
-  /* Dropdown menu styling */
   .dropdown-menu {
     background-color: #ffffff;
     border: 1px solid #eaeaea;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     border-radius: 12px;
+    border: none !important;
   }
   
-  /* Dropdown item styling */
   .dropdown-menu .dropdown-item {
-    font-size: 0.9rem; /* Font size */
-    color: #333333; /* Text color */
-    padding: 0.5rem 1rem; /* Spacing */
-    transition: background-color 0.2s, color 0.2s; /* Smooth hover effect */
+    font-size: 0.9rem;
+    color: #333333;
+    padding: 0.5rem 1rem;
+    transition: background-color 0.2s, color 0.2s;
     border-radius: 12px;
   }
   
   .dropdown-menu .dropdown-item:hover {
-    background-color: #e8f2fb; /* Light hover background */
-    color: #007bff; /* Hover text color */
+    background-color: #e8f2fb;
+    color: #007bff;
   }
   
-  /* Divider style */
   .dropdown-menu .dropdown-divider {
-    border-top: 1px solid #eaeaea; /* Divider color */
-    margin: 0.5rem 0; /* Spacing above and below */
+    border-top: 1px solid #eaeaea;
+    margin: 0.5rem 0;
   }
   
-  /* General Toast Styling */
+  /*Toast Styling */
 .custom-toast {
     min-width: 300px;
     color: white;
@@ -226,24 +224,21 @@ li {
 .z-901 {
     z-index: 901 !important;
 }
-/* Success Toast */
+
 .custom-toast-success {
-    background-color: #28a746b9; /* Bootstrap's success green */
+    background-color: #28a746b9;
 }
 
-/* Failure/Error Toast */
 .custom-toast-error {
-    background-color: #dc3545b9; /* Bootstrap's danger red */
+    background-color: #dc3545b9;
 }
 
-/* Warning Toast */
 .custom-toast-warning {
-    background-color: #ffc107b9; /* Bootstrap's warning yellow */
+    background-color: #ffc107b9;
 }
 
-/* Info Toast */
 .custom-toast-info {
-    background-color: #17a2b8b9; /* Bootstrap's info blue */
+    background-color: #17a2b8b9;
 }
 
 @keyframes toastSlideIn {

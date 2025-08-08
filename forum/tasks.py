@@ -16,11 +16,26 @@ import django
 logger = logging.getLogger(__name__)
 
 def get_decrypted_wolfnet_password(user_email):
+    """
+    Args:
+        user_email (str): User's school email address
+    
+    Returns:
+        str: Decrypted WolfNet password or None if not found
+    """
     user = User.objects.get(school_email=user_email)
     profile = user.userprofile
     return profile.get_decrypted_wolfnet_password()
 
 def compare_assignments(old_assignments, new_assignments):
+    """
+    Args:
+        old_assignments (list): Previous assignment data
+        new_assignments (list): Current assignment data
+    
+    Returns:
+        list: List of changes detected between old and new assignments
+    """
     changes = []
     old_map = {a["assignment_id"]: a for a in old_assignments}
     for new_a in new_assignments:
@@ -43,7 +58,16 @@ def compare_assignments(old_assignments, new_assignments):
     return changes
 
 def login_to_wolfnet(user_email, driver, wait, password=None):
-    """Log into WolfNet and return the authenticated driver"""
+    """
+    Args:
+        user_email (str): User's school email address
+        driver: Selenium WebDriver instance
+        wait: WebDriverWait instance
+        password (str, optional): WolfNet password, uses stored password if None
+    
+    Returns:
+        dict: {"success": bool, "error": str, "error_type": str} or {"success": True} if successful
+    """
     LOGIN_URL = "https://wpga.myschoolapp.com/"
     
     if password:
@@ -52,7 +76,7 @@ def login_to_wolfnet(user_email, driver, wait, password=None):
         PASSWORD = get_decrypted_wolfnet_password(user_email)
         if not PASSWORD:
             logger.error(f"No Wolfnet password found for {user_email}. Cannot login.")
-            return False
+            return {"success": False, "error": "No WolfNet password found", "error_type": "no_password"}
     
     try:
         logger.info(f"Navigating to login page for {user_email}")
@@ -70,45 +94,71 @@ def login_to_wolfnet(user_email, driver, wait, password=None):
 
         # Wait for either success (stay signed in prompt) or error (password error)
         try:
+            logger.info("start wait")
             element = wait.until(
                 EC.any_of(
                     EC.presence_of_element_located((By.ID, "idBtn_Back")),  # Stay signed in button (success)
                     EC.presence_of_element_located((By.CSS_SELECTOR, "#passwordError, .error, .alert-error")),  # Error elements
-                    EC.presence_of_element_located((By.CSS_SELECTOR, "#activitiesContainer"))  # Direct dashboard access
+                    EC.presence_of_element_located((By.CSS_SELECTOR, "#activitiesContainer")) 
                 )
             )
+
+            logger.info(element)
             
-            # Check which element we got
             if element.get_attribute("id") == "idBtn_Back":
-                # Stay signed in prompt - login was successful
+                # Stay signed in prompt
                 element.click()
                 wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "#activitiesContainer")))
                 time.sleep(1)
                 logger.info(f"Successfully logged in for {user_email} after handling stay signed in prompt")
-                return True
+                return {"success": True}
             elif "activitiesContainer" in element.get_attribute("id"):
-                # Direct dashboard access - login was successful
                 logger.info(f"Successfully logged in for {user_email}")
                 time.sleep(1)
-                return True
+                return {"success": True}
             else:
                 logger.error(f"Wrong WolfNet password detected for {user_email}")
-                return "wrong_password"
+                return {"success": False, "error": "Invalid WolfNet credentials", "error_type": "wrong_password"}
                     
         except Exception as e:
-            # If none of the expected elements appear within timeout, assume password error
-            logger.error(f"Login timeout or unexpected state for {user_email}: {str(e)}")
-            return "wrong_password"
+            # Before assuming password error, check if we can find account-nav (indicates successful login)
+            try:
+                account_nav = driver.find_element(By.CSS_SELECTOR, "#account-nav")
+                if account_nav:
+                    logger.info(f"Successfully logged in for {user_email} - found account-nav after timeout")
+                    return {"success": False, "error": "Logged in but needed content not found", "error_type": "no_courses"}
+            except:
+                pass
+        
+            
+            # Login timeout or page loading issue
+            logger.error(f"Login timeout or page loading issue for {user_email}: {str(e)}")
+            return {"success": False, "error": f"Login timeout or page loading issue: {str(e)}", "error_type": "timeout"}
     except Exception as e:
-        logger.error(f"Failed to login for {user_email}: {str(e)}")
-        return False
+        error_msg = str(e)
+        logger.error(f"Failed to login for {user_email}: {error_msg}")
+        
+        # Determine error type based on the exception
+        if "element" in error_msg.lower() and ("username" in error_msg.lower() or "password" in error_msg.lower()):
+            return {"success": False, "error": f"Login form elements not found: {error_msg}", "error_type": "page_structure"}
+        elif "timeout" in error_msg.lower():
+            return {"success": False, "error": f"Page timeout: {error_msg}", "error_type": "timeout"}
+        elif "network" in error_msg.lower() or "connection" in error_msg.lower():
+            return {"success": False, "error": f"Network error: {error_msg}", "error_type": "network"}
+        else:
+            return {"success": False, "error": f"General login error: {error_msg}", "error_type": "general"}
 
 def check_user_grades_core(user_email):
-    """Core grade checking logic using Selenium"""
+    """
+    Args:
+        user_email (str): User's school email address
+    
+    Returns:
+        dict: Result with success status and error message if failed
+    """
     logger.info(f"Starting grade check for user: {user_email}")
     LOGIN_URL = "https://wpga.myschoolapp.com/"
 
-    # Check if user has WolfNet password
     user_obj = User.objects.get(school_email=user_email)
     profile = getattr(user_obj, 'userprofile', None)
     wolfnet_password = None
@@ -126,14 +176,17 @@ def check_user_grades_core(user_email):
     chrome_options.add_argument("--no-sandbox")
     chrome_options.add_argument("--disable-dev-shm-usage")
     driver = webdriver.Chrome(options=chrome_options)
-    wait = WebDriverWait(driver, 20)
+    wait = WebDriverWait(driver, 8)
 
     try:
         login_result = login_to_wolfnet(user_email, driver, wait)
-        if login_result == "wrong_password":
-            return {"success": False, "error": "wrong_password"}
-        elif not login_result:
-            return {"success": False, "error": "Failed to login to WolfNet"}
+        if not login_result["success"]:
+            if login_result["error_type"] == "wrong_password":
+                return {"success": False, "error": "wrong_password"}
+            elif login_result["error_type"] == "no_courses":
+                return {"success": False, "error": f"{login_result['error']}", "error_type": "no_courses"}
+            else:
+                return {"success": False, "error": f"Failed to login to WolfNet: {login_result['error']}"}
 
         # Wait for courses to load
         wait.until(EC.presence_of_all_elements_located((By.CSS_SELECTOR, ".collapse")))
@@ -390,7 +443,11 @@ def check_user_grades_core(user_email):
 @shared_task(bind=True, queue='low', routing_key='low.grades')
 def check_single_user_grades(self, user_email):
     """
-    Check grades for a single user - low priority background task
+    Args:
+        user_email (str): User's school email address
+    
+    Returns:
+        dict: Result from check_user_grades_core function
     """
     try:
         return check_user_grades_core(user_email)
@@ -400,7 +457,11 @@ def check_single_user_grades(self, user_email):
 
 def check_all_user_grades_sequential():
     """
-    Regular function to schedule grade checking for all users one after the other finished
+    Args:
+        None
+    
+    Returns:
+        dict: Summary with checked_users count and results list
     """
     users = list(User.objects.filter(school_email__isnull=False).exclude(school_email=''))
     logger.info(f"Starting sequential grade check for {len(users)} users")
@@ -414,8 +475,11 @@ def check_all_user_grades_sequential():
 @shared_task
 def periodic_grade_check_trigger():
     """
-    Simple task that triggers the sequential grade checking function.
-    This is called by Celery Beat to start the grade checking process.
+    Args:
+        None
+    
+    Returns:
+        dict: Result from check_all_user_grades_sequential function
     """
     logger.info("Starting periodic grade check trigger")
     return check_all_user_grades_sequential()
@@ -423,7 +487,13 @@ def periodic_grade_check_trigger():
 @shared_task(bind=True, queue='default', routing_key='default.email')
 def send_email_notification(self, recipient_email, subject, message):
     """
-    Send email notification - default priority task
+    Args:
+        recipient_email (str): Email address to send to
+        subject (str): Email subject line
+        message (str): HTML email content
+    
+    Returns:
+        str: Success message or raises exception on failure
     """
     from django.core.mail import send_mail
     from django.conf import settings
@@ -446,37 +516,57 @@ def send_email_notification(self, recipient_email, subject, message):
 @shared_task(bind=True, queue='high', routing_key='high.auto')
 def auto_complete_courses(self, user_email, password=None):
     """
-    Auto-complete courses from WolfNet schedule for a user - high priority interactive task
+    Args:
+        user_email (str): User's school email address
+        password (str, optional): WolfNet password, uses stored password if None
+    
+    Returns:
+        dict: Result with success status, courses data, and raw_data if successful, or error message if failed
     """
     logger.info(f"Starting auto-complete courses for user: {user_email}")
     
     chrome_options = Options()
-    chrome_options.add_argument("--headless=new")
+    # chrome_options.add_argument("--headless=new")
     chrome_options.add_argument("--no-sandbox")
     chrome_options.add_argument("--disable-dev-shm-usage")
     driver = webdriver.Chrome(options=chrome_options)
-    wait = WebDriverWait(driver, 20)
+    wait = WebDriverWait(driver, 8)
 
     try:
         login_result = login_to_wolfnet(user_email, driver, wait, password)
-        if login_result == "wrong_password":
-            return {"success": False, "error": "wrong_password"}
-        elif not login_result:
-            return {"success": False, "error": "Failed to login to WolfNet"}
+        if not login_result["success"]:
+            if login_result["error_type"] == "wrong_password":
+                return {"success": False, "error": "wrong_password", "error_type": "authentication"}
+            elif login_result["error_type"] == "no_courses":
+                return {"success": False, "error": f"{login_result['error']}", "error_type": "no_courses"}
+            else:
+                return {"success": False, "error": f"Failed to login to WolfNet: {login_result['error']}", "error_type": "authentication"}
 
         # Wait for the page to load and find the first .subnav-multicol element
-        wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, ".subnav-multicol")))
-        subnav_elements = driver.find_elements(By.CSS_SELECTOR, ".subnav-multicol")
-        
-        if not subnav_elements:
-            logger.error(f"No .subnav-multicol elements found for {user_email}")
-            return {"success": False, "error": "No course navigation found"}
+        try:
+            wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, ".subnav-multicol")))
+            subnav_elements = driver.find_elements(By.CSS_SELECTOR, ".subnav-multicol")
+            
+            if not subnav_elements:
+                logger.error(f"No .subnav-multicol elements found for {user_email}")
+                return {"success": False, "error": "Course navigation not found on page", "error_type": "page_loading"}
+        except Exception as e:
+            logger.error(f"Failed to load course navigation elements for {user_email}: {str(e)}")
+            return {"success": False, "error": "Course navigation failed to load", "error_type": "page_loading"}
         
         # Take the first .subnav-multicol element
         subnav = subnav_elements[0]
         
         # Find all span.multi.title elements in the subnav
-        title_spans = subnav.find_elements(By.CSS_SELECTOR, "span.multi.title")
+        try:
+            title_spans = subnav.find_elements(By.CSS_SELECTOR, "span.multi.title")
+            
+            if not title_spans:
+                logger.warning(f"No course title spans found for {user_email}")
+                return {"success": False, "error": "No course titles found in navigation", "error_type": "page_structure"}
+        except Exception as e:
+            logger.error(f"Failed to find course title elements for {user_email}: {str(e)}")
+            return {"success": False, "error": "Failed to parse course navigation structure", "error_type": "page_structure"}
 
         courses_data = {}
         for title_span in title_spans:
@@ -511,6 +601,11 @@ def auto_complete_courses(self, user_email, password=None):
                 logger.warning(f"Error parsing span.multi.title for {user_email}: {str(e)}")
                 continue
         logger.info(f"Found {len(courses_data)} courses for {user_email}: {courses_data}")
+        
+        # Check if we found any courses at all
+        if not courses_data:
+            logger.warning(f"No valid courses found for {user_email}")
+            return {"success": False, "error": "No valid courses found in schedule", "error_type": "no_courses"}
         
         # Now search for each course in our database using course_search
         matched_courses = {}
@@ -555,8 +650,22 @@ def auto_complete_courses(self, user_email, password=None):
         }
         
     except Exception as e:
-        logger.error(f"Error in auto_complete_courses for {user_email}: {str(e.with_traceback)}")
-        return {"success": False, "error": str(e)}
+        error_message = str(e)
+        logger.error(f"Error in auto_complete_courses for {user_email}: {error_message}")
+        
+        # Determine error type based on the exception
+        if "login" in error_message.lower() or "password" in error_message.lower():
+            error_type = "authentication"
+        elif "element" in error_message.lower() or "timeout" in error_message.lower() or "not found" in error_message.lower():
+            error_type = "page_loading"
+        else:
+            error_type = "general"
+            
+        return {
+            "success": False, 
+            "error": error_message,
+            "error_type": error_type
+        }
     finally:
         driver.quit()
         logger.info(f"Auto-complete courses completed for {user_email}")

@@ -12,8 +12,6 @@ from forum.models import (
 )
 
 from forum.forms import ( 
-    UserCourseExperienceForm,
-    UserCourseHelpForm,
     UserProfileForm,
     WolfNetSettingsForm
 )
@@ -32,8 +30,8 @@ from forum.services.profile_service import (
 
 # Import the auto-complete service
 from forum.services.auto_complete_service import (
-    auto_complete_user_courses,
-    auto_complete_courses_registration as auto_complete_courses_registration_service
+    auto_complete_user_courses_service,
+    auto_complete_courses_registration_service
 )
 
 logger = logging.getLogger(__name__)
@@ -122,7 +120,7 @@ def auto_complete_courses_view(request):
     View to trigger auto-completion of courses from WolfNet for logged-in users
     """
     try:
-        result = auto_complete_user_courses(request.user)
+        result = auto_complete_user_courses_service(request.user)
         return JsonResponse(result)
         
     except Exception as e:
