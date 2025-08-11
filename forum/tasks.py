@@ -92,7 +92,6 @@ def login_to_wolfnet(user_email, driver, wait, password=None):
         submit_btn = wait.until(EC.element_to_be_clickable((By.ID, "idSIButton9")))
         submit_btn.click()
 
-        # Wait for either success (stay signed in prompt) or error (password error)
         try:
             logger.info("start wait")
             element = wait.until(
@@ -354,27 +353,47 @@ def check_user_grades_core(user_email):
                                     else:
                                         grade_info = "Grade information not available."
 
-                                message = f"<h3>{assignment_name} ({course_name}): </h3><br>"
+                                # Create HTML message for email
+                                html_message = f"<h3>{assignment_name} ({course_name}): </h3><br>"
                                 if change["type"] == "new":
-                                    message += f"New assignment graded.<br>{grade_info}<br>Comment: {assignment.get('comment')}"
+                                    html_message += f"New assignment graded.<br>{grade_info}<br>Comment: {assignment.get('comment')}"
                                 elif change["type"] == "skill_changed":
                                     skill = change["skill"]
-                                    message += f"Competency '<strong>{skill.get('skill_name')}</strong>' updated to '<strong>{skill.get('rating_desc')}</strong>'. {grade_info}"
+                                    html_message += f"Competency '<strong>{skill.get('skill_name')}</strong>' updated to '<strong>{skill.get('rating_desc')}</strong>'. {grade_info}"
                                 elif change["type"] == "points_changed":
-                                    message += f"Points changed to {assignment.get('points_earned')}/{assignment.get('max_points')}. {grade_info}"
+                                    html_message += f"Points changed to {assignment.get('points_earned')}/{assignment.get('max_points')}. {grade_info}"
                                 elif change["type"] == "comment_changed":
-                                    message += f"Comment updated.<br>{grade_info}<br>Comment: {assignment.get('comment')}"
+                                    html_message += f"Comment updated.<br>{grade_info}<br>Comment: {assignment.get('comment')}"
                                 else:
-                                    message += f"Graded or updated.<br>{grade_info}"
+                                    html_message += f"Graded or updated.<br>{grade_info}"
 
-                                section_messages.append(message)
+                                # Create clean text message for notification/push notification
+                                clean_grade_info = strip_tags(grade_info.replace("<br>", " "))
+                                clean_message = f"{assignment_name} ({course_name}): "
+                                if change["type"] == "new":
+                                    clean_message += f"New assignment graded. {clean_grade_info}"
+                                    if assignment.get('comment'):
+                                        clean_message += f" Comment: {assignment.get('comment')}"
+                                elif change["type"] == "skill_changed":
+                                    skill = change["skill"]
+                                    clean_message += f"Competency '{skill.get('skill_name')}' updated to '{skill.get('rating_desc')}'. {clean_grade_info}"
+                                elif change["type"] == "points_changed":
+                                    clean_message += f"Points changed to {assignment.get('points_earned')}/{assignment.get('max_points')}. {clean_grade_info}"
+                                elif change["type"] == "comment_changed":
+                                    clean_message += f"Comment updated. {clean_grade_info}"
+                                    if assignment.get('comment'):
+                                        clean_message += f" Comment: {assignment.get('comment')}"
+                                else:
+                                    clean_message += f"Graded or updated. {clean_grade_info}"
+
+                                section_messages.append(html_message)
 
                                 from forum.services.notification_services import send_notification_service
                                 send_notification_service(
                                     recipient=recipient,
                                     sender=sender,
                                     notification_type=notification_type,
-                                    message=message,
+                                    message=clean_message,
                                 )
 
                             snapshot.json_data = assignments
@@ -413,7 +432,6 @@ def check_user_grades_core(user_email):
                         all_email_messages.extend(section_messages)
                 except Exception as exc:
                     logger.error(f"Section {section_id} generated an exception: {exc}")
-                    # Log more details about the exception
                     import traceback
                     logger.error(f"Full traceback for section {section_id}: {traceback.format_exc()}")
 
@@ -526,7 +544,7 @@ def auto_complete_courses(self, user_email, password=None):
     logger.info(f"Starting auto-complete courses for user: {user_email}")
     
     chrome_options = Options()
-    # chrome_options.add_argument("--headless=new")
+    chrome_options.add_argument("--headless=new")
     chrome_options.add_argument("--no-sandbox")
     chrome_options.add_argument("--disable-dev-shm-usage")
     driver = webdriver.Chrome(options=chrome_options)
@@ -602,12 +620,10 @@ def auto_complete_courses(self, user_email, password=None):
                 continue
         logger.info(f"Found {len(courses_data)} courses for {user_email}: {courses_data}")
         
-        # Check if we found any courses at all
         if not courses_data:
             logger.warning(f"No valid courses found for {user_email}")
             return {"success": False, "error": "No valid courses found in schedule", "error_type": "no_courses"}
-        
-        # Now search for each course in our database using course_search
+
         matched_courses = {}
         
         for block, course_info in courses_data.items():
@@ -620,7 +636,7 @@ def auto_complete_courses(self, user_email, password=None):
             })()
             
             try:
-                from forum.services.course_services import course_search #avoids circular imports
+                from forum.services.course_services import course_search
                 
                 search_response = course_search(mock_request)
                 search_data = search_response.content.decode('utf-8')
@@ -653,7 +669,6 @@ def auto_complete_courses(self, user_email, password=None):
         error_message = str(e)
         logger.error(f"Error in auto_complete_courses for {user_email}: {error_message}")
         
-        # Determine error type based on the exception
         if "login" in error_message.lower() or "password" in error_message.lower():
             error_type = "authentication"
         elif "element" in error_message.lower() or "timeout" in error_message.lower() or "not found" in error_message.lower():

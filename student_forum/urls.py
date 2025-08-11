@@ -120,6 +120,15 @@ from forum.views.about_view import about_view
 
 from forum.api.feed import api_for_you, api_all_posts
 
+from forum.api.notifications import (
+    notifications_api,
+    mark_notification_read_api,
+    mark_all_notifications_read_api,
+    register_push_token_api,
+    unregister_push_token_api,
+    unread_count_api
+)
+
 from forum.api.posts import (
     post_detail_api,
     create_post_api,
@@ -283,6 +292,14 @@ urlpatterns = [
     path('api/comments/<int:comment_id>/edit/', edit_comment_api, name='api_edit_comment'),
     path('api/comments/<int:comment_id>/delete/', delete_comment_api, name='api_delete_comment'),
     path('api/solutions/<int:solution_id>/comments/', get_comments_api, name='api_get_comments'),
+    
+    # Notification API endpoints
+    path('api/notifications/', notifications_api, name='api_notifications'),
+    path('api/notifications/unread-count/', unread_count_api, name='api_notifications_unread_count'),
+    path('api/notifications/<int:notification_id>/mark-read/', mark_notification_read_api, name='api_mark_notification_read'),
+    path('api/notifications/mark-all-read/', mark_all_notifications_read_api, name='api_mark_all_notifications_read'),
+    path('api/notifications/register-push-token/', register_push_token_api, name='api_register_push_token'),
+    path('api/notifications/unregister-push-token/', unregister_push_token_api, name='api_unregister_push_token'),
     
     # Profile API endpoints
     path('api/profile/', get_profile_api, name='api_get_current_profile'),

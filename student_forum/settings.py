@@ -306,3 +306,6 @@ else:
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.getenv('SECRET_KEY', 'my-secret-key')
 FERNET_KEY = os.getenv('FERNET_KEY')
+
+# Expo Push Notification Settings
+EXPO_ACCESS_TOKEN = os.getenv('EXPO_ACCESS_TOKEN', None)

@@ -93,7 +93,7 @@ def post_detail(request, post_id):
         ).exists() if request.user.is_authenticated else False
         processed_solutions.append(solution)
 
-    
+    post = get_object_or_404(Post, id=post_id)
 
     context = {
         'post': post,  # Use actual post object for template helpers

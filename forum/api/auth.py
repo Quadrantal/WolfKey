@@ -102,8 +102,6 @@ def api_register(request):
         return JsonResponse({'error': str(e)}, status=500)
 
 @api_view(['GET'])
-@authentication_classes([TokenAuthentication])
-@permission_classes([IsAuthenticated])
 def search_users_api(request):
     """Search for users API endpoint"""
     try:

@@ -1,6 +1,7 @@
 from django.shortcuts import get_object_or_404
 from django.conf import settings
 from forum.models import UserCourseExperience, Notification, Post, Solution
+from forum.services.utils import process_post_preview
 import logging
 
 logger = logging.getLogger(__name__)
@@ -12,7 +13,7 @@ def send_course_notifications_service(post, courses):
     experienced_users = experienced_users.exclude(user=post.author)
     for exp_user in experienced_users:
         recipient = exp_user.user
-        message = f'New post in {", ".join(c.name for c in courses)}: {post.title}'
+        message = process_post_preview(post)
         url = post.get_absolute_url()
         email_subject = f'New post in your experienced course: {post.title}'
         email_message = f"""
@@ -128,8 +129,7 @@ def send_comment_notifications_service(comment, solution, parent_comment=None):
 def send_notification_service(
     recipient, sender, notification_type, message, url=None, post=None, solution=None, email_subject=None, email_message=None
 ):
-    # Create the in-app notification
-    Notification.objects.create(
+    created_notification = Notification.objects.create(
         recipient=recipient,
         sender=sender,
         notification_type=notification_type,
@@ -146,8 +146,55 @@ def send_notification_service(
             email_subject,
             email_message
         )
+    
+    try:
+        from forum.services.expo_push_service import send_push_notification_to_user
+        from forum.services.deep_link_service import create_notification_deep_link
+        
+        # Create push notification title and body
+        push_title = f"New {notification_type.title()}"
+        if notification_type == 'post':
+            push_title = post.title
+        elif notification_type == 'solution':
+            push_title = "New Solution for your question"
+        elif notification_type == 'comment':
+            push_title = "New Comment"
+        elif notification_type == 'reply':
+            push_title = "New Reply"
+        elif notification_type == 'grade_update':
+            push_title = "Grade Update"
+            
+        push_body = message[:100] + "..." if len(message) > 100 else message
+
+        deep_link_data = create_notification_deep_link(
+            notification_type=notification_type,
+            post=post,
+            solution=solution,
+            post_id=post.id if post else None,
+            solution_id=solution.id if solution else None,
+            user=sender
+        )
+        
+        push_data = {
+            'notification_id': str(created_notification.id),
+            'notification_type': notification_type,
+            'post_id': str(post.id) if post else None,
+            'solution_id': str(solution.id) if solution else None,
+            **deep_link_data
+        }
+        
+        send_push_notification_to_user(
+            user=recipient,
+            title=push_title,
+            body=push_body,
+            data=push_data
+        )
+        
+    except Exception as e:
+        logger.error(f"Failed to send push notification: {str(e)}")
 
 def all_notifications_service(user):
+    print(user.notifications.all())
     return user.notifications.all()
 
 def mark_notification_read_service(user, notification_id):

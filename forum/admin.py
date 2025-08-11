@@ -25,7 +25,7 @@ class UserProfileInline(admin.StackedInline):
     
     fieldsets = (
         (None, {
-            'fields': ('bio', 'profile_picture', 'background_hue', 'points', 'is_moderator', 'wolfnet_password')
+            'fields': ('bio', 'profile_picture', 'background_hue', 'points', 'is_moderator', 'wolfnet_password', 'expo_push_token')
         }),
         ('Course Blocks', {
             'fields': (

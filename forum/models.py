@@ -398,6 +398,14 @@ class UserProfile(models.Model):
     block_2C = models.ForeignKey(Course, on_delete=models.SET_NULL, null=True, blank=True, related_name="block_2C")
     block_2D = models.ForeignKey(Course, on_delete=models.SET_NULL, null=True, blank=True, related_name="block_2D")
     block_2E = models.ForeignKey(Course, on_delete=models.SET_NULL, null=True, blank=True, related_name="block_2E")
+    
+    # Expo push notification token for mobile app
+    expo_push_token = models.CharField(
+        max_length=255,
+        blank=True,
+        null=True,
+        help_text="Expo push notification token for mobile app notifications"
+    )
 
     def __str__(self):
         return f"{self.user.username}'s profile"
@@ -487,6 +495,8 @@ class Notification(models.Model):
         ('post', 'New Post'),
         ('solution', 'New Solution'),
         ('comment', 'New Comment'),
+        ('reply', 'New Reply'),
+        ('grade_update', 'Grade Update'),
         ('edit', 'Post Edit'),
     )
     
