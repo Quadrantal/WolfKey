@@ -243,11 +243,9 @@ def create_notification_deep_link(notification_type: str, **kwargs) -> Dict:
                 )
                 
         elif notification_type == 'follow':
-            # Someone followed your post - link to post detail
             return WolfKeyDeepLink.post_detail(post_id=post_id)
             
         elif notification_type == 'like':
-            # Someone liked your post - link to post detail
             return WolfKeyDeepLink.post_detail(post_id=post_id)
                 
         elif notification_type == 'course_update':

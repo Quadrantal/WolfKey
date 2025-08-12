@@ -99,6 +99,11 @@
   transform-origin: center;
   box-shadow: 0 2px 4px rgba(0,0,0,0.2);
   z-index: 100;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.card:hover .banner {
+  transform: rotate(-45deg) translateY(4px);
 }
 
 .card.loading {
