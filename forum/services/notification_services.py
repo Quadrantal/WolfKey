@@ -194,7 +194,6 @@ def send_notification_service(
         logger.error(f"Failed to send push notification: {str(e)}")
 
 def all_notifications_service(user):
-    print(user.notifications.all())
     return user.notifications.all()
 
 def mark_notification_read_service(user, notification_id):

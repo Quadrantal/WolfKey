@@ -91,8 +91,6 @@ def unread_count_api(request):
             is_read=False
         ).count()
 
-        print("Unread count: ", unread_count)
-        
         return Response({
             'success': True,
             'data': {

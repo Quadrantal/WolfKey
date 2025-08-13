@@ -328,7 +328,6 @@ class Comment(models.Model):
         while parent:
             depth += 1
             parent = parent.parent
-        print("Dep: ", depth)
         return min(depth, 5)  # Limit maximum nesting depth to 5
 
 class SolutionUpvote(models.Model):

@@ -95,7 +95,6 @@ def auto_complete_courses_registration_service(school_email, wolfnet_password):
                 'error': 'School email required for auto-completion.'
             }
         
-        print("aweoifjaoifjajfio")
         # Start the auto-complete task
         task = auto_complete_courses.delay(school_email, wolfnet_password)
         

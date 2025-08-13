@@ -168,7 +168,6 @@ def send_push_notification_to_user(user, title: str, body: str, data: Optional[D
     """
     try:
         user_profile = user.userprofile
-        print(user_profile.expo_push_token)
         if not user_profile.expo_push_token:
             logger.info(f"User {user.get_full_name()} has no push token registered")
             return {'success': False, 'error': 'No push token registered'}
