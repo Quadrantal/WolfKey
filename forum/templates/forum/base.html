@@ -65,13 +65,8 @@
         document.addEventListener('DOMContentLoaded', function() {
             const isProfilePage = document.body.classList.contains('profile-page');
             if (!isProfilePage) {
-                const hue = {{ request.user.userprofile.background_hue}};
-                {% if request.user.is_authenticated %}
-                    setBackground({{ request.user.userprofile.background_hue|default:231 }});
-                {% else %}
-                    setBackground(231);
-                {% endif %};
-                    setBackground(hue);
+                const hue = {% if request.user.is_authenticated %}{{ request.user.userprofile.background_hue|default:205 }}{% else %}205{% endif %};
+                setBackground(hue);
             }
         });
     </script>
