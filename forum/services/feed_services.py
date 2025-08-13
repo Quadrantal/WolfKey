@@ -1,6 +1,6 @@
 from django.db.models import Q, F, Count
 from django.contrib.postgres.search import SearchQuery, SearchRank, SearchVector, TrigramSimilarity
-from forum.models import Post
+from forum.models import Post, Course
 from forum.services.course_services import get_user_courses
 from forum.services.utils import process_post_preview, add_course_context, annotate_post_card_context
 from django.core.paginator import Paginator
@@ -18,11 +18,18 @@ def get_for_you_posts(user, page=1, per_page=8):
         profile.block_2A, profile.block_2B, profile.block_2C, profile.block_2D, profile.block_2E
     ]))
 
+    try:
+        school_life_course = Course.objects.get(name="School Life")
+    except Course.DoesNotExist:
+        school_life_course = None
+
     base_qs = Post.objects.filter(
         Q(courses__in=experienced_courses) | 
         Q(courses__in=help_needed_courses) | 
         Q(author=user) |
-        Q(courses__in=current_courses)
+        Q(courses__in=current_courses) |
+        Q(courses__isnull=True) |
+        (Q(courses=school_life_course) if school_life_course else Q())
     ).distinct().order_by('-created_at')
 
     paginator = Paginator(base_qs, per_page)
