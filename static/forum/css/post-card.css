@@ -176,9 +176,9 @@
 
 .highlighted-card-green{
     padding-top: 12px;
-    border: 1px solid #45cb7d !important;
+    border: 1px solid #00ff6a !important;
     background: linear-gradient(to bottom, #aae6a3 -5%, #fff 6%, #fff 85%,#aae6a3 120%);
-    box-shadow: 0 0px 20px rgba(41, 234, 14, 0.9) !important;
+    box-shadow: 0 0px 20px rgba(41, 234, 14, 1) !important;
     z-index: 1; 
 }
 
