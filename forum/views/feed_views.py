@@ -36,13 +36,22 @@ def for_you(request):
     tomorrow_iso = _get_iso_date(tomorrow_pst)
 
     greeting = get_random_greeting(request.user.first_name, user_timezone="America/Vancouver")
-    ceremonial_required_today = is_ceremonial_uniform_required(request.user, today_iso)
-    ceremonial_required_tomorrow = is_ceremonial_uniform_required(request.user, tomorrow_iso)
-    
-    raw_schedule_today = get_block_order_for_day(today_iso)
-    raw_schedule_tomorrow = get_block_order_for_day(tomorrow_iso)
-    processed_schedule_today = process_schedule_for_user(request.user, raw_schedule_today)
-    processed_schedule_tomorrow = process_schedule_for_user(request.user, raw_schedule_tomorrow)
+
+    try:
+        ceremonial_required_today = is_ceremonial_uniform_required(request.user, today_iso)
+        ceremonial_required_tomorrow = is_ceremonial_uniform_required(request.user, tomorrow_iso)
+        
+        raw_schedule_today = get_block_order_for_day(today_iso)
+        raw_schedule_tomorrow = get_block_order_for_day(tomorrow_iso)
+        processed_schedule_today = process_schedule_for_user(request.user, raw_schedule_today)
+        processed_schedule_tomorrow = process_schedule_for_user(request.user, raw_schedule_tomorrow)
+    except Exception as e:
+        print(e)
+        ceremonial_required_today = None
+        ceremonial_required_tomorrow = None
+
+        processed_schedule_today = None
+        processed_schedule_tomorrow = None
 
     # Convert dates to display format
     today_display = _convert_to_sheet_date_format(now_pst.date())

@@ -31,22 +31,28 @@
                                 👔 Ceremonial Required
                             </li>
                             {% endif %}
-                            {% for item in schedule_today %}
-                            {% if item == "no school"  %}
-                            <li class="list-group-item">
-                                <p style = "margin-bottom: 0px;">No School</p>
-                            </li>
+                            {% if schedule_today %}
+                                {% for item in schedule_today %}
+                                {% if item == "no school"  %}
+                                <li class="list-group-item">
+                                    <p style = "margin-bottom: 0px;">No School</p>
+                                </li>
+                                {% else %}
+                                    <li class="list-group-item">
+                                        <div class="d-flex justify-content-between align-items-center mb-1">
+                                            <p style = "margin-bottom: 0px;">{{ item.block }}</p>
+                                            {% if item.time %}
+                                                <p style = "margin-bottom: 0px;">{{ item.time }} </p>
+                                            {% endif %}
+                                        </div>
+                                    </li>
+                                {% endif %}
+                                {% endfor %}
                             {% else %}
                                 <li class="list-group-item">
-                                    <div class="d-flex justify-content-between align-items-center mb-1">
-                                        <p style = "margin-bottom: 0px;">{{ item.block }}</p>
-                                        {% if item.time %}
-                                            <p style = "margin-bottom: 0px;">{{ item.time }} </p>
-                                        {% endif %}
-                                    </div>
+                                    <p style = "margin-bottom: 0px;">Schedule unavailable</p>
                                 </li>
                             {% endif %}
-                            {% endfor %}
                         </ul>
                     </div>
 
@@ -67,22 +73,28 @@
                             👔 Ceremonial Required
                         </li>
                         {% endif %}
-                        {% for item in schedule_tomorrow %}
-                        {% if item == "no school"  %}
-                        <li class="list-group-item">
-                            <p style = "margin-bottom: 0px;">No School</p>
-                        </li>
+                        {% if schedule_tomorrow %}
+                            {% for item in schedule_tomorrow %}
+                            {% if item == "no school"  %}
+                            <li class="list-group-item">
+                                <p style = "margin-bottom: 0px;">No School</p>
+                            </li>
+                            {% else %}
+                            <li class="list-group-item">
+                                <div class="d-flex justify-content-between align-items-center mb-1">
+                                    <p style = "margin-bottom: 0px;">{{ item.block }}</p>
+                                    {% if item.time %}
+                                        <p style = "margin-bottom: 0px;">{{ item.time }} </p>
+                                    {% endif %}
+                                </div>
+                            </li>
+                            {% endif %}
+                            {% endfor %}
                         {% else %}
-                        <li class="list-group-item">
-                            <div class="d-flex justify-content-between align-items-center mb-1">
-                                <p style = "margin-bottom: 0px;">{{ item.block }}</p>
-                                {% if item.time %}
-                                    <p style = "margin-bottom: 0px;">{{ item.time }} </p>
-                                {% endif %}
-                            </div>
-                        </li>
+                            <li class="list-group-item">
+                                <p style = "margin-bottom: 0px;">Schedule unavailable</p>
+                            </li>
                         {% endif %}
-                        {% endfor %}
                     </ul>
                     </div>
                 </div>
