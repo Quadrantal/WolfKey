@@ -47,7 +47,17 @@
 </head>
 
 {% block content %}
-{% include 'forum/components/post_detail_post_card.html'%}
+<div class="post-detail-container">
+    <div id="go-back-container" style="display: none;">
+        <a href="#" id="go-back-button" class="go-back-button">
+            <i class="fas fa-arrow-left"></i>
+        </a>
+    </div>
+    
+    <div class="post-detail-content">
+        {% include 'forum/components/post_detail_post_card.html'%}
+    </div>
+</div>
 
 <hr>
 
@@ -228,6 +238,68 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     initializePage();
+    
+    // Go back button logic
+    function setupGoBackButton() {
+        const goBackContainer = document.getElementById('go-back-container');
+        const goBackButton = document.getElementById('go-back-button');
+        
+        // Check if user came from for-you or all-posts pages
+        const referrer = document.referrer;
+        const currentHost = window.location.origin;
+        const postId = {{ post.id }};
+        const storedGoBackUrl = sessionStorage.getItem('goBackUrl');
+        
+        let shouldShowButton = false;
+        let backUrl = '';
+        
+        // First check if we have stored go-back information
+        if (storedGoBackUrl) {
+            shouldShowButton = true;
+            backUrl = storedGoBackUrl;
+    
+        } else if (referrer.includes(currentHost)) {
+            // Fallback to referrer detection
+            if (referrer.endsWith('/') || referrer.includes('/?')) {
+                shouldShowButton = true;
+                backUrl = '{% url "for_you" %}';
+            } else if (referrer.includes('/all-posts/')) {
+                shouldShowButton = true;
+                backUrl = '{% url "all_posts" %}';
+            }
+        }
+        
+        if (shouldShowButton) {
+            goBackButton.href = backUrl;
+            goBackContainer.style.display = 'block';
+        }
+        
+        // Add click handler for browser back functionality with scroll to post
+        goBackButton.addEventListener('click', function(e) {
+            e.preventDefault();
+            
+            // Store the post ID in sessionStorage for scrolling back to it
+            sessionStorage.setItem('scrollToPostId', postId);
+            
+            // Clear the stored go-back URL since we're using it
+            sessionStorage.removeItem('goBackUrl');
+            
+            // If we have a specific back URL, use it
+            if (backUrl) {
+                window.location.href = backUrl;
+            } else {
+                // Fallback to browser history
+                if (window.history.length > 1) {
+                    window.history.back();
+                } else {
+                    // If no history, go to for-you page
+                    window.location.href = '{% url "for_you" %}';
+                }
+            }
+        });
+    }
+    
+    setupGoBackButton();
 });
 
 function showReplyForm(commentId) {

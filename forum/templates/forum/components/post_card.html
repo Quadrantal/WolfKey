@@ -241,6 +241,20 @@
 
         const url = card.dataset.postUrl;
         if (url) {
+            // Extract post ID from URL for scroll-back functionality
+            const postIdMatch = url.match(/post\/(\d+)\//);
+            if (postIdMatch) {
+                const postId = postIdMatch[1];
+                
+                // Store current page information for the go-back button
+                const currentPath = window.location.pathname;
+                const currentSearch = window.location.search;
+                sessionStorage.setItem('goBackUrl', currentPath + currentSearch);
+                
+                // Also store the clicked post ID (this is used when coming back)
+                sessionStorage.setItem('lastClickedPostId', postId);
+            }
+            
             window.location.href = url;
         }
     });

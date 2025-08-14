@@ -207,6 +207,8 @@
                             animationObserver.observe(post);
                         }
                     });
+                    
+                    checkForScrollTarget();
                 } else {
                     hasMore = false;
                     loadingSpinner.style.display = 'none';
@@ -234,6 +236,70 @@
         if (loadingSpinner) {
             scrollObserver.observe(loadingSpinner);
         }
+        
+        // Check if we need to scroll to a specific post
+        function checkForScrollTarget() {
+            const targetPostId = sessionStorage.getItem('scrollToPostId');
+            if (targetPostId) {
+                const postCard = document.querySelector(`[data-post-url*="post/${targetPostId}/"]`);
+                if (postCard) {
+                    sessionStorage.removeItem('scrollToPostId'); // Remove after use
+                    
+                    // Add a highlight effect
+                    postCard.style.transition = 'box-shadow 0.3s ease';
+                    postCard.style.boxShadow = '0 0 0 3px rgba(66, 153, 225, 0.5)';
+                    
+                    // Scroll to the post with some offset
+                    postCard.scrollIntoView({ 
+                        behavior: 'smooth', 
+                        block: 'center' 
+                    });
+                    
+                    // Remove highlight after a delay
+                    setTimeout(() => {
+                        postCard.style.boxShadow = '';
+                    }, 2000);
+                    
+                    return true;
+                }
+            }
+            return false;
+        }
+        
+        function scrollToPostIfNeeded() {
+            const targetPostId = sessionStorage.getItem('scrollToPostId');
+            if (targetPostId) {
+                // Try to scroll immediately
+                if (!checkForScrollTarget()) {
+                    // If post not found, automatically load more posts until we find it
+                    let attempts = 0;
+                    const maxAttempts = 40;
+                    
+                    const findPostInterval = setInterval(() => {
+                        attempts++;
+                        
+                        // Check if post is now available
+                        if (checkForScrollTarget()) {
+                            clearInterval(findPostInterval);
+                            return;
+                        }
+                        
+                        // If we still have more posts to load and haven't exceeded attempts
+                        if (hasMore && !loading && attempts < maxAttempts) {
+                            console.log(`Attempting to load more posts to find post ${targetPostId} (attempt ${attempts})`);
+                            loadMorePosts();
+                        } else if (attempts >= maxAttempts || !hasMore) {
+                            clearInterval(findPostInterval);
+                            sessionStorage.removeItem('scrollToPostId');
+                            console.log(`Could not find post ${targetPostId} after ${attempts} attempts`);
+                        }
+                    }, 200);
+                }
+            }
+        }
+        
+
+        setTimeout(scrollToPostIfNeeded, 100);
     });
 </script>
 {% endblock %}
