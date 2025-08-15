@@ -14,7 +14,6 @@ from forum.services.schedule_services import (
     _convert_to_sheet_date_format,
     is_ceremonial_uniform_required
 )
-from forum.services.course_comparer_services import get_user_schedule_service
 
 @ensure_csrf_cookie
 @require_http_methods(["GET"])
@@ -45,12 +44,19 @@ def get_daily_schedule(request, target_date):
 @require_http_methods(["GET"])
 def get_user_schedule_api(request, user_id):
     """Get user's course schedule for comparison"""
-    schedule_data, error = get_user_schedule_service(user_id)
+    from django.shortcuts import get_object_or_404
+    from forum.models import User, UserProfile
+    from forum.serializers import ScheduleSerializer
     
-    if error:
-        return JsonResponse({'error': error}, status=404)
-    
-    return JsonResponse(schedule_data)
+    try:
+        user = get_object_or_404(User, id=user_id)
+        user_profile = get_object_or_404(UserProfile, user=user)
+        
+        serializer = ScheduleSerializer(user_profile)
+        return JsonResponse(serializer.data)
+        
+    except Exception as e:
+        return JsonResponse({'error': 'User or profile not found'}, status=404)
 
 @api_view(['GET'])
 @authentication_classes([TokenAuthentication])

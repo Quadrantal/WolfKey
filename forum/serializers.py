@@ -56,17 +56,89 @@ class UserProfileSerializer(serializers.ModelSerializer):
 class UserSerializer(serializers.ModelSerializer):
     userprofile = UserProfileSerializer(read_only=True)
     full_name = serializers.SerializerMethodField()
+    profile_picture_url = serializers.SerializerMethodField()
     
     class Meta:
         model = User
         fields = [
             'id', 'username', 'first_name', 'last_name', 'full_name',
             'school_email', 'personal_email', 'phone_number', 
-            'date_joined', 'userprofile'
+            'date_joined', 'userprofile', 'profile_picture_url'
         ]
     
     def get_full_name(self, obj):
         return obj.get_full_name()
+    
+    def get_profile_picture_url(self, obj):
+        try:
+            if obj.userprofile and obj.userprofile.profile_picture:
+                return obj.userprofile.profile_picture.url
+            return None
+        except:
+            return None
+
+class ScheduleSerializer(serializers.ModelSerializer):
+    """Serializer for user schedule data - returns user info + schedule blocks"""
+    user_id = serializers.IntegerField(source='user.id', read_only=True)
+    username = serializers.CharField(source='user.username', read_only=True)
+    full_name = serializers.SerializerMethodField()
+    profile_picture_url = serializers.SerializerMethodField()
+    schedule = serializers.SerializerMethodField()
+    
+    class Meta:
+        model = UserProfile
+        fields = ['user_id', 'username', 'full_name', 'profile_picture_url', 'schedule']
+    
+    def get_full_name(self, obj):
+        return obj.user.get_full_name()
+    
+    def get_profile_picture_url(self, obj):
+        try:
+            if obj.profile_picture:
+                return obj.profile_picture.url
+            return None
+        except:
+            return None
+    
+    def get_schedule(self, obj):
+        return {
+            '1A': {
+                'course': obj.block_1A.name if obj.block_1A else None,
+                'course_id': obj.block_1A.id if obj.block_1A else None,
+            },
+            '1B': {
+                'course': obj.block_1B.name if obj.block_1B else None,
+                'course_id': obj.block_1B.id if obj.block_1B else None,
+            },
+            '1D': {
+                'course': obj.block_1D.name if obj.block_1D else None,
+                'course_id': obj.block_1D.id if obj.block_1D else None,
+            },
+            '1E': {
+                'course': obj.block_1E.name if obj.block_1E else None,
+                'course_id': obj.block_1E.id if obj.block_1E else None,
+            },
+            '2A': {
+                'course': obj.block_2A.name if obj.block_2A else None,
+                'course_id': obj.block_2A.id if obj.block_2A else None,
+            },
+            '2B': {
+                'course': obj.block_2B.name if obj.block_2B else None,
+                'course_id': obj.block_2B.id if obj.block_2B else None,
+            },
+            '2C': {
+                'course': obj.block_2C.name if obj.block_2C else None,
+                'course_id': obj.block_2C.id if obj.block_2C else None,
+            },
+            '2D': {
+                'course': obj.block_2D.name if obj.block_2D else None,
+                'course_id': obj.block_2D.id if obj.block_2D else None,
+            },
+            '2E': {
+                'course': obj.block_2E.name if obj.block_2E else None,
+                'course_id': obj.block_2E.id if obj.block_2E else None,
+            },
+        }
 
 class PostListSerializer(serializers.ModelSerializer):
     """Serializer for post list/feed views - matches paginate_posts structure"""
