@@ -13,7 +13,7 @@ creds = ServiceAccountCredentials.from_json_keyfile_dict(settings.GSHEET_CREDENT
 client = gspread.authorize(creds)
 
 # Open the spreadsheet
-sheet = client.open("Copy of 2024-2025 SS Block Order Calendar").sheet1
+sheet = client.open("Copy of 2025-2026 SS Block Order Calendar").sheet1
 
 DEFAULT_BLOCK_TIMES = [
     "8:20-9:30",
@@ -94,21 +94,32 @@ def get_block_order_for_day(iso_date):
 
     if existing_schedule != None:
         if any([existing_schedule.block_1, existing_schedule.block_2, existing_schedule.block_3, existing_schedule.block_4, existing_schedule.block_5]):
+            blocks = [
+                existing_schedule.block_1,
+                existing_schedule.block_2,
+                existing_schedule.block_3,
+                existing_schedule.block_4,
+                existing_schedule.block_5,
+            ]
+            times = [
+                existing_schedule.block_1_time,
+                existing_schedule.block_2_time,
+                existing_schedule.block_3_time,
+                existing_schedule.block_4_time,
+                existing_schedule.block_5_time,
+            ]
+            
+            # Add blocks 6-8 only if they exist
+            for block_num in [6, 7, 8]:
+                block_value = getattr(existing_schedule, f'block_{block_num}', None)
+                time_value = getattr(existing_schedule, f'block_{block_num}_time', None)
+                if block_value:
+                    blocks.append(block_value)
+                    times.append(time_value)
+            
             return {
-                'blocks': [
-                    existing_schedule.block_1,
-                    existing_schedule.block_2,
-                    existing_schedule.block_3,
-                    existing_schedule.block_4,
-                    existing_schedule.block_5,
-                ],
-                'times': [
-                    existing_schedule.block_1_time,
-                    existing_schedule.block_2_time,
-                    existing_schedule.block_3_time,
-                    existing_schedule.block_4_time,
-                    existing_schedule.block_5_time,
-                ],
+                'blocks': blocks,
+                'times': times,
             }
         elif not existing_schedule.is_school and existing_schedule.is_school != None:
             return {
@@ -124,7 +135,7 @@ def get_block_order_for_day(iso_date):
         block_times = {i + 1: DEFAULT_BLOCK_TIMES[i] for i in range(5)}
 
     date_column = sheet.col_values(4)[6:]
-    rows = sheet.get_all_values()[6:]
+    rows = sheet.get_all_values()[6:212]
 
     for i, date_str in enumerate(date_column):
         if date_str.strip() == sheet_date.strip():
@@ -141,31 +152,41 @@ def get_block_order_for_day(iso_date):
                 if getattr(schedule, time_field) in [None, ""] and time_value:
                     setattr(schedule, time_field, time_value)
 
-            if any([
-                schedule.block_1,
-                schedule.block_2,
-                schedule.block_3,
-                schedule.block_4,
-                schedule.block_5
-            ]):
-                schedule.is_school = True
-            else:
-                schedule.is_school = False
-
+            # Check if any blocks 1-8 exist to determine if it's a school day
+            school_blocks = []
+            for block_num in range(1, 9):
+                if hasattr(schedule, f'block_{block_num}'):
+                    school_blocks.append(getattr(schedule, f'block_{block_num}'))
+            
+            schedule.is_school = any(school_blocks)
             schedule.save()
 
+            blocks = []
+            times = []
+            for block_num in range(1, 9):
+                if hasattr(schedule, f'block_{block_num}'):
+                    block_value = getattr(schedule, f'block_{block_num}')
+                    time_value = getattr(schedule, f'block_{block_num}_time')
+                    if block_value:  # Only add if block exists and is not null
+                        blocks.append(block_value)
+                        times.append(time_value)
+                elif block_num <= 5:  # Always include blocks 1-5 even if null
+                    blocks.append(getattr(schedule, f'block_{block_num}'))
+                    times.append(getattr(schedule, f'block_{block_num}_time'))
+
             return {
-                'blocks': [getattr(schedule, f'block_{i+1}') for i in range(5)],
-                'times': [getattr(schedule, f'block_{i+1}_time') for i in range(5)],
+                'blocks': blocks,
+                'times': times,
             }
 
     schedule, created = DailySchedule.objects.get_or_create(date=date_obj)
-    schedule.is_school = False
+    if created or schedule.is_school is None:
+        schedule.is_school = False
     schedule.save()
 
     return {
         'blocks': [None] * 5,
-        'times': [block_times.get(i+1) for i in range(5)],
+        'times': [block_times.get(i+1, DEFAULT_BLOCK_TIMES[i] if i < len(DEFAULT_BLOCK_TIMES) else None) for i in range(5)],
     }
 
 def process_schedule_for_user(user, raw_schedule):
@@ -173,12 +194,18 @@ def process_schedule_for_user(user, raw_schedule):
     processed_schedule = []
 
     block_mapping = {
-        "1ca": "Academics",
-        "1cp": "PEAKS",
+        "1ca": "Advisory",
+        "1cp": "Advisory",
         "1cap": "Advisory",
+        "1c-pa" :"Advisory",
+        "1c-ap" : "Advisory",
         "assm": "Assembly",
-        "tfr": "Terry Fox Run"
+        "tfr": "Terry Fox Run",
+        "g8 assm" : "Grade 8 Assembly ONLY",
+        "ss assm" : "Senior School Assembly",
     }
+
+    regular_blocks = ["1a", "1b","1c","1d","1e","2a","2b","2c","2d","2e"]
 
     if not any(raw_schedule['blocks']):
         return ["no school"]
@@ -190,12 +217,17 @@ def process_schedule_for_user(user, raw_schedule):
             normalized = block.strip().lower()
             if normalized in block_mapping:
                 processed_schedule.append({"block": block_mapping[normalized], "time": time})
-            else:
+            elif normalized in regular_blocks:
                 block_attr = f"block_{normalized.upper()}"
                 course = getattr(profile, block_attr, None)
                 processed_schedule.append({
-                    "block": course.name if course else "Add your courses in profile/preferences to unlock this!",
+                    "block": course.name if course else "Add your courses in profile to unlock this!",
                     "time": time
+                })
+            else:
+                processed_schedule.append({
+                    "block": normalized,
+                    "time": time,
                 })
     return processed_schedule
 
@@ -229,7 +261,10 @@ def is_ceremonial_uniform_required(user, iso_date):
         ).execute()
 
         for event in events_result.get('items', []):
-            if event.get('summary', '').lower() == "ceremonial uniform required for senior school students":
+            summary = event.get('summary', '').lower()
+            description = event.get('description', '').lower()
+            
+            if 'ceremonial uniform' in summary or 'ceremonial uniform' in description:
                 existing_schedule.ceremonial_uniform = True
                 existing_schedule.save()
                 return True

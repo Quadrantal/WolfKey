@@ -421,6 +421,12 @@ class DailySchedule(models.Model):
     block_4_time = models.CharField(max_length=50, blank=True, null=True)
     block_5 = models.CharField(max_length=100, blank=True, null=True)
     block_5_time = models.CharField(max_length=50, blank=True, null=True)
+    block_6 = models.CharField(max_length=100, blank=True, null=True) # Following blocks are only in case of days where there are more than 5 blocks. 
+    block_6_time = models.CharField(max_length=50, blank=True, null=True)
+    block_7 = models.CharField(max_length=100, blank=True, null=True)
+    block_7_time = models.CharField(max_length=50, blank=True, null=True)
+    block_8 = models.CharField(max_length=100, blank=True, null=True)
+    block_8_time = models.CharField(max_length=50, blank=True, null=True)
     ceremonial_uniform = models.BooleanField(null = True)
     is_school = models.BooleanField(null = True)
 
