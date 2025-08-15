@@ -125,7 +125,7 @@ def login_to_wolfnet(user_email, driver, wait, password=None):
                 account_nav = driver.find_element(By.CSS_SELECTOR, "#account-nav")
                 if account_nav:
                     logger.info(f"Successfully logged in for {user_email} - found account-nav after timeout")
-                    return {"success": False, "error": "Logged in but needed content not found", "error_type": "no_courses"}
+                    return {"success": True, "message": "Login successful - account navigation found"}
             except:
                 pass
         
@@ -187,8 +187,18 @@ def check_user_grades_core(user_email):
             else:
                 return {"success": False, "error": f"Failed to login to WolfNet: {login_result['error']}"}
 
+        # Check if login was successful but with limited content (account-nav found but no course content)
+        if login_result.get("message") and "account navigation found" in login_result["message"]:
+            logger.info(f"Login successful for {user_email} but no course content available for grade checking")
+            return {"success": False, "error": "No course content available for grade checking", "error_type": "no_courses"}
+
         # Wait for courses to load
-        wait.until(EC.presence_of_all_elements_located((By.CSS_SELECTOR, ".collapse")))
+        try:
+            wait.until(EC.presence_of_all_elements_located((By.CSS_SELECTOR, ".collapse")))
+        except Exception as e:
+            logger.info(f"No course content found for {user_email} - this is expected for grade checking when account-nav login fallback was used")
+            return {"success": False, "error": "No course content available for grade checking", "error_type": "no_courses"}
+            
         course_divs = driver.find_elements(By.CSS_SELECTOR, ".collapse")
         section_ids = []
         section_id_to_course_name = {}
@@ -560,6 +570,11 @@ def auto_complete_courses(self, user_email, password=None):
             else:
                 return {"success": False, "error": f"Failed to login to WolfNet: {login_result['error']}", "error_type": "authentication"}
 
+        # Check if login was successful but with limited content (account-nav found but no course content)
+        if login_result.get("message") and "account navigation found" in login_result["message"]:
+            logger.info(f"Login successful for {user_email} but no course content available for auto-completion")
+            return {"success": False, "error": "No course content available for auto-completion", "error_type": "no_courses"}
+
         # Wait for the page to load and find the first .subnav-multicol element
         try:
             wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, ".subnav-multicol")))
@@ -569,6 +584,10 @@ def auto_complete_courses(self, user_email, password=None):
                 logger.error(f"No .subnav-multicol elements found for {user_email}")
                 return {"success": False, "error": "Course navigation not found on page", "error_type": "page_loading"}
         except Exception as e:
+            # This is expected when account-nav login fallback was used
+            if login_result.get("message") and "account navigation found" in login_result["message"]:
+                logger.info(f"No course navigation found for {user_email} - expected with account-nav login fallback")
+                return {"success": False, "error": "No course content available for auto-completion", "error_type": "no_courses"}
             logger.error(f"Failed to load course navigation elements for {user_email}: {str(e)}")
             return {"success": False, "error": "Course navigation failed to load", "error_type": "page_loading"}
         
@@ -684,3 +703,50 @@ def auto_complete_courses(self, user_email, password=None):
     finally:
         driver.quit()
         logger.info(f"Auto-complete courses completed for {user_email}")
+
+
+@shared_task(bind=True, queue='default', routing_key='default.wolfnet')
+def check_wolfnet_password(self, user_email, password):
+    """
+    Check if WolfNet password is valid for a user
+    
+    Args:
+        user_email (str): User's school email address
+        password (str): WolfNet password to verify
+    
+    Returns:
+        dict: Result with success status and error message if failed
+    """
+    logger.info(f"Starting WolfNet password check for user: {user_email}")
+    
+    chrome_options = Options()
+    chrome_options.add_argument("--headless=new")
+    chrome_options.add_argument("--no-sandbox")
+    chrome_options.add_argument("--disable-dev-shm-usage")
+    driver = webdriver.Chrome(options=chrome_options)
+    wait = WebDriverWait(driver, 8)
+
+    try:
+        login_result = login_to_wolfnet(user_email, driver, wait, password)
+        logger.info(f"WolfNet password check completed for {user_email}: {login_result}")
+        return login_result
+        
+    except Exception as e:
+        error_message = str(e)
+        logger.error(f"Error checking WolfNet password for {user_email}: {error_message}")
+        
+        if "login" in error_message.lower() or "password" in error_message.lower():
+            error_type = "authentication"
+        elif "element" in error_message.lower() or "timeout" in error_message.lower():
+            error_type = "page_loading"
+        else:
+            error_type = "general"
+            
+        return {
+            "success": False, 
+            "error": error_message,
+            "error_type": error_type
+        }
+    finally:
+        driver.quit()
+        logger.info(f"WolfNet password check completed for {user_email}")

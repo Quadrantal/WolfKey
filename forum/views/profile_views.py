@@ -147,3 +147,57 @@ def auto_complete_courses_registration(request):
             'success': False,
             'error': f'An error occurred: {str(e)}'
         })
+
+
+@login_required
+@require_POST
+@csrf_exempt
+def check_wolfnet_password_view(request):
+    """
+    Check if WolfNet password is valid for the current user
+    """
+    try:
+        import json
+        data = json.loads(request.body)
+        wolfnet_password = data.get('wolfnet_password')
+        
+        if not wolfnet_password:
+            return JsonResponse({
+                'success': False,
+                'error': 'WolfNet password is required'
+            })
+        
+        school_email = request.user.school_email
+        if not school_email:
+            return JsonResponse({
+                'success': False,
+                'error': 'School email is required for WolfNet verification'
+            })
+        
+        from forum.tasks import check_wolfnet_password
+        result = check_wolfnet_password.delay(school_email, wolfnet_password)
+        verification_result = result.get(timeout=60)
+        
+        # If verification is successful, save the password
+        if verification_result.get('success'):
+            try:
+                user_profile = request.user.userprofile
+                from forum.forms import WolfNetSettingsForm
+                wolfnet_form = WolfNetSettingsForm()
+                encrypted_password = wolfnet_form.encrypt_password(wolfnet_password)
+                user_profile.wolfnet_password = encrypted_password
+                user_profile.save()
+                verification_result['message'] = 'WolfNet password verified and saved successfully!'
+            except Exception as save_error:
+                logging.getLogger(__name__).error(f"Error saving WolfNet password for {request.user.username}: {str(save_error)}")
+                # Still return success for verification, but note the save issue
+                verification_result['message'] = 'WolfNet password verified successfully, but there was an issue saving it. Please try again.'
+        
+        return JsonResponse(verification_result)
+            
+    except Exception as e:
+        logging.getLogger(__name__).error(f"Error in check_wolfnet_password_view for {request.user.username}: {str(e)}")
+        return JsonResponse({
+            'success': False,
+            'error': f'An error occurred while checking WolfNet password: {str(e)}'
+        })

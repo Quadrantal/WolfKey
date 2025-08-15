@@ -64,7 +64,8 @@ from forum.views.profile_views import (
     update_courses,
     upload_profile_picture,
     auto_complete_courses_view,
-    auto_complete_courses_registration
+    auto_complete_courses_registration,
+    check_wolfnet_password_view
 )
 from forum.services.course_services import (
     course_search
@@ -218,6 +219,7 @@ urlpatterns = [
     path('update-courses/', update_courses, name='update_courses'),
     path('auto-complete-courses/', auto_complete_courses_view, name='auto_complete_courses'),
     path('auto-complete-courses-registration/', auto_complete_courses_registration, name='auto_complete_courses_registration'),
+    path('check-wolfnet-password/', check_wolfnet_password_view, name='check_wolfnet_password'),
     
     # Course management URLs
     path('courses/experience/add/', add_experience, name='add_experience'),

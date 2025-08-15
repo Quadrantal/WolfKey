@@ -224,7 +224,7 @@ input[type="range"]::-webkit-slider-runnable-track {
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-#autoCompleteBtn {
+.magic-btn {
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     border-radius: 12px;
     border: none !important;
@@ -233,7 +233,7 @@ input[type="range"]::-webkit-slider-runnable-track {
     z-index: 3;
 }
 
-#autoCompleteBtn .fa-magic {
+.magic-btn .fa-magic {
     color: #00c3ff;
     border-radius: 50%;
     padding: 2px;
@@ -241,14 +241,14 @@ input[type="range"]::-webkit-slider-runnable-track {
     transition: transform 0.3s cubic-bezier(0.4, 0.2, 0.2, 1)
 }
 
-#autoCompleteBtn:hover .fa-magic,
-#autoCompleteBtn:focus .fa-magic {
+.magic-btn:hover .fa-magic,
+.magic-btn:focus .fa-magic {
     transform: scale(1.25);
 }
 
-#autoCompleteBtn:disabled, #autoCompleteBtn:disabled .fa-magic {
-    background: grey;
-    color: #b5b5b5;
+.magic-btn:disabled, .magic-btn:disabled .fa-magic {
+    background: rgb(183, 94, 243);
+    color: #000000;
     pointer-events: all;
 }
 

@@ -1,5 +1,5 @@
 """
-API endpoints for auto-completing courses from WolfNet
+API endpoints for WolfNet integration
 """
 import logging
 from rest_framework.decorators import api_view, authentication_classes, permission_classes
@@ -11,6 +11,7 @@ from forum.services.auto_complete_service import (
     auto_complete_user_courses_service,
     auto_complete_courses_registration_service
 )
+from forum.tasks import check_wolfnet_password
 
 
 logger = logging.getLogger(__name__)
