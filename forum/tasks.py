@@ -483,34 +483,149 @@ def check_single_user_grades(self, user_email):
         logger.error(f"Error checking grades for {user_email}: {str(e)}")
         raise
 
-def check_all_user_grades_sequential():
+@shared_task(bind=True, queue='default', routing_key='default.coordination')
+def check_all_user_grades_sequential_dispatch(self):
     """
+    Process users one by one, waiting for each to complete before starting the next
+    
     Args:
         None
     
     Returns:
-        dict: Summary with checked_users count and results list
+        dict: Summary with processed users count and results
     """
     users = list(User.objects.filter(school_email__isnull=False).exclude(school_email=''))
-    logger.info(f"Starting sequential grade check for {len(users)} users")
+    logger.info(f"Starting sequential dispatch of grade checks for {len(users)} users")
+    
     results = []
-    for idx, user in enumerate(users):
-        logger.info(f"Checking grades for {user.school_email} (user {idx+1}/{len(users)})")
-        result = check_user_grades_core(user.school_email)
-        results.append(result)
-    return {"checked_users": len(results), "results": results}
+    successful_checks = 0
+    failed_checks = 0
+    
+    for idx, user in enumerate(users, 1):
+        logger.info(f"Processing user {idx}/{len(users)}: {user.school_email}")
+        
+        try:
+            # Dispatch task and wait for completion
+            task = check_single_user_grades.delay(user.school_email)
+            logger.info(f"Dispatched task {task.id} for {user.school_email}, waiting for completion...")
+            
+            # Wait for the task to complete (with timeout)
+            result = task.apply_async(timeout=45)
+            results.append({
+                "user": user.school_email,
+                "status": "success",
+                "result": result,
+                "task_id": task.id
+            })
+            successful_checks += 1
+            logger.info(f"Completed grade check for {user.school_email} (task {task.id})")
+            
+        except Exception as e:
+            logger.error(f"Failed to process {user.school_email}: {str(e)}")
+            results.append({
+                "user": user.school_email,
+                "status": "failed",
+                "error": str(e),
+                "task_id": getattr(task, 'id', 'unknown') if 'task' in locals() else 'not_created'
+            })
+            failed_checks += 1
+    
+    summary = {
+        "total_users": len(users),
+        "successful_checks": successful_checks,
+        "failed_checks": failed_checks,
+        "results": results,
+        "message": f"Processed {len(users)} users: {successful_checks} successful, {failed_checks} failed"
+    }
+    
+    logger.info(f"Sequential grade check completed: {summary['message']}")
+    return summary
 
-@shared_task
-def periodic_grade_check_trigger():
+@shared_task(bind=True, queue='default', routing_key='default.coordination')  
+def check_user_grades_batched_dispatch(self, batch_size=2):
     """
+    Process users in small batches with controlled queue flooding
+    
     Args:
-        None
+        batch_size (int): Number of users to process simultaneously per batch
     
     Returns:
-        dict: Result from check_all_user_grades_sequential function
+        dict: Summary with processed batches and results
     """
-    logger.info("Starting periodic grade check trigger")
-    return check_all_user_grades_sequential()
+    users = list(User.objects.filter(school_email__isnull=False).exclude(school_email=''))
+    logger.info(f"Starting batched dispatch of grade checks for {len(users)} users (batch size: {batch_size})")
+    
+    # Split users into batches
+    batches = [users[i:i + batch_size] for i in range(0, len(users), batch_size)]
+    
+    all_results = []
+    total_successful = 0
+    total_failed = 0
+    
+    for batch_idx, batch in enumerate(batches, 1):
+        logger.info(f"Processing batch {batch_idx}/{len(batches)} ({len(batch)} users)")
+        
+        # Dispatch all tasks in this batch
+        batch_tasks = []
+        for user in batch:
+            task = check_single_user_grades.delay(user.school_email)
+            batch_tasks.append((user.school_email, task))
+            logger.info(f"Dispatched task {task.id} for {user.school_email}")
+        
+        # Wait for all tasks in this batch to complete
+        batch_results = []
+        for user_email, task in batch_tasks:
+            try:
+                result = task.apply_async(timeout=45)
+                batch_results.append({
+                    "user": user_email,
+                    "status": "success",
+                    "result": result,
+                    "task_id": task.id
+                })
+                total_successful += 1
+                logger.info(f"Completed grade check for {user_email} (task {task.id})")
+                
+            except Exception as e:
+                logger.error(f"Failed to process {user_email}: {str(e)}")
+                batch_results.append({
+                    "user": user_email,
+                    "status": "failed",
+                    "error": str(e),
+                    "task_id": task.id
+                })
+                total_failed += 1
+        
+        all_results.extend(batch_results)
+        logger.info(f"Completed batch {batch_idx}/{len(batches)}")
+    
+    summary = {
+        "total_users": len(users),
+        "total_batches": len(batches),
+        "batch_size": batch_size,
+        "successful_checks": total_successful,
+        "failed_checks": total_failed,
+        "results": all_results,
+        "message": f"Processed {len(users)} users in {len(batches)} batches: {total_successful} successful, {total_failed} failed"
+    }
+    
+    logger.info(f"Batched grade check completed: {summary['message']}")
+    return summary
+
+@shared_task(bind=True, queue='default', routing_key='default.trigger')
+def periodic_grade_check_trigger(self):
+    """
+    Trigger periodic grade checking with sequential dispatch
+
+    Args:
+        None
+
+    Returns:
+        None
+    """
+    logger.info("Starting periodic grade check trigger - using sequential dispatch")
+    check_all_user_grades_sequential_dispatch.apply_async()
+    logger.info("Dispatched sequential grade check task")
 
 @shared_task(bind=True, queue='default', routing_key='default.email')
 def send_email_notification(self, recipient_email, subject, message):

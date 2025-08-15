@@ -30,7 +30,15 @@ app.conf.beat_schedule = {
     'check-all-user-grades': {
         'task': 'forum.tasks.periodic_grade_check_trigger',
         'schedule': 30.0 * 60,  # Every 30 minutes
+        'options': {'queue': 'default', 'routing_key': 'default.trigger'}
     },
+    # Alternative: Use batched approach (comment out above and uncomment below)
+    # 'check-all-user-grades-batched': {
+    #     'task': 'forum.tasks.check_user_grades_batched_dispatch',
+    #     'schedule': 30.0 * 60,  # Every 30 minutes
+    #     'options': {'queue': 'default', 'routing_key': 'default.coordination'},
+    #     'kwargs': {'batch_size': 2}  # Process 3 users at a time
+    # },
 }
 
 CELERY_TASK_SOFT_TIME_LIMIT = 60 
