@@ -78,11 +78,12 @@ input[type="range"]::-webkit-slider-runnable-track {
       ) !important;  
   }
 
-  #profile-tab{
+#profile-tab, #preferences-tab, #schedule-tab{
     color: black;
-    border-top-left-radius: 6px;
-    border-top-right-radius: 6px;
-  }
+    border-top-left-radius: 8px;
+    border-top-right-radius: 8px;
+    border: none !important;
+}
 
 #preferences-tab{
     color: black;
@@ -95,11 +96,13 @@ input[type="range"]::-webkit-slider-runnable-track {
 
 
 #profile-tab:hover,
-#preferences-tab:hover {
+#preferences-tab:hover,
+#schedule-tab:hover{
     background-color: #f1f1f1;
     transition: background-color 0.3s ease, color 0.3s ease;
+    border-top-left-radius: 8px;
+    border-top-right-radius: 8px;
 }
-
 #profileTabs {
     border-bottom: 1px solid white;
 }
@@ -140,16 +143,6 @@ input[type="range"]::-webkit-slider-runnable-track {
 .course-selector .selected-items {
     width: 100%;
     min-height: 38px;
-}
-
-.add-experience-btn{
-    background-color: #10B981;
-    border-radius: 999px !important; 
-    border-width: 0px !important;
-}
-
-.add-help-btn{
-    border-radius: 999px !important;
 }
 
 #profilePictureMenu {
@@ -200,4 +193,85 @@ input[type="range"]::-webkit-slider-runnable-track {
 /* Show hover text on hover */
 .changeablePfp:hover + .hover-text {
     display: block !important;
+}
+
+.block-label {
+    margin-right: 10px;
+}
+
+/* Compare Schedules Button */
+#compare-schedules-btn {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border: none;
+    color: white;
+    font-weight: 600;
+    padding: 0.75rem 0.75rem;
+    border-radius: 8px;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+#compare-schedules-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+    color: white;
+    text-decoration: none;
+}
+
+#compare-schedules-btn:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.magic-btn {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 12px;
+    border: none !important;
+    padding: .375rem .75rem;
+    color: white;
+    z-index: 3;
+}
+
+.magic-btn .fa-magic {
+    color: #00c3ff;
+    border-radius: 50%;
+    padding: 2px;
+    font-size: 1.1em;
+    transition: transform 0.3s cubic-bezier(0.4, 0.2, 0.2, 1)
+}
+
+.magic-btn:hover .fa-magic,
+.magic-btn:focus .fa-magic {
+    transform: scale(1.25);
+}
+
+.magic-btn:disabled, .magic-btn:disabled .fa-magic {
+    background: rgb(183, 94, 243);
+    color: #000000;
+    pointer-events: all;
+}
+
+/* Simple change detection button */
+.change-detected {
+    background: linear-gradient(135deg, #007bff, #0056b3) !important;
+    border-color: #007bff !important;
+    color: white !important;
+    animation: scale-pulse 0.5s ease-in-out infinite alternate;
+    transition: background 0.3s ease, transform 0.2s ease !important;
+}
+
+.change-detected:hover {
+    background: linear-gradient(135deg, #0056b3, #007bff) !important;
+    transform: scale(1.05) !important;
+    animation: none;
+}
+
+@keyframes scale-pulse {
+    0% {
+        transform: scale(1);
+    }
+    100% {
+        transform: scale(1.05);
+    }
 }

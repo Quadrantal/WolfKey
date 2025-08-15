@@ -4,10 +4,16 @@ from django.core.validators import RegexValidator
 from django.contrib.postgres.search import SearchVectorField, SearchVector
 from django.urls import reverse
 import os
-from django.db.models.signals import post_save
+from django.db.models.signals import post_save, pre_delete
 from django.dispatch import receiver
 from django.contrib.auth.models import BaseUserManager
 from django.utils import timezone
+import base64
+from django.conf import settings
+from cryptography.fernet import Fernet
+import logging
+
+logger = logging.getLogger(__name__)
 
 class UserManager(BaseUserManager):
     def create_user(self, school_email, first_name, last_name, password=None, **extra_fields):
@@ -123,34 +129,42 @@ class User(AbstractUser):
             SearchVector('last_name', weight='A')
         )
         User.objects.filter(id=self.id).update(search_vector=search_vector)
+
+class GradebookSnapshot(models.Model):
+    user = models.ForeignKey('User', on_delete=models.CASCADE, related_name='gradebook_snapshots')
+    section_id = models.CharField(max_length=32)
+    marking_period_id = models.CharField(max_length=32)
+    json_data = models.JSONField()
+    timestamp = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('user', 'section_id', 'marking_period_id', 'timestamp')
+
+    def __str__(self):
+        return f"Snapshot for {self.user.school_email} | Section {self.section_id} | MP {self.marking_period_id} @ {self.timestamp}"
     
 class Course(models.Model):
-    code = models.CharField(max_length=10, unique=True)
     name = models.CharField(max_length=100)
     category = models.CharField(max_length=100, default = "Misc")
     description = models.TextField(blank=True)
     
+    def __str__(self):
+        return f"{self.name}"
     
-    def __str__(self):
-        return f"{self.code} - {self.name}"
-
-
-class Tag(models.Model):
-    name = models.CharField(max_length=50, unique=True)
-
-    def __str__(self):
-        return self.name
+class CourseAlias(models.Model):
+    name = models.CharField(max_length=100)
+    course = models.ForeignKey(Course, related_name='aliases', on_delete=models.CASCADE)
     
 class Post(models.Model):
     title = models.CharField(max_length=200)
     content = models.JSONField() 
     created_at = models.DateTimeField(auto_now_add=True)
     author = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
-    tags = models.ManyToManyField(Tag, related_name='posts', blank=True)
     search_vector = SearchVectorField(null=True, blank=True)
     courses = models.ManyToManyField(Course, related_name='posts', blank=True)
     solved = models.BooleanField(default = False)
     views = models.IntegerField(default = 0)
+    is_anonymous = models.BooleanField(default=False)
     
     accepted_solution = models.OneToOneField(
         'Solution',
@@ -174,6 +188,42 @@ class Post(models.Model):
     def get_absolute_url(self):
         return reverse('post_detail', args=[self.id])
 
+    def like_count(self):
+        return self.likes.count()
+
+    def is_liked_by(self, user):
+        if not user.is_authenticated:
+            return False
+        return self.likes.filter(user=user).exists()
+    
+    def get_author(self):
+        return "Anonymous" if self.is_anonymous else self.author
+    
+    def get_first_image_url(self):
+        """Extract the first image URL from the post content JSON"""
+        try:
+            import json
+            
+            content = self.content
+            if isinstance(content, str):
+                content = json.loads(content)
+            
+            if not isinstance(content, dict) or 'blocks' not in content:
+                return None
+            
+            for block in content.get('blocks', []):
+                if isinstance(block, dict) and block.get('type') == 'image':
+                    if 'data' in block and 'file' in block['data']:
+                        file_data = block['data']['file']
+                        if isinstance(file_data, dict) and 'url' in file_data:
+                            return file_data['url']
+                        elif isinstance(file_data, str):
+                            return file_data
+            
+            return None
+            
+        except (json.JSONDecodeError, AttributeError, TypeError):
+            return None
     
 class SavedPost(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="saved_posts")
@@ -234,6 +284,10 @@ class Solution(models.Model):
         Returns the URL to the specific solution element on the post detail page.
         """
         return f"{self.post.get_absolute_url()}#solution-{self.id}"
+    
+    def root_comments_count(self):
+        return self.comments.filter(parent__isnull=True).count()
+
         
 
 class SavedSolution(models.Model):
@@ -305,6 +359,26 @@ class UserProfile(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     background_hue = models.IntegerField(default=231)
+    
+    # WolfNet Integration
+    wolfnet_password = models.CharField(
+        max_length=255,
+        blank=True,
+        null=True,
+        help_text="Your WolfNet password for grade notifications and schedule integration"
+    )
+
+    def get_decrypted_wolfnet_password(self):
+        """Get the decrypted WolfNet password for use in web scraping"""
+        from .forms import WolfNetSettingsForm
+        return WolfNetSettingsForm.decrypt_password(self.wolfnet_password)
+    
+    def save(self, *args, **kwargs):
+        if self.wolfnet_password and not self.wolfnet_password.startswith('gAAAA'):  # Fernet tokens start with 'gAAAA'
+            key = base64.urlsafe_b64encode(settings.SECRET_KEY[:32].encode())
+            f = Fernet(key)
+            self.wolfnet_password = f.encrypt(self.wolfnet_password.encode()).decode()
+        super().save(*args, **kwargs)
 
     profile_picture = models.ImageField(
         upload_to='profile_pictures/',
@@ -323,6 +397,14 @@ class UserProfile(models.Model):
     block_2C = models.ForeignKey(Course, on_delete=models.SET_NULL, null=True, blank=True, related_name="block_2C")
     block_2D = models.ForeignKey(Course, on_delete=models.SET_NULL, null=True, blank=True, related_name="block_2D")
     block_2E = models.ForeignKey(Course, on_delete=models.SET_NULL, null=True, blank=True, related_name="block_2E")
+    
+    # Expo push notification token for mobile app
+    expo_push_token = models.CharField(
+        max_length=255,
+        blank=True,
+        null=True,
+        help_text="Expo push notification token for mobile app notifications"
+    )
 
     def __str__(self):
         return f"{self.user.username}'s profile"
@@ -339,6 +421,12 @@ class DailySchedule(models.Model):
     block_4_time = models.CharField(max_length=50, blank=True, null=True)
     block_5 = models.CharField(max_length=100, blank=True, null=True)
     block_5_time = models.CharField(max_length=50, blank=True, null=True)
+    block_6 = models.CharField(max_length=100, blank=True, null=True) # Following blocks are only in case of days where there are more than 5 blocks. 
+    block_6_time = models.CharField(max_length=50, blank=True, null=True)
+    block_7 = models.CharField(max_length=100, blank=True, null=True)
+    block_7_time = models.CharField(max_length=50, blank=True, null=True)
+    block_8 = models.CharField(max_length=100, blank=True, null=True)
+    block_8_time = models.CharField(max_length=50, blank=True, null=True)
     ceremonial_uniform = models.BooleanField(null = True)
     is_school = models.BooleanField(null = True)
 
@@ -377,11 +465,43 @@ def save_user_profile(sender, instance, **kwargs):
     except UserProfile.DoesNotExist:
         UserProfile.objects.create(user=instance)
 
+@receiver(pre_delete, sender='forum.Solution')
+def delete_solution_files(sender, instance, **kwargs):
+    """Delete files referenced in solution content before deleting the solution"""
+    if instance.content:
+        from forum.services.utils import extract_and_delete_files_from_content
+        try:
+            extract_and_delete_files_from_content(instance.content)
+        except Exception as e:
+            logger.error(f"Error deleting files for solution {instance.id}: {str(e)}")
+
+@receiver(pre_delete, sender='forum.Comment')
+def delete_comment_files(sender, instance, **kwargs):
+    """Delete files referenced in comment content before deleting the comment"""
+    if instance.content:
+        from forum.services.utils import extract_and_delete_files_from_content
+        try:
+            extract_and_delete_files_from_content(instance.content)
+        except Exception as e:
+            logger.error(f"Error deleting files for comment {instance.id}: {str(e)}")
+
+@receiver(pre_delete, sender='forum.Post')
+def delete_post_files(sender, instance, **kwargs):
+    """Delete files referenced in post content before deleting the post"""
+    if instance.content:
+        from forum.services.utils import extract_and_delete_files_from_content
+        try:
+            extract_and_delete_files_from_content(instance.content)
+        except Exception as e:
+            logger.error(f"Error deleting files for post {instance.id}: {str(e)}")
+
 class Notification(models.Model):
     NOTIFICATION_TYPES = (
         ('post', 'New Post'),
         ('solution', 'New Solution'),
         ('comment', 'New Comment'),
+        ('reply', 'New Reply'),
+        ('grade_update', 'Grade Update'),
         ('edit', 'Post Edit'),
     )
     
@@ -415,3 +535,14 @@ class UserUpdateView(models.Model):
 
     class Meta:
         unique_together = ['user', 'update']
+
+class PostLike(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="liked_posts")
+    post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name="likes")
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('user', 'post')
+
+    def __str__(self):
+        return f"{self.user.username} likes {self.post.title}"

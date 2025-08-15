@@ -2,43 +2,55 @@
 
 {% block head %}
     <link href="https://cdn.jsdelivr.net/npm/@editorjs/editorjs@2.22.0/dist/editor.css" rel="stylesheet"></link>
-    <link rel="stylesheet" href="https://unpkg.com/mathlive/dist/mathlive-static.css"> </link>
-
+    <link rel="stylesheet" href="https://unpkg.com/mathlive/dist/mathlive-static.css" />
     {% load static %}
     <link rel="stylesheet" href="{% static 'forum/css/editorjs.css' %}">
     <link rel="stylesheet" href="{% static 'forum/css/course-selector.css' %}">
-    <link rel="stylesheet" href="{% static 'forum/css/post-detail.css' %}"> 
-
+    <link rel="stylesheet" href="{% static 'forum/css/post-detail.css' %}">
 {% endblock %}
 
 {% block content %}
 <div class="row justify-content-center">
-        <div class="card">
-            <div class="card-body">
-                <h2 class="card-title">{{ action }} a Post</h2>
-                <form id= "postCreationForm" method="post" action="{% url 'create_post' %}" enctype="multipart/form-data">
-                    {% csrf_token %}
-                    
-                    <h3>Title:</h3>
-                    <p>{{ form.title }}</p>
+    <div class="card">
+        <div class="card-body">
+            <h2 class="card-title">{{ action }} Post</h2>
+            <form id="postForm" method="post" action="{% if post %}{% url 'edit_post' post.id %}{% else %}{% url 'create_post' %}{% endif %}" enctype="multipart/form-data">
+                {% csrf_token %}
+                
+                <h3>Title:</h3>
+                <input type="text" id="id_title" name="title" class="form-control"
+                    value="{% if post %}{{ post.title }}{% else %}{{ form.title.value|default_if_none:'' }}{% endif %}">
 
-                    <h3>Content:</h3>
-                    <!-- Editor.js Container -->
-                    <div id="editorjs" class = "post-form-editor"></div>
-                    <input type="hidden" id="editorjs-content" name="content">
+                <h3>Content:</h3>
+                <div id="editorjs" class="post-form-editor"></div>
+                <input type="hidden" id="editorjs-content" name="content">
 
-                    <!-- Course Selector -->
-                    <h3 class = "mt-4">Select a Course:</h3>
-                    <div id="postCoursesSelector"></div>
+                <h3 class="mt-4">Select a Course:</h3>
+                <div id="postCoursesSelector"></div>
 
-                    <button id = "submitPostButton" type="submit" class="btn btn-primary" style = "border-radius: 12px;">{{ action }} Post</button>
-                    <a href="{% url 'for_you' %}" class="btn btn-secondary">Cancel</a>
-                </form>
-            </div>
+                <div class="form-check mt-2 mb-2">
+                    <input class="form-check-input" type="checkbox" name="is_anonymous" id="id_is_anonymous"
+                        {% if post and post.is_anonymous %}checked{% endif %}>
+                    <label class="form-check-label" for="id_is_anonymous">
+                        Post Anonymously
+                    </label>
+                    <i class="bi bi-info-circle ms-3" 
+                        data-bs-toggle="tooltip" 
+                        data-bs-placement="right" 
+                        title="Your name and profile picture will not be shown publicly. Staff may still see it.">
+                    </i>
+                </div>
+                
+
+                <button id="submitPostButton" type="submit" class="btn btn-primary" style="border-radius: 12px;">{{ action }} Post</button>
+                <a href="{% url 'for_you' %}" class="btn btn-secondary">Cancel</a>
+            </form>
         </div>
+    </div>
 </div>
+{% endblock %}
 
-
+{% block scripts %}
 <!-- Initialize Editor.js -->
 <script src="https://cdn.jsdelivr.net/npm/@editorjs/editorjs@latest"></script>
 <script defer src="https://cdn.jsdelivr.net/npm/@editorjs/image@latest"></script>
@@ -51,87 +63,78 @@
 <script defer src="https://cdn.jsdelivr.net/npm/@calumk/editorjs-codecup@latest"></script>
 <script defer src="https://unpkg.com/mathlive"></script>
 
-
 {% load static %}
 <script defer src="{% static 'forum/js/math-block.js' %}"></script>
 <script defer src="{% static 'forum/js/editor-config.js' %}"></script>
 <script defer src="{% static 'forum/js/course-selector.js' %}"></script>
 
-    <script type="module">
-        import createEditor from '{% static "forum/js/editor-config.js" %}';
-        import { CourseSelector } from '{% static "forum/js/course-selector.js" %}';
-    
-        document.addEventListener("DOMContentLoaded", function () {
-            const form = document.getElementById("postCreationForm");
-            const submitButton = document.getElementById('submitPostButton');
-            let selectedCourses = []; 
-            let submitClicked = false;
-            
-            // Prevent enter key from submitting form
-            form.addEventListener('keydown', function(e) {
-                if (e.key === 'Enter' && e.target.tagName !== 'TEXTAREA') {
-                    e.preventDefault();
-                }
-            });
-    
-            // Single form submit handler
-            submitButton.addEventListener('click', async function(e) {
+<script type="module">
+    import createEditor from '{% static "forum/js/editor-config.js" %}';
+    import { CourseSelector } from '{% static "forum/js/course-selector.js" %}';
+
+    document.addEventListener("DOMContentLoaded", async function () {
+        const form = document.getElementById("postForm");
+        const submitButton = document.getElementById("submitPostButton");
+        let selectedCourses = {% if selected_courses_json %}{{ selected_courses_json|safe }}{% else %}[]{% endif %};
+        let submitClicked = false;
+
+        // Prevent enter key from submitting form
+        form.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' && e.target.tagName !== 'TEXTAREA') {
                 e.preventDefault();
-                
-                if(!submitClicked){
-                    try {
-                        submitClicked = true;
-                        // Get Editor.js content
-                        const content = await editor.save();
-                        
-                        // Create FormData object
-                        const formData = new FormData(form);
-                        formData.set('content', JSON.stringify(content));
-                        formData.set('title', document.querySelector('#id_title').value);
-                        
-                        // Add selected courses
-                        selectedCourses.forEach(course => {
-                            formData.append('courses', course.id);
-                        });
-        
-                        // Send form data using fetch
-                        const response = await fetch(form.action, {
-                            method: 'POST',
-                            body: formData,
-                            headers: {
-                                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
-                            }
-                        });
-        
-                        if (response.ok) {
-                            window.location.href = response.url;
-                        } else {
-                            const errorData = await response.text();
-                            console.error('Server error:', errorData);
-                            throw new Error('Form submission failed');
-                        }
-        
-                    } catch (error) {
-                        console.error('Error submitting form:', error);
-                    }
-                }
-                
-            });
-    
-            // Initialize editor
-            const editor = createEditor(
-                'editorjs', 
-                {},
-                document.querySelector('[name="csrfmiddlewaretoken"]').value
-            );
-    
-            // Initialize course selector
-            const courseSelector = new CourseSelector({
-                containerId: 'postCoursesSelector',
-                maxCourses: 5,
-                initialSelection: {% if selected_courses_json %}{{ selected_courses_json|safe }}{% else %}[]{% endif %},
-                formName: "postCreationForm"
-            });
+            }
         });
-    </script>
+
+        submitButton.addEventListener('click', async function(e) {
+            e.preventDefault();
+            if (!submitClicked) {
+                submitClicked = true;
+                try {
+                    const content = await editor.save();
+                    const formData = new FormData(form);
+                    formData.set('content', JSON.stringify(content));
+                    formData.set('title', document.querySelector('#id_title').value);
+                    formData.set('is_anonymous', document.getElementById('id_is_anonymous').checked ? 'on' : 'off');
+
+                    courseSelector.selectedCourses.forEach(course => {
+                        formData.append('courses', course.id);
+                    });
+
+                    const response = await fetch(form.action, {
+                        method: 'POST',
+                        body: formData,
+                        headers: {
+                            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                        }
+                    });
+
+                    if (response.ok) {
+                        window.location.href = response.url;
+                    } else {
+                        const errorData = await response.text();
+                        console.error('Server error:', errorData);
+                        throw new Error('Form submission failed');
+                    }
+                } catch (error) {
+                    console.error('Error submitting form:', error);
+                }
+            }
+        });
+
+        // Initialize editor
+        const editor = createEditor(
+            'editorjs',
+            {% if post_content %}{{ post_content|safe }}{% else %}{}{% endif %},
+            document.querySelector('[name="csrfmiddlewaretoken"]').value
+        );
+
+        // Initialize course selector
+        const courseSelector = new CourseSelector({
+            containerId: 'postCoursesSelector',
+            maxCourses: 5,
+            initialSelection: selectedCourses,
+            formName: "postForm"
+        });
+    });
+</script>
 {% endblock %}

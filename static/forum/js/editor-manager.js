@@ -3,6 +3,7 @@ import createEditor from './editor-config.js';
 export class EditorManager {
     constructor() {
         this.editors = new Map();
+        this.originalContents = {};
     }
 
     async initializeMainEditor(editorId, content, csrfToken, readOnly = true) {
@@ -98,67 +99,44 @@ export class EditorManager {
 
     toggleEditorReadOnly(editorId, readOnly) {
         const editor = this.getEditor(editorId);
-        if (editor) {
-            editor.readOnly.toggle(readOnly);
-            // Access the holder element o
-            // f the editor
-            const holder = editor.configuration.holder; // Get the holder element from the editor instance
-            if (typeof holder === 'string') {
-                // If the holder is a string (ID), get the element by ID
-                const holderElement = document.getElementById(holder);
-                if (holderElement) {
-                    this.updateMathFields(holderElement, readOnly, editor);
-                } else {
-                    console.warn(`Holder element with ID '${holder}' not found.`);
-                }
-            } else if (holder instanceof HTMLElement) {
-                // If the holder is already an HTMLElement, use it directly
-                this.updateMathFields(holder, readOnly, editor);
-            } else {
-                console.warn(`Invalid holder configuration for editor with ID '${editorId}'.`);
-            }
-        } else {
+        if (!editor) {
             console.warn(`Editor with ID '${editorId}' not found.`);
+            return;
+        }
+
+        editor.readOnly.toggle(readOnly);
+    }
+
+    async storeOriginalContent(commentId) {
+        const editor = this.getEditor(commentId);
+        if (!editor) return;
+
+        try {
+            const data = await editor.save();
+            this.originalContents[commentId] = data;
+        } catch (e) {
+            console.error('Failed to store original content:', e);
         }
     }
-    
-    updateMathFields(holder, readOnly, editor) {
-        setTimeout(() => {
-            holder.querySelectorAll('math-field').forEach(mathField => {
-                const tex = mathField.value;
-    
-                if (tex) {
-                    const mathElement = new MathfieldElement();
-                    mathElement.value = tex;
-    
-                    // If the editor is in read-only mode, set the math field to read-only
-                    if (readOnly) {
-                        mathElement.readOnly = true;
-                    }
-    
-                    // Find the block element containing the math-field
-                    const blockElement = mathField.closest('.ce-block'); // Adjust the selector if needed
-                    if (blockElement) {
-                        const blockId = blockElement.getAttribute('data-id'); // Get the block's data-id attribute
-                        if (blockId) {
-                            // Add an event listener to the math-field for changes
-                            mathElement.addEventListener("input", () => {
-                                editor.blocks.update(blockId, {
-                                    type: 'math',
-                                    data: { content: mathElement.value }
-                                });
-                            });
-                        } else {
-                            console.warn('Block element does not have a data-id attribute.');
-                        }
-                    } else {
-                        console.warn('Math-field is not inside a block element.');
-                    }
-    
-                    // Replace the placeholder math-field with the initialized MathfieldElement
-                    mathField.replaceWith(mathElement);
-                }
-            });
-        }, 100);
+
+    async restoreOriginalContent(commentId) {
+        const editor = this.getEditor(commentId);
+        const original = this.originalContents[commentId];
+        if (!editor || !original) return;
+
+        try {
+            // Clear all blocks first
+            await editor.blocks.clear();
+
+            const output = await editor.save();
+        
+            // Re-insert original blocks
+            for (const block of original.blocks) {
+                await editor.blocks.insert(block.type, block.data);
+            }
+        } catch (e) {
+            console.error('Failed to restore original content:', e);
+        }
     }
+
 }

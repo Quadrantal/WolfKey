@@ -8,73 +8,87 @@ from forum.forms import CustomUserCreationForm, CustomPasswordResetForm
 import json
 from django.contrib.auth.views import PasswordResetView, PasswordResetDoneView, PasswordResetConfirmView, PasswordResetCompleteView
 from django.urls import reverse_lazy
+from forum.services.auth_services import authenticate_user, register_user
 
 def register(request):
     if request.method == 'POST':
         form = CustomUserCreationForm(request.POST)
-        # print(form)
+        
         if form.is_valid():
-            current_courses = request.POST.get('current_courses', '').split(',')
-            experienced_courses = request.POST.get('experienced_courses', '').split(',')
+            wolfnet_password = request.POST.get('wolfnet_password', '').strip()
             
-            # print(current_courses)
-            # print(experienced_courses)
+            # Get course experience data
+            help_courses_raw = request.POST.get('help_courses', '').split(',')
+            experience_courses_raw = request.POST.get('experience_courses', '').split(',')
             
+            # Convert to integers, filtering out invalid values
+            help_courses = [int(course_id) for course_id in help_courses_raw if course_id.strip().isdigit()]
+            experience_courses = [int(course_id) for course_id in experience_courses_raw if course_id.strip().isdigit()]
             
-            if len(experienced_courses) < 5:
-                messages.error(request, 'You must select at least 5 experienced courses.')
-                return render(request, 'forum/register.html', {
-                    'form': form,
-                    'courses': Course.objects.all().order_by('name'),
-                    'form_errors': form.errors.as_json()  
-                })
-            if len(current_courses) < 3:
-                messages.error(request, 'You must select at least 3 courses you need help with.')
-                return render(request, 'forum/register.html', {
-                    'form': form,
-                    'courses': Course.objects.all().order_by('name'),
-                    'form_errors': form.errors.as_json()  
-            })
-            user = form.save()
+            # Get schedule data if WolfNet password was provided
+            schedule_data = {}
+            blocks = ['1A', '1B', '1D', '1E', '2A', '2B', '2C', '2D', '2E']
+            for block in blocks:
+                block_course = request.POST.get(f'block_{block}', '')
+                if block_course:
+                    try:
+                        schedule_data[f'block_{block}'] = int(block_course)
+                    except (ValueError, TypeError):
+                        # Skip invalid course IDs
+                        pass
             
-            # Add current courses as help needed
-            for course_id in current_courses:
-                UserCourseHelp.objects.create(
-                    user=user,
-                    course_id=course_id,
-                    active=True
-                )
-                
-            # Add experienced courses
-            for course_id in experienced_courses:
-                UserCourseExperience.objects.create(
-                    user=user,
-                    course_id=course_id
-                )
-            
-            login(request, user)
-            messages.success(request, 'Welcome to Student Forum!')
-            return redirect('all_posts')
+            user, error = register_user(request, form, help_courses, experience_courses, wolfnet_password, schedule_data)
+            if error:
+                messages.error(request, error)
+            else:
+                messages.success(request, 'Welcome to WolfKey!')
+                return redirect('all_posts')
         else:
-            current_course_ids = request.POST.get('current_courses', '').split(',')
-            experienced_course_ids = request.POST.get('experienced_courses', '').split(',')
+            for field, errors in form.errors.items():
+                for error in errors:
+                    if field == '__all__':
+                        messages.error(request, error)
+                    else:
+                        field_name = form.fields[field].label or field.replace('_', ' ').title()
+                        messages.error(request, f"{field_name}: {error}")
+        
+        help_course_ids = request.POST.get('help_courses', '').split(',')
+        experience_course_ids = request.POST.get('experience_courses', '').split(',')
 
-            current_course_ids = [int(id) for id in current_course_ids if id]
-            experienced_course_ids = [int(id) for id in experienced_course_ids if id]
+        help_course_ids = [int(id) for id in help_course_ids if id.isdigit()]
+        experience_course_ids = [int(id) for id in experience_course_ids if id.isdigit()]
 
-            current_courses = list(Course.objects.filter(id__in=current_course_ids).values('id', 'name', 'code'))
-            experienced_courses = list(Course.objects.filter(id__in=experienced_course_ids).values('id', 'name', 'code'))
+        help_courses = list(Course.objects.filter(id__in=help_course_ids).values('id', 'name'))
+        experience_courses = list(Course.objects.filter(id__in=experience_course_ids).values('id', 'name'))
 
-            return render(request, 'forum/register.html', {
-                'form': form,
-                'courses': Course.objects.all().order_by('name'),
-                'form_errors': form.errors.as_json(),
-                'selected_current_courses': json.dumps(current_courses),
-                'selected_experienced_courses': json.dumps(experienced_courses) 
-            })
+        wolfnet_password = request.POST.get('wolfnet_password', '').strip()
+        
+        schedule_data = {}
+        blocks = ['1A', '1B', '1D', '1E', '2A', '2B', '2C', '2D', '2E']
+        for block in blocks:
+            block_course = request.POST.get(f'block_{block}', '')
+            if block_course:
+                try:
+                    course = Course.objects.get(id=int(block_course))
+                    schedule_data[block] = {
+                        'id': course.id,
+                        'name': course.name,
+                    }
+                except (Course.DoesNotExist, ValueError):
+                    pass
+
+        return render(request, 'forum/register.html', {
+            'form': form,
+            'courses': Course.objects.all().order_by('name'),
+            'form_errors': form.errors.as_json(),
+            'selected_help_courses': json.dumps(help_courses),
+            'selected_experience_courses': json.dumps(experience_courses),
+            'saved_wolfnet_password': wolfnet_password,
+            'saved_schedule_data': json.dumps(schedule_data)
+        })
     else:
         form = CustomUserCreationForm()
-    
+
     courses = Course.objects.all().order_by('name')
     return render(request, 'forum/register.html', {
         'form': form,
@@ -85,21 +99,25 @@ def login_view(request):
     if request.method == 'POST':
         form = AuthenticationForm(data=request.POST)
         if form.is_valid():
-            user = form.get_user()
-            login(request, user)
-            messages.success(request, 'You are now logged in!')
-            return redirect('for_you')
+            school_email = form.cleaned_data.get('username')  # AuthenticationForm uses 'username' field
+            password = form.cleaned_data.get('password')
+
+            user, error = authenticate_user(request, school_email, password)
+            if user:
+                login(request,user)
+                messages.success(request, 'You are now logged in!')
+                return redirect('for_you')
+            else:
+                form.add_error(None, error)
         else:
-            school_email = request.POST.get('username')  # AuthenticationForm uses 'username' field
-            try:
-                user = User.objects.get(school_email=school_email)
-                # print(f"User exists: {user.school_email}, is_active: {user.is_active}")
-            except User.DoesNotExist:
-                # print(f"No user with email: {school_email}")
-                pass
+            form.add_error(None, "Invalid credentials. Please try again.")
     else:
         form = AuthenticationForm()
+
     return render(request, 'forum/login.html', {'form': form})
+
+
+from django.contrib.auth import logout
 
 def logout_view(request):
     logout(request)

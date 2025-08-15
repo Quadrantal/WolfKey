@@ -150,7 +150,7 @@ export class CommentEditor {
             const data = await response.json();
             const commentsContainer = document.querySelector(`[data-solution-id="${solutionId}"] .comments`);
 
-
+            console.log("DATA: ", data);
             
             if (commentsContainer) {
                 // Update HTML
@@ -160,11 +160,6 @@ export class CommentEditor {
                 // Initialize editors using the comments data
                 if (data.comments && data.comments.length > 0) {
                     await this.editorManager.initializeCommentEditors(data.comments, this.csrfToken);
-                    
-                    // Reinitialize math fields
-                    data.comments.forEach(comment => {
-
-                    });
                 }
             }
         } catch (error) {
@@ -175,6 +170,7 @@ export class CommentEditor {
     async showEditForm(commentId) {
         try {
             await this.editorManager.toggleEditorReadOnly(commentId, false);
+            await this.editorManager.storeOriginalContent(commentId);
             const editor = this.editorManager.editors.get(commentId);
             if (editor) {
                 if (!editor.readOnly.isEnabled) {
@@ -246,17 +242,14 @@ export class CommentEditor {
 
     async cancelCommentEdit(commentId) {
         const editor = this.editorManager.editors.get(commentId);
-        if (editor && this.originalContents[commentId]) {
+        if (editor) {
             try {
                 // Restore original content
-                await editor.render(this.originalContents[commentId]);
-                
+                await this.editorManager.restoreOriginalContent(commentId);
+
                 // Reset editor state
-                await this.editorManager.toggleEditorReadOnly(`editorjs-comment-${commentId}`, true);
+                await this.editorManager.toggleEditorReadOnly(commentId, true);
                 this.toggleCommentActions(commentId, false);
-                
-                // Cleanup
-                delete this.originalContents[commentId];
                 
             } catch (error) {
                 console.error('Error canceling comment edit:', error);

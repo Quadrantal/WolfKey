@@ -1,5 +1,6 @@
 import { MathLiveBlock } from './math-block.js';
 const createEditor = (holder,initialData, csrfToken, isReadOnly = false, contentElementId = 'editorjs-content') => {
+    console.log("Intial Data: ", initialData);
     return new EditorJS({
         holder: holder,  // The container where Editor.js will be initialized
         data: initialData,
@@ -14,7 +15,10 @@ const createEditor = (holder,initialData, csrfToken, isReadOnly = false, content
                     field: 'image', // The name of the field expected by the backend
                     additionalRequestHeaders: {
                         'X-CSRFToken': document.querySelector('[name="csrfmiddlewaretoken"]').value
-                    }
+                    },
+                    features: {
+                        caption: 'optional',
+                    }  
                 }
             },
             header: {
@@ -76,7 +80,7 @@ const createEditor = (holder,initialData, csrfToken, isReadOnly = false, content
                 }
             });
         },
-        onChange: !isReadOnly ? async (api) => {
+        onChange: async (api) => {
             try {
                 const outputData = await api.saver.save();
                 const blocks = outputData.blocks;
@@ -100,7 +104,7 @@ const createEditor = (holder,initialData, csrfToken, isReadOnly = false, content
             } catch (error) {
                 console.error('Saving failed:', error);
             }
-        } : undefined,
+        },
         minHeight: 75,
     })
 }

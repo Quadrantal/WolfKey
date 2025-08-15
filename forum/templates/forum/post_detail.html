@@ -5,8 +5,28 @@
 <head>
     {% block head %}
     {{ block.super }}
-    <link rel="stylesheet" href="{% static 'forum/css/editorjs.css' %}">
+    
+    <!-- OG protocol for showing up better in embeds -->
+    <meta property="og:title" content="{{ post.title }} - WolfKey">
+    <meta property="og:description" content="{{ post.preview_text|truncatewords:30|striptags }}">
+    <meta property="og:type" content="article">
+    <meta property="og:url" content="{{ request.build_absolute_uri }}">
+    <meta property="og:site_name" content="WolfKey">
+    {% if post.get_first_image_url %}
+    <meta property="og:image" content="{{ request.scheme }}://{{ request.get_host }}{{ post.get_first_image_url }}">
+    <meta property="og:image:alt" content="Image from {{ post.title }}">
+    {% else %}
+    <meta property="og:image" content="{{ request.scheme }}://{{ request.get_host }}{% static 'forum/images/WolfkeyLogo.png' %}">
+    <meta property="og:image:alt" content="WolfKey Logo">
+    {% endif %}
+    
+    <meta name="description" content="{{ post.preview_text|truncatewords:30|striptags }}">
+    <meta name="author" content="{% if post.is_anonymous %}Anonymous{% else %}{{ post.author.first_name }} {{ post.author.last_name }}{% endif %}">
+    <meta name="article:published_time" content="{{ post.created_at|date:'c' }}">
+    <meta name="article:modified_time" content="{{ post.updated_at|date:'c' }}">
+    
     <link rel="stylesheet" href="{% static 'forum/css/post-detail.css' %}">
+    <link rel="stylesheet" href="{% static 'forum/css/editorjs.css' %}">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.19/dist/katex.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/default.min.css">
     <style>
@@ -27,13 +47,23 @@
 </head>
 
 {% block content %}
-{% include 'forum/components/post_detail_post_card.html' %}
+<div class="post-detail-container">
+    <div id="go-back-container" style="display: none;">
+        <a href="#" id="go-back-button" class="go-back-button">
+            <i class="fas fa-arrow-left"></i>
+        </a>
+    </div>
+    
+    <div class="post-detail-content">
+        {% include 'forum/components/post_detail_post_card.html'%}
+    </div>
+</div>
 
 <hr>
 
 <!-- Solutions -->
 <div class="solutions-header">
-    <h3 class="mt-4 mb-3">{{ solutions.count }} Solutions</h3>
+    <h3 class="mt-4 mb-3">{% if post.solutions.count == 1 %} {{ post.solutions.count }} Solution {% else %} {{ post.solutions.count }} Solutions {%endif%}</h3>
     <div class="sort-dropdown">
         <button class="sort-dropdown-button" type="button" id="sortDropdown">
             Sort by: <span id="currentSort">Votes</span>
@@ -82,7 +112,6 @@
 
 {% block scripts %}
 
-<script defer src="//unpkg.com/mathlive"></script>
 
 <!-- Initialize Editor.js -->
 <script src="https://cdn.jsdelivr.net/npm/@editorjs/editorjs@latest"></script>
@@ -94,6 +123,7 @@
 <script defer src="https://cdn.jsdelivr.net/gh/mdgaziur/EditorJS-LaTeX@latest/dist/editorjs-latex.bundle-min.js"></script>
 <script defer src="https://cdn.jsdelivr.net/npm/@editorjs/inline-code@latest"></script>
 <script defer src="https://cdn.jsdelivr.net/npm/@calumk/editorjs-codecup@latest"></script>
+<script defer src="//unpkg.com/mathlive"></script>
 
 <script src="{% static 'forum/js/inline-math.js' %}" defer></script>
 <script src="{% static 'forum/js/editor-config.js' %}" defer></script>
@@ -102,147 +132,174 @@
 
 <script type="module">
 import { EditorManager } from '{% static "forum/js/editor-manager.js" %}';
-import { VotingSystem } from '{% static "forum/js/voting-system.js" %}';
 import { SolutionEditor } from '{% static "forum/js/solution-editing.js" %}';
 import { SolutionSorter } from '{% static "forum/js/solution-sorting.js" %}';
 import { CommentEditor } from '{% static "forum/js/comment-editing.js" %}';
 import { MathLiveBlock } from '{% static "forum/js/math-block.js" %}';
 import createEditor from '{% static "forum/js/editor-config.js" %}';
+import { SolutionInteractions } from '/static/forum/js/solution-interactions.js';
 
-document.addEventListener("DOMContentLoaded", async function () {
-    try {
-        const editorManager = new EditorManager();
+document.addEventListener("DOMContentLoaded", function () {
+    async function initializePage() {
+        try {
+            window.solutionInteractions = new SolutionInteractions();
 
-        const contentJSON = '{{ content_json|escapejs }}';
-        const content = JSON.parse(contentJSON);
-        await editorManager.initializeMainEditor('editorjs', content, '{{ csrf_token }}', true);
+            const editorManager = new EditorManager();
 
-        const processedSolutions = JSON.parse('{{ processed_solutions_json|escapejs }}');
-        await editorManager.initializeSolutionEditors(processedSolutions, '{{ csrf_token }}');
+            const contentJSON = '{{ content_json|escapejs }}';
+            const content = JSON.parse(contentJSON);
+            await editorManager.initializeMainEditor('editorjs', content, '{{ csrf_token }}', true);
 
-        for (const solution of processedSolutions) {
-            if (solution.comments && solution.comments.length > 0) {
-                await editorManager.initializeCommentEditors(solution.comments);
-            }
-        }
+            const processedSolutions = JSON.parse('{{ processed_solutions_json|escapejs }}');
+            await editorManager.initializeSolutionEditors(processedSolutions, '{{ csrf_token }}');
 
-        const user_posted_a_solution = {{ has_solution_from_user|yesno:"true,false"|safe }};
-        if (!user_posted_a_solution) {
-            var solutionFormEditor = await editorManager.initializeSolutionFormEditor(
-                'editorjs-solution-form',
-                '{{ csrf_token }}',
-                'solution-content'
-            );
-        }
-
-        const solutionForm = document.getElementById('solutionForm');
-        if (solutionForm) {
-            solutionForm.addEventListener('submit', async function (e) {
-                e.preventDefault();
-                try {
-                    const outputData = await solutionFormEditor.save();
-                    document.getElementById('solution-content').value = JSON.stringify(outputData);
-                    this.submit();
-                } catch (error) {
-                    console.error('Failed to save solution content:', error);
+            for (const solution of processedSolutions) {
+                if (solution.comments && solution.comments.length > 0) {
+                    await editorManager.initializeCommentEditors(solution.comments);
                 }
-            });
+            }
+
+            const user_posted_a_solution = {{ has_solution_from_user|yesno:"true,false"|safe }};
+            if (!user_posted_a_solution) {
+                var solutionFormEditor = await editorManager.initializeSolutionFormEditor(
+                    'editorjs-solution-form',
+                    '{{ csrf_token }}',
+                    'solution-content'
+                );
+            }
+
+            const solutionForm = document.getElementById('solutionForm');
+            if (solutionForm) {
+                solutionForm.addEventListener('submit', async function (e) {
+                    e.preventDefault();
+                    try {
+                        const outputData = await solutionFormEditor.save();
+                        document.getElementById('solution-content').value = JSON.stringify(outputData);
+                        this.submit();
+                    } catch (error) {
+                        console.error('Failed to save solution content:', error);
+                    }
+                });
+            }
+
+
+            const solutionEditor = new SolutionEditor(editorManager, '{{ csrf_token }}');
+            window.showEditSolutionForm = solutionEditor.showEditForm.bind(solutionEditor);
+            window.saveSolutionEdit = solutionEditor.saveSolution.bind(solutionEditor);
+            window.cancelSolutionEdit = solutionEditor.cancelEdit.bind(solutionEditor);
+
+            const commentEditor = new CommentEditor(editorManager, '{{ csrf_token }}');
+            new SolutionSorter();
+
+        } catch (error) {
+            console.error("Error initializing post detail page:", error);
         }
 
-        new VotingSystem('{{ csrf_token }}');
-
-        const solutionEditor = new SolutionEditor(editorManager, '{{ csrf_token }}');
-        window.showEditSolutionForm = solutionEditor.showEditForm.bind(solutionEditor);
-        window.saveSolutionEdit = solutionEditor.saveSolution.bind(solutionEditor);
-        window.cancelSolutionEdit = solutionEditor.cancelEdit.bind(solutionEditor);
-
-        const commentEditor = new CommentEditor(editorManager, '{{ csrf_token }}');
-        new SolutionSorter();
-
-    } catch (error) {
-        console.error("Error initializing post detail page:", error);
+        // Interaction listeners
+        const followForms = document.querySelectorAll('.follow-form');
+        followForms.forEach(form => {
+            form.addEventListener('submit', function (e) {
+                e.preventDefault();
+                const url = this.getAttribute('action');
+                const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+                fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'X-CSRFToken': csrfToken,
+                        'Content-Type': 'application/json',
+                    },
+                    credentials: 'same-origin'
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        const followCount = document.querySelectorAll('.follow-count');
+                        followCount.forEach(count => {
+                            count.textContent = data.followers_count;
+                        });
+                        const button = this.querySelector('button');
+                        if (data.followed) {
+                            this.setAttribute('action', '{% url "unfollow_post" post.id %}');
+                            button.innerHTML = '<i class="fas fa-bell-slash me-1"></i> Unfollow<span class="follow-count">' + data.followers_count + '</span>';
+                            button.classList.add('active');
+                        } else {
+                            this.setAttribute('action', '{% url "follow_post" post.id %}');
+                            button.innerHTML = '<i class="fas fa-bell me-1"></i> Follow<span class="follow-count">' + data.followers_count + '</span>';
+                            button.classList.remove('active');
+                        }
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                });
+            });
+        });
     }
 
-    // Interaction listeners
-    const followForms = document.querySelectorAll('.follow-form');
-    followForms.forEach(form => {
-        form.addEventListener('submit', function (e) {
+    initializePage();
+    
+    // Go back button logic
+    function setupGoBackButton() {
+        const goBackContainer = document.getElementById('go-back-container');
+        const goBackButton = document.getElementById('go-back-button');
+        
+        // Check if user came from for-you or all-posts pages
+        const referrer = document.referrer;
+        const currentHost = window.location.origin;
+        const postId = {{ post.id }};
+        const storedGoBackUrl = sessionStorage.getItem('goBackUrl');
+        
+        let shouldShowButton = false;
+        let backUrl = '';
+        
+        // First check if we have stored go-back information
+        if (storedGoBackUrl) {
+            shouldShowButton = true;
+            backUrl = storedGoBackUrl;
+    
+        } else if (referrer.includes(currentHost)) {
+            // Fallback to referrer detection
+            if (referrer.endsWith('/') || referrer.includes('/?')) {
+                shouldShowButton = true;
+                backUrl = '{% url "for_you" %}';
+            } else if (referrer.includes('/all-posts/')) {
+                shouldShowButton = true;
+                backUrl = '{% url "all_posts" %}';
+            }
+        }
+        
+        if (shouldShowButton) {
+            goBackButton.href = backUrl;
+            goBackContainer.style.display = 'block';
+        }
+        
+        // Add click handler for browser back functionality with scroll to post
+        goBackButton.addEventListener('click', function(e) {
             e.preventDefault();
-            const url = this.getAttribute('action');
-            const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
-            fetch(url, {
-                method: 'POST',
-                headers: {
-                    'X-Requested-With': 'XMLHttpRequest',
-                    'X-CSRFToken': csrfToken,
-                    'Content-Type': 'application/json',
-                },
-                credentials: 'same-origin'
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    const followCount = document.querySelectorAll('.follow-count');
-                    followCount.forEach(count => {
-                        count.textContent = data.followers_count;
-                    });
-                    const button = this.querySelector('button');
-                    if (data.followed) {
-                        this.setAttribute('action', '{% url "unfollow_post" post.id %}');
-                        button.innerHTML = '<i class="fas fa-bell-slash me-1"></i> Unfollow<span class="follow-count">' + data.followers_count + '</span>';
-                        button.classList.add('active');
-                    } else {
-                        this.setAttribute('action', '{% url "follow_post" post.id %}');
-                        button.innerHTML = '<i class="fas fa-bell me-1"></i> Follow<span class="follow-count">' + data.followers_count + '</span>';
-                        button.classList.remove('active');
-                    }
+            
+            // Store the post ID in sessionStorage for scrolling back to it
+            sessionStorage.setItem('scrollToPostId', postId);
+            
+            // Clear the stored go-back URL since we're using it
+            sessionStorage.removeItem('goBackUrl');
+            
+            // If we have a specific back URL, use it
+            if (backUrl) {
+                window.location.href = backUrl;
+            } else {
+                // Fallback to browser history
+                if (window.history.length > 1) {
+                    window.history.back();
+                } else {
+                    // If no history, go to for-you page
+                    window.location.href = '{% url "for_you" %}';
                 }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-            });
+            }
         });
-    });
-
-    const saveSolutionForms = document.querySelectorAll('.save-solution-form');
-    saveSolutionForms.forEach(form => {
-        form.addEventListener('submit', function (e) {
-            e.preventDefault();
-            const url = this.getAttribute('action');
-            const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
-            fetch(url, {
-                method: 'POST',
-                headers: {
-                    'X-Requested-With': 'XMLHttpRequest',
-                    'X-CSRFToken': csrfToken,
-                    'Content-Type': 'application/json',
-                },
-                credentials: 'same-origin'
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    const solutionId = url.split('/').slice(-2)[0];
-                    const button = this.querySelector('button');
-                    if (data.saved) {
-                        this.setAttribute('action', '/unsave-solution/' + solutionId + '/');
-                        button.classList.add('active');
-                        button.innerHTML = '<i class="fas fa-bookmark"></i>';
-                        button.title = "Unsave";
-                    } else {
-                        this.setAttribute('action', '/save-solution/' + solutionId + '/');
-                        button.classList.remove('active');
-                        button.innerHTML = '<i class="far fa-bookmark"></i>';
-                        button.title = "Save";
-                    }
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-            });
-        });
-    });
-
+    }
+    
+    setupGoBackButton();
 });
 
 function showReplyForm(commentId) {
@@ -256,4 +313,42 @@ function hideReplyForm(commentId) {
 }
 </script>
 
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    // Like button AJAX for post detail
+    document.querySelectorAll('.like-button').forEach(button => {
+        button.addEventListener('click', function () {
+            const postId = this.dataset.postId;
+            const isLiked = this.dataset.liked === 'true';
+            const url = isLiked ? this.dataset.unlikeUrl : this.dataset.likeUrl;
+            const csrfToken = this.dataset.csrf;
+            const likeIcon = this.querySelector('.like-icon');
+            const likeCount = this.querySelector('.like-count');
+            fetch(url, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': csrfToken,
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'Content-Type': 'application/json',
+                },
+                credentials: 'same-origin'
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    this.dataset.liked = data.liked.toString();
+                    likeCount.textContent = data.like_count;
+                    if (data.liked) {
+                        this.classList.add('active');
+                        likeIcon.innerHTML = `<svg aria-label="Unlike" fill="currentColor" height="24" viewBox="0 0 48 48" width="24"><path d="M34.6 3.1c-4.5 0-7.9 1.8-10.6 5.6-2.7-3.7-6.1-5.5-10.6-5.5C6 3.1 0 9.6 0 17.6c0 7.3 5.4 12 10.6 16.5.6.5 1.3 1.1 1.9 1.7l2.3 2c4.4 3.9 6.6 5.9 7.6 6.5.5.3 1.1.5 1.6.5s1.1-.2 1.6-.5c1-.6 2.8-2.2 7.8-6.8l2-1.8c.7-.6 1.3-1.2 2-1.7C42.7 29.6 48 25 48 17.6c0-8-6-14.5-13.4-14.5z"></path></svg>`;
+                    } else {
+                        this.classList.remove('active');
+                        likeIcon.innerHTML = `<svg aria-label="Like" fill="currentColor" height="24" viewBox="0 0 24 24" width="24"><path d="M16.792 3.904A4.989 4.989 0 0 1 21.5 9.122c0 3.072-2.652 4.959-5.197 7.222-2.512 2.243-3.865 3.469-4.303 3.752-.477-.309-2.143-1.823-4.303-3.752C5.141 14.072 2.5 12.167 2.5 9.122a4.989 4.989 0 0 1 4.708-5.218 4.21 4.21 0 0 1 3.675 1.941c.84 1.175.98 1.763 1.12 1.763s.278-.588 1.11-1.766a4.17 4.17 0 0 1 3.679-1.938m0-2a6.04 6.04 0 0 0-4.797 2.127 6.052 6.052 0 0 0-4.787-2.127A6.985 6.985 0 0 0 .5 9.122c0 3.61 2.55 5.827 5.015 7.97.283.246.569.494.853.747l1.027.918a44.998 44.998 0 0 0 3.518 3.018 2 2 0 0 0 2.174 0 45.263 45.263 0 0 0 3.626-3.115l.922-.824c.293-.26.59-.519.885-.774 2.334-2.025 4.98-4.32 4.98-7.94a6.985 6.985 0 0 0-6.708-7.218Z"></path></svg>`;
+                    }
+                }
+            });
+        });
+    });
+});
+</script>
 {% endblock %}

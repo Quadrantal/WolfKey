@@ -1,24 +1,103 @@
 {% extends 'forum/base.html' %}
+{% load static %}
 
 {% block content %}
+<link rel="stylesheet" href="{% static 'forum/css/post-card.css' %}">
+<link rel="stylesheet" href="{% static 'forum/css/notifications.css' %}">
 <div class="container">
     <h2>All Notifications</h2>
-    
     {% if notifications %}
-        <div class="list-group">
+        <button id="mark-all-read-btn" class="btn btn-outline-primary" style="margin-bottom: 1rem;">Mark all as read</button>
+        <div class="notification-list">
             {% for notification in notifications %}
-                <a href="{% url 'mark_notification_read' notification.id %}" 
-                   class="list-group-item list-group-item-action {% if not notification.is_read %}active{% endif %}">
-                    <div class="d-flex w-100 justify-content-between">
-                        <h5 class="mb-1">{{ notification.message }}</h5>
-                        <small>{{ notification.created_at|timesince }} ago</small>
+                <div class="card notification-card {% if not notification.is_read %}active{% endif %}" data-notification-id="{{ notification.id }}">
+                    <div class="d-flex w-100 justify-content-between align-items-center">
+                        <div class="card-body" style="flex:1;">
+                            <h5 class="mb-1">{{ notification.message }}</h5>
+                            <small>{{ notification.created_at|timesince }} ago</small>
+                            <p class="mb-1">From: {{ notification.sender.username }}</p>
+                        </div>
+                        {% if not notification.is_read %}
+                            <span class="mark-read-btn" title="Mark as read" data-notification-id="{{ notification.id }}" style="z-index:2; pointer-events:auto; position:relative; cursor:pointer; display:inline-flex; align-items:center;">
+                                <i class="bi bi-envelope-open" style="font-size:1.5rem;"></i>
+                            </span>
+                        {% endif %}
                     </div>
-                    <p class="mb-1">From: {{ notification.sender.username }}</p>
-                </a>
+                </div>
             {% endfor %}
         </div>
     {% else %}
         <p>No notifications</p>
     {% endif %}
 </div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+
+// Get CSRF token from cookie
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+const csrftoken = getCookie('csrftoken');
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Mark single notification as read
+    document.querySelectorAll('.mark-read-btn').forEach(btn => {
+        btn.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            const notificationId = this.getAttribute('data-notification-id');
+            fetch(`/notifications/${notificationId}/read/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': csrftoken,
+                    'Accept': 'application/json',
+                },
+            }).then(response => {
+                if (response.ok) {
+                    // Update UI without reload
+                    const card = btn.closest('.notification-card');
+                    card.classList.remove('active');
+                    card.classList.add('read');
+                    btn.remove();
+                }
+            });
+        });
+    });
+
+    // Mark all notifications as read
+    document.getElementById('mark-all-read-btn').addEventListener('click', function(e) {
+        e.preventDefault();
+        fetch(`/notifications/mark-all-read/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': csrftoken,
+                'Accept': 'application/json',
+            },
+        }).then(response => {
+            if (response.ok) {
+                // Update all cards without reload
+                document.querySelectorAll('.notification-card.active').forEach(card => {
+                    card.classList.remove('active');
+                    card.classList.add('read');
+                    const btn = card.querySelector('.mark-read-btn');
+                    if (btn) btn.remove();
+                });
+            }
+        });
+    });
+});
+</script>
 {% endblock %}

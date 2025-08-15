@@ -1,30 +1,29 @@
 {% extends 'forum/base.html' %}
 
 {% block head %}
-
 {% load static %}
 <link rel="stylesheet" href="{% static 'forum/css/course-selector.css' %}">
 <link rel="stylesheet" href="{% static 'forum/css/register.css' %}">
-
+<link rel="stylesheet" href="{% static 'forum/css/asset.css' %}">
+<link rel="stylesheet" href="{% static 'forum/css/profile.css' %}">
 {% endblock %}
 
 {% block content %}
 <div class="main-container">
     <h1 class="page-title">WolfKey</h1>
-    <p class="page-subtitle">Your academic journey begins with a few simple steps</p>
 
     <div class="progress-container">
         <div class="step-item">
             <div class="step-circle active" data-step="1">1</div>
-            <div class="step-label active">Choose Role</div>
+            <div class="step-label active">Personal Info</div>
         </div>
         <div class="step-item">
             <div class="step-circle" data-step="2">2</div>
-            <div class="step-label">School Info</div>
+            <div class="step-label">WolfNet Integration</div>
         </div>
         <div class="step-item">
             <div class="step-circle" data-step="3">3</div>
-            <div class="step-label">Personal Info</div>
+            <div class="step-label">Course Experience</div>
         </div>
         <div class="step-item">
             <div class="step-circle" data-step="4">4</div>
@@ -33,9 +32,10 @@
     </div>
 
     <div class="card">
-        <form id="onboardingForm" method="post">
+        <form id="onboardingForm" method="post" action="{% url 'register' %}">
             {% csrf_token %}
             
+            <!-- Step 1: Personal Information -->
             <div class="form-step active" data-step="1">
                 <div class="user-icon">
                     <div class="icon">
@@ -43,42 +43,24 @@
                     </div>
                 </div>
                 <div class="heading-section">
-                    <h3>Tell us who you are</h3>
-                    <p>Choose your role to personalize your experience</p>
-                </div>
-                <div class="role-selection">
-                    <label class="role-option">
-                        <input type="radio" name="role" value="student" class="role-radio">
-                        <i class="fas fa-graduation-cap role-option-icon"></i>
-                        <span>Student</span>
-                    </label>
-                    <label class="role-option">
-                        <input type="radio" name="role" value="teacher" class="role-radio">
-                        <i class="fas fa-chalkboard-teacher role-option-icon"></i>
-                        <span>Teacher</span>
-                    </label>
-                </div>
-                <div class="continue-btn">
-                    <button type="button" class="btn btn-primary" id="nextBtn">Continue <i class="fas fa-arrow-right"></i></button>
-                </div>
-            </div>
-
-            <div class="form-step" data-step="2">
-                <h3 class="mb-4">School Information</h3>
-                <div class="mb-3">
-                    {{ form.first_name }}
-                    {% if form.first_name.help_text %}
-                        <small class="help-text">{{ form.first_name.help_text }}</small>
-                    {% endif %}
-                    <div class="error-message" id="error-first_name"></div>
+                    <p>Let's start with some information</p>
                 </div>
                 
-                <div class="mb-3">
-                    {{ form.last_name }}
-                    {% if form.last_name.help_text %}
-                        <small class="help-text">{{ form.last_name.help_text }}</small>
-                    {% endif %}
-                    <div class="error-message" id="error-last_name"></div>
+                <div class="row">
+                    <div class="col-6 mb-3">
+                        {{ form.first_name }}
+                        {% if form.first_name.help_text %}
+                            <small class="help-text">{{ form.first_name.help_text }}</small>
+                        {% endif %}
+                        <div class="error-message" id="error-first_name"></div>
+                    </div>
+                    <div class="col-6 mb-3">
+                        {{ form.last_name }}
+                        {% if form.last_name.help_text %}
+                            <small class="help-text">{{ form.last_name.help_text }}</small>
+                        {% endif %}
+                        <div class="error-message" id="error-last_name"></div>
+                    </div>
                 </div>
                 
                 <div class="mb-3">
@@ -92,7 +74,7 @@
                 <div class="mb-3">
                     {{ form.personal_email }}
                     {% if form.personal_email.help_text %}
-                        <small class="help-text">{{ form.personal_email.help_text }}</small>
+                        <small class="help-text">{{ form.personal_email.help_text |safe }}</small>
                     {% endif %}
                     <div class="error-message" id="error-personal_email"></div>
                 </div>
@@ -100,13 +82,10 @@
                 <div class="mb-3">
                     {{ form.phone_number }}
                     {% if form.phone_number.help_text %}
-                        <small class="help-text">{{ form.phone_number.help_text }}</small>
+                        <small class="help-text">{{ form.phone_number.help_text | safe}}</small>
                     {% endif %}
                     <div class="error-message" id="error-phone_number"></div>
-
                 </div>
-                
-                <h3 class="mb-4">Personal Information</h3>
                 
                 <div class="mb-3">
                     {{ form.password1 }}
@@ -114,7 +93,6 @@
                         <small class="help-text">{{ form.password1.help_text }}</small>
                     {% endif %}
                     <div class="error-message" id="error-password1"></div>
-
                 </div>
                 
                 <div class="mb-3">
@@ -123,39 +101,156 @@
                         <small class="help-text">{{ form.password2.help_text }}</small>
                     {% endif %} 
                     <div class="error-message" id="error-password2"></div>
-
                 </div>
 
-                <div class="d-flex justify-content-between mt-4">
-                    <button type="button" class="btn btn-outline-secondary" id="prevBtn">Previous</button>
-                    <button type="button" class="btn btn-primary" id="nextBtn2">Continue <i class="fas fa-arrow-right"></i></button>
+                <div class="continue-btn">
+                    <button type="button" class="btn btn-primary" id="nextBtn1">Continue <i class="fas fa-arrow-right"></i></button>
                 </div>
             </div>
 
+            <!-- Step 2: WolfNet Integration -->
+            <div class="form-step" data-step="2">
+                <div class="user-icon">
+                    <div class="icon">
+                        <i class="fas fa-shield-alt"></i>
+                    </div>
+                </div>
+                <div class="heading-section">
+                    <h3>WolfNet Integration</h3>
+                    <p>Connect your WolfNet account for automatic schedule and grade updates</p>
+                </div>
+                
+                <div class="card mb-4" style="background: #f8f9fa; border: 1px solid #e9ecef;">
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label for="id_wolfnet_password" class="form-label">WolfNet Password</label>
+                            <div style="position:relative;">
+                                <input type="password" 
+                                       name="wolfnet_password" 
+                                       id="id_wolfnet_password" 
+                                       class="form-control" 
+                                       placeholder="Enter your WolfNet password (optional)">
+                                <button type="button" id="toggleWolfnetPassword" class="btn btn-outline-secondary" tabindex="-1" aria-label="Show/Hide Password" style="position:absolute; right:10px; top:50%; transform:translateY(-50%);">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                            </div>
+                            <small class="text-muted">
+                                <i class="fas fa-lock text-success"></i> Your password will be <strong>securely encrypted</strong> and used for:
+                                <ul class="mt-2 mb-0">
+                                    <li>Automatic schedule retrieval and updates</li>
+                                    <li>Email notifications when assignments are graded</li>
+                                </ul>
+                            </small>
+                        </div>
+                        
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle"></i>
+                            <strong>Optional:</strong> You can skip this step and add your WolfNet password later in your profile settings.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-between">
+                    <button type="button" class="btn btn-outline-secondary" id="prevBtn1">
+                        <i class="fas fa-arrow-left"></i> Previous
+                    </button>
+                    <div>
+                        <button type="button" class="btn btn-outline-primary me-2" id="skipBtn2">Skip for Now</button>
+                        <button type="button" class="btn btn-primary" id="nextBtn2">Continue <i class="fas fa-arrow-right"></i></button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 3: Course Experience -->
             <div class="form-step" data-step="3">
-                <h3 class="mb-4">Hard Courses</h3>
-                <p class="text-muted">Select the courses you might have trouble in. Courses that you have low grades in, or new clubs this year.</p>
-                <div id="currentCoursesSelector"></div>
-                <div id="currentCoursesError" style="color: red;"></div>
-                <input type="hidden" name="current_courses" id="current_courses_input">
-                <h3 class="mb-4 mt-4">Past Experience</h3>
-                <p class="text-muted">Select courses you're proficient in. Courses or clubs that you're doing good in.</p>
-                <div id="experiencedCoursesSelector"></div>
-                <div id="experiencedCoursesError" style="color: red;"></div>
-                <input type="hidden" name="experienced_courses" id="experienced_courses_input">
+                <div class="user-icon">
+                    <div class="icon">
+                        <i class="fas fa-graduation-cap"></i>
+                    </div>
+                </div>
+                <div class="heading-section">
+                    <h3>Course Experience</h3>
+                </div>
 
+
+                <h6 class="mb-0 text-warning"><i class="fas fa-hand-paper"></i> Courses You'd Like Help With</h6>
+                <div class="card-body">
+                    <p class="small text-muted">Select at least 3 courses where you'd appreciate help</p>
+                    <div id="helpCoursesSelector"></div>
+                    <input type="hidden" name="help_courses" id="help_courses_input">
+                    <div class="mt-2">
+                        <small id="helpCoursesCount" class="text-muted">0 courses selected (minimum 3)</small>
+                    </div>
+                </div>
+            
+                <h6 class="mb-0 text-success"><i class="fas fa-star"></i> Courses You're Proficient In</h6>
+                <div class="card-body">
+                    <p class="small text-muted">Select at least 3 courses where you excel and could help others</p>
+                    <div id="experienceCoursesSelector"></div>
+                    <input type="hidden" name="experience_courses" id="experience_courses_input">
+                    <div class="mt-2">
+                        <small id="experienceCoursesCount" class="text-muted">0 courses selected (minimum 3)</small>
+                    </div>
+                </div>
 
                 <div class="d-flex justify-content-between mt-4">
-                    <button type="button" class="btn btn-outline-secondary" id="prevBtn2">Previous</button>
-                    <button type="button" class="btn btn-primary" id="nextBtn3">Continue <i class="fas fa-arrow-right"></i></button>
+                    <button type="button" class="btn btn-outline-secondary" id="prevBtn2">
+                        <i class="fas fa-arrow-left"></i> Previous
+                    </button>
+                    <button type="button" class="btn btn-primary" id="nextBtn3" disabled>Continue <i class="fas fa-arrow-right"></i></button>
                 </div>
             </div>
 
-            <div class="form-step" data-step="4">
-                <h3 class="mb-4 text-center">Welcome Aboard! 🎉</h3>
-                <p class="text-center">You're all set to join WolfKey!</p>
-                <div class="text-center mt-4">
-                    <button type="submit" class="btn btn-primary btn-lg">Complete Registration</button>
+            <!-- Step 4: Schedule Review (Only if WolfNet password provided) -->
+            <div class="form-step" data-step="4" id="scheduleStep" style="display: none;">
+                <div class="user-icon">
+                    <div class="icon">
+                        <i class="fas fa-calendar-alt"></i>
+                    </div>
+                </div>
+                <div class="heading-section">
+                    <h3>Schedule Review</h3>
+                    <p>Review and modify your automatically retrieved schedule</p>
+                </div>
+
+                <!-- Loading state -->
+                <div id="scheduleLoading" class="text-center py-5">
+                    <div class="loader mb-3"></div>
+                    <h5>Retrieving your schedule from WolfNet...</h5>
+                    <p class="text-muted">This may take a moment</p>
+                </div>
+
+                <!-- Schedule content -->
+                <div id="scheduleContent" style="display: none;">
+                    <form id="scheduleForm">
+                        {% include 'forum/partials/schedule_block.html' %}
+                    </form>
+                </div>
+
+                <div class="d-flex justify-content-between mt-4" id="scheduleNavigation" style="display: none;">
+                    <button type="button" class="btn btn-outline-secondary" id="prevBtn3">
+                        <i class="fas fa-arrow-left"></i> Previous
+                    </button>
+                    <button type="button" class="btn btn-primary" id="saveAndCompleteBtn" disabled>
+                        <i class="fas fa-save"></i> Save Schedule & Complete Registration
+                    </button>
+                </div>
+            </div>
+
+            <!-- Final Step: Completion -->
+            <div class="form-step" data-step="complete">
+                <div class="text-center py-5">
+                    <div class="user-icon">
+                        <div class="icon" style="background: linear-gradient(135deg, #28a745, #20c997); color: white;">
+                            <i class="fas fa-check"></i>
+                        </div>
+                    </div>
+                    <h3 class="mb-4 text-success">Welcome to WolfKey! 🎉</h3>
+                    <div class="mt-4">
+                        <button type="submit" class="btn btn-success btn-lg" id="submitBtn">
+                            <i class="fas fa-rocket"></i> Enter WolfKey
+                        </button>
+                    </div>
                 </div>
             </div>
         </form>
@@ -163,200 +258,708 @@
 </div>
 
 {% load static %}
-<script src="{% static 'forum/js/course-selector.js' %}"></script>
 <script type="module">
     import { CourseSelector } from '{% static "forum/js/course-selector.js" %}';
-        document.addEventListener('DOMContentLoaded', function() {
+    
+    document.addEventListener('DOMContentLoaded', function() {
         const form = document.getElementById('onboardingForm');
+        console.log('Form found:', form ? 'Yes' : 'No');
+        
         const steps = document.querySelectorAll('.form-step');
         const stepCircles = document.querySelectorAll('.step-circle');
         const stepLabels = document.querySelectorAll('.step-label');
-        const nextBtn = document.getElementById('nextBtn');
-        const nextBtn2 = document.getElementById('nextBtn2');
-        const nextBtn3 = document.getElementById('nextBtn3');
-        const prevBtn = document.getElementById('prevBtn');
-        const prevBtn2 = document.getElementById('prevBtn2');
+        
         let currentStep = 1;
+        let wolfnetPassword = '';
+        let previousWolfnetPassword = ''; 
+        let scheduleTask = null;
+        let courseSelectors = {};
+        let retrievedCourses = null;
+        let scheduleError = null;
+        let currentHelpCourses = [];
+        let currentExperienceCourses = [];
 
+        // Load saved data from server if form had errors
+        const savedWolfnetPassword = '{{ saved_wolfnet_password|default:"" }}';
+        const savedScheduleDataStr = '{{ saved_schedule_data|default:"{}"|safe|escapejs }}';
+        const savedScheduleData = savedScheduleDataStr ? JSON.parse(savedScheduleDataStr) : {};
+        
+        if (savedWolfnetPassword) {
+            wolfnetPassword = savedWolfnetPassword;
+            previousWolfnetPassword = savedWolfnetPassword;
+            const passwordField = document.getElementById('id_wolfnet_password');
+            if (passwordField) {
+                passwordField.value = savedWolfnetPassword;
+            }
+        }
+        
+        if (Object.keys(savedScheduleData).length > 0) {
+            retrievedCourses = savedScheduleData;
+        }
+
+        // ===============================================
+        // UTILITY FUNCTIONS
+        // ===============================================
+        
+        // Update step UI
         function updateSteps() {
-            steps.forEach(step => step.classList.remove('active'));
-            stepCircles.forEach(circle => circle.classList.remove('active'));
-            stepLabels.forEach(label => label.classList.remove('active'));
-            
-            document.querySelector(`.form-step[data-step="${currentStep}"]`).classList.add('active');
-            document.querySelector(`.step-circle[data-step="${currentStep}"]`).classList.add('active');
-            document.querySelector(`.step-circle[data-step="${currentStep}"]`).parentElement.querySelector('.step-label').classList.add('active');
-        }
-
-        function showAllSteps() {
-            steps.forEach(step => step.classList.add('active'));
-            stepCircles.forEach(circle => circle.classList.add('active'));
-            stepLabels.forEach(label => label.classList.add('active'));
-        }
-
-        function hideAllStepsExceptCurrent() {
-            steps.forEach(step => step.classList.remove('active'));
-            stepCircles.forEach(circle => circle.classList.remove('active'));
-            stepLabels.forEach(label => label.classList.remove('active'));
-            
-            document.querySelector(`.form-step[data-step="${currentStep}"]`).classList.add('active');
-            document.querySelector(`.step-circle[data-step="${currentStep}"]`).classList.add('active');
-            document.querySelector(`.step-circle[data-step="${currentStep}"]`).parentElement.querySelector('.step-label').classList.add('active');
-        }
-
-        nextBtn.addEventListener('click', () => {
-            currentStep = 2;
-            updateSteps();
-        });
-
-        nextBtn2.addEventListener('click', () => {
-            currentStep = 3;
-            updateSteps();
-        });
-
-        nextBtn3.addEventListener('click', () => {
-            currentStep = 4;
-            updateSteps();
-        });
-
-        prevBtn.addEventListener('click', () => {
-            currentStep = 1;
-            updateSteps();
-        });
-
-        prevBtn2.addEventListener('click', () => {
-            currentStep = 2;
-            updateSteps();
-        });
-
-        // Role selection functionality
-        const roleOptions = document.querySelectorAll('.role-option');
-        roleOptions.forEach(option => {
-            option.addEventListener('click', () => {
-                roleOptions.forEach(opt => opt.classList.remove('selected'));
-                option.classList.add('selected');
-                option.querySelector('input[type="radio"]').checked = true;
+            steps.forEach(step => {
+                step.classList.remove('active');
+                step.style.display = 'none';
             });
-        });
-
-        // Initialize current courses selector
-        const currentCoursesSelector = new CourseSelector({
-            containerId: 'currentCoursesSelector',
-            maxCourses: 20,
-            onSelectionChange: (courses) => {
-                validateCurrentCourses(courses);
-            },
-            initialSelection: {% if selected_current_courses %}{{ selected_current_courses|safe }}{% else %}[]{% endif %},
-            formName: "onboardingForm"
-        });
-
-        // Initialize experienced courses selector
-        const experiencedCoursesSelector = new CourseSelector({
-            containerId: 'experiencedCoursesSelector',
-            maxCourses: 20,
-            onSelectionChange: (courses) => {
-                validateExperiencedCourses(courses);
-            },
-            initialSelection: {% if selected_experienced_courses %}{{ selected_experienced_courses|safe }}{% else %}[]{% endif %},
-            formName: "onboardingForm"
-        });
-
-
-        function validateCurrentCourses(courses) {
-            const errorDiv = document.getElementById('currentCoursesError');
-            const currentCourses = currentCoursesSelector.getSelectedCourses();
-            // console.log(currentCourses)
-            if (courses.length < 3) {
-                errorDiv.textContent = 'You must select at least 3 courses you need help with.';
-            } else {
-                errorDiv.textContent = '';
+            stepCircles.forEach(circle => circle.classList.remove('active'));
+            stepLabels.forEach(label => label.classList.remove('active'));
+            
+            // Show current step
+            const currentStepElement = document.querySelector(`.form-step[data-step="${currentStep}"]`) || 
+                                      document.querySelector(`.form-step[data-step="complete"]`);
+            if (currentStepElement) {
+                currentStepElement.classList.add('active');
+                currentStepElement.style.display = 'block';
             }
-            document.getElementById('current_courses_input').value = currentCourses.map(course => course.id).join(',');
+            
+            // Update progress circles and bar
+            const progressContainer = document.querySelector('.progress-container');
+            const stepNumber = currentStep === 'complete' ? 4 : currentStep;
+            progressContainer.setAttribute('data-progress', stepNumber);
+            
+            stepCircles.forEach((circle, index) => {
+                if (index + 1 <= stepNumber) {
+                    circle.classList.add('active');
+                    circle.parentElement.querySelector('.step-label').classList.add('active');
+                }
+            });
         }
 
-        function validateExperiencedCourses(courses) {
-            const experiencedCourses = experiencedCoursesSelector.getSelectedCourses();
-
-            const errorDiv = document.getElementById('experiencedCoursesError');
-            if (courses.length < 5) {
-                errorDiv.textContent = 'You must select at least 5 experienced courses.';
-            } else {
-                errorDiv.textContent = '';
-            }
-            document.getElementById('experienced_courses_input').value = experiencedCourses.map(course => course.id).join(',');
-
-        }
-
-        // Show all steps before form submission
-        form.addEventListener('submit', (e) => {
-            // alert("Hi");
-            showAllSteps();
-            setTimeout(() => {
-                if (!form.checkValidity()) {
-                    console.log('Selected Courses:', selectedCourses);
-                    e.preventDefault();
-                    hideAllStepsExceptCurrent();
-                }
-            }, 0);
-        });
-
-        displayFormErrors();
-        function displayFormErrors() {
-            try {
-                const errorMessages = JSON.parse('{{ form_errors|safe }}');
-                if (Object.keys(errorMessages).length > 0) {
-                    alert("Please correct the errors in the form.");
-                }
-                console.log("Parsed error messages:", errorMessages);
+        // Show validation error
+        function showError(fieldName, message) {
+            const errorElement = document.getElementById(`error-${fieldName}`);
+            if (errorElement) {
+                errorElement.textContent = message;
+                errorElement.style.display = 'block';
                 
-                // Clear any existing error messages
-                document.querySelectorAll('.error-message').forEach(el => {
-                    el.style.display = 'none';
-                    el.textContent = '';
-                });
-                document.querySelectorAll('.is-invalid').forEach(el => {
-                    el.classList.remove('is-invalid');
-                });
-
-                // Display new error messages
-                Object.entries(errorMessages).forEach(([field, fieldErrors]) => {
-                    // Get the error element for this field
-                    const errorElement = document.getElementById(`error-${field}`);
-                    if (errorElement) {
-                        // Extract the error message from the messages array
-                        const errorMessage = fieldErrors[0].message;
-                        errorElement.textContent = errorMessage;
-                        errorElement.style.display = 'block';
-                        
-                        // Add invalid class to the input
-                        const inputElement = form.querySelector(`[name="${field}"]`);
-                        if (inputElement) {
-                            inputElement.classList.add('is-invalid');
-                        }
-                        
-                        // Navigate to the step containing the error
-                        const step = inputElement?.closest('.form-step');
-                        if (step) {
-                            currentStep = parseInt(step.dataset.step);
-                            updateSteps();
-                        }
-                    }
-                });
-            } catch (e) {
-                console.error("Error parsing form errors:", e);
+                const input = document.querySelector(`[name="${fieldName}"]`);
+                if (input) {
+                    input.classList.add('is-invalid');
+                }
             }
         }
-        validateCurrentCourses(currentCoursesSelector.getSelectedCourses());
-        validateExperiencedCourses(experiencedCoursesSelector.getSelectedCourses());
 
-        form.addEventListener('keypress', function(event) {
-            if (event.key === 'Enter') {
-                event.preventDefault();
-                console.log("Enters");
-                return false;
+        // Clear validation errors
+        function clearErrors() {
+            document.querySelectorAll('.error-message').forEach(el => {
+                el.style.display = 'none';
+                el.textContent = '';
+            });
+            document.querySelectorAll('.is-invalid').forEach(el => {
+                el.classList.remove('is-invalid');
+            });
+        }
+
+        // ===============================================
+        // VALIDATION FUNCTIONS
+        // ===============================================
+        
+        // Validate current step
+        function validateStep(step) {
+            if (step === 1) {
+                const requiredFields = ['first_name', 'last_name', 'school_email', 'password1', 'password2'];
+                for (let field of requiredFields) {
+                    const input = document.querySelector(`[name="${field}"]`);
+                    if (!input || !input.value.trim()) {
+                        showError(field, 'This field is required');
+                        return false;
+                    }
+                }
+                
+                // Validate passwords match
+                const password1 = document.querySelector('[name="password1"]').value;
+                const password2 = document.querySelector('[name="password2"]').value;
+                if (password1 !== password2) {
+                    showError('password2', 'Passwords do not match');
+                    return false;
+                }
             }
-        });
-    });
+            return true;
+        }
 
+        // ===============================================
+        // COURSE SELECTOR FUNCTIONS (STEP 3)
+        // ===============================================
+        
+        // Initialize course selectors for step 3
+        function initializeCourseSelectors() {
+            console.log("Intializing course selectors");
+            
+            // Load saved selections if available
+            const savedHelpCoursesStr = '{{ selected_help_courses|default:"[]"|safe|escapejs }}';
+            const savedExperienceCoursesStr = '{{ selected_experience_courses|default:"[]"|safe|escapejs }}';
+            const savedHelpCourses = savedHelpCoursesStr ? JSON.parse(savedHelpCoursesStr) : [];
+            const savedExperienceCourses = savedExperienceCoursesStr ? JSON.parse(savedExperienceCoursesStr) : [];
+            
+            // Use current selections if available, otherwise use saved selections from server
+            const helpCoursesToUse = currentHelpCourses.length > 0 ? currentHelpCourses : savedHelpCourses;
+            const experienceCoursesToUse = currentExperienceCourses.length > 0 ? currentExperienceCourses : savedExperienceCourses;
+            
+            courseSelectors.help = new CourseSelector({
+                containerId: 'helpCoursesSelector',
+                initialSelection: helpCoursesToUse,
+                formName: "onboardingForm",
+                onSelectionChange: updateCourseValidation
+            });
+
+            courseSelectors.experience = new CourseSelector({
+                containerId: 'experienceCoursesSelector',
+                initialSelection: experienceCoursesToUse,
+                formName: "onboardingForm",
+                onSelectionChange: updateCourseValidation
+            });
+            
+            // Initial validation check
+            updateCourseValidation();
+        }
+
+        // Update course selection validation
+        function updateCourseValidation() {
+            const helpCount = courseSelectors.help ? courseSelectors.help.getSelectedCourses().length : 0;
+            const experienceCount = courseSelectors.experience ? courseSelectors.experience.getSelectedCourses().length : 0;
+            
+            // Update counters
+            const helpCountElement = document.getElementById('helpCoursesCount');
+            const experienceCountElement = document.getElementById('experienceCoursesCount');
+            const nextBtn3 = document.getElementById('nextBtn3');
+            
+            if (helpCountElement) {
+                helpCountElement.textContent = `${helpCount} courses selected (minimum 3)`;
+                helpCountElement.className = helpCount >= 3 ? 'text-success' : 'text-muted';
+            }
+            
+            if (experienceCountElement) {
+                experienceCountElement.textContent = `${experienceCount} courses selected (minimum 3)`;
+                experienceCountElement.className = experienceCount >= 3 ? 'text-success' : 'text-muted';
+            }
+            
+            // Enable/disable next button based on requirements
+            if (nextBtn3) {
+                const isValid = helpCount >= 3 && experienceCount >= 3;
+                nextBtn3.disabled = !isValid;
+                
+                if (isValid) {
+                    nextBtn3.classList.remove('btn-secondary');
+                    nextBtn3.classList.add('btn-primary');
+                    nextBtn3.innerHTML = 'Continue <i class="fas fa-arrow-right"></i>';
+                } else {
+                    nextBtn3.classList.remove('btn-primary');
+                    nextBtn3.classList.add('btn-secondary');
+                    const helpNeeded = Math.max(0, 3 - helpCount);
+                    const expNeeded = Math.max(0, 3 - experienceCount);
+                    if (helpNeeded > 0 && expNeeded > 0) {
+                        nextBtn3.innerHTML = `Select ${helpNeeded} more help courses and ${expNeeded} more experience courses`;
+                    } else if (helpNeeded > 0) {
+                        nextBtn3.innerHTML = `Select ${helpNeeded} more help courses`;
+                    } else if (expNeeded > 0) {
+                        nextBtn3.innerHTML = `Select ${expNeeded} more experience courses`;
+                    }
+                }
+            }
+        }
+
+        // Save current course selections from step 3
+        function saveCourseSelections() {
+            if (courseSelectors.help && courseSelectors.help.getSelectedCourses) {
+                currentHelpCourses = courseSelectors.help.getSelectedCourses();
+            }
+            if (courseSelectors.experience && courseSelectors.experience.getSelectedCourses) {
+                currentExperienceCourses = courseSelectors.experience.getSelectedCourses();
+            }
+            console.log('Saved course selections:', {
+                help: currentHelpCourses,
+                experience: currentExperienceCourses
+            });
+        }
+
+        // ===============================================
+        // WOLFNET INTEGRATION FUNCTIONS
+        // ===============================================
+        
+        // Start WolfNet course auto-complete
+        async function startCourseAutoComplete() {
+            if (!wolfnetPassword) return;
+            
+            try {
+                // Create a temporary form to store the password
+                const tempData = new FormData();
+                tempData.append('wolfnet_password', wolfnetPassword);
+                tempData.append('school_email', document.querySelector('[name="school_email"]').value);
+                tempData.append('csrfmiddlewaretoken', document.querySelector('[name=csrfmiddlewaretoken]').value);
+                
+                const response = await fetch('/auto-complete-courses-registration/', {
+                    method: 'POST',
+                    body: tempData
+                });
+                
+                const result = await response.json();
+
+                console.log("Result: ", result);
+                
+                if (result.success && result.courses) {
+                    retrievedCourses = result.courses;
+                    scheduleError = null; // Clear any previous errors
+                    // If selectors are already initialized, apply the courses immediately
+                    if (courseSelectors['block_1A']) {
+                        updateCourseSelectors(retrievedCourses);
+                    }
+                    // If we're on the schedule step, show content
+                    if (currentStep === 4) {
+                        showScheduleContent();
+                    }
+                } else {
+                    // Handle different error types
+                    const errorType = result.error_type || 'general';
+                    let errorMessage = result.error || 'Failed to retrieve courses';
+                    
+                    if (errorType === 'authentication') {
+                        // For authentication errors, clear the password so it won't be submitted
+                        if (result.error === 'wrong_password') {
+                            scheduleError = {
+                                error_type: errorType,
+                                message: errorMessage
+                            }
+                            wolfnetPassword = ''; // Clear password for submission
+                        } else {
+                            scheduleError = {
+                                error_type: errorType,
+                                message: errorMessage
+                            };
+                            wolfnetPassword = ''; // Clear password for submission
+                        }
+                    } else {
+                        // For non-authentication errors, keep the password for submission
+                        scheduleError = {
+                            error_type: errorType,
+                            message: errorMessage
+                        };
+                    }
+                    
+                    console.log('Schedule error stored:', scheduleError);
+                    // Only show error if we're on the schedule step
+                    if (currentStep === 4) {
+                        showScheduleError(scheduleError);
+                    }
+                }
+            } catch (error) {
+                console.error('Auto-complete error:', error);
+                // For network/general errors, keep the password for submission
+                scheduleError = {
+                    type: 'network',
+                    message: 'Failed to retrieve courses from WolfNet'
+                };
+                // Only show error if we're on the schedule step
+                if (currentStep === 4) {
+                    showScheduleError(scheduleError);
+                }
+            }
+        }
+
+        // Password toggle
+        if (document.getElementById('toggleWolfnetPassword')) {
+            document.getElementById('toggleWolfnetPassword').addEventListener('click', function() {
+                const passwordInput = document.getElementById('id_wolfnet_password');
+                const icon = this.querySelector('i');
+                
+                if (passwordInput.type === 'password') {
+                    passwordInput.type = 'text';
+                    icon.classList.replace('fa-eye', 'fa-eye-slash');
+                } else {
+                    passwordInput.type = 'password';
+                    icon.classList.replace('fa-eye-slash', 'fa-eye');
+                }
+            });
+        }
+
+        // ===============================================
+        // SCHEDULE FUNCTIONS (STEP 4)
+        // ===============================================
+        
+        // Initialize schedule selectors for step 4
+        function initializeScheduleSelectors() {
+            const blocks = ['1A', '1B', '1D', '1E', '2A', '2B', '2C', '2D', '2E'];
+            
+            blocks.forEach(block => {
+                const blockId = `block_${block}`;
+                // Get initial selection from saved schedule data
+                const savedCourse = savedScheduleData[block] || null;
+                const initialSelection = savedCourse ? [savedCourse] : [];
+                
+                courseSelectors[blockId] = new CourseSelector({
+                    containerId: `${blockId}_selector`,
+                    block: block,
+                    maxCourses: 1,
+                    initialSelection: initialSelection,
+                    formName: "onboardingForm",
+                    onSelectionChange: (courses) => updateBlockButtons(blockId, courses[0] || null, [], [])
+                });
+            });
+            
+            // Apply retrieved courses if they exist (from auto-complete)
+            if (retrievedCourses && Object.keys(retrievedCourses).length > 0) {
+                updateCourseSelectors(retrievedCourses);
+            }
+        }
+
+        // Update course selectors with retrieved courses
+        function updateCourseSelectors(courses) {
+            const blocks = ['1A', '1B', '1D', '1E', '2A', '2B', '2C', '2D', '2E'];
+
+            console.log("Courses: ", courses);
+            
+            blocks.forEach(block => {
+                const blockId = `block_${block}`;
+                const course = courses[block];
+                if (course && courseSelectors[blockId]) {
+                    courseSelectors[blockId].addCourse(course);
+                    updateBlockButtons(blockId, course, [], []);
+                }
+            });
+        }
+
+        // Reset schedule to loading state
+        function resetScheduleToLoading() {
+            document.getElementById('scheduleLoading').innerHTML = `
+                <div class="text-center py-5">
+                    <div class="loader mb-3"></div>
+                    <h5>Retrieving your schedule from WolfNet...</h5>
+                    <p class="text-muted">This may take a moment</p>
+                </div>
+            `;
+            document.getElementById('scheduleLoading').style.display = 'block';
+            document.getElementById('scheduleContent').style.display = 'none';
+            document.getElementById('scheduleNavigation').style.display = 'none';
+        }
+
+        // Show schedule content and hide loading
+        function showScheduleContent() {
+            document.getElementById('scheduleLoading').style.display = 'none';
+            document.getElementById('scheduleContent').style.display = 'block';
+            document.getElementById('scheduleNavigation').style.display = 'flex';
+            document.getElementById('saveAndCompleteBtn').disabled = false;
+        }
+
+        // Show schedule error
+        function showScheduleError(error) {
+            let displayMessage = '';
+            let showBackButton = true;
+            let showSkipButton = true;
+
+            console.log(error);
+            
+            if (typeof error === 'object' && error.error_type) {
+                switch (error.error_type) {
+                    case 'authentication':
+                        displayMessage = 'WolfNet Authentication failed. Password incorrect.';
+                        break;
+                    case 'page_loading':
+                        displayMessage = 'WolfNet page failed to load properly. This may be a temporary issue - you can try again later or continue without auto-completing your schedule.';
+                        showBackButton = false; // No need to go back for page loading issues
+                        break;
+                    case 'page_structure':
+                        displayMessage = 'Unable to find course information on WolfNet page. You can continue without auto-completing your schedule.';
+                        showBackButton = false;
+                        break;
+                    case 'no_courses':
+                        displayMessage = 'No courses found in your WolfNet schedule. Make sure you have courses enrolled, or continue without auto-completing your schedule.';
+                        showBackButton = false;
+                        break;
+                    case 'network':
+                        displayMessage = 'Network error occurred while connecting to WolfNet. Please check your connection and try again, or continue without auto-completing your schedule.';
+                        break;
+                    default:
+                        displayMessage = error.message || 'An unexpected error occurred while retrieving your schedule.';
+                }
+            } else {
+                displayMessage = 'An unexpected error occurred while retrieving your schedule.';
+            }
+            
+            let buttonsHtml = '';
+            if (showBackButton) {
+                buttonsHtml += `
+                    <button type="button" class="btn btn-primary" onclick="goBackToWolfnetPassword()">
+                        <i class="fas fa-arrow-left"></i> Go Back to WolfNet Password
+                    </button>
+                    <br><br>
+                `;
+            }
+            if (showSkipButton) {
+                buttonsHtml += `
+                    <button type="button" class="btn btn-outline-secondary btn-sm" onclick="skipScheduleStep()">
+                        Continue Without Schedule
+                    </button>
+                `;
+            }
+            
+            document.getElementById('scheduleLoading').innerHTML = `
+                <div class="alert alert-warning">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <strong>Could not retrieve schedule:</strong> ${displayMessage}
+                    <br><br>
+                    ${buttonsHtml}
+                </div>
+            `;
+
+            document.getElementById('saveAndCompleteBtn').disabled = true;
+        }
+
+        // Go back to WolfNet password step
+        window.goBackToWolfnetPassword = function() {
+            currentStep = 2;
+            updateSteps();
+        };
+
+        // Skip schedule step
+        window.skipScheduleStep = function() {
+            currentStep = 'complete';
+            wolfnetPassword = '';
+            updateSteps();
+        };
+
+        // Block buttons update function (similar to profile.html)
+        window.updateBlockButtons = function(blockId, course, experiencedCourses, helpNeededCourses) {
+            const buttonsContainer = document.getElementById(`${blockId}_buttons`);
+            if (!buttonsContainer) return;
+            
+            if (course) {
+                buttonsContainer.style.display = 'flex';
+            } else {
+                buttonsContainer.style.display = 'none';
+            }
+        };
+
+        // ===============================================
+        // NAVIGATION EVENT HANDLERS
+        // ===============================================
+        
+        // Step 1 -> Step 2
+        if (document.getElementById('nextBtn1')) {
+            document.getElementById('nextBtn1').addEventListener('click', function() {
+                clearErrors();
+                if (validateStep(1)) {
+                    currentStep = 2;
+                    updateSteps();
+                }
+            });
+        }
+
+        // Step 1 <- Step 2
+        if (document.getElementById('prevBtn1')) {
+            document.getElementById('prevBtn1').addEventListener('click', function() {
+                currentStep = 1;
+                updateSteps();
+            });
+        }
+
+        // Step 2 -> Step 3
+        if (document.getElementById('nextBtn2')) {
+            document.getElementById('nextBtn2').addEventListener('click', function() {
+                const currentWolfnetPassword = document.getElementById('id_wolfnet_password').value;
+                const passwordChanged = currentWolfnetPassword !== previousWolfnetPassword;
+                
+                wolfnetPassword = currentWolfnetPassword;
+                currentStep = 3;
+                updateSteps();
+                // Initialize course selectors when reaching step 3
+                initializeCourseSelectors();
+                
+                // Reset schedule to loading state if password changed
+                if (passwordChanged) {
+                    retrievedCourses = null;
+                    scheduleError = null;
+                    resetScheduleToLoading();
+                }
+                
+                // Only start course auto-complete if password is provided AND has changed
+                if (wolfnetPassword && passwordChanged) {
+                    startCourseAutoComplete();
+                    previousWolfnetPassword = wolfnetPassword;
+                } else if (wolfnetPassword && !passwordChanged) {
+                    console.log('Password unchanged, using cached schedule data');
+                }
+            });
+        }
+
+        // Skip WolfNet step
+        if (document.getElementById('skipBtn2')) {
+            document.getElementById('skipBtn2').addEventListener('click', function() {
+                wolfnetPassword = '';
+                currentStep = 3;
+                updateSteps();
+                // Initialize course selectors when reaching step 3
+                initializeCourseSelectors();
+            });
+        }
+
+        // Step 2 <- Step 3
+        if (document.getElementById('prevBtn2')) {
+            document.getElementById('prevBtn2').addEventListener('click', function() {
+                saveCourseSelections();
+                currentStep = 2;
+                updateSteps();
+            });
+        }
+
+        // Step 3 -> Step 4 / Complete
+        if (document.getElementById('nextBtn3')) {
+            document.getElementById('nextBtn3').addEventListener('click', function() {
+                // Validate course selections
+                const helpCount = courseSelectors.help ? courseSelectors.help.getSelectedCourses().length : 0;
+                const experienceCount = courseSelectors.experience ? courseSelectors.experience.getSelectedCourses().length : 0;
+                
+                if (helpCount < 3 || experienceCount < 3) {
+                    alert(`Please select at least 3 courses for each category. Currently: ${helpCount} help courses and ${experienceCount} experience courses selected.`);
+                    return;
+                }
+                
+                // Save current course selections before leaving step 3
+                saveCourseSelections();
+                
+                if (wolfnetPassword) {
+                    // Show schedule step
+                    currentStep = 4;
+                    document.querySelector('.form-step[data-step="4"]').style.display = 'block';
+                    updateSteps();
+                    initializeScheduleSelectors();
+                    
+                    // Check if we have an error from earlier auto-complete attempt
+                    if (scheduleError) {
+                        showScheduleError(scheduleError);
+                    }
+                    // If courses were already retrieved, show content immediately
+                    else if (retrievedCourses) {
+                        showScheduleContent();
+                    }
+                    // If still loading, the loading screen is already shown by default
+                } else {
+                    // Skip to completion
+                    currentStep = 'complete';
+                    updateSteps();
+                }
+            });
+        }
+
+        // Step 3 <- Step 4
+        if (document.getElementById('prevBtn3')) {
+            document.getElementById('prevBtn3').addEventListener('click', function() {
+                currentStep = 3;
+                updateSteps();
+            });
+        }
+
+        // Step 4 -> Complete
+        if (document.getElementById('saveAndCompleteBtn')) {
+            document.getElementById('saveAndCompleteBtn').addEventListener('click', function() {
+                const button = this;
+                const originalText = button.innerHTML;
+                
+                button.innerHTML = '<i class="fas fa-check"></i> Schedule Ready!';
+                button.disabled = true;
+                
+                // Move to completion step after a short delay
+                setTimeout(() => {
+                    currentStep = 'complete';
+                    updateSteps();
+                }, 800);
+            });
+        }
+
+        // Submit button handler
+        const submitBtn = document.getElementById('submitBtn');
+        if (submitBtn) {
+            submitBtn.addEventListener('click', function(e) {
+                console.log('Submit button clicked');
+                e.preventDefault(); 
+                
+                this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Creating Account...';
+                this.disabled = true;
+                
+                try {
+                    // Collect help and experience courses
+                    if (courseSelectors.help && courseSelectors.help.getSelectedCourses) {
+                        const helpCourses = courseSelectors.help.getSelectedCourses().map(course => course.id).join(',');
+                        document.getElementById('help_courses_input').value = helpCourses;
+                    }
+                    
+                    if (courseSelectors.experience && courseSelectors.experience.getSelectedCourses) {
+                        const experienceCourses = courseSelectors.experience.getSelectedCourses().map(course => course.id).join(',');
+                        document.getElementById('experience_courses_input').value = experienceCourses;
+                    }
+                    
+                    // Add WolfNet success indicator
+                    // Only include wolfnet_password if integration was successful OR error was not authentication-related
+                    const wolfnetSuccessInput = document.createElement('input');
+                    wolfnetSuccessInput.type = 'hidden';
+                    wolfnetSuccessInput.name = 'wolfnet_success';
+                    
+                    if (!scheduleError) {
+                        // No error - integration was successful
+                        wolfnetSuccessInput.value = 'true';
+                    } else if (typeof scheduleError === 'string' && (scheduleError === 'wrong_password' || scheduleError === 'authentication_failed')) {
+                        // Authentication error - don't save password
+                        wolfnetSuccessInput.value = 'false';
+                        // Clear the password field so it won't be submitted
+                        const passwordField = document.getElementById('id_wolfnet_password');
+                        if (passwordField) {
+                            passwordField.value = '';
+                        }
+                    } else if (typeof scheduleError === 'object' && scheduleError.type === 'authentication') {
+                        // Authentication error - don't save password
+                        wolfnetSuccessInput.value = 'false';
+                        // Clear the password field so it won't be submitted
+                        const passwordField = document.getElementById('id_wolfnet_password');
+                        if (passwordField) {
+                            passwordField.value = '';
+                        }
+                    } else {
+                        // Non-authentication error - keep password for future attempts
+                        wolfnetSuccessInput.value = 'partial';
+                    }
+                    
+                    form.appendChild(wolfnetSuccessInput);
+                    
+                    // Collect all schedule data
+                    const blocks = ['1A', '1B', '1D', '1E', '2A', '2B', '2C', '2D', '2E'];
+                    blocks.forEach(block => {
+                        const blockId = `block_${block}`;
+                        const selector = courseSelectors[blockId];
+                        if (selector && selector.getSelectedCourses && selector.getSelectedCourses().length > 0) {
+                            // Remove any existing input for this block to avoid duplicates
+                            const existingInput = form.querySelector(`[name="${blockId}"]`);
+                            if (existingInput) {
+                                existingInput.remove();
+                            }
+                            
+                            const hiddenInput = document.createElement('input');
+                            hiddenInput.type = 'hidden';
+                            hiddenInput.name = blockId;
+                            hiddenInput.value = selector.getSelectedCourses()[0].id;
+                            form.appendChild(hiddenInput);
+                        }
+                    });
+                    
+                    console.log('Form data collection complete, submitting form...');
+                    
+                    form.submit();
+                    
+                } catch (error) {
+                    console.error('Error during form data collection:', error);
+                    // Reset submit button on error
+                    this.innerHTML = '<i class="fas fa-rocket"></i> Enter WolfKey';
+                    this.disabled = false;
+                }
+            });
+        } else {
+            console.error('Submit button not found!');
+        }
+
+        updateSteps();
+    });
 </script>
 {% endblock %}

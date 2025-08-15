@@ -1,5 +1,5 @@
 from django import forms
-from .models import Post, Comment, Solution, Tag, File, UserProfile, UserCourseExperience, UserCourseHelp, Course, User
+from .models import Post, Comment, Solution, File, UserProfile, UserCourseExperience, UserCourseHelp, Course, User
 from django.forms.widgets import ClearableFileInput
 from django.core.files.uploadedfile import UploadedFile
 from django.contrib.auth.forms import UserCreationForm
@@ -15,7 +15,12 @@ from django.utils.encoding import force_bytes
 from django.contrib.auth.tokens import default_token_generator
 from django.conf import settings
 from django.core.exceptions import ValidationError
+from django.contrib.auth.hashers import make_password, check_password
+from cryptography.fernet import Fernet
+import base64
+import logging
 
+logger = logging.getLogger(__name__)
 
 class MultipleFileInput(forms.ClearableFileInput):
     allow_multiple_selected = True
@@ -35,9 +40,14 @@ class MultipleFileField(forms.FileField):
 
         
 class PostForm(forms.ModelForm):
+
+    is_anonymous = forms.BooleanField(
+        required=False, label="Post Anonymously",
+        widget=forms.CheckboxInput(attrs={'class': 'form-check-input'})
+    )
     class Meta:
         model = Post
-        fields = ['title', 'content', 'tags', 'courses']
+        fields = ['title', 'content', 'courses', 'is_anonymous']
         widgets = {
             'title': forms.TextInput(attrs={'class': 'form-control'}),
         }
@@ -91,11 +101,6 @@ class CommentForm(forms.ModelForm):
         if not isinstance(data, dict):  # Ensure content is valid JSON
             raise forms.ValidationError("Invalid content format.")
         return data
-        
-class TagForm(forms.ModelForm):
-    class Meta:
-        model = Tag
-        fields = ['name']
 
 
 class UserProfileForm(forms.ModelForm):
@@ -105,6 +110,56 @@ class UserProfileForm(forms.ModelForm):
         widgets = {
             'bio': forms.Textarea(attrs={'rows': 4}),
         }
+
+class WolfNetSettingsForm(forms.ModelForm):
+    wolfnet_password = forms.CharField(
+        widget=forms.PasswordInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Enter your WolfNet password'
+        }),
+        required=False,
+        help_text='Your WolfNet password will be securely encrypted and stored for grade notifications and schedule integration.'
+    )
+    
+    class Meta:
+        model = UserProfile
+        fields = ['wolfnet_password']
+        
+    def clean_wolfnet_password(self):
+        password = self.cleaned_data.get('wolfnet_password')
+        if password:
+            # Add any additional validation for WolfNet password here
+            if len(password) < 1:
+                raise forms.ValidationError("Please enter a valid WolfNet password.")
+        return password
+
+    
+    def encrypt_password(self, password):
+        """Encrypt the password using Fernet encryption"""
+        # Generate a key from Django's SECRET_KEY
+        key = settings.FERNET_KEY.encode()
+        f = Fernet(key)
+
+        encrypted_password = f.encrypt(password.encode())
+
+        return encrypted_password.decode()
+    
+    @staticmethod
+    def decrypt_password(encrypted_password):
+        """Decrypt the password for use in web scraping"""
+        if not encrypted_password:
+            logger.error("No encrypted password passed")
+            return None
+        try:
+            key = settings.FERNET_KEY.encode()
+            f = Fernet(key)
+            decrypted_password = f.decrypt(encrypted_password.encode())
+            return decrypted_password.decode()
+        except Exception as e:
+            import traceback
+            logger.error(f"Exception during decryption: {e}\n{traceback.format_exc()}")
+            return None
+
 
 class UserCourseExperienceForm(forms.ModelForm):
     class Meta:
@@ -183,20 +238,12 @@ class CustomUserCreationForm(UserCreationForm):
             'class': 'form-control',
             'placeholder': 'personal@example.com'
         }),
-        help_text="Optional personal email address. NOTE: You can not reset your password without this!"
-    )
-    phone_number = forms.CharField(
-        required=False,
-        widget=forms.TextInput(attrs={
-            'class': 'form-control',
-            'placeholder': '+1234567890'
-        }),
-        help_text="Optional phone number in international format (e.g., +12345678900)"
+        help_text="<strong> Optional </strong> personal email address. NOTE: You can not reset your password without this!"
     )
 
     class Meta:
         model = User
-        fields = ('first_name', 'last_name', 'school_email', 'personal_email', 'phone_number', 'password1', 'password2')
+        fields = ('first_name', 'last_name', 'school_email', 'personal_email', 'password1', 'password2')
 
     def clean_school_email(self):
         email = self.cleaned_data.get('school_email')
@@ -205,16 +252,6 @@ class CustomUserCreationForm(UserCreationForm):
         if User.objects.filter(school_email=email).exists():
             raise forms.ValidationError("This school email is already registered")
         return email
-
-    def clean_phone_number(self):
-        phone = self.cleaned_data.get('phone_number')
-        if phone:
-            # Remove any spaces or special characters except +
-            phone = ''.join(c for c in phone if c.isdigit() or c == '+')
-            # Validate phone number format
-            if not re.match(r'^\+?1?\d{9,15}$', phone):
-                raise forms.ValidationError("Please enter a valid phone number in international format")
-        return phone
     
     def save(self, commit=True):
         user = super().save(commit=False)

@@ -31,11 +31,16 @@ from forum.views.post_views import (
     post_detail, 
     edit_post, 
     delete_post, 
-    create_post
+    create_post,
+    like_post,
+    unlike_post,
+    follow_post,
+    unfollow_post
 )
-from forum.views.search_views import (
-    for_you, 
+
+from forum.views.feed_views import (
     all_posts,
+    for_you,
     my_posts
 )
 from forum.views.solution_views import (
@@ -44,7 +49,9 @@ from forum.views.solution_views import (
     edit_solution,
     upvote_solution, 
     downvote_solution,
-    accept_solution
+    accept_solution,
+    get_sorted_solutions,
+    
 )
 from forum.views.search_views import search_results_new_page
 from forum.views.profile_views import (
@@ -52,29 +59,29 @@ from forum.views.profile_views import (
     remove_experience,
     add_help_request,
     remove_help_request,
-    edit_profile,
     my_profile,
     profile_view,
     update_courses,
-    upload_profile_picture
+    upload_profile_picture,
+    auto_complete_courses_view,
+    auto_complete_courses_registration,
+    check_wolfnet_password_view
 )
-from forum.views.course_views import (
+from forum.services.course_services import (
     course_search
 )
 from forum.views.save_views import (
-    follow_post,
-    unfollow_post,
     followed_posts,
     save_solution,
-    unsave_solution,
     saved_solutions,
 )
 from forum.views.notification_views import (
     all_notifications,
-    mark_notification_read
+    mark_notification_read,
+    mark_all_notifications_read
 )
 from forum.views.updates_views import acknowledge_update
-from forum.views.utils import upload_image
+from forum.services.utils import upload_image
 
 from forum.views.comments_views import (
     create_comment,
@@ -82,9 +89,84 @@ from forum.views.comments_views import (
     delete_comment,
     get_comments
 )
+from forum.views.course_comparer_views import (
+    course_comparer
+)
+from forum.api.schedule import(
+    get_daily_schedule,
+    get_user_schedule_api,
+    check_ceremonial_uniform
+)
+from forum.api.auth import(
+    api_login,
+    api_register,
+    api_upload_image,
+    search_users_api,
+    api_refresh_token,
+    api_verify_token,
+    api_logout
+)
+from forum.views.auth_views import register, login_view, logout_view
+from forum.api.wolfnet_integration import(
+    auto_complete_courses_api,
+    auto_complete_courses_registration_api
+)
+from forum.services.schedule_services import (
+    is_ceremonial_uniform_required
+)
+
 from django.views.generic import RedirectView
 
 from forum.views.about_view import about_view
+
+from forum.api.feed import api_for_you, api_all_posts
+
+from forum.api.notifications import (
+    notifications_api,
+    mark_notification_read_api,
+    mark_all_notifications_read_api,
+    register_push_token_api,
+    unregister_push_token_api,
+    unread_count_api
+)
+
+from forum.api.posts import (
+    post_detail_api,
+    create_post_api,
+    update_post_api,
+    delete_post_api,
+    like_post_api,
+    unlike_post_api,
+    follow_post_api,
+    unfollow_post_api,
+    get_post_share_info_api
+)
+
+from forum.api.solutions import (
+    create_solution_api,
+    update_solution_api,
+    delete_solution_api,
+    vote_solution_api,
+    accept_solution_api
+)
+
+from forum.api.comment import (
+    create_comment_api,
+    edit_comment_api,
+    delete_comment_api,
+    get_comments_api
+)
+
+from forum.api.profile import (
+    get_profile_api,
+    update_profile_api,
+    upload_profile_picture_api,
+    update_courses_api,
+    add_experience_api,
+    add_help_request_api,
+    remove_experience_api,
+    remove_help_request_api,
+)
 
 urlpatterns = [
 
@@ -96,10 +178,14 @@ urlpatterns = [
     path('post/<int:post_id>/edit/', edit_post, name='edit_post'),
     path('post/<int:post_id>/delete/', delete_post, name='delete_post'),
     path('post/create/', create_post, name='create_post'),
+    path('posts/<int:post_id>/like/', like_post, name='like_post'),
+    path('posts/<int:post_id>/unlike/', unlike_post, name='unlike_post'),
 
     path('solution/<int:solution_id>/edit/', edit_solution, name='edit_solution'),
     path('solution/<int:solution_id>/delete/', delete_solution, name='delete_solution'),
     path('solution/<int:post_id>/create/', create_solution, name='create_solution'),
+    path('post/<int:post_id>/solutions/sorted/', get_sorted_solutions, name='get_sorted_solutions'),
+
 
     path('comment/create/<int:solution_id>/', create_comment, name='create_comment'),
     path('comment/edit/<int:comment_id>/', edit_comment, name='edit_comment'),
@@ -128,10 +214,12 @@ urlpatterns = [
     
     # Profile URLs
     path('profile/upload-picture/', upload_profile_picture, name='upload_profile_picture'),
-    path('profile/edit/', edit_profile, name='edit_profile'),
     path('my-profile/', my_profile, name='my_profile'),
     path('profile/<str:username>/', profile_view, name='profile'),
     path('update-courses/', update_courses, name='update_courses'),
+    path('auto-complete-courses/', auto_complete_courses_view, name='auto_complete_courses'),
+    path('auto-complete-courses-registration/', auto_complete_courses_registration, name='auto_complete_courses_registration'),
+    path('check-wolfnet-password/', check_wolfnet_password_view, name='check_wolfnet_password'),
     
     # Course management URLs
     path('courses/experience/add/', add_experience, name='add_experience'),
@@ -140,13 +228,17 @@ urlpatterns = [
     path('courses/help/remove/<int:help_id>/', remove_help_request, name='remove_help_request'),
     path('api/courses/', course_search, name='course-search'),
     
+    # Course comparer URLs
+    path('course-comparer/', course_comparer, name='course_comparer'),
+    path('api/search-users/', search_users_api, name='search_users_api'),
+    path('api/user-schedule/<int:user_id>/', get_user_schedule_api, name='get_user_schedule_api'),
+
     # Saved posts URLs
     path('followed-posts/', followed_posts, name='followed_posts'),
     path('my-posts/', my_posts, name='my_posts'),
     path('follow-post/<int:post_id>/', follow_post, name='follow_post'),
     path('unfollow-post/<int:post_id>/', unfollow_post, name='unfollow_post'),
     path('save-solution/<int:solution_id>/', save_solution, name='save_solution'),
-    path('unsave-solution/<int:solution_id>/', unsave_solution, name='unsave_solution'),
     path('saved-solutions/', saved_solutions, name='saved_solutions'),
 
     # API URLs
@@ -154,6 +246,7 @@ urlpatterns = [
     
     # Notification URLs
     path('notifications/', all_notifications, name='all_notifications'),
+    path('notifications/mark-all-read/', mark_all_notifications_read, name='mark_all_notifications_read'),
     path('notifications/<int:notification_id>/read/', mark_notification_read, name='mark_notification_read'),
     
     # Admin URL
@@ -163,6 +256,67 @@ urlpatterns = [
     path('password_reset/done/', CustomPasswordResetDoneView.as_view(), name='password_reset_done'),
     path('reset/<uidb64>/<token>/', CustomPasswordResetConfirmView.as_view(), name='password_reset_confirm'),
     path('reset/done/', CustomPasswordResetCompleteView.as_view(), name='password_reset_complete'),
+
+    # Authentication API endpoints
+    path('api/auth/login/', api_login, name='api_login'),
+    path('api/auth/register/', api_register, name='api_register'),
+    path('api/auth/logout/', api_logout, name='api_logout'),
+    path('api/auth/refresh-token/', api_refresh_token, name='api_refresh_token'),
+    path('api/auth/verify-token/', api_verify_token, name='api_verify_token'),
+    path('api/upload-image/', api_upload_image, name='api_upload_image'),
+    
+    path('api/schedules/daily/<str:target_date>/', get_daily_schedule),
+    path('api/schedules/uniform/<str:target_date>/', check_ceremonial_uniform),
+
+    path('api/for-you/', api_for_you, name='api_for_you'),
+    path('api/posts/create/', create_post_api, name='api_create_post'),
+    path('api/posts/<int:post_id>/', post_detail_api, name='api_post_detail'),
+    path('api/posts/<int:post_id>/edit/', update_post_api, name='api_update_post'),
+    path('api/posts/<int:post_id>/delete/', delete_post_api, name='api_delete_post'),
+    
+    # Post interaction API endpoints
+    path('api/posts/<int:post_id>/like/', like_post_api, name='api_like_post'),
+    path('api/posts/<int:post_id>/unlike/', unlike_post_api, name='api_unlike_post'),
+    path('api/posts/<int:post_id>/follow/', follow_post_api, name='api_follow_post'),
+    path('api/posts/<int:post_id>/unfollow/', unfollow_post_api, name='api_unfollow_post'),
+    path('api/posts/<int:post_id>/share/', get_post_share_info_api, name='api_post_share_info'),
+    
+    # Solution API endpoints
+    path('api/posts/<int:post_id>/solutions/create/', create_solution_api, name='api_create_solution'),
+    path('api/solutions/<int:solution_id>/edit/', update_solution_api, name='api_update_solution'),
+    path('api/solutions/<int:solution_id>/delete/', delete_solution_api, name='api_delete_solution'),
+    path('api/solutions/<int:solution_id>/vote/', vote_solution_api, name='api_vote_solution'),
+    path('api/solutions/<int:solution_id>/accept/', accept_solution_api, name='api_accept_solution'),
+    path('api/all-posts/', api_all_posts, name='api_all_posts'),
+    
+    # Comment API endpoints
+    path('api/solutions/<int:solution_id>/comments/create/', create_comment_api, name='api_create_comment'),
+    path('api/comments/<int:comment_id>/edit/', edit_comment_api, name='api_edit_comment'),
+    path('api/comments/<int:comment_id>/delete/', delete_comment_api, name='api_delete_comment'),
+    path('api/solutions/<int:solution_id>/comments/', get_comments_api, name='api_get_comments'),
+    
+    # Notification API endpoints
+    path('api/notifications/', notifications_api, name='api_notifications'),
+    path('api/notifications/unread-count/', unread_count_api, name='api_notifications_unread_count'),
+    path('api/notifications/<int:notification_id>/mark-read/', mark_notification_read_api, name='api_mark_notification_read'),
+    path('api/notifications/mark-all-read/', mark_all_notifications_read_api, name='api_mark_all_notifications_read'),
+    path('api/notifications/register-push-token/', register_push_token_api, name='api_register_push_token'),
+    path('api/notifications/unregister-push-token/', unregister_push_token_api, name='api_unregister_push_token'),
+    
+    # Profile API endpoints
+    path('api/profile/', get_profile_api, name='api_get_current_profile'),
+    path('api/profile/update/', update_profile_api, name='api_update_profile'),
+    path('api/profile/upload-picture/', upload_profile_picture_api, name='api_upload_profile_picture'),
+    path('api/profile/courses/update/', update_courses_api, name='api_update_courses'),
+    path('api/profile/<str:username>/', get_profile_api, name='api_get_profile'),
+    path('api/profile/experience/add/', add_experience_api, name='api_add_experience'),
+    path('api/profile/help/add/', add_help_request_api, name='api_add_help_request'),
+    path('api/profile/experience/<int:experience_id>/remove/', remove_experience_api, name='api_remove_experience'),
+    path('api/profile/help/<int:help_id>/remove/', remove_help_request_api, name='api_remove_help_request'),
+    
+    # Auto-complete courses API endpoints
+    path('api/auto-complete-courses/', auto_complete_courses_api, name='api_auto_complete_courses'),
+    path('api/auto-complete-courses-registration/', auto_complete_courses_registration_api, name='api_auto_complete_courses_registration'),
 ]
 
 if settings.DEBUG:

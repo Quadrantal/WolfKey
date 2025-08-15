@@ -33,11 +33,11 @@
                             {% endif %}
                             <!-- Dropdown Menu -->
                             <div class="dropdown-menu" id="profilePictureMenu">
-                                <form action="{% url 'upload_profile_picture' %}" method="post" enctype="multipart/form-data" class="p-2">
+                                <form action="{% url 'upload_profile_picture' %}" method="post" enctype="multipart/form-data" class="p-2" id="profilePictureForm">
                                     {% csrf_token %}
                                     <label for="profile_picture" class="form-label">Upload New Profile Picture:</label>
                                     <input type="file" name="profile_picture" id="profile_picture" class="form-control mb-2">
-                                    <button type="submit" class="btn btn-primary btn-sm">Upload</button>
+                                    <button type="submit" class="btn btn-primary btn-sm" disabled>Upload</button>
                                 </form>
                             </div>
                         </div>
@@ -48,6 +48,15 @@
                             <p>{{ profile_user.userprofile.bio }}</p>
                         </div>
                     </div>
+                    
+                    <!-- Compare Schedules Button -->
+                    {% if can_compare %}
+                    <div class="ms-auto">
+                        <a href="{% url 'course_comparer' %}" class="btn btn-primary" id="compare-schedules-btn">
+                            <i class="bi bi-arrow-left-right" title="Compare schedules"></i>
+                        </a>
+                    </div>
+                    {% endif %}
                 </div>
             </div>
         </div>
@@ -83,13 +92,13 @@
                             </div>
                             <div class="card-body">
                                 {% if user == profile_user %}
-                                <form method="post">
+                                <form method="post" id="bioForm">
                                     {% csrf_token %}
                                     <div class="mb-3">
                                         <textarea name="bio" id="bio" class="form-control" maxlength="500" rows="4">{{ profile_user.userprofile.bio }}</textarea>
                                         <small class="text-muted">Max 500 characters. Avoid inappropriate language.</small>
                                     </div>
-                                    <button type="submit" class="btn btn-primary">Save Bio</button>
+                                    <button type="submit" class="btn btn-primary" disabled>Save Bio</button>
                                 </form>
                                 {% else %}
                                 <p>{{ profile_user.userprofile.bio|default:"No bio provided." }}</p>
@@ -116,13 +125,13 @@
                                 <h5 class="mb-0">Customize Background</h5>
                             </div>
                             <div class="card-body">
-                                <form method="post">
+                                <form method="post" id="backgroundForm">
                                     {% csrf_token %}
                                     <div class="mb-3">
                                         <label for="background_hue" class="form-label">Background Color Hue</label>
                                         <input type="range" name="background_hue" id="background_hue" class="form-range background_hue_slider" min="0" max="360" value="{{ profile_user.userprofile.background_hue }}" oninput="setBackground(this.value)">
                                     </div>
-                                    <button type="submit" class="btn btn-primary">Save Changes</button>
+                                    <button type="submit" class="btn btn-primary" disabled>Save Changes</button>
                                 </form>
                             </div>
                         </div>
@@ -162,7 +171,7 @@
                                 <div class="course-list">
                                     {% for course in experienced_courses %}
                                     <div class="course-item d-flex justify-content-between align-items-center mb-2">
-                                        <span>{{ course.course.code }} - {{ course.course.name }}</span>
+                                        <span>{{ course.course.name }}</span>
                                         {% if user == profile_user %}
                                         <form method="post" action="{% url 'remove_experience' course.id %}" class="d-inline">
                                             {% csrf_token %}
@@ -194,7 +203,7 @@
                                 <div class="course-list">
                                     {% for course in help_needed_courses %}
                                     <div class="course-item d-flex justify-content-between align-items-center mb-2">
-                                        <span>{{ course.course.code }} - {{ course.course.name }}</span>
+                                        <span>{{ course.course.name }}</span>
                                         <form method="post" action="{% url 'remove_help_request' course.id %}" class="d-inline">
                                             {% csrf_token %}
                                             <button type="submit" class="btn btn-sm btn-outline-danger">
@@ -221,150 +230,22 @@
 
                         <!-- Block Courses Section -->
                         <div class="card mb-4">
-                            <div class="card-header">
-                                <h5 class="mb-0">Select Courses for Each Block</h5>
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <h5 class="mb-0">Fill in your schedule info</h5>
+                                {% if user == profile_user %}
+                                <button type="button" class="btn btn-info btn-sm magic-btn" id="autoCompleteBtn" {% if not has_wolfnet_password %}disabled title = "Not connected to WolfNet Account. Add password under preferences tab"{% endif %}>
+                                    <i class="fas fa-magic"></i> Auto-Complete from WolfNet
+                                </button>
+                                {% endif %}
                             </div>
                             <div class="card-body">
                                 <form method="post" action="{% url 'update_courses' %}" id="blockCoursesForm">
                                     {% csrf_token %}
+                                    {% include 'forum/partials/schedule_block.html' %}
                                     <div class="row">
-                                        <div class="col-md-6 mb-1">
-                                            <div class="block-container">
-                                                <div class="block-header">
-                                                    <label for="block_1A" class="form-label mb-0">Block 1A</label>
-                                                </div>
-                                                <div class="block-content">
-                                                    <div class="course-selector" id="block_1A_selector"></div>
-                                                    <div class="block-buttons" id="block_1A_buttons">
-                                                        <button type="button" class="btn btn-sm btn-warning add-help-btn" data-block="1A">Need Help</button>
-                                                        <button type="button" class="btn btn-sm btn-success add-experience-btn" data-block="1A">Proficient </button>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="col-md-6 mb-1">
-                                            <div class="block-container">
-                                                <div class="block-header">
-                                                    <label for="block_2A" class="form-label mb-0">Block 2A</label>
-                                                </div>
-                                                <div class="block-content">
-                                                    <div class="course-selector" id="block_2A_selector"></div>
-                                                    <div class="block-buttons" id="block_2A_buttons">
-                                                        <button type="button" class="btn btn-sm btn-warning add-help-btn" data-block="2A">Need Help</button>
-                                                        <button type="button" class="btn btn-sm btn-success add-experience-btn" data-block="2A">Proficient </button>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        
-                                        <div class="col-md-6 mb-1">
-                                            <div class="block-container">
-                                                <div class="block-header">
-                                                    <label for="block_1B" class="form-label mb-0">Block 1B</label>
-                                                </div>
-                                                <div class="block-content">
-                                                    <div class="course-selector" id="block_1B_selector"></div>
-                                                    <div class="block-buttons" id="block_1B_buttons">
-                                                        <button type="button" class="btn btn-sm btn-warning add-help-btn" data-block="1B">Need Help</button>
-                                                        <button type="button" class="btn btn-sm btn-success add-experience-btn" data-block="1B">Proficient </button>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        
-                                        <div class="col-md-6 mb-1">
-                                            <div class="block-container">
-                                                <div class="block-header">
-                                                    <label for="block_2B" class="form-label mb-0">Block 2B</label>
-                                                </div>
-                                                <div class="block-content">
-                                                    <div class="course-selector" id="block_2B_selector"></div>
-                                                    <div class="block-buttons" id="block_2B_buttons">
-                                                        <button type="button" class="btn btn-sm btn-warning add-help-btn" data-block="2B">Need Help</button>
-                                                        <button type="button" class="btn btn-sm btn-success add-experience-btn" data-block="2B">Proficient </button>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        
-                                        <div class="col-md-6 mb-1">
-                                            <div class="block-container">
-                                                <div class="block-header">
-                                                    <label for="block_1D" class="form-label mb-0">Block 1D</label>
-                                                </div>
-                                                <div class="block-content">
-                                                    <div class="course-selector" id="block_1D_selector"></div>
-                                                    <div class="block-buttons" id="block_1D_buttons">
-                                                        <button type="button" class="btn btn-sm btn-warning add-help-btn" data-block="1D">Need Help</button>
-                                                        <button type="button" class="btn btn-sm btn-success add-experience-btn" data-block="1D">Proficient </button>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        
-                                        <div class="col-md-6 mb-1">
-                                            <div class="block-container">
-                                                <div class="block-header">
-                                                    <label for="block_2C" class="form-label mb-0">Block 2C</label>
-                                                </div>
-                                                <div class="block-content">
-                                                    <div class="course-selector" id="block_2C_selector"></div>
-                                                    <div class="block-buttons" id="block_2C_buttons">
-                                                        <button type="button" class="btn btn-sm btn-warning add-help-btn" data-block="2C">Need Help</button>
-                                                        <button type="button" class="btn btn-sm btn-success add-experience-btn" data-block="2C">Proficient </button>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        
-                                        <div class="col-md-6 mb-1">
-                                            <div class="block-container">
-                                                <div class="block-header">
-                                                    <label for="block_1E" class="form-label mb-0">Block 1E</label>
-                                                </div>
-                                                <div class="block-content">
-                                                    <div class="course-selector" id="block_1E_selector"></div>
-                                                    <div class="block-buttons" id="block_1E_buttons">
-                                                        <button type="button" class="btn btn-sm btn-warning add-help-btn" data-block="1E">Need Help</button>
-                                                        <button type="button" class="btn btn-sm btn-success add-experience-btn" data-block="1E">Proficient </button>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        
-                                        <div class="col-md-6 mb-1">
-                                            <div class="block-container">
-                                                <div class="block-header">
-                                                    <label for="block_2D" class="form-label mb-0">Block 2D</label>
-                                                </div>
-                                                <div class="block-content">
-                                                    <div class="course-selector" id="block_2D_selector"></div>
-                                                    <div class="block-buttons" id="block_2D_buttons">
-                                                        <button type="button" class="btn btn-sm btn-warning add-help-btn" data-block="2D">Need Help</button>
-                                                        <button type="button" class="btn btn-sm btn-success add-experience-btn" data-block="2D">Proficient </button>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        
-                                        <div class="col-md-6 mb-1">
-                                            <button type="submit" class="btn btn-primary">Save Courses</button>
+                                        <div class="col-md-12 mb-1" style="text-align: center">
+                                            <button type="submit" class="btn btn-primary" disabled>Save Courses</button>
                                         </div>                                        
-                                        <div class="col-md-6 mb-1">
-                                            <div class="block-container">
-                                                <div class="block-header">
-                                                    <label for="block_2E" class="form-label mb-0">Block 2E</label>
-                                                </div>
-                                                <div class="block-content">
-                                                    <div class="course-selector" id="block_2E_selector"></div>
-                                                    <div class="block-buttons" id="block_2E_buttons">
-                                                        <button type="button" class="btn btn-sm btn-warning add-help-btn" data-block="2E">Need Help</button>
-                                                        <button type="button" class="btn btn-sm btn-success add-experience-btn" data-block="2E">Proficient </button>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        
                                     </div>
                                 </form>
                             </div>
@@ -400,7 +281,46 @@
                                         <label for="id_phone_number" class="form-label">Phone Number</label>
                                         <input type="text" name="phone_number" id="id_phone_number" class="form-control" value="{{ request.user.phone_number }}">
                                     </div>
-                                    <button type="submit" class="btn btn-primary">Save Info</button>
+                                    <button type="submit" class="btn btn-primary" disabled>Save Info</button>
+                                </form>
+                            </div>
+                        </div>
+    
+                        <div class="card mb-4">
+                            <div class="card-header">
+                                <h5 class="mb-0">WolfNet Integration</h5>
+                            </div>
+                            <div class="card-body">
+                                <form method="post" id="wolfnetForm">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="form_type" value="wolfnet_settings">
+                                    <div class="mb-3">
+                                        <label for="id_wolfnet_password" class="form-label">WolfNet Password</label>
+                                        <div style="position:relative;">
+                                            <input type="password" 
+                                                   name="wolfnet_password" 
+                                                   id="id_wolfnet_password" 
+                                                   class="form-control" 
+                                                   placeholder="Enter your WolfNet password"
+                                                   value="{% if request.user.userprofile.wolfnet_password %}Password exists; hidden for security{% endif %}">
+                                            <button type="button" id="toggleWolfnetPassword" class="btn btn-outline-secondary" tabindex="-1" aria-label="Show/Hide Password" style="position:absolute; right:10px; top:50%; transform:translateY(-50%);">
+                                                <i class="fas fa-eye"></i>
+                                            </button>
+                                        </div>
+                                        <small class="text-muted">
+                                            Your WolfNet password will be securely stored and used for:
+                                            <ul class="mt-2 mb-0">
+                                                <li>Email notifications when assignments are graded</li>
+                                                <li>Automatic schedule retrieval and updates</li>
+                                            </ul>
+                                        </small>
+                                    </div>
+                                    <div class="d-flex gap-2">
+                                        <button type="button" id="checkWolfnetBtn" class="btn btn-primary magic-btn">Check WolfNet Password</button>
+                                        {% if request.user.userprofile.wolfnet_password %}
+                                        <button type="button" class="btn btn-outline-danger" onclick="clearWolfNetPassword()">Clear Password</button>
+                                        {% endif %}
+                                    </div>
                                 </form>
                             </div>
                         </div>
@@ -426,7 +346,20 @@
             <form id="addExperienceForm" method="post" action="{% url 'add_experience' %}">
                 <div class="modal-body">
                     {% csrf_token %}
-                    {{ experience_form.as_p }}
+                    <div class="mb-3">
+                        <label for="experience_course" class="form-label">Select a course you have experience with:</label>
+                        <select name="course" id="experience_course" class="form-select" required>
+                            <option value="">-- Select a course --</option>
+                            {% regroup all_courses by category as courses_by_category %}
+                            {% for category in courses_by_category %}
+                                <optgroup label="{{ category.grouper }}">
+                                    {% for course in category.list %}
+                                        <option value="{{ course.id }}">{{ course.name }}</option>
+                                    {% endfor %}
+                                </optgroup>
+                            {% endfor %}
+                        </select>
+                    </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
@@ -448,7 +381,20 @@
             <form id="addHelpForm" method="post" action="{% url 'add_help_request' %}">
                 <div class="modal-body">
                     {% csrf_token %}
-                    {{ help_form.as_p }}
+                    <div class="mb-3">
+                        <label for="help_course" class="form-label">Select a course you need help with:</label>
+                        <select name="course" id="help_course" class="form-select" required>
+                            <option value="">-- Select a course --</option>
+                            {% regroup all_courses by category as courses_by_category %}
+                            {% for category in courses_by_category %}
+                                <optgroup label="{{ category.grouper }}">
+                                    {% for course in category.list %}
+                                        <option value="{{ course.id }}">{{ course.name }}</option>
+                                    {% endfor %}
+                                </optgroup>
+                            {% endfor %}
+                        </select>
+                    </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
@@ -462,20 +408,336 @@
 
 {% block scripts %}
 <script>
+    // General function to update the block buttons container
+    window.updateBlockButtons = function(blockId, course, experiencedCourses, helpNeededCourses) {
+        const buttonsContainer = document.getElementById(`${blockId}_buttons`);
+        if (!buttonsContainer) return;
+        if (course) {
+            if (experiencedCourses.includes(course.id) || helpNeededCourses.includes(course.id)) {
+                buttonsContainer.style.display = 'none';
+            } else {
+                buttonsContainer.style.display = 'flex';
+            }
+        } else {
+            buttonsContainer.style.display = 'none';
+        }
+    }
+
+    // Handle modal form submissions
+    document.addEventListener('DOMContentLoaded', function() {
+        // Handle Add Experience form
+        const addExperienceForm = document.getElementById('addExperienceForm');
+        if (addExperienceForm) {
+            addExperienceForm.addEventListener('submit', async function(e) {
+                e.preventDefault();
+                
+                const formData = new FormData(this);
+                try {
+                    const response = await fetch(this.action, {
+                        method: 'POST',
+                        body: formData,
+                        headers: {
+                            'X-CSRFToken': formData.get('csrfmiddlewaretoken'),
+                        }
+                    });
+                    
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        // Close modal
+                        const modal = bootstrap.Modal.getInstance(document.getElementById('addExperienceModal'));
+                        modal.hide();
+                        
+                        // Reload page to show the new experience
+                        window.location.reload();
+                    } else {
+                        alert('Error: ' + (data.error || 'Failed to add course experience'));
+                    }
+                } catch (error) {
+                    console.error('Error:', error);
+                    alert('Network error occurred while adding course experience');
+                }
+            });
+        }
+
+        // Handle Add Help Request form
+        const addHelpForm = document.getElementById('addHelpForm');
+        if (addHelpForm) {
+            addHelpForm.addEventListener('submit', async function(e) {
+                e.preventDefault();
+                
+                const formData = new FormData(this);
+                try {
+                    const response = await fetch(this.action, {
+                        method: 'POST',
+                        body: formData,
+                        headers: {
+                            'X-CSRFToken': formData.get('csrfmiddlewaretoken'),
+                        }
+                    });
+                    
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        // Close modal
+                        const modal = bootstrap.Modal.getInstance(document.getElementById('addHelpModal'));
+                        modal.hide();
+                        
+                        // Reload page to show the new help request
+                        window.location.reload();
+                    } else {
+                        alert('Error: ' + (data.error || 'Failed to add help request'));
+                    }
+                } catch (error) {
+                    console.error('Error:', error);
+                    alert('Network error occurred while adding help request');
+                }
+            });
+        }
+    });
+</script>
+<!-- Auto Complete Courses Handler -->
+{% if user == profile_user and user.userprofile.wolfnet_password %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const autoCompleteBtn = document.getElementById('autoCompleteBtn');
+        if (autoCompleteBtn) {
+            autoCompleteBtn.addEventListener('click', async function() {
+                // Disable button and show loading state
+                autoCompleteBtn.disabled = true;
+                autoCompleteBtn.innerHTML = '<span style="display:inline-flex;align-items:center;gap:0.5em;"><div class="loader"></div><span>Loading...</span></span>';
+                
+                try {
+                    const response = await fetch('{% url "auto_complete_courses" %}', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                        }
+                    });
+                    
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        // Update course selectors with the fetched data
+                        updateCourseSelectors(data.courses);
+                    } else {
+                        const errorType = data.error_type || 'general';
+                        let errorMessage = data.error || 'Failed to auto-complete courses';
+                        
+                        if (errorType === 'authentication') {
+                            if (data.error === 'wrong_password') {
+                                alert('Your WolfNet password appears to be incorrect. Please update it in the Preferences tab and try again.');
+                            } else {
+                                alert('Authentication failed: ' + errorMessage + '. Please check your WolfNet password in the Preferences tab.');
+                            }
+                        } else if (errorType === 'page_loading') {
+                            alert('WolfNet page failed to load properly. Please try again in a moment.');
+                        } else if (errorType === 'page_structure') {
+                            alert('Unable to find course information on WolfNet page. The page structure may have changed.');
+                        } else if (errorType === 'no_courses') {
+                            alert('No courses found in your WolfNet schedule. Make sure you have courses enrolled.');
+                        } else {
+                            alert('Error: ' + errorMessage);
+                        }
+                    }
+                } catch (error) {
+                    console.error('Error:', error);
+                    alert('Network error occurred while auto-completing courses');
+                } finally {
+                    // Re-enable button
+                    autoCompleteBtn.disabled = false;
+                    autoCompleteBtn.innerHTML = '<i class="fas fa-magic"></i> Auto-Complete from WolfNet';
+                }
+            });
+        }
+    });
+
+    document.addEventListener('DOMContentLoaded', function () {
+        const toggleBtn = document.getElementById('toggleWolfnetPassword');
+        const passwordInput = document.getElementById('id_wolfnet_password');
+        if (toggleBtn && passwordInput) {
+            toggleBtn.addEventListener('click', function () {
+                const type = passwordInput.type === 'password' ? 'text' : 'password';
+                passwordInput.type = type;
+                this.innerHTML = type === 'password' ? '<i class="fas fa-eye"></i>' : '<i class="fas fa-eye-slash"></i>';
+            });
+        }
+        
+        // Handle Check WolfNet Password button
+        const checkWolfnetBtn = document.getElementById('checkWolfnetBtn');
+        if (checkWolfnetBtn) {
+            checkWolfnetBtn.addEventListener('click', async function() {
+                const passwordInput = document.getElementById('id_wolfnet_password');
+                const password = passwordInput.value.trim();
+                
+                if (!password) {
+                    alert('Please enter your WolfNet password first');
+                    return;
+                }
+                
+                // Disable button and show loading state
+                checkWolfnetBtn.disabled = true;
+                checkWolfnetBtn.innerHTML = '<span style="display:inline-flex;align-items:center;gap:0.5em;"><div class="loader"></div><span>Checking...</span></span>';
+                
+                try {
+                    const response = await fetch('/check-wolfnet-password/', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                        },
+                        body: JSON.stringify({
+                            wolfnet_password: password
+                        })
+                    });
+                    
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        const message = data.message || 'WolfNet password verified and saved!';
+                        checkWolfnetBtn.innerHTML = '<i class="fas fa-check"></i> Saved Successfully';
+                        checkWolfnetBtn.classList.remove('btn-primary');
+                        checkWolfnetBtn.classList.add('btn-success');
+                    } else {
+                        let errorMessage = 'Invalid WolfNet password';
+                        if (data.error_type === 'wrong_password') {
+                            errorMessage = 'Invalid WolfNet credentials. Please check your password.';
+                        } else if (data.error_type === 'timeout' || data.error_type === 'page_loading') {
+                            errorMessage = 'WolfNet connection timeout. Please try again.';
+                        } else if (data.error) {
+                            errorMessage = data.error;
+                        }
+                        
+                        checkWolfnetBtn.innerHTML = '<i class="fas fa-times"></i> Invalid';
+                        checkWolfnetBtn.classList.remove('btn-primary');
+                        checkWolfnetBtn.classList.add('btn-danger');
+                        alert(errorMessage);
+                    }
+                } catch (error) {
+                    console.error('Error checking WolfNet password:', error);
+                    alert('Network error occurred while checking password');
+                    checkWolfnetBtn.innerHTML = '<i class="fas fa-times"></i> Error';
+                    checkWolfnetBtn.classList.remove('btn-primary');
+                    checkWolfnetBtn.classList.add('btn-danger');
+                } finally {
+                    checkWolfnetBtn.disabled = false;
+                }
+            });
+        }
+    });
     
+    function updateCourseSelectors(courses) {
+        const blocks = ['1A', '1B', '1D', '1E', '2A', '2B', '2C', '2D', '2E'];
+        
+        blocks.forEach(block => {
+            const course = courses[block];
+            if (course) {
+                // Find the course selector instance for this block
+                const blockId = `block_${block}`;
+                const selector = window.courseSelectors && window.courseSelectors[blockId];
+                
+                if (selector) {
+                    try {
+                        // Clear existing selection and add the new course
+                        selector.selectedCourses = [course];
+                        selector.updateSelectedCourses();
+                        selector.updateFormData();
+                        
+                        // Also update the buttons visibility using the general function
+                        const experiencedCourses = JSON.parse('{{ experienced_courses_json|escapejs }}');
+                        const helpNeededCourses = JSON.parse('{{ help_needed_courses_json|escapejs }}');
+                        window.updateBlockButtons(blockId, course, experiencedCourses, helpNeededCourses);
+                    } catch (error) {
+                        console.error(`Error updating selector for block ${block}:`, error);
+                    }
+                } else {
+                    console.warn(`Course selector not found for block ${block}`);
+                }
+            }
+        });
+    }
+</script>
+{% endif %}
+
+<!-- Compare Schedules Button Handler -->
+{% if can_compare %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const compareBtn = document.getElementById('compare-schedules-btn');
+        if (compareBtn) {
+            compareBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                
+                // Store the initial users data in sessionStorage
+                const initialUsers = {{ initial_users|safe }};
+                sessionStorage.setItem('courseComparerInitialUsers', JSON.stringify(initialUsers));
+                
+                // Navigate to course comparer
+                window.location.href = this.href;
+            });
+        }
+    });
+</script>
+{% endif %}
+
+<!-- Background Color Setting -->
+<script>
     document.addEventListener('DOMContentLoaded', function () {
         const hueValue = {{ profile_user.userprofile.background_hue }};
         setBackground(hueValue);
-        const personalInfoForm = document.getElementById('personalInfoForm');
+    });
     
-        // Prevent Enter key from submitting the form
+</script>
+
+<!-- Profile Picture Upload -->
+<script>
+    {% if user == profile_user %}
+    document.addEventListener('DOMContentLoaded', function () {
+        const profilePicture = document.getElementById('profilePicture');
+        const profilePictureMenu = document.getElementById('profilePictureMenu');
+        const hoverText = document.getElementById('hoverText');
+
+        // Show/hide hover text
+        profilePicture.addEventListener('mouseenter', () => {
+            hoverText.style.display = 'block';
+        });
+        profilePicture.addEventListener('mouseleave', () => {
+            hoverText.style.display = 'none';
+        });
+
+        // Toggle dropdown menu
+        profilePicture.addEventListener('click', function (e) {
+            e.stopPropagation();  // prevent document click from firing
+            const isVisible = profilePictureMenu.style.display === 'block';
+            profilePictureMenu.style.display = isVisible ? 'none' : 'block';
+        });
+
+        // Prevent clicks inside the menu from closing it
+        profilePictureMenu.addEventListener('click', function (e) {
+            e.stopPropagation();
+        });
+
+        // Close menu on document click if outside
+        document.addEventListener('click', function (e) {
+            profilePictureMenu.style.display = 'none';
+        });
+    });
+    {% endif %}
+</script>
+
+
+<!-- Personal Info Form Handling -->
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const personalInfoForm = document.getElementById('personalInfoForm');
+        
         personalInfoForm.addEventListener('keydown', (event) => {
             if (event.key === 'Enter') {
                 event.preventDefault();
             }
         });
-    
-        // Prevent form submission on Enter key press
+
         personalInfoForm.addEventListener('submit', (event) => {
             const activeElement = document.activeElement;
             if (activeElement.tagName === 'INPUT' && activeElement.type !== 'submit') {
@@ -483,203 +745,391 @@
             }
         });
     });
-
 </script>
 
+<!-- Form Change Tracking and Alert System -->
 <script>
-    {% if user == profile_user %}
-        document.addEventListener('DOMContentLoaded', function () {
-        const profilePicture = document.getElementById('profilePicture');
-        const profilePictureMenu = document.getElementById('profilePictureMenu');
-
-        // Toggle the dropdown menu when the profile picture is clicked
-        profilePicture.addEventListener('click', function () {
-            const isMenuVisible = profilePictureMenu.style.display === 'block';
-            profilePictureMenu.style.display = isMenuVisible ? 'none' : 'block';
-        });
-
-        // Close the menu if clicked outside
-        document.addEventListener('click', function (event) {
-            if (!profilePicture.contains(event.target) && !profilePictureMenu.contains(event.target)) {
-                profilePictureMenu.style.display = 'none';
+    document.addEventListener('DOMContentLoaded', function () {
+        // Track changes across all forms
+        let hasUnsavedChanges = false;
+        let originalFormData = {};
+        
+        // Get all forms that should be tracked
+        const trackedForms = [
+            'personalInfoForm',
+            'wolfnetForm',
+            'blockCoursesForm',
+            'bioForm',
+            'backgroundForm'
+        ];
+        
+        // Store original form data and add change listeners
+        trackedForms.forEach(formId => {
+            const form = document.getElementById(formId);
+            if (form) {
+                // Store original data
+                originalFormData[formId] = new FormData(form);
+                
+                // Add change listeners to all inputs (except course selectors which are handled separately)
+                const inputs = form.querySelectorAll('input:not([data-course-selector]), textarea:not([data-course-selector]), select:not([data-course-selector])');
+                inputs.forEach(input => {
+                    input.addEventListener('change', () => {
+                        checkForChanges(form, formId);
+                    });
+                    input.addEventListener('input', () => {
+                        checkForChanges(form, formId);
+                    });
+                });
+                
+                // Handle form submission
+                form.addEventListener('submit', () => {
+                    hasUnsavedChanges = false;
+                    // Remove change-detected class and disable submit buttons
+                    const submitBtns = form.querySelectorAll('button[type="submit"]');
+                    submitBtns.forEach(btn => {
+                        btn.classList.remove('change-detected');
+                        btn.disabled = true;
+                    });
+                });
             }
         });
+        
+        // Function to check for changes in a specific form
+        function checkForChanges(form, formId) {
+            const currentData = new FormData(form);
+            const originalData = originalFormData[formId];
+            let hasChanges = false;
+            
+            // Special handling for file inputs
+            const fileInputs = form.querySelectorAll('input[type="file"]');
+            fileInputs.forEach(fileInput => {
+                if (fileInput.files && fileInput.files.length > 0) {
+                    hasChanges = true;
+                }
+            });
+            
+            // Compare current data with original (skip file inputs as they're handled above)
+            if (!hasChanges) {
+                for (let [key, value] of currentData.entries()) {
+                    const input = form.querySelector(`[name="${key}"]`);
+                    if (input && input.type !== 'file' && originalData.get(key) !== value) {
+                        hasChanges = true;
+                        break;
+                    }
+                }
+            }
+            
+            // Check if any original fields are missing in current data (skip file inputs)
+            if (!hasChanges) {
+                for (let [key, value] of originalData.entries()) {
+                    const input = form.querySelector(`[name="${key}"]`);
+                    if (input && input.type !== 'file' && currentData.get(key) !== value) {
+                        hasChanges = true;
+                        break;
+                    }
+                }
+            }
+            
+            // Update submit button styling and enabled state
+            const submitBtn = form.querySelector('button[type="submit"]');
+            if (submitBtn) {
+                if (hasChanges) {
+                    submitBtn.classList.add('change-detected');
+                    submitBtn.disabled = false;
+                    hasUnsavedChanges = true;
+                } else {
+                    submitBtn.classList.remove('change-detected');
+                    submitBtn.disabled = true;
+                    checkAllFormsForChanges();
+                }
+            }
+        }
+        
+        // Function to check if any form has unsaved changes
+        function checkAllFormsForChanges() {
+            hasUnsavedChanges = false;
+            trackedForms.forEach(formId => {
+                const form = document.getElementById(formId);
+                if (form) {
+                    const submitBtn = form.querySelector('button[type="submit"]');
+                    if (submitBtn && submitBtn.classList.contains('change-detected')) {
+                        hasUnsavedChanges = true;
+                    }
+                }
+            });
+        }
+        
+        // Expose function to update unsaved changes state from course selectors
+        window.updateUnsavedChanges = function(hasChanges) {
+            if (hasChanges) {
+                hasUnsavedChanges = true;
+            } else {
+                checkAllFormsForChanges();
+            }
+        };
+        
+        // Warn user before leaving page with unsaved changes
+        window.addEventListener('beforeunload', function (e) {
+            if (hasUnsavedChanges) {
+                const message = 'You have unsaved changes. Are you sure you want to leave?';
+                e.preventDefault();
+                e.returnValue = message;
+                return message;
+            }
+        });
+        
+        // Handle internal navigation (like tab switching)
+        document.querySelectorAll('a[href], .nav-link').forEach(link => {
+            link.addEventListener('click', function(e) {
+                if (hasUnsavedChanges) {
+                    // Always prevent default first
+                    e.preventDefault();
+                    e.stopPropagation();
+                    
+                    if (this.classList.contains('nav-link')) {
+                        const confirmLeave = confirm('You have unsaved changes. Are you sure you want to switch tabs?');
+                        if (confirmLeave) {
+                            hasUnsavedChanges = false;
+                            const tab = new bootstrap.Tab(this);
+                            tab.show();
+                        }
+                    } else {
+                        const confirmLeave = confirm('You have unsaved changes. Are you sure you want to leave this page?');
+                        if (confirmLeave) {
+                            hasUnsavedChanges = false;
+                            window.location.href = this.href;
+                        }
+                    }
+                }
+            });
+        });
     });
-    {% endif %}
-
 </script>
 
+<!-- Course Experience/Help Buttons -->
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const initialCourses = JSON.parse('{{ initial_courses_json|escapejs }}');
+
+        // Handle "Proficient" and "Need Help" buttons
+        document.querySelectorAll('.add-experience-btn, .add-help-btn').forEach(button => {
+            button.addEventListener('click', async function() {
+                const block = this.dataset.block;
+                const courseId = initialCourses[`block_${block}`]?.id;
+                const isExperienceBtn = this.classList.contains('add-experience-btn');
+                
+                if (!courseId) return;
+
+                const url = isExperienceBtn 
+                    ? '{% url "add_experience" %}' 
+                    : '{% url "add_help_request" %}';
+                
+                try {
+                    const response = await fetch(url, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded',
+                            'X-CSRFToken': '{{ csrf_token }}'
+                        },
+                        body: `course=${courseId}`
+                    });
+                    
+                    const data = await response.json();
+                    if (data.success) {
+                        this.style.display = 'none';
+                        document.getElementById(`block_${block}_buttons`).style.display = 'none';
+                    } else {
+                        alert('Error: ' + (data.message || 'Request failed'));
+                    }
+                } catch (error) {
+                    console.error('Error:', error);
+                    alert('Network error occurred');
+                }
+            });
+        });
+    });
+</script>
+
+<!-- Modal Form Submissions -->
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Experience Modal Form
+        const experienceForm = document.getElementById('addExperienceForm');
+        if (experienceForm) {
+            experienceForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const formData = new FormData(experienceForm);
+                
+                try {
+                    const response = await fetch(experienceForm.action, {
+                        method: 'POST',
+                        body: formData,
+                        headers: {
+                            'X-CSRFToken': '{{ csrf_token }}'
+                        }
+                    });
+                    
+                    const data = await response.json();
+                    if (data.success) {
+                        bootstrap.Modal.getInstance(document.getElementById('addExperienceModal')).hide();
+                        location.reload();
+                    } else {
+                        alert('Error adding experience: ' + (data.message || 'Unknown error'));
+                    }
+                } catch (error) {
+                    console.error('Error:', error);
+                    alert('Network error occurred');
+                }
+            });
+        }
+
+        // Help Modal Form
+        const helpForm = document.getElementById('addHelpForm');
+        if (helpForm) {
+            helpForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const formData = new FormData(helpForm);
+                
+                try {
+                    const response = await fetch(helpForm.action, {
+                        method: 'POST',
+                        body: formData,
+                        headers: {
+                            'X-CSRFToken': '{{ csrf_token }}'
+                        }
+                    });
+                    
+                    const data = await response.json();
+                    if (data.success) {
+                        bootstrap.Modal.getInstance(document.getElementById('addHelpModal')).hide();
+                        location.reload();
+                    } else {
+                        alert('Error adding help request: ' + (data.message || 'Unknown error'));
+                    }
+                } catch (error) {
+                    console.error('Error:', error);
+                    alert('Network error occurred');
+                }
+            });
+        }
+    });
+</script>
+
+<!-- Course Selector Initialization -->
 <script type="module">
     import { CourseSelector } from '{% static "forum/js/course-selector.js" %}';
+    
     document.addEventListener('DOMContentLoaded', () => {
-        const hueValue = {{ profile_user.userprofile.background_hue }};
-        setBackground(hueValue);
-
-        const blocks = ['1A', '1B', '1D', '1E', '2A', '2B', '2C', '2D', '2E'];
-
-        // Parse initial courses from JSON
         const initialCourses = JSON.parse('{{ initial_courses_json|escapejs }}');
         const experiencedCourses = JSON.parse('{{ experienced_courses_json|escapejs }}');
-        const helpNeededCourses = JSON.parse('{{ help_needed_courses_json|escapejs }}');
+        const helpNeededCourses = JSON.parse('{{ help_needed_courses_json|escapejs }}');        
+        const blocks = ['1A', '1B', '1D', '1E', '2A', '2B', '2C', '2D', '2E'];
 
-        // Function to check if a course is in the experienced or help-needed list
-        function isCourseInList(courseId, list) {
-            return list.includes(courseId);
-        }
+        // Store course selectors globally for auto-complete function
+        window.courseSelectors = {};
+        
+        const originalCourseSelections = JSON.parse(JSON.stringify(initialCourses));
 
         blocks.forEach(block => {
             const blockId = `block_${block}`;
             const course = initialCourses[blockId];
 
-            // Show the button container initially
-            const buttonsContainer = document.getElementById(`${blockId}_buttons`);
-            if (buttonsContainer && course) {
-                buttonsContainer.style.display = 'flex';
-                // Check if the course is already in either the "Experienced" or "Help Needed" lists
-                if (isCourseInList(course.id, experiencedCourses) || isCourseInList(course.id, helpNeededCourses)) {
-                    // Hide buttons if the course is in one of the lists
-                    buttonsContainer.style.display = 'none';
-                }
-            }else if (!course) {
-                buttonsContainer.style.display = 'none';
-            }
+            updateBlockButtons(blockId, course, experiencedCourses, helpNeededCourses);
 
-            // Add course selection handler to toggle visibility of buttons
-            new CourseSelector({
-                containerId: `block_${block}_selector`,
+            const selector = new CourseSelector({
+                containerId: `${blockId}_selector`,
                 formName: 'blockCoursesForm',
-                maxCourses: 1, // Only one course per block
-                initialSelection: course ? [course] : [], // Initialize with the selected course, if any
+                maxCourses: 1,
+                initialSelection: initialCourses[blockId] ? [initialCourses[blockId]] : [],
                 block: block,
                 onSelectionChange: (selectedCourses) => {
-                    console.log(`Block ${block} selected courses:`, selectedCourses);
-
-                    // Show or hide the buttons based on course selection
-                    if (selectedCourses.length > 0) {
-                        buttonsContainer.style.display = 'flex';
+                    const buttonsContainer = document.getElementById(`${blockId}_buttons`);
+                    buttonsContainer.style.display = selectedCourses.length > 0 ? 'flex' : 'none';
+                    
+                    // Check if course selection has changed from original
+                    const currentCourse = selectedCourses.length > 0 ? selectedCourses[0] : null;
+                    const originalCourse = originalCourseSelections[blockId];
+                    
+                    let hasChanged = false;
+                    if (!currentCourse && !originalCourse) {
+                        hasChanged = false;
+                    } else if (!currentCourse || !originalCourse) {
+                        hasChanged = true;
                     } else {
-                        buttonsContainer.style.display = 'none';
+                        hasChanged = currentCourse.id !== originalCourse.id;
+                    }
+                    
+                    // Update the submit button for the course form
+                    const courseForm = document.getElementById('blockCoursesForm');
+                    const courseSubmitBtn = courseForm.querySelector('button[type="submit"]');
+                    
+                    if (hasChanged) {
+                        if (courseSubmitBtn) {
+                            courseSubmitBtn.classList.add('change-detected');
+                            courseSubmitBtn.disabled = false;
+                        }
+                        // Update global change tracker
+                        if (window.updateUnsavedChanges) {
+                            window.updateUnsavedChanges(true);
+                        }
+                    } else {
+                        // Check if any other blocks have changes
+                        let anyBlockChanged = false;
+                        blocks.forEach(otherBlock => {
+                            const otherBlockId = `block_${otherBlock}`;
+                            const otherSelector = window.courseSelectors[otherBlockId];
+                            if (otherSelector) {
+                                const otherCurrent = otherSelector.selectedCourses.length > 0 ? otherSelector.selectedCourses[0] : null;
+                                const otherOriginal = originalCourseSelections[otherBlockId];
+                                
+                                if (!otherCurrent && !otherOriginal) {
+                                    // No change
+                                } else if (!otherCurrent || !otherOriginal) {
+                                    anyBlockChanged = true;
+                                } else if (otherCurrent.id !== otherOriginal.id) {
+                                    anyBlockChanged = true;
+                                }
+                            }
+                        });
+                        
+                        if (!anyBlockChanged) {
+                            if (courseSubmitBtn) {
+                                courseSubmitBtn.classList.remove('change-detected');
+                                courseSubmitBtn.disabled = true;
+                            }
+                            if (window.updateUnsavedChanges) {
+                                window.updateUnsavedChanges(false);
+                            }
+                        }
                     }
                 }
             });
+            
+            window.courseSelectors[blockId] = selector;
         });
-
-        // Attach click event listeners to the buttons
-        blocks.forEach(block => {
-            const buttonsContainer = document.getElementById(`block_${block}_buttons`);
-            if (buttonsContainer) {
-                buttonsContainer.addEventListener('click', (event) => {
-                    const target = event.target;
-                    const blockId = target.getAttribute('data-block');
-                    const courseId = initialCourses[`block_${blockId}`]?.id;
-
-                    if (courseId) {
-                        let url, formData;
-                        if (target.classList.contains('add-help-btn')) {
-                            url = '{% url "add_help_request" %}';
-                            formData = new FormData();
-                            formData.append('course', courseId);
-                        } else if (target.classList.contains('add-experience-btn')) {
-                            url = '{% url "add_experience" %}';
-                            formData = new FormData();
-                            formData.append('course', courseId);
-                        }
-
-                        fetch(url, {
-                            method: 'POST',
-                            body: formData,
-                            headers: {
-                                'X-CSRFToken': '{{ csrf_token }}'
-                            }
-                        })
-                        .then(response => response.json())
-                        .then(data => {
-                            if (data.success) {
-                                // Hide the button after it's clicked
-                                target.style.display = 'none';
-                                buttonsContainer.style.display = 'none'; // Hide the button container as well
-                            } else {
-                                console.log(data);
-                                alert('There was an issue with the request.');
-                            }
-                        })
-                        .catch(error => {
-                            console.error('Error:', error);
-                            alert('There was an error with the request.');
-                        });
-                    }
-                });
-            }
-        });
-
-        const addExperienceForm = document.getElementById('addExperienceForm');
-        const addHelpForm = document.getElementById('addHelpForm');
-
-        console.log(addExperienceForm, addHelpForm);
-
-        if (addExperienceForm) {
-            addExperienceForm.addEventListener('submit', (event) => {
-                event.preventDefault();  // Prevent the default form submission behavior
-
-                const formData = new FormData(addExperienceForm);
-                console.log(formData);
-                fetch(addExperienceForm.action, {
-                    method: 'POST',
-                    body: formData,
-                    headers: {
-                        'X-CSRFToken': '{{ csrf_token }}',
-                    },
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        // Hide modal and reload the page
-                        const addExperienceModal = new bootstrap.Modal(document.getElementById('addExperienceModal'));
-                        addExperienceModal.hide();
-                        location.reload();
-                    } else {
-                        alert('There was an issue with adding the experience.');
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    alert('There was an error processing the request.');
-                });
-            });
-        }
-
-        if (addHelpForm) {
-            addHelpForm.addEventListener('submit', (event) => {
-                event.preventDefault();  // Prevent the default form submission behavior
-
-                const formData = new FormData(addHelpForm);
-                console.log(formData);
-
-                fetch(addHelpForm.action, {
-                    method: 'POST',
-                    body: formData,
-                    headers: {
-                        'X-CSRFToken': '{{ csrf_token }}',
-                    },
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        // Hide modal and reload the page
-                        const addHelpModal = new bootstrap.Modal(document.getElementById('addHelpModal'));
-                        addHelpModal.hide();
-                        location.reload();
-                    } else {
-                        alert('There was an issue with adding the help request.');
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    alert('There was an error processing the request.');
-                });
-            });
-        }
+        
+        // Expose function to update unsaved changes state from course selectors
+        window.updateUnsavedChanges = function(hasChanges) {
+            // This will be called by course selectors to update the global state
+            // The main change tracking script will handle the rest
+        };
     });
+</script>
 
+<script>
+function clearWolfNetPassword() {
+    if (confirm('Are you sure you want to clear your WolfNet password? This will disable grade notifications and schedule integration.')) {
+        const form = document.getElementById('wolfnetForm');
+        const passwordInput = document.getElementById('id_wolfnet_password');
+        passwordInput.value = '';
+        // Create a hidden input to indicate we want to clear the password
+        const clearInput = document.createElement('input');
+        clearInput.type = 'hidden';
+        clearInput.name = 'clear_wolfnet_password';
+        clearInput.value = 'true';
+        form.appendChild(clearInput);
+        form.submit();
+    }
+}
 </script>
 {% endblock %}

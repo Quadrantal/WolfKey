@@ -53,11 +53,6 @@ p { font-family: var(--font-secondary); }
     transition: all 0.2s ease;
 }
 
-.logo {
-    height: 40px; 
-    width: auto; 
-}
-
 .text-muted {
   font-size: smaller;
 }
@@ -73,19 +68,4 @@ html {
 body, html {
   margin: 0;
   padding: 0;
-}
-
-.background-svg {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  z-index: -1;
-}
-
-.notification-circle {
-  position: relative;
-  border-radius: 999px;
-  right: 12px;
 }

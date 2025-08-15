@@ -27,13 +27,11 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.getenv('SECRET_KEY', 'your-default-secret-key')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv('DEBUG', 'False') == 'True'
 
-ALLOWED_HOSTS = ['wolfkey-de5aac68fc04.herokuapp.com', '127.0.0.1', 'wolfkey.net', 'www.wolfkey.net']
+ALLOWED_HOSTS = ['*']
 
 # Application definition
 
@@ -44,9 +42,13 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django.contrib.humanize',
     'forum',
     'storages',
     'django_editorjs_fields',
+    'rest_framework',
+    'rest_framework.authtoken',
+    'corsheaders'
 ]
 
 MIDDLEWARE = [
@@ -59,7 +61,15 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'forum.middleware.UserRoleMiddleware',
+    'corsheaders.middleware.CorsMiddleware'
 ]
+
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.TokenAuthentication',
+    ],
+}
 
 AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend',
@@ -186,6 +196,57 @@ LOGGING = {
     },
 }
 
+CORS_ALLOWED_ORIGINS = [
+    'http://127.0.0.1:8081',
+    "http://localhost:8081",
+    "exp://localhost:19000",
+    "http://localhost:19006",
+    'http://10.0.0.38:8000'
+]
+
+CORS_ALLOW_CREDENTIALS = True
+
+CORS_ALLOWED_ORIGIN_REGEXES = [
+    r"^exp://.*",             # All Expo Go URLs
+    r"^http://192\.168\..*"   # Local network IPs
+]
+CSRF_TRUSTED_ORIGINS = [
+    "http://localhost:8081",
+    "http://localhost:19000",
+    "http://localhost:19006"
+    'http://10.0.0.38:8000'
+]
+
+CORS_ALLOW_METHODS = [
+    'GET',
+    'POST',
+    'OPTIONS'
+]
+
+CORS_ALLOW_HEADERS = [
+    'accept',
+    'accept-encoding',
+    'authorization',
+    'content-type',
+    'dnt',
+    'origin',
+    'user-agent',
+    'x-csrftoken',
+    'x-requested-with',
+    'cookie'
+]
+
+
+
+# Cookie settings
+CORS_EXPOSE_HEADERS = ['set-cookie']
+CSRF_COOKIE_SAMESITE = 'Lax'
+SESSION_COOKIE_SAMESITE = 'Lax'
+CSRF_COOKIE_SECURE = False 
+CSRF_COOKIE_HTTPONLY = False 
+CSRF_USE_SESSIONS = False
+CSRF_COOKIE_SAMESITE = None
+
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -210,6 +271,14 @@ SITE_URL = os.getenv('SITE_URL')
 
 AUTH_USER_MODEL = 'forum.User'
 
+# Celery Configuration
+CELERY_BROKER_URL = os.getenv('REDIS_URL', 'redis://localhost:6379')
+CELERY_RESULT_BACKEND = os.getenv('REDIS_URL', 'redis://localhost:6379')
+CELERY_ACCEPT_CONTENT = ['json']
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_RESULT_SERIALIZER = 'json'
+CELERY_TIMEZONE = 'UTC'
+
 # AWS S3 Configuration
 if not DEBUG:  # Use S3 in production only
     print("Debug turned off")
@@ -232,3 +301,11 @@ else:
     MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 # EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+
+
+# SECURITY WARNING: keep the secret key used in production secret!
+SECRET_KEY = os.getenv('SECRET_KEY', 'my-secret-key')
+FERNET_KEY = os.getenv('FERNET_KEY')
+
+# Expo Push Notification Settings
+EXPO_ACCESS_TOKEN = os.getenv('EXPO_ACCESS_TOKEN', None)

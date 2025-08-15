@@ -1,77 +1,71 @@
 # WolfKey
 
-This is a Django-based forum application where users can create posts, add solutions, and comment on solutions. The application supports user registration, login, and logout functionalities.
+WolfKey is a Django-based forum application where users can create posts, add solutions, and comment on solutions. The application supports user registration, login, and logout functionalities. It is designed to be beginner-friendly and easy to set up.
 
-## Project Structure
+## Table of Contents
 
-## Setup Instructions
+- [Description](#description)
+- [Installation](#installation)
+- [Usage](#usage)
+- [Features](#features)
+- [Configuration](#configuration)
+- [Contributing](#contributing)
+- [File Structure Overview](#file-structure-overview)
+- [Running Tests](#running-tests)
+- [Common Issues](#common-issues)
+
+## Description
+
+WolfKey is a collaborative student forum platform that allows users to ask questions, provide solutions, and interact through comments. It features user authentication, notifications, and a clean web interface.
+
+## Installation
 
 1. **Clone the repository:**
-
     ```sh
     git clone https://github.com/HugoC1000/School-Forum.git
     cd School-Forum/
     ```
 
 2. **Create and activate a virtual environment:**
-
     ```sh
     python -m venv venv
     source venv/bin/activate  # On Windows use `venv\Scripts\activate`
     ```
 
 3. **Install the dependencies:**
-
     ```sh
     pip install -r requirements.txt
     ```
 
 4. **Install PostgreSQL:**
-
-    You can install PostgreSQL using Homebrew:
-
     ```sh
     brew install postgresql
-    #for Windows users, go to <https://www.postgresql.org/download/windows/> and download the official installer
+    # For Windows users, download from https://www.postgresql.org/download/windows/
     ```
 
-    After installation, start the PostgreSQL service:
-
+    Start the PostgreSQL service:
     ```sh
     brew services start postgresql
     ```
 
 5. **Set up PostgreSQL:**
-
-    Initialize the database cluster (if not already initialized):
-
     ```sh
     initdb /usr/local/var/postgres
-    ```
-
-    Create a new PostgreSQL user and database: 
-    Note: database name and user should be all lowercase. 
-
-    ```sh
     createuser --interactive
     createdb student_forum
     ```
 
-    You can also set a password for the PostgreSQL user:
-
+    Set a password for the PostgreSQL user:
     ```sh
     psql
     \password <your-username>
     \q
     ```
 
-
 6. **Configure Django to use PostgreSQL:**
 
-    Update your `settings.py` file to configure the database settings:
-
+    Update your `student_forum/settings.py` file:
     ```python
-    # filepath: /Users/a0014208/Documents/GitHub/School-Forum/forum/settings.py
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.postgresql',
@@ -84,56 +78,109 @@ This is a Django-based forum application where users can create posts, add solut
     }
     ```
 
-7. **Apply the migrations to set up the database:**
-
+7. **Apply the migrations:**
     ```sh
     python manage.py migrate
     ```
 
-8. **Create a superuser to access the admin interface:**
-
+8. **Create a superuser:**
     ```sh
     python manage.py createsuperuser
     ```
 
 9. **Run the development server:**
-
     ```sh
     python manage.py runserver
     ```
 
-By following these steps, you will have PostgreSQL installed and configured for your Django application on a Mac.
+10. **Configure Tasks (Optional)**
 
-**Common Issues**
-- Sometimes python3 is required to correctly execute some commands. E.g. python3 -m venv venv, or python3 manage.py migrate
-- Sometimes the libraries don't install correctly from requirements.txt. You'd need to do `pip install` to install the libraries if that happens until you no longer have errors. 
+    If you want to test email notifications, and functionality involving WolfNet integration, you would have to follow instructions in LOCAL_DEVELOPMENT.md
 
+## Usage
 
-## Database
+- Access the site at `http://localhost:8000/`
+- Register a new account or log in.
+- Create, view, and interact with posts and solutions.
+- Use the search and notification features to stay updated.
 
-The application uses PostgreSQL as the database. Ensure you have PostgreSQL installed and a database created for the application. Update the `DATABASES` setting in `student_forum/settings.py` with your database credentials.
+## Features
 
-## User Authentication
+- User registration, login, and logout
+- Post creation, editing, and deletion
+- Solution and comment system
+- Notifications for activity
+- Post following and saving
+- Search for posts and users
+- Customizable user profiles
 
-The application supports user registration, login, and logout functionalities. The following views handle user authentication:
+## Configuration
 
-- **Registration:** The [register](http://_vscodecontentref_/16) view in [views.py](http://_vscodecontentref_/17) handles user registration using Django's [UserCreationForm](http://_vscodecontentref_/18).
-- **Login:** The [login_view](http://_vscodecontentref_/19) view in [views.py](http://_vscodecontentref_/20) handles user login using Django's [AuthenticationForm](http://_vscodecontentref_/21).
-- **Logout:** The [logout_view](http://_vscodecontentref_/22) view in [views.py](http://_vscodecontentref_/23) handles user logout.
+- Update `student_forum/settings.py` for database and other settings.
+- Static files are managed in the `static/` directory.
+- Media uploads (e.g., profile pictures) are stored in the `media/` directory.
 
-## Application Structure
+## Contributing
 
-- **`forum/models.py`:** Contains the database models for [Post](http://_vscodecontentref_/24), [Solution](http://_vscodecontentref_/25), and [Comment](http://_vscodecontentref_/26).
-- **`forum/forms.py`:** Contains the forms for creating and editing posts, solutions, and comments.
-- **`forum/views.py`:** Contains the views for handling requests and rendering templates.
-- **[forum](http://_vscodecontentref_/27):** Contains the HTML templates for the application.
-- **`forum/urls.py`:** Contains the URL patterns for the forum application.
-- **`student_forum/settings.py`:** Contains the Django project settings.
-- **`student_forum/urls.py`:** Contains the URL patterns for the project.
+### Codebase Structure
+
+WolfKey uses a modular Django architecture:
+
+- **Templates:** HTML files in `forum/templates/` define the UI and are rendered by views.
+- **Views:** Python files in `forum/views/` handle HTTP requests, call services, and render templates.
+- **Services:** Business logic is separated into `forum/services/` for maintainability. Views call these services to interact with models and perform actions.
+- **Models:** Defined in `forum/models.py`, these represent the database structure.
+- **Forms:** User input forms are defined in `forum/forms.py`.
+- **Static:** CSS, JS, and images are in `static/`.
+- **Management Commands:** Custom scripts are in `forum/management/commands/`.
+- **Templatetags:** Custom template filters and tags are in `forum/templatetags/`.
+- **API:** API endpoints are in `forum/api/`.
+- **Tests:** Automated tests are in `forum/tests/`.
+
+**Typical flow:**  
+Templates → Views → Services → Models → Database
+
+### File Structure Overview
+
+- `manage.py`: Django’s command-line utility.
+- `student_forum/`: Project settings and URLs.
+  - `settings.py`: Main configuration.
+  - `urls.py`: URL routing.
+- `forum/`: Main app.
+  - `models.py`: Database models (User, Post, Solution, etc.).
+  - `views/`: Handles web requests and responses.
+  - `services/`: Contains business logic for posts, comments, profiles, etc.
+  - `forms.py`: Django forms for user input.
+  - `templates/`: HTML templates for all pages and components.
+  - `static/`: CSS, JS, images.
+  - `management/commands/`: Custom Django management commands.
+  - `templatetags/`: Custom template filters and tags.
+  - `api/`: API endpoints.
+  - `tests/`: Automated tests for the forum app.
+- `media/`: Uploaded files (profile pictures, etc.).
+- `requirements.txt`: Python dependencies.
+- `README.md`: This documentation.
+
+### How to Contribute
+
+1. Fork the repository and create a new branch.
+2. Make your changes, following the code structure above.
+3. Write clear commit messages.
+4. Submit a pull request with a description of your changes.
+
+**Tips for Beginners:**
+- Start by reading the views and templates to understand the user flow.
+- Use the services layer to add or modify business logic.
+- For new features, add tests in the `forum/tests/` directory.
 
 ## Running Tests
 
-To run the tests, use the following command:
-
+To run the tests, use:
 ```sh
 python manage.py test
+```
+
+## Common Issues
+
+- Sometimes `python3` is required instead of `python` (e.g., `python3 -m venv venv`).
+- If libraries don't install correctly from `requirements.txt`, try installing them individually with `pip install <package>`.

@@ -28,45 +28,42 @@
         <div id="editorjs-comment-{{ comment.id }}"></div>
     </div>
 
-    <div class="comment-metadata d-flex align-items-end justify-content-between">
-            
-        <div class="comment-actions">
-            <div class="default-actions" style="display: block;">
-                <!-- Reply to comment-->
-                {% if user.is_authenticated %}
-                <button class="reply-button btn btn-link btn-sm" 
-                        data-solution-id="{{ comment.solution.id }}"
-                        data-parent-id="{{ comment.id }}">
-                    <i class="bi bi-reply"></i> 
-                </button>
-                {% endif %}
-                <!-- Edit comment-->
-                {% if user == comment.author %}
-                <button class="edit-comment btn btn-link btn-sm" data-comment-id="{{ comment.id }}">
-                    <i class="bi bi-pencil"></i> 
-                </button>
-                {% endif %}
-                <!-- Delete comment-->
-                {% if user == comment.author %}
-                <button class="delete-comment btn btn-link btn-sm" data-comment-id="{{ comment.id }}">
-                    <i class="bi bi-trash"></i> 
-                </button>
-                {% endif %}
+    <div class="comment-metadata d-flex justify-content-between align-items-center mt-2">
 
-            </div>
-            {% if user == comment.author %}
-            <!-- Icons for when editing comment-->
-            <div class="edit-actions" style="display: none;">
-                <button class="save-comment btn btn-link btn-sm" data-comment-id="{{ comment.id }}">
-                    <i class="bi bi-check-lg"></i> 
-                </button>
-                <button class="cancel-comment btn btn-link btn-sm" data-comment-id="{{ comment.id }}">
-                    <i class="bi bi-x-lg"></i> 
-                </button>
-            </div>
-            {% endif %}
+        <!-- Left: Reply Button -->
+        {% if user.is_authenticated %}
+        <div>
+            <button class="reply-button btn pill-btn btn-outline-secondary btn-sm" 
+                    data-solution-id="{{ comment.solution.id }}"
+                    data-parent-id="{{ comment.id }}">
+                <i class="bi bi-reply"></i> Reply
+            </button>
         </div>
+        {% endif %}
+
+        <!-- Right: Edit/Delete (and Save/Cancel if editing) -->
+        {% if user == comment.author %}
+        <div class="text-end">
+            <div class="default-actions d-flex gap-2">
+                <button class="edit-comment btn pill-btn btn-outline-secondary btn-sm" data-comment-id="{{ comment.id }}">
+                    <i class="bi bi-pencil"></i>
+                </button>
+                <button class="delete-comment btn pill-btn btn-outline-danger btn-sm" data-comment-id="{{ comment.id }}">
+                    <i class="bi bi-trash"></i>
+                </button>
+            </div>
+            <div class="edit-actions d-flex gap-2 mt-2" style="display: none;">
+                <button class="save-comment btn pill-btn btn-success btn-sm" data-comment-id="{{ comment.id }}">
+                    <i class="bi bi-check-lg"></i> Save
+                </button>
+                <button class="cancel-comment btn pill-btn btn-secondary btn-sm" data-comment-id="{{ comment.id }}">
+                    <i class="bi bi-x-lg"></i> Cancel
+                </button>
+            </div>
+        </div>
+        {% endif %}
     </div>
+
     <div class="replies">
         {% for reply in comment.replies.all %}
             {% if forloop.counter <= 2 %}
@@ -82,9 +79,9 @@
             </div>
             <button class="toggle-replies btn btn-link btn-sm" 
                     data-comment-id="{{ comment.id }}"
-                    data-show-text="Show {{ comment.replies.count|add:'-3' }} more replies"
+                    data-show-text="Show {{ comment.replies.count|add:'-2' }} more replies"
                     data-hide-text="Hide replies">
-                Show {{ comment.replies.count|add:'-3' }} more replies
+                Show {{ comment.replies.count|add:'-2' }} more replies
             </button>
         {% endif %}
     </div>

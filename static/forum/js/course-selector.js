@@ -122,10 +122,6 @@ class CourseSelector {
         });
     }
 
-    getSelectedCourses() {
-        return this.selectedCourses;
-    }
-
     updateFormData() {
         this.clearExistingInputs();
 
@@ -154,6 +150,10 @@ class CourseSelector {
         if (this.onSelectionChange) {
             this.onSelectionChange(this.selectedCourses);
         }
+    }
+
+    getSelectedCourses() {
+        return this.selectedCourses;
     }
 }
 
