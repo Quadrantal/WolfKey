@@ -497,7 +497,7 @@
     });
 </script>
 <!-- Auto Complete Courses Handler -->
-{% if user == profile_user and user.userprofile.wolfnet_password %}
+{% if user == profile_user %}
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         const autoCompleteBtn = document.getElementById('autoCompleteBtn');
@@ -553,6 +553,42 @@
         }
     });
 
+    function updateCourseSelectors(courses) {
+        const blocks = ['1A', '1B', '1D', '1E', '2A', '2B', '2C', '2D', '2E'];
+        
+        blocks.forEach(block => {
+            const course = courses[block];
+            if (course) {
+                // Find the course selector instance for this block
+                const blockId = `block_${block}`;
+                const selector = window.courseSelectors && window.courseSelectors[blockId];
+                
+                if (selector) {
+                    try {
+                        // Clear existing selection and add the new course
+                        selector.selectedCourses = [course];
+                        selector.updateSelectedCourses();
+                        selector.updateFormData();
+                        
+                        // Also update the buttons visibility using the general function
+                        const experiencedCourses = JSON.parse('{{ experienced_courses_json|escapejs }}');
+                        const helpNeededCourses = JSON.parse('{{ help_needed_courses_json|escapejs }}');
+                        window.updateBlockButtons(blockId, course, experiencedCourses, helpNeededCourses);
+                    } catch (error) {
+                        console.error(`Error updating selector for block ${block}:`, error);
+                    }
+                } else {
+                    console.warn(`Course selector not found for block ${block}`);
+                }
+            }
+        });
+    }
+
+</script>
+{% endif %}
+
+{% if user == profile_user %}
+<script>
     document.addEventListener('DOMContentLoaded', function () {
         const toggleBtn = document.getElementById('toggleWolfnetPassword');
         const passwordInput = document.getElementById('id_wolfnet_password');
@@ -626,37 +662,7 @@
             });
         }
     });
-    
-    function updateCourseSelectors(courses) {
-        const blocks = ['1A', '1B', '1D', '1E', '2A', '2B', '2C', '2D', '2E'];
-        
-        blocks.forEach(block => {
-            const course = courses[block];
-            if (course) {
-                // Find the course selector instance for this block
-                const blockId = `block_${block}`;
-                const selector = window.courseSelectors && window.courseSelectors[blockId];
-                
-                if (selector) {
-                    try {
-                        // Clear existing selection and add the new course
-                        selector.selectedCourses = [course];
-                        selector.updateSelectedCourses();
-                        selector.updateFormData();
-                        
-                        // Also update the buttons visibility using the general function
-                        const experiencedCourses = JSON.parse('{{ experienced_courses_json|escapejs }}');
-                        const helpNeededCourses = JSON.parse('{{ help_needed_courses_json|escapejs }}');
-                        window.updateBlockButtons(blockId, course, experiencedCourses, helpNeededCourses);
-                    } catch (error) {
-                        console.error(`Error updating selector for block ${block}:`, error);
-                    }
-                } else {
-                    console.warn(`Course selector not found for block ${block}`);
-                }
-            }
-        });
-    }
+
 </script>
 {% endif %}
 
