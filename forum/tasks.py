@@ -13,6 +13,7 @@ from django.utils.html import strip_tags
 from django.http import HttpRequest
 import django
 import tempfile
+import shutil
 
 logger = logging.getLogger(__name__)
 
@@ -865,7 +866,7 @@ def check_wolfnet_password(self, user_email, password):
         login_result = login_to_wolfnet(user_email, driver, wait, password)
         logger.info(f"WolfNet password check completed for {user_email}: {login_result}")
         return login_result
-        
+    
     except Exception as e:
         error_message = str(e)
         logger.error(f"Error checking WolfNet password for {user_email}: {error_message}")
@@ -884,4 +885,5 @@ def check_wolfnet_password(self, user_email, password):
         }
     finally:
         driver.quit()
-        logger.info(f"WolfNet password check completed for {user_email}")
+        shutil.rmtree(unique_user_data_dir, ignore_errors=True)
+        logger.info(f"Cleaned up temporary user-data-dir for {user_email}")
