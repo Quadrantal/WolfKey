@@ -175,8 +175,18 @@ def check_wolfnet_password_view(request):
             })
         
         from forum.tasks import check_wolfnet_password
-        result = check_wolfnet_password.delay(school_email, wolfnet_password)
-        verification_result = result.get(timeout=60)
+        
+        # Check if result backend is disabled - if so, run synchronously
+        from django.conf import settings
+        result_backend_disabled = getattr(settings, 'CELERY_RESULT_BACKEND', None) is None
+        
+        if result_backend_disabled:
+            # Run task synchronously when result backend is disabled
+            verification_result = check_wolfnet_password(school_email, wolfnet_password)
+        else:
+            # Run asynchronously with result retrieval
+            result = check_wolfnet_password.delay(school_email, wolfnet_password)
+            verification_result = result.get(timeout=60)
         
         # If verification is successful, save the password
         if verification_result.get('success'):
