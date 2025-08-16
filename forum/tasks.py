@@ -6,6 +6,7 @@ import re
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.chrome.service import Service as ChromeService
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 import requests
@@ -19,6 +20,12 @@ import traceback
 import gc
 import uuid
 import os
+import socket
+try:
+    import fcntl  # POSIX-only; used to serialize Chrome startup on Heroku
+except Exception:  # pragma: no cover
+    fcntl = None
+from selenium.common.exceptions import SessionNotCreatedException
 
 logger = logging.getLogger(__name__)
 
@@ -45,7 +52,6 @@ def get_memory_optimized_chrome_options():
     chrome_options.add_argument("--disable-features=VizDisplayCompositor")
     chrome_options.add_argument("--disable-ipc-flooding-protection")
     chrome_options.add_argument("--disable-gpu")
-    chrome_options.add_argument("--single-process")  # Use single process to reduce memory
     chrome_options.add_argument("--disable-extensions")
     chrome_options.add_argument("--disable-plugins")
     chrome_options.add_argument("--disable-images")  # Don't load images to save memory
@@ -55,13 +61,54 @@ def get_memory_optimized_chrome_options():
     chrome_options.add_argument("--no-default-browser-check")
     chrome_options.add_argument("--disable-default-apps")
     chrome_options.add_argument("--disable-sync")
-    chrome_options.add_argument("--incognito")  # Use incognito mode to avoid user data
+    # Do not use incognito when providing a custom user-data-dir; it may conflict
     chrome_options.add_argument("--disable-session-crashed-bubble")
     chrome_options.add_argument("--disable-infobars")
     chrome_options.add_argument("--disable-translate")
     chrome_options.add_argument("--disable-component-extensions-with-background-pages")
+    # Extra stability flags for containerized Linux (Heroku)
+    chrome_options.add_argument("--disable-software-rasterizer")
+    chrome_options.add_argument("--no-zygote")
+    chrome_options.add_argument("--disable-setuid-sandbox")
     
+    # Reduce process count and site isolation overhead to lower memory footprint
+    chrome_options.add_argument("--renderer-process-limit=1")
+    chrome_options.add_argument("--disable-site-isolation-trials")
     return chrome_options
+
+def _get_free_port() -> int:
+    """Find a free localhost TCP port for Chrome's remote debugging."""
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+        s.bind(("127.0.0.1", 0))
+        s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        return s.getsockname()[1]
+
+
+def _with_file_lock(lock_path):
+    """Context manager yielding a file lock if available, else a no-op context."""
+    class _Noop:
+        def __enter__(self):
+            return self
+        def __exit__(self, exc_type, exc, tb):
+            return False
+    if not fcntl:
+        return _with_file_lock._Noop()  # type: ignore[attr-defined]
+    class _Lock:
+        def __init__(self, path):
+            self.path = path
+            self.fd = None
+        def __enter__(self):
+            self.fd = open(self.path, "w+")
+            fcntl.flock(self.fd.fileno(), fcntl.LOCK_EX)
+            return self
+        def __exit__(self, exc_type, exc, tb):
+            try:
+                fcntl.flock(self.fd.fileno(), fcntl.LOCK_UN)
+            finally:
+                self.fd.close()
+            return False
+    return _Lock(lock_path)
+
 
 def create_webdriver_with_cleanup():
     """
@@ -91,26 +138,78 @@ def create_webdriver_with_cleanup():
     
     unique_user_data_dir = os.path.join(temp_base, f"chrome_{timestamp}_{process_id}_{unique_id}")
     
-    # Ensure directory exists
-    os.makedirs(unique_user_data_dir, exist_ok=True)
-    chrome_options.add_argument(f"--user-data-dir={unique_user_data_dir}")
+    # Set Chrome binary/driver paths if provided by environment (Heroku buildpack)
+    chrome_bin = os.environ.get("GOOGLE_CHROME_BIN") or os.environ.get("CHROME_BIN")
+    chromedriver_path = os.environ.get("CHROMEDRIVER_PATH") or shutil.which("chromedriver")
+    service = ChromeService(executable_path=chromedriver_path) if chromedriver_path else None
 
-    # Add additional arguments to prevent session conflicts
-    chrome_options.add_argument(f"--remote-debugging-port=0")  # Use random available port
+    # Serialize Chrome startups slightly on Heroku to avoid transient races
+    lock_path = "/tmp/wolfkey_chrome.lock" if is_heroku else os.path.join(tempfile.gettempdir(), "wolfkey_chrome.lock")
 
-    if is_heroku:
-        # Heroku-specific optimizations
-        chrome_options.add_argument("--disable-user-media-security")
-        chrome_options.add_argument("--allow-running-insecure-content")
-        logger.info(f"Created WebDriver for Heroku with temp user data dir: {unique_user_data_dir}")
-    else:
-        # Local development
-        logger.info(f"Created WebDriver for local environment with temp user data dir: {unique_user_data_dir}")
+    def _start_once():
+        # Create a fresh, unique user-data directory and port for each attempt
+        nonlocal unique_user_data_dir
+        ts = str(int(time.time() * 1000))
+        pid = str(os.getpid())
+        uid = str(uuid.uuid4())[:8]
+        base = "/tmp" if is_heroku else tempfile.gettempdir()
+        unique_user_data_dir = os.path.join(base, f"chrome_{ts}_{pid}_{uid}")
+        os.makedirs(unique_user_data_dir, exist_ok=True)
 
-    driver = webdriver.Chrome(options=chrome_options)
-    driver.set_window_size(400, 300)  # Smaller window size to save memory
+        # Use separate data/cache dirs inside user-data-dir to avoid conflicts
+        data_path = os.path.join(unique_user_data_dir, "data")
+        cache_path = os.path.join(unique_user_data_dir, "cache")
+        os.makedirs(data_path, exist_ok=True)
+        os.makedirs(cache_path, exist_ok=True)
 
-    return driver, unique_user_data_dir
+        local_opts = get_memory_optimized_chrome_options()
+        if chrome_bin:
+            local_opts.binary_location = chrome_bin
+        # Choose a real free port
+        try:
+            rd_port_local = _get_free_port()
+        except Exception:
+            rd_port_local = 9222
+        local_opts.add_argument(f"--remote-debugging-port={rd_port_local}")
+        local_opts.add_argument(f"--user-data-dir={unique_user_data_dir}")
+        local_opts.add_argument("--profile-directory=Default")
+        local_opts.add_argument(f"--data-path={data_path}")
+        local_opts.add_argument(f"--disk-cache-dir={cache_path}")
+
+        env_label = "Heroku" if is_heroku else "local"
+        logger.info(f"Launching Chrome ({env_label}) with profile at {unique_user_data_dir} on rd_port={rd_port_local}")
+
+        with _with_file_lock(lock_path):
+            return webdriver.Chrome(service=service, options=local_opts) if service else webdriver.Chrome(options=local_opts)
+
+    # Try up to 2 attempts in case of transient lock/memory issues
+    last_exc = None
+    for attempt in range(2):
+        try:
+            driver = _start_once()
+            driver.set_window_size(400, 300)
+            return driver, unique_user_data_dir
+        except SessionNotCreatedException as e:
+            last_exc = e
+            logger.warning(f"SessionNotCreatedException on attempt {attempt+1}: {e}. Retrying with fresh profile...")
+            try:
+                if unique_user_data_dir and os.path.exists(unique_user_data_dir):
+                    shutil.rmtree(unique_user_data_dir, ignore_errors=True)
+            except Exception:
+                pass
+            time.sleep(0.5)
+        except Exception as e:
+            last_exc = e
+            logger.error(f"Error starting Chrome on attempt {attempt+1}: {e}")
+            try:
+                if unique_user_data_dir and os.path.exists(unique_user_data_dir):
+                    shutil.rmtree(unique_user_data_dir, ignore_errors=True)
+            except Exception:
+                pass
+            time.sleep(0.5)
+
+    # If we get here, both attempts failed
+    raise last_exc if last_exc else RuntimeError("Failed to create WebDriver")
 
 def cleanup_old_chrome_dirs():
     """
@@ -237,7 +336,6 @@ def login_to_wolfnet(user_email, driver, wait, password=None):
                 return {"success": True}
             elif "activitiesContainer" in element.get_attribute("id"):
                 logger.info(f"Successfully logged in for {user_email}")
-                time.sleep(1)
                 return {"success": True}
             else:
                 logger.error(f"Wrong WolfNet password detected for {user_email}")
