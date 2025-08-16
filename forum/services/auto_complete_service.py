@@ -4,8 +4,24 @@ Service for handling auto-completion of courses from WolfNet
 import logging
 from django.http import JsonResponse
 from forum.tasks import auto_complete_courses
+from django.conf import settings
 
 logger = logging.getLogger(__name__)
+
+
+def _execute_task_with_result(task_func, *args, **kwargs):
+    """
+    Execute a Celery task either synchronously or asynchronously based on result backend configuration.
+    """
+    result_backend_disabled = getattr(settings, 'CELERY_RESULT_BACKEND', None) is None
+    
+    if result_backend_disabled:
+        # Run task synchronously when result backend is disabled
+        return task_func(*args, **kwargs)
+    else:
+        # Run asynchronously with result retrieval
+        task = task_func.delay(*args, **kwargs)
+        return task.get(timeout=60)
 
 
 def auto_complete_user_courses_service(user, wolfnet_password=None):
@@ -45,12 +61,9 @@ def auto_complete_user_courses_service(user, wolfnet_password=None):
         
         # Start the auto-complete task
         if password:
-            task = auto_complete_courses.delay(school_email, password)
+            result = _execute_task_with_result(auto_complete_courses, school_email, password)
         else:
-            task = auto_complete_courses.delay(school_email)
-        
-        # Get the result (this will wait for completion)
-        result = task.get(timeout=60)
+            result = _execute_task_with_result(auto_complete_courses, school_email)
         
         logger.info(f"Auto-complete courses result for {user.username}: {result}")
         
@@ -96,10 +109,7 @@ def auto_complete_courses_registration_service(school_email, wolfnet_password):
             }
         
         # Start the auto-complete task
-        task = auto_complete_courses.delay(school_email, wolfnet_password)
-        
-        # Get the result (this will wait for completion)
-        result = task.get(timeout=60)
+        result = _execute_task_with_result(auto_complete_courses, school_email, wolfnet_password)
         
         logger.info(f"Auto-complete courses result for registration {school_email}: {result}")
         
