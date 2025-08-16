@@ -279,6 +279,20 @@ CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
 CELERY_TIMEZONE = 'UTC'
 
+# Reduce the number of simultaneous Redis connections to avoid hitting
+# Heroku Redis connection limits. These values can be tuned via env vars.
+# NOTE: Celery will load these under the 'CELERY_' namespace because the
+# Celery app calls config_from_object(..., namespace='CELERY').
+CELERY_BROKER_POOL_LIMIT = int(os.getenv('BROKER_POOL_LIMIT', '3'))
+# This controls redis-py's max connections for Celery transport
+CELERY_BROKER_TRANSPORT_OPTIONS = {
+    'max_connections': int(os.getenv('REDIS_MAX_CONNECTIONS', '10'))
+}
+
+# Optional: tighten connection timeouts so idle connections are released
+CELERY_BROKER_CONNECTION_TIMEOUT = int(os.getenv('BROKER_CONNECTION_TIMEOUT', '10'))
+CELERY_BROKER_HEARTBEAT = int(os.getenv('BROKER_HEARTBEAT', '30'))
+
 # Memory optimization for Heroku
 CELERY_WORKER_PREFETCH_MULTIPLIER = 1
 CELERY_WORKER_MAX_TASKS_PER_CHILD = 10  # Restart worker after 10 tasks

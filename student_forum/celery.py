@@ -64,3 +64,31 @@ app.conf.timezone = 'UTC'
 
 # Ensure compatibility with Celery 6.0 and above
 app.conf.broker_connection_retry_on_startup = True
+
+# Respect Redis/Celery transport options set in Django settings.
+from django.conf import settings as django_settings
+
+# Apply transport options if provided in settings (e.g. max_connections)
+try:
+    transport_opts = getattr(django_settings, 'CELERY_BROKER_TRANSPORT_OPTIONS', None)
+    if transport_opts:
+        app.conf.broker_transport_options = transport_opts
+except Exception:
+    # Fail quietly - defaults will be used
+    pass
+
+# Configure SSL for Redis broker if the REDIS_URL uses rediss://
+# Do not disable certificate validation (no CERT_NONE).
+try:
+    broker_url = getattr(django_settings, 'CELERY_BROKER_URL', os.getenv('REDIS_URL', ''))
+    if broker_url and broker_url.startswith('rediss://'):
+        # Let redis-py handle SSL using system certs / certifi bundle.
+        # If custom CA is required, set CELERY_BROKER_USE_SSL in settings as a dict.
+        ssl_opts = getattr(django_settings, 'CELERY_BROKER_USE_SSL', None)
+        if ssl_opts is None:
+            # Default: rely on system CA bundle; do not set CERT_NONE.
+            app.conf.broker_use_ssl = True
+        else:
+            app.conf.broker_use_ssl = ssl_opts
+except Exception:
+    pass
