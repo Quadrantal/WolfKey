@@ -431,7 +431,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 
                 // Highlight all matching courses in the same block
                 document.querySelectorAll(`[data-block="${block}"][data-course-name="${courseName}"]`).forEach(matchingItem => {
-                    matchingItem.style.transform = 'scale(1.02)';
                     matchingItem.style.boxShadow = '0 4px 12px rgba(16, 185, 129, 0.3)';
                 });
                 
@@ -439,7 +438,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 const courseRow = document.getElementById(`courses-${block}`);
                 if (courseRow) {
                     courseRow.querySelectorAll('.course-connection-line').forEach(line => {
-                        line.classList.add('highlight');
+                        line.classList.add('line-highlight');
                     });
                 }
             });
@@ -458,7 +457,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 const courseRow = document.getElementById(`courses-${block}`);
                 if (courseRow) {
                     courseRow.querySelectorAll('.course-connection-line').forEach(line => {
-                        line.classList.remove('highlight');
+                        line.classList.remove('line-highlight');
                     });
                 }
             });
