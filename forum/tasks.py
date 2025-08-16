@@ -48,6 +48,12 @@ def get_memory_optimized_chrome_options():
     # Set a safer page load strategy (normal) to ensure redirects complete
     chrome_options.set_capability("pageLoadStrategy", "normal")
     
+    # Configure Chrome binary location for Heroku (from your comprehensive guide)
+    chrome_bin = os.environ.get('CHROME_BIN')
+    if chrome_bin:
+        chrome_options.binary_location = chrome_bin
+        logger.info(f"Using Chrome binary from environment: {chrome_bin}")
+    
     return chrome_options
 
 def create_webdriver_with_cleanup():
