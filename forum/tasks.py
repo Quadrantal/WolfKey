@@ -12,6 +12,7 @@ import requests
 from django.utils.html import strip_tags
 from django.http import HttpRequest
 import django
+import tempfile
 
 logger = logging.getLogger(__name__)
 
@@ -174,7 +175,14 @@ def check_user_grades_core(user_email):
     chrome_options.add_argument("--headless=new")
     chrome_options.add_argument("--no-sandbox")
     chrome_options.add_argument("--disable-dev-shm-usage")
+
+    # Add unique user-data-dir to avoid session conflicts
+    unique_user_data_dir = tempfile.mkdtemp()
+    chrome_options.add_argument(f"--user-data-dir={unique_user_data_dir}")
+    
     driver = webdriver.Chrome(options=chrome_options)
+    driver.set_window_size(800, 600)
+
     wait = WebDriverWait(driver, 8)
 
     try:
@@ -672,7 +680,14 @@ def auto_complete_courses(self, user_email, password=None):
     chrome_options.add_argument("--headless=new")
     chrome_options.add_argument("--no-sandbox")
     chrome_options.add_argument("--disable-dev-shm-usage")
+    
+
+    # Add unique user-data-dir to avoid session conflicts
+    unique_user_data_dir = tempfile.mkdtemp()
+    chrome_options.add_argument(f"--user-data-dir={unique_user_data_dir}")
+    
     driver = webdriver.Chrome(options=chrome_options)
+    driver.set_window_size(800, 600)
     wait = WebDriverWait(driver, 8)
 
     try:
@@ -838,6 +853,11 @@ def check_wolfnet_password(self, user_email, password):
     chrome_options.add_argument("--headless=new")
     chrome_options.add_argument("--no-sandbox")
     chrome_options.add_argument("--disable-dev-shm-usage")
+
+    # Add unique user-data-dir to avoid session conflicts
+    unique_user_data_dir = tempfile.mkdtemp()
+    chrome_options.add_argument(f"--user-data-dir={unique_user_data_dir}")
+    
     driver = webdriver.Chrome(options=chrome_options)
     wait = WebDriverWait(driver, 8)
 
