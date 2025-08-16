@@ -50,11 +50,16 @@ def get_memory_optimized_chrome_options():
     chrome_options.add_argument("--disable-plugins")
     chrome_options.add_argument("--disable-images")  # Don't load images to save memory
     
-    # Heroku-specific optimizations - avoid user data directory issues
+    # Avoid user data directory issues completely
     chrome_options.add_argument("--no-first-run")
     chrome_options.add_argument("--no-default-browser-check")
     chrome_options.add_argument("--disable-default-apps")
     chrome_options.add_argument("--disable-sync")
+    chrome_options.add_argument("--incognito")  # Use incognito mode to avoid user data
+    chrome_options.add_argument("--disable-session-crashed-bubble")
+    chrome_options.add_argument("--disable-infobars")
+    chrome_options.add_argument("--disable-translate")
+    chrome_options.add_argument("--disable-component-extensions-with-background-pages")
     
     return chrome_options
 
@@ -63,52 +68,74 @@ def create_webdriver_with_cleanup():
     Create a WebDriver with proper cleanup handling and Heroku-compatible settings
 
     Returns:
-        tuple: (driver, None)
+        tuple: (driver, unique_user_data_dir or None)
     """
     chrome_options = get_memory_optimized_chrome_options()
 
-    # Check if we're running on Heroku (avoid user data directory issues)
+    # Check if we're running on Heroku
     is_heroku = os.environ.get('DYNO') is not None
+    unique_user_data_dir = None
+
+    # Create a unique temporary directory for user data to avoid conflicts
+    import time
+    timestamp = str(int(time.time() * 1000))  # milliseconds
+    process_id = str(os.getpid())  # process ID
+    unique_id = str(uuid.uuid4())[:8]
+    
+    if is_heroku:
+        # For Heroku, use /tmp which is writable
+        temp_base = "/tmp"
+    else:
+        # For local development, use system temp dir
+        temp_base = tempfile.gettempdir()
+    
+    unique_user_data_dir = os.path.join(temp_base, f"chrome_{timestamp}_{process_id}_{unique_id}")
+    
+    # Ensure directory exists
+    os.makedirs(unique_user_data_dir, exist_ok=True)
+    chrome_options.add_argument(f"--user-data-dir={unique_user_data_dir}")
 
     # Add additional arguments to prevent session conflicts
     chrome_options.add_argument(f"--remote-debugging-port=0")  # Use random available port
 
     if is_heroku:
-        # Heroku deployment - avoid user data directory completely
+        # Heroku-specific optimizations
         chrome_options.add_argument("--disable-user-media-security")
         chrome_options.add_argument("--allow-running-insecure-content")
-        logger.info("Created WebDriver for Heroku (no user data dir)")
+        logger.info(f"Created WebDriver for Heroku with temp user data dir: {unique_user_data_dir}")
     else:
-        # Local development - no user data directory
-        logger.info("Created WebDriver for local environment (no user data dir)")
+        # Local development
+        logger.info(f"Created WebDriver for local environment with temp user data dir: {unique_user_data_dir}")
 
     driver = webdriver.Chrome(options=chrome_options)
     driver.set_window_size(400, 300)  # Smaller window size to save memory
 
-    return driver, None
+    return driver, unique_user_data_dir
 
 def cleanup_old_chrome_dirs():
     """
-    Clean up old Chrome user data directories that might be left over (local development only)
+    Clean up old Chrome user data directories that might be left over
     """
-    # Only run cleanup in local development, not on Heroku
-    if os.environ.get('DYNO') is not None:
-        return
-
     try:
-        temp_dir = tempfile.gettempdir()
-        for item in os.listdir(temp_dir):
-            if item.startswith("chrome_") and os.path.isdir(os.path.join(temp_dir, item)):
-                old_dir = os.path.join(temp_dir, item)
-                try:
-                    # Check if directory is older than 1 hour
-                    dir_time = os.path.getctime(old_dir)
-                    current_time = time.time()
-                    if current_time - dir_time > 3600:  # 1 hour
-                        shutil.rmtree(old_dir, ignore_errors=True)
-                        logger.info(f"Cleaned up old Chrome directory: {old_dir}")
-                except:
-                    pass
+        # Check both /tmp (Heroku) and system temp directory (local)
+        temp_dirs = ["/tmp", tempfile.gettempdir()]
+        
+        for temp_dir in temp_dirs:
+            if not os.path.exists(temp_dir):
+                continue
+                
+            for item in os.listdir(temp_dir):
+                if item.startswith("chrome_") and os.path.isdir(os.path.join(temp_dir, item)):
+                    old_dir = os.path.join(temp_dir, item)
+                    try:
+                        # Check if directory is older than 1 hour
+                        dir_time = os.path.getctime(old_dir)
+                        current_time = time.time()
+                        if current_time - dir_time > 3600:  # 1 hour
+                            shutil.rmtree(old_dir, ignore_errors=True)
+                            logger.info(f"Cleaned up old Chrome directory: {old_dir}")
+                    except:
+                        pass
     except:
         pass
 
