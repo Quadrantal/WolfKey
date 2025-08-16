@@ -870,9 +870,11 @@ def auto_complete_courses(self, user_email, password=None):
             return {"success": False, "error": "No valid courses found in schedule", "error_type": "no_courses"}
 
         matched_courses = {}
+        logger.info(courses_data)
         
         for block, course_info in courses_data.items():
             course_name = course_info["name"]
+
             
             # Create a mock request object for course_search
             mock_request = type('MockRequest', (), {
