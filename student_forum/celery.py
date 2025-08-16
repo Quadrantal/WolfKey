@@ -47,7 +47,5 @@ CELERY_TASK_TIME_LIMIT = 120
 
 app.conf.timezone = 'UTC'
 
-# Configure SSL for Redis broker
-app.conf.broker_use_ssl = {
-    'ssl_cert_reqs': ssl.CERT_NONE
-}
+# Ensure compatibility with Celery 6.0 and above
+app.conf.broker_connection_retry_on_startup = True
