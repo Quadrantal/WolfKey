@@ -52,20 +52,36 @@ def get_memory_optimized_chrome_options():
 
 def create_webdriver_with_cleanup():
     """
-    Create a WebDriver with proper cleanup handling using incognito mode to avoid user data conflicts
+    Create a WebDriver with proper cleanup handling using enhanced isolation
     
     Returns:
-        tuple: (driver, None)
+        tuple: (driver, temp_user_data_dir)
     """
     chrome_options = get_memory_optimized_chrome_options()
     
-    # Use incognito mode instead of user data directories to avoid conflicts completely
-    chrome_options.add_argument("--incognito")
+    # Create a temporary user data directory even for incognito mode to ensure complete isolation
+    import time
+    import threading
+    timestamp = str(int(time.time() * 1000000))  # Use microseconds for better uniqueness
+    unique_id = str(uuid.uuid4()).replace('-', '')
+    process_id = str(os.getpid())
+    thread_id = str(threading.get_ident())
+    temp_user_data_dir = tempfile.mkdtemp(
+        prefix=f"chrome_isolated_",
+        suffix=f"_{timestamp}_{unique_id}_{process_id}_{thread_id}"
+    )
     
-    # Add additional arguments for better isolation and stability
+    # Ensure directory exists and has proper permissions
+    os.makedirs(temp_user_data_dir, exist_ok=True)
+    
+    # Force use of our temporary directory
+    chrome_options.add_argument(f"--user-data-dir={temp_user_data_dir}")
+    chrome_options.add_argument("--incognito")  # Still use incognito for additional privacy
+    
+    # Add comprehensive isolation flags
     chrome_options.add_argument(f"--remote-debugging-port=0")  # Use random available port
     chrome_options.add_argument("--no-first-run")
-    chrome_options.add_argument("--no-default-browser-check")
+    chrome_options.add_argument("--no-default-browser-check") 
     chrome_options.add_argument("--disable-background-timer-throttling")
     chrome_options.add_argument("--disable-backgrounding-occluded-windows")
     chrome_options.add_argument("--disable-renderer-backgrounding")
@@ -76,19 +92,35 @@ def create_webdriver_with_cleanup():
     chrome_options.add_argument("--disable-notifications")
     chrome_options.add_argument("--disable-popup-blocking")
     chrome_options.add_argument("--no-zygote")  # Disable zygote process for better isolation
+    chrome_options.add_argument("--disable-software-rasterizer")
+    chrome_options.add_argument("--disable-background-networking")
+    chrome_options.add_argument("--disable-default-apps")
+    chrome_options.add_argument("--disable-sync")
+    chrome_options.add_argument("--metrics-recording-only")
+    chrome_options.add_argument("--no-report-upload")
     
-    # Add a small random delay to prevent race conditions in concurrent requests
+    # Add crash dumps to our temp directory
+    chrome_options.add_argument(f"--crash-dumps-dir={temp_user_data_dir}")
+    
+    # Add a larger random delay to prevent race conditions
     import random
-    import time
-    time.sleep(random.uniform(0.3, 1.5))  # Increased delay for better separation
+    delay = random.uniform(1.0, 3.0)  # Increased delay significantly
+    logger.info(f"Waiting {delay:.2f} seconds before creating WebDriver...")
+    time.sleep(delay)
     
     try:
         driver = webdriver.Chrome(options=chrome_options)
         driver.set_window_size(1000, 1000)  # Smaller window size to save memory
         
-        logger.info(f"Created WebDriver in incognito mode")
-        return driver, None  # No user data directory to clean up
+        logger.info(f"Created WebDriver with isolated temp dir: {temp_user_data_dir}")
+        return driver, temp_user_data_dir
     except Exception as e:
+        # Clean up the directory if driver creation fails
+        try:
+            if os.path.exists(temp_user_data_dir):
+                shutil.rmtree(temp_user_data_dir, ignore_errors=True)
+        except:
+            pass
         logger.error(f"Failed to create WebDriver: {e}")
         raise
 
@@ -101,12 +133,13 @@ def cleanup_old_chrome_dirs():
         current_time = time.time()
         
         for item in os.listdir(temp_dir):
-            if item.startswith("chrome_") and os.path.isdir(os.path.join(temp_dir, item)):
+            # Clean up both old and new directory prefixes
+            if (item.startswith("chrome_") or item.startswith("chrome_isolated_")) and os.path.isdir(os.path.join(temp_dir, item)):
                 old_dir = os.path.join(temp_dir, item)
                 try:
-                    # Check if directory is older than 30 minutes (reduced from 1 hour)
+                    # Check if directory is older than 15 minutes (reduced from 30 minutes)
                     dir_time = os.path.getctime(old_dir)
-                    if current_time - dir_time > 1800:  # 30 minutes
+                    if current_time - dir_time > 900:  # 15 minutes
                         # Force kill any Chrome processes that might be using this directory
                         try:
                             import subprocess
@@ -287,7 +320,7 @@ def check_user_grades_core(user_email):
 
     # Use memory-optimized WebDriver
     cleanup_old_chrome_dirs()  # Clean up any old directories first
-    driver, _ = create_webdriver_with_cleanup()  # No user data dir to track
+    driver, temp_user_data_dir = create_webdriver_with_cleanup()
     wait = WebDriverWait(driver, 6)  # Reduced timeout for memory efficiency
 
     try:
@@ -587,7 +620,18 @@ def check_user_grades_core(user_email):
         # Wait a moment for driver to fully close
         time.sleep(0.5)
         
-        # No user data directory cleanup needed with incognito mode
+        # Clean up temporary directory aggressively
+        if temp_user_data_dir and os.path.exists(temp_user_data_dir):
+            max_retries = 3
+            for attempt in range(max_retries):
+                try:
+                    shutil.rmtree(temp_user_data_dir, ignore_errors=True)
+                    if not os.path.exists(temp_user_data_dir):
+                        logger.info(f"Successfully cleaned up temp dir: {temp_user_data_dir}")
+                        break
+                    time.sleep(1)  # Wait before retry
+                except Exception as e:
+                    logger.warning(f"Cleanup attempt {attempt + 1} failed: {e}")
         
         # Force garbage collection to free memory
         gc.collect()
@@ -783,7 +827,7 @@ def auto_complete_courses(self, user_email, password=None):
     
     # Use memory-optimized WebDriver
     cleanup_old_chrome_dirs()  # Clean up any old directories first
-    driver, _ = create_webdriver_with_cleanup()  # No user data dir to track
+    driver, temp_user_data_dir = create_webdriver_with_cleanup()
     wait = WebDriverWait(driver, 6)  # Reduced timeout
 
     try:
@@ -935,7 +979,18 @@ def auto_complete_courses(self, user_email, password=None):
         # Wait a moment for driver to fully close
         time.sleep(0.5)
         
-        # No user data directory cleanup needed with incognito mode
+        # Clean up temporary directory aggressively
+        if temp_user_data_dir and os.path.exists(temp_user_data_dir):
+            max_retries = 3
+            for attempt in range(max_retries):
+                try:
+                    shutil.rmtree(temp_user_data_dir, ignore_errors=True)
+                    if not os.path.exists(temp_user_data_dir):
+                        logger.info(f"Successfully cleaned up temp dir: {temp_user_data_dir}")
+                        break
+                    time.sleep(1)  # Wait before retry
+                except Exception as e:
+                    logger.warning(f"Cleanup attempt {attempt + 1} failed: {e}")
         
         # Force garbage collection to free memory
         gc.collect()
@@ -959,7 +1014,7 @@ def check_wolfnet_password(self, user_email, password):
     
     # Use memory-optimized WebDriver
     cleanup_old_chrome_dirs()  # Clean up any old directories first
-    driver, _ = create_webdriver_with_cleanup()  # No user data dir to track
+    driver, temp_user_data_dir = create_webdriver_with_cleanup()
     wait = WebDriverWait(driver, 6)  # Reduced timeout
 
     try:
@@ -992,7 +1047,18 @@ def check_wolfnet_password(self, user_email, password):
         # Wait a moment for driver to fully close
         time.sleep(0.5)
         
-        # No user data directory cleanup needed with incognito mode
+        # Clean up temporary directory aggressively
+        if temp_user_data_dir and os.path.exists(temp_user_data_dir):
+            max_retries = 3
+            for attempt in range(max_retries):
+                try:
+                    shutil.rmtree(temp_user_data_dir, ignore_errors=True)
+                    if not os.path.exists(temp_user_data_dir):
+                        logger.info(f"Successfully cleaned up temp dir: {temp_user_data_dir}")
+                        break
+                    time.sleep(1)  # Wait before retry
+                except Exception as e:
+                    logger.warning(f"Cleanup attempt {attempt + 1} failed: {e}")
         
         # Force garbage collection
         gc.collect()
