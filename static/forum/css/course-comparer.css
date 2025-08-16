@@ -412,7 +412,7 @@
     transition: all 0.3s ease;
 }
 
-.course-connection-line.highlight {
+.course-connection-line.line-highlight {
     height: 4px;
     background-color: #059669;
     opacity: 1;
@@ -434,7 +434,8 @@
     border: 2px solid #10b981;
     border-radius: 14px;
     pointer-events: none;
-    opacity: 0.6;
+    opacity: 0.75;
+    z-index: 1000;
 }
 
 .course-item.has-match:hover::after {
