@@ -19,6 +19,7 @@ import traceback
 import gc
 import uuid
 import os
+import platform
 
 logger = logging.getLogger(__name__)
 
@@ -46,8 +47,23 @@ def get_memory_optimized_chrome_options():
     chrome_options.add_argument("--disable-gpu")
     
     # Critical flags to prevent segfaults in fork processes
-    chrome_options.add_argument("--no-zygote")  # Disable zygote process
-    chrome_options.add_argument("--single-process")  # Force single process mode
+    # Only add zygote/single-process flags on Linux/Heroku where forking issues are common.
+    # These flags are known to cause Chrome to crash or close the DevTools connection on macOS.
+    try:
+        system_name = platform.system().lower()
+    except Exception:
+        system_name = ''
+
+    add_isolation_flags = False
+    # If running on Heroku (CHROME_BIN set) or on Linux, enable these isolation flags
+    if os.environ.get('CHROME_BIN') is not None or system_name == 'linux':
+        add_isolation_flags = True
+
+    if add_isolation_flags:
+        chrome_options.add_argument("--no-zygote")  # Disable zygote process
+        chrome_options.add_argument("--single-process")  # Force single process mode
+    else:
+        logger.debug(f"Skipping --no-zygote/--single-process flags on platform={system_name}")
     chrome_options.add_argument("--disable-background-timer-throttling")
     chrome_options.add_argument("--disable-backgrounding-occluded-windows")
     chrome_options.add_argument("--disable-renderer-backgrounding")
@@ -64,9 +80,9 @@ def get_memory_optimized_chrome_options():
     chrome_options.add_argument("--disable-ipc-flooding-protection")
     
     # Memory and stability
-    chrome_options.add_argument("--max_old_space_size=4096")
-    chrome_options.add_argument("--no-first-run")
-    chrome_options.add_argument("--no-default-browser-check")
+    # chrome_options.add_argument("--max_old_space_size=4096")
+    # chrome_options.add_argument("--no-first-run")
+    # chrome_options.add_argument("--no-default-browser-check")
     
     # Only disable images if not causing redirect issues
     # chrome_options.add_argument("--blink-settings=imagesEnabled=false")
@@ -91,21 +107,20 @@ def create_webdriver_with_cleanup():
     Returns:
         tuple: (driver, temp_user_data_dir)
     """
-    # Simplified webdriver creation: use a single stable user-data-dir and avoid
-    # creating per-run temporary directories or complex cleanup logic.
+    # Create a unique temporary user-data-dir per run to avoid conflicts
+    # when multiple WebDriver instances are created concurrently.
     chrome_options = get_memory_optimized_chrome_options()
 
-    # Use a stable, shared user-data-dir in the system temp directory. This
-    # avoids creating and tearing down unique directories per run.
-    stable_user_data_dir = os.path.join(tempfile.gettempdir(), 'chrome_user_data')
+    temp_user_data_dir = None
     try:
-        os.makedirs(stable_user_data_dir, exist_ok=True)
+        temp_user_data_dir = tempfile.mkdtemp(prefix='chrome_user_data_')
+        # Ensure directory was created
+        if temp_user_data_dir and os.path.isdir(temp_user_data_dir):
+            chrome_options.add_argument(f"--user-data-dir={temp_user_data_dir}")
     except Exception:
         # If creation fails, proceed without explicitly setting user-data-dir.
-        stable_user_data_dir = None
+        temp_user_data_dir = None
 
-    if stable_user_data_dir:
-        chrome_options.add_argument(f"--user-data-dir={stable_user_data_dir}")
     chrome_options.add_argument("--incognito")
 
     # Create ChromeDriver service
@@ -113,9 +128,8 @@ def create_webdriver_with_cleanup():
     service = Service()
     driver = webdriver.Chrome(service=service, options=chrome_options)
     driver.set_window_size(1000, 1000)
-    logger.info(f"Created WebDriver using stable user-data-dir: {stable_user_data_dir}")
-    # Return driver and None for compatibility with existing call sites
-    return driver, None
+    logger.info(f"Created WebDriver using temp user-data-dir: {temp_user_data_dir}")
+    return driver, temp_user_data_dir
 
 def get_decrypted_wolfnet_password(user_email):
     """
@@ -289,7 +303,6 @@ def check_user_grades_core(user_email):
         # Check if login was successful but with limited content (account-nav found but no course content)
         if login_result.get("message") and "account navigation found" in login_result["message"]:
             logger.info(f"Login successful for {user_email} but no course content available for grade checking")
-            return {"success": False, "error": "No course content available for grade checking", "error_type": "no_courses"}
 
         # Wait for courses to load
         try:
@@ -569,7 +582,14 @@ def check_user_grades_core(user_email):
             driver.quit()
         except Exception as e:
             logger.warning(f"Error quitting driver: {e}")
-        
+        # Remove temporary user-data-dir if created
+        try:
+            if temp_user_data_dir:
+                shutil.rmtree(temp_user_data_dir, ignore_errors=True)
+                logger.info(f"Removed temp user-data-dir: {temp_user_data_dir}")
+        except Exception as e:
+            logger.warning(f"Error removing temp user-data-dir {temp_user_data_dir}: {e}")
+
         # Wait a moment for driver to fully close
         time.sleep(0.5)
     # Force garbage collection to free memory
@@ -780,7 +800,6 @@ def auto_complete_courses(self, user_email, password=None):
         # Check if login was successful but with limited content (account-nav found but no course content)
         if login_result.get("message") and "account navigation found" in login_result["message"]:
             logger.info(f"Login successful for {user_email} but no course content available for auto-completion")
-            return {"success": False, "error": "No course content available for auto-completion", "error_type": "no_courses"}
 
         # Wait for the page to load and find the first .subnav-multicol element
         try:
@@ -912,7 +931,14 @@ def auto_complete_courses(self, user_email, password=None):
             driver.quit()
         except Exception as e:
             logger.warning(f"Error quitting driver: {e}")
-        
+        # Remove temporary user-data-dir if created
+        try:
+            if temp_user_data_dir:
+                shutil.rmtree(temp_user_data_dir, ignore_errors=True)
+                logger.info(f"Removed temp user-data-dir: {temp_user_data_dir}")
+        except Exception as e:
+            logger.warning(f"Error removing temp user-data-dir {temp_user_data_dir}: {e}")
+
         # Wait a moment for driver to fully close
         time.sleep(0.5)
         
@@ -965,7 +991,14 @@ def check_wolfnet_password(self, user_email, password):
             driver.quit()
         except Exception as e:
             logger.warning(f"Error quitting driver: {e}")
-        
+        # Remove temporary user-data-dir if created
+        try:
+            if temp_user_data_dir:
+                shutil.rmtree(temp_user_data_dir, ignore_errors=True)
+                logger.info(f"Removed temp user-data-dir: {temp_user_data_dir}")
+        except Exception as e:
+            logger.warning(f"Error removing temp user-data-dir {temp_user_data_dir}: {e}")
+
         # Wait a moment for driver to fully close
         time.sleep(0.5)
         
