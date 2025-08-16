@@ -342,7 +342,6 @@ try:
             CELERY_BROKER_USE_SSL = {
                 'ssl_cert_reqs': ssl.CERT_NONE,
                 'ssl_check_hostname': False,
-                'ssl_version': ssl.PROTOCOL_TLS,
             }
         
         # Also set the result backend SSL configuration
