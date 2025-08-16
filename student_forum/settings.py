@@ -290,19 +290,55 @@ CELERY_BROKER_TRANSPORT_OPTIONS = {
     'max_connections': int(os.getenv('REDIS_MAX_CONNECTIONS', '10'))
 }
 
-# If the broker URL uses TLS (rediss://), configure Celery/kombu to avoid
-# failing on self-signed certificates from some Heroku Redis instances.
-# This disables SSL certificate verification only when connecting over rediss://.
+# Configure SSL for Redis broker when using TLS (rediss://)
+# For Heroku Redis, use SSL encryption but disable certificate verification
 try:
     if CELERY_BROKER_URL and CELERY_BROKER_URL.startswith('rediss://'):
-        CELERY_BROKER_USE_SSL = {'cert_reqs': ssl.CERT_NONE}
-except Exception:
+        # Use environment variable to control SSL validation
+        # Set REDIS_SSL_CERT_REQS=required for strict validation (production with proper certs)  
+        # Set REDIS_SSL_CERT_REQS=heroku for Heroku Redis (default - encrypted but no cert validation)
+        ssl_cert_reqs = os.getenv('REDIS_SSL_CERT_REQS', 'heroku').lower()
+        
+        if ssl_cert_reqs == 'required':
+            # Strict SSL validation (for production with proper CA-signed certificates)
+            CELERY_BROKER_USE_SSL = {
+                'ssl_cert_reqs': ssl.CERT_REQUIRED,  # Note: ssl_cert_reqs not cert_reqs
+                'ssl_ca_certs': None,  # Use system CA bundle
+                'ssl_check_hostname': False,
+            }
+        elif ssl_cert_reqs == 'optional':
+            # Relaxed SSL validation (verify certs if present, but don't require)
+            CELERY_BROKER_USE_SSL = {
+                'ssl_cert_reqs': ssl.CERT_OPTIONAL,  # Note: ssl_cert_reqs not cert_reqs
+                'ssl_ca_certs': None,
+                'ssl_check_hostname': False,
+            }
+        else:
+            # Heroku Redis configuration (default)
+            # Uses SSL encryption but disables certificate verification for self-signed certs
+            # This maintains encryption while working with Heroku's self-signed certificates
+            CELERY_BROKER_USE_SSL = {
+                'ssl_cert_reqs': ssl.CERT_NONE,      # Note: ssl_cert_reqs not cert_reqs
+                'ssl_check_hostname': False,         # Note: ssl_check_hostname not check_hostname
+                'ssl_version': ssl.PROTOCOL_TLS,     # Use PROTOCOL_TLS instead of TLSv1_2 for better compatibility
+            }
+        
+        # Also set the result backend SSL configuration
+        CELERY_REDIS_BACKEND_USE_SSL = CELERY_BROKER_USE_SSL.copy()
+            
+except Exception as e:
+    print(f"Error configuring Redis SSL: {e}")
     # If anything goes wrong reading the URL, do not set the override here.
     pass
 
-# Optional: tighten connection timeouts so idle connections are released
-CELERY_BROKER_CONNECTION_TIMEOUT = int(os.getenv('BROKER_CONNECTION_TIMEOUT', '10'))
-CELERY_BROKER_HEARTBEAT = int(os.getenv('BROKER_HEARTBEAT', '30'))
+# Improve connection reliability and timeouts
+CELERY_BROKER_CONNECTION_TIMEOUT = int(os.getenv('BROKER_CONNECTION_TIMEOUT', '30'))  # Increased from 10
+CELERY_BROKER_HEARTBEAT = int(os.getenv('BROKER_HEARTBEAT', '10'))  # Decreased from 30 for faster detection
+
+# Additional connection robustness settings
+CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP = True
+CELERY_BROKER_CONNECTION_RETRY = True
+CELERY_BROKER_CONNECTION_MAX_RETRIES = 10
 
 # Memory optimization for Heroku
 CELERY_WORKER_PREFETCH_MULTIPLIER = 1
