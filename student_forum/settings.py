@@ -294,6 +294,28 @@ CELERY_BROKER_TRANSPORT_OPTIONS = {
 # For Heroku Redis, use SSL encryption but disable certificate verification
 try:
     if CELERY_BROKER_URL and CELERY_BROKER_URL.startswith('rediss://'):
+        # Remove ssl_cert_reqs parameter from URL if present (it conflicts with our SSL config)
+        import urllib.parse
+        parsed_url = urllib.parse.urlparse(CELERY_BROKER_URL)
+        query_params = urllib.parse.parse_qs(parsed_url.query)
+        
+        # Remove ssl_cert_reqs from query parameters
+        if 'ssl_cert_reqs' in query_params:
+            del query_params['ssl_cert_reqs']
+            
+        # Reconstruct URL without ssl_cert_reqs parameter
+        new_query = urllib.parse.urlencode(query_params, doseq=True)
+        cleaned_url = urllib.parse.urlunparse((
+            parsed_url.scheme,
+            parsed_url.netloc,
+            parsed_url.path,
+            parsed_url.params,
+            new_query,
+            parsed_url.fragment
+        ))
+        CELERY_BROKER_URL = cleaned_url
+        CELERY_RESULT_BACKEND = cleaned_url
+        
         # Use environment variable to control SSL validation
         # Set REDIS_SSL_CERT_REQS=required for strict validation (production with proper certs)  
         # Set REDIS_SSL_CERT_REQS=heroku for Heroku Redis (default - encrypted but no cert validation)
@@ -302,14 +324,14 @@ try:
         if ssl_cert_reqs == 'required':
             # Strict SSL validation (for production with proper CA-signed certificates)
             CELERY_BROKER_USE_SSL = {
-                'ssl_cert_reqs': ssl.CERT_REQUIRED,  # Note: ssl_cert_reqs not cert_reqs
+                'ssl_cert_reqs': ssl.CERT_REQUIRED,
                 'ssl_ca_certs': None,  # Use system CA bundle
                 'ssl_check_hostname': False,
             }
         elif ssl_cert_reqs == 'optional':
             # Relaxed SSL validation (verify certs if present, but don't require)
             CELERY_BROKER_USE_SSL = {
-                'ssl_cert_reqs': ssl.CERT_OPTIONAL,  # Note: ssl_cert_reqs not cert_reqs
+                'ssl_cert_reqs': ssl.CERT_OPTIONAL,
                 'ssl_ca_certs': None,
                 'ssl_check_hostname': False,
             }
@@ -318,13 +340,16 @@ try:
             # Uses SSL encryption but disables certificate verification for self-signed certs
             # This maintains encryption while working with Heroku's self-signed certificates
             CELERY_BROKER_USE_SSL = {
-                'ssl_cert_reqs': ssl.CERT_NONE,      # Note: ssl_cert_reqs not cert_reqs
-                'ssl_check_hostname': False,         # Note: ssl_check_hostname not check_hostname
-                'ssl_version': ssl.PROTOCOL_TLS,     # Use PROTOCOL_TLS instead of TLSv1_2 for better compatibility
+                'ssl_cert_reqs': ssl.CERT_NONE,
+                'ssl_check_hostname': False,
+                'ssl_version': ssl.PROTOCOL_TLS,
             }
         
         # Also set the result backend SSL configuration
         CELERY_REDIS_BACKEND_USE_SSL = CELERY_BROKER_USE_SSL.copy()
+        
+        print(f"Cleaned Redis URL (removed ssl_cert_reqs parameter): {cleaned_url[:50]}...")
+        print(f"Using SSL cert validation mode: {ssl_cert_reqs}")
             
 except Exception as e:
     print(f"Error configuring Redis SSL: {e}")
