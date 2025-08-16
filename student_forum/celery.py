@@ -78,27 +78,56 @@ except Exception:
     pass
 
 # Configure SSL for Redis broker if the REDIS_URL uses rediss://
-# Do not disable certificate validation (no CERT_NONE).
+# Clean URL parameters and apply proper SSL configuration
 try:
     broker_url = getattr(django_settings, 'CELERY_BROKER_URL', os.getenv('REDIS_URL', ''))
     if broker_url and broker_url.startswith('rediss://'):
+        # Remove ssl_cert_reqs parameter from URL if present (it conflicts with our SSL config)
+        import urllib.parse
+        parsed_url = urllib.parse.urlparse(broker_url)
+        query_params = urllib.parse.parse_qs(parsed_url.query)
+        
+        # Remove ssl_cert_reqs from query parameters
+        if 'ssl_cert_reqs' in query_params:
+            del query_params['ssl_cert_reqs']
+            print(f"Removed ssl_cert_reqs parameter from Redis URL")
+            
+        # Reconstruct URL without ssl_cert_reqs parameter
+        new_query = urllib.parse.urlencode(query_params, doseq=True)
+        cleaned_url = urllib.parse.urlunparse((
+            parsed_url.scheme,
+            parsed_url.netloc,
+            parsed_url.path,
+            parsed_url.params,
+            new_query,
+            parsed_url.fragment
+        ))
+        
+        # Update broker URL
+        app.conf.broker_url = cleaned_url
+        
         # Get SSL configuration from Django settings
         ssl_opts = getattr(django_settings, 'CELERY_BROKER_USE_SSL', None)
         
         if ssl_opts is not None:
             # Use the SSL configuration from Django settings
             app.conf.broker_use_ssl = ssl_opts
+            print(f"Using SSL config from Django settings")
         else:
             # Default configuration for Heroku Redis (self-signed certificates)
             app.conf.broker_use_ssl = {
                 'ssl_cert_reqs': ssl.CERT_NONE,      # Don't verify certificate
                 'ssl_check_hostname': False,         # Don't verify hostname
-                'ssl_version': ssl.PROTOCOL_TLS,     # Use modern TLS
+                'ssl_ca_certs': None,                # No CA certificates
             }
+            print(f"Using default Heroku SSL config (CERT_NONE)")
             
         # Also configure result backend SSL if using Redis for results
         result_backend = getattr(django_settings, 'CELERY_RESULT_BACKEND', '')
         if result_backend and result_backend.startswith('rediss://'):
+            # Clean result backend URL too
+            app.conf.result_backend = cleaned_url
+            
             redis_backend_ssl = getattr(django_settings, 'CELERY_REDIS_BACKEND_USE_SSL', None)
             if redis_backend_ssl is not None:
                 app.conf.redis_backend_use_ssl = redis_backend_ssl
@@ -106,8 +135,9 @@ try:
                 app.conf.redis_backend_use_ssl = {
                     'ssl_cert_reqs': ssl.CERT_NONE,
                     'ssl_check_hostname': False,
-                    'ssl_version': ssl.PROTOCOL_TLS,
+                    'ssl_ca_certs': None,
                 }
+                
 except Exception as e:
     print(f"Error configuring Celery SSL: {e}")
     pass

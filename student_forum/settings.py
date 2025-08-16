@@ -287,13 +287,40 @@ CELERY_TIMEZONE = 'UTC'
 CELERY_BROKER_POOL_LIMIT = int(os.getenv('BROKER_POOL_LIMIT', '3'))
 # This controls redis-py's max connections for Celery transport
 CELERY_BROKER_TRANSPORT_OPTIONS = {
-    'max_connections': int(os.getenv('REDIS_MAX_CONNECTIONS', '10'))
+    'max_connections': int(os.getenv('REDIS_MAX_CONNECTIONS', '10')),
+    'socket_keepalive': True,
+    'socket_keepalive_options': {},
+    'socket_connect_timeout': 30,
+    'socket_timeout': 30,
+    'retry_on_timeout': True,
 }
 
 # Configure SSL for Redis broker when using TLS (rediss://)
 # For Heroku Redis, use SSL encryption but disable certificate verification
 try:
     if CELERY_BROKER_URL and CELERY_BROKER_URL.startswith('rediss://'):
+        # Remove ssl_cert_reqs parameter from URL if present (it conflicts with our SSL config)
+        import urllib.parse
+        parsed_url = urllib.parse.urlparse(CELERY_BROKER_URL)
+        query_params = urllib.parse.parse_qs(parsed_url.query)
+        
+        # Remove ssl_cert_reqs from query parameters
+        if 'ssl_cert_reqs' in query_params:
+            del query_params['ssl_cert_reqs']
+            
+        # Reconstruct URL without ssl_cert_reqs parameter
+        new_query = urllib.parse.urlencode(query_params, doseq=True)
+        cleaned_url = urllib.parse.urlunparse((
+            parsed_url.scheme,
+            parsed_url.netloc,
+            parsed_url.path,
+            parsed_url.params,
+            new_query,
+            parsed_url.fragment
+        ))
+        CELERY_BROKER_URL = cleaned_url
+        CELERY_RESULT_BACKEND = cleaned_url
+        
         # Use environment variable to control SSL validation
         # Set REDIS_SSL_CERT_REQS=required for strict validation (production with proper certs)  
         # Set REDIS_SSL_CERT_REQS=heroku for Heroku Redis (default - encrypted but no cert validation)
@@ -302,14 +329,14 @@ try:
         if ssl_cert_reqs == 'required':
             # Strict SSL validation (for production with proper CA-signed certificates)
             CELERY_BROKER_USE_SSL = {
-                'ssl_cert_reqs': ssl.CERT_REQUIRED,  # Note: ssl_cert_reqs not cert_reqs
+                'ssl_cert_reqs': ssl.CERT_REQUIRED,
                 'ssl_ca_certs': None,  # Use system CA bundle
                 'ssl_check_hostname': False,
             }
         elif ssl_cert_reqs == 'optional':
             # Relaxed SSL validation (verify certs if present, but don't require)
             CELERY_BROKER_USE_SSL = {
-                'ssl_cert_reqs': ssl.CERT_OPTIONAL,  # Note: ssl_cert_reqs not cert_reqs
+                'ssl_cert_reqs': ssl.CERT_OPTIONAL,
                 'ssl_ca_certs': None,
                 'ssl_check_hostname': False,
             }
@@ -318,13 +345,16 @@ try:
             # Uses SSL encryption but disables certificate verification for self-signed certs
             # This maintains encryption while working with Heroku's self-signed certificates
             CELERY_BROKER_USE_SSL = {
-                'ssl_cert_reqs': ssl.CERT_NONE,      # Note: ssl_cert_reqs not cert_reqs
-                'ssl_check_hostname': False,         # Note: ssl_check_hostname not check_hostname
-                'ssl_version': ssl.PROTOCOL_TLS,     # Use PROTOCOL_TLS instead of TLSv1_2 for better compatibility
+                'ssl_cert_reqs': ssl.CERT_NONE,
+                'ssl_check_hostname': False,
+                'ssl_ca_certs': None,
             }
         
         # Also set the result backend SSL configuration
         CELERY_REDIS_BACKEND_USE_SSL = CELERY_BROKER_USE_SSL.copy()
+        
+        print(f"Cleaned Redis URL (removed ssl_cert_reqs parameter): {cleaned_url[:50]}...")
+        print(f"Using SSL cert validation mode: {ssl_cert_reqs}")
             
 except Exception as e:
     print(f"Error configuring Redis SSL: {e}")
@@ -332,13 +362,18 @@ except Exception as e:
     pass
 
 # Improve connection reliability and timeouts
-CELERY_BROKER_CONNECTION_TIMEOUT = int(os.getenv('BROKER_CONNECTION_TIMEOUT', '30'))  # Increased from 10
-CELERY_BROKER_HEARTBEAT = int(os.getenv('BROKER_HEARTBEAT', '10'))  # Decreased from 30 for faster detection
+CELERY_BROKER_CONNECTION_TIMEOUT = int(os.getenv('BROKER_CONNECTION_TIMEOUT', '60'))  # Increased for stability
+CELERY_BROKER_HEARTBEAT = int(os.getenv('BROKER_HEARTBEAT', '30'))  # Increased for stability
 
 # Additional connection robustness settings
 CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP = True
 CELERY_BROKER_CONNECTION_RETRY = True
 CELERY_BROKER_CONNECTION_MAX_RETRIES = 10
+
+# Add retry settings for tasks
+CELERY_TASK_ALWAYS_EAGER = False
+CELERY_TASK_EAGER_PROPAGATES = True
+CELERY_TASK_STORE_EAGER_RESULT = False
 
 # Memory optimization for Heroku
 CELERY_WORKER_PREFETCH_MULTIPLIER = 1
