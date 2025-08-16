@@ -311,10 +311,12 @@ document.addEventListener('DOMContentLoaded', function() {
                     courseName.className = 'course-name-container'
                     courseItem.className = 'course-item';
                     courseItem.dataset.userId = userData.user_id;
+                    courseItem.dataset.block = block;
                     
                     const course = userData.schedule[block];
                     if (course && course.course) {
                         courseName.textContent = course.course;
+                        courseItem.dataset.courseName = course.course;
                     } else {
                         courseName.textContent = '-';
                         courseItem.classList.add('empty');
@@ -326,6 +328,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 });
             }
         });
+        
+        // Add connection lines after all course blocks are rendered
+        setTimeout(() => {
+            drawConnectionLines();
+        }, 100);
     }
     
     function arrangeCurrentUserFirst() {
@@ -349,8 +356,126 @@ document.addEventListener('DOMContentLoaded', function() {
         updateSelectedUsersDisplay(selectedUsers);
     }
     
+    function drawConnectionLines() {
+        // Remove existing connection lines
+        document.querySelectorAll('.course-connection-line').forEach(line => line.remove());
+        
+        if (selectedUsersData.length < 2) return;
+        
+        const allBlocks = ['1A', '1B', '1D', '1E', '2A', '2B', '2C', '2D', '2E'];
+        
+        allBlocks.forEach(block => {
+            const courseRow = document.getElementById(`courses-${block}`);
+            if (!courseRow) return;
+            
+            const courseItems = Array.from(courseRow.querySelectorAll('.course-item:not(.empty)'));
+            
+            // Group course items by course name
+            const courseGroups = {};
+            courseItems.forEach(item => {
+                const courseName = item.dataset.courseName;
+                if (courseName && courseName !== '-') {
+                    if (!courseGroups[courseName]) {
+                        courseGroups[courseName] = [];
+                    }
+                    courseGroups[courseName].push(item);
+                }
+            });
+            
+            // Draw lines for courses that appear more than once
+            Object.entries(courseGroups).forEach(([courseName, items]) => {
+                if (items.length > 1) {
+                    // Add matching class to highlight matching courses
+                    items.forEach(item => item.classList.add('has-match'));
+                    
+                    // Draw connection lines between consecutive matching items
+                    for (let i = 0; i < items.length - 1; i++) {
+                        drawLineBetweenItems(items[i], items[i + 1], courseRow);
+                    }
+                }
+            });
+        });
+        
+        // Add hover effects
+        addConnectionLineHoverEffects();
+    }
+    
+    function drawLineBetweenItems(item1, item2, container) {
+        const rect1 = item1.getBoundingClientRect();
+        const rect2 = item2.getBoundingClientRect();
+        const containerRect = container.getBoundingClientRect();
+        
+        // Calculate line position and length
+        const startX = rect1.right - containerRect.left;
+        const endX = rect2.left - containerRect.left;
+        const centerY = (rect1.top + rect1.height / 2) - containerRect.top;
+        
+        // Create connection line
+        const line = document.createElement('div');
+        line.className = 'course-connection-line';
+        line.style.position = 'absolute';
+        line.style.left = `${startX}px`;
+        line.style.top = `${centerY - 1.5}px`;
+        line.style.width = `${endX - startX}px`;
+        
+        // Add to container
+        container.style.position = 'relative';
+        container.appendChild(line);
+    }
+    
+    function addConnectionLineHoverEffects() {
+        document.querySelectorAll('.course-item.has-match').forEach(item => {
+            item.addEventListener('mouseenter', () => {
+                const courseName = item.dataset.courseName;
+                const block = item.dataset.block;
+                
+                // Highlight all matching courses in the same block
+                document.querySelectorAll(`[data-block="${block}"][data-course-name="${courseName}"]`).forEach(matchingItem => {
+                    matchingItem.style.transform = 'scale(1.02)';
+                    matchingItem.style.boxShadow = '0 4px 12px rgba(16, 185, 129, 0.3)';
+                });
+                
+                // Highlight connection lines in the same block
+                const courseRow = document.getElementById(`courses-${block}`);
+                if (courseRow) {
+                    courseRow.querySelectorAll('.course-connection-line').forEach(line => {
+                        line.classList.add('highlight');
+                    });
+                }
+            });
+            
+            item.addEventListener('mouseleave', () => {
+                const courseName = item.dataset.courseName;
+                const block = item.dataset.block;
+                
+                // Remove highlight from all matching courses in the same block
+                document.querySelectorAll(`[data-block="${block}"][data-course-name="${courseName}"]`).forEach(matchingItem => {
+                    matchingItem.style.transform = '';
+                    matchingItem.style.boxShadow = '';
+                });
+                
+                // Remove highlight from connection lines in the same block
+                const courseRow = document.getElementById(`courses-${block}`);
+                if (courseRow) {
+                    courseRow.querySelectorAll('.course-connection-line').forEach(line => {
+                        line.classList.remove('highlight');
+                    });
+                }
+            });
+        });
+    }
+    
     // Initialize layout
     updateLayout();
+    
+    // Redraw connection lines on window resize
+    window.addEventListener('resize', () => {
+        if (selectedUsersData.length > 1) {
+            setTimeout(() => {
+                drawConnectionLines();
+            }, 100);
+        }
+    });
 });
 </script>
 {% endblock %}
