@@ -30,26 +30,23 @@ def get_memory_optimized_chrome_options():
         Options: Configured Chrome options
     """
     chrome_options = Options()
-    chrome_options.add_argument("--headless=new")
+    # chrome_options.add_argument("--headless=new")
     chrome_options.add_argument("--no-sandbox")
     chrome_options.add_argument("--disable-dev-shm-usage")
-    
-    # Memory optimization flags
-    chrome_options.add_argument("--memory-pressure-off")
-    chrome_options.add_argument("--max_old_space_size=256")
-    chrome_options.add_argument("--disable-background-timer-throttling")
-    chrome_options.add_argument("--disable-renderer-backgrounding")
-    chrome_options.add_argument("--disable-backgrounding-occluded-windows")
-    chrome_options.add_argument("--disable-background-networking")
-    chrome_options.add_argument("--disable-web-security")
-    chrome_options.add_argument("--disable-features=VizDisplayCompositor")
-    chrome_options.add_argument("--disable-ipc-flooding-protection")
+
+    # Keep GPU disabled in CI or headless environments
     chrome_options.add_argument("--disable-gpu")
-    chrome_options.add_argument("--single-process")  # Use single process to reduce memory
+
+    # Disable extensions/plugins to reduce overhead
     chrome_options.add_argument("--disable-extensions")
     chrome_options.add_argument("--disable-plugins")
-    chrome_options.add_argument("--disable-images")  # Don't load images to save memory
-    # JavaScript is needed for login forms, so we keep it enabled
+
+    # Optionally avoid loading images to save memory. If redirects or content
+    # detection fail, try removing this flag.
+    chrome_options.add_argument("--blink-settings=imagesEnabled=false")
+
+    # Set a safer page load strategy (normal) to ensure redirects complete
+    chrome_options.set_capability("pageLoadStrategy", "normal")
     
     return chrome_options
 
@@ -78,7 +75,7 @@ def create_webdriver_with_cleanup():
     chrome_options.add_argument("--no-default-browser-check")
     
     driver = webdriver.Chrome(options=chrome_options)
-    driver.set_window_size(400, 300)  # Smaller window size to save memory
+    driver.set_window_size(1000, 1000)  # Smaller window size to save memory
     
     logger.info(f"Created WebDriver with user data dir: {unique_user_data_dir}")
     return driver, unique_user_data_dir

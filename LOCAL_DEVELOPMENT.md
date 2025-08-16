@@ -2,11 +2,9 @@
 
 ## Overview
 
-The parallel grade checking system uses **Celery** with **Redis** to:
-- Check user grades in parallel (instead of sequentially)
-- Schedule automatic grade checks every 30 minutes
-- Handle email notifications in a separate queue
-- Handle auto complete courses when users requests it
+The grade checking system uses Celery with Redis and separates workload into two dedicated worker types:
+- grades_worker: Dedicated to grade-checking tasks that use Selenium/WebDriver and are memory-intensive.
+- general_worker: Handles all other tasks (emails, notifications, autocomplete, interactive tasks).
 
 
 ## Local Development
@@ -23,19 +21,24 @@ redis-cli ping  # Should return: PONG
 pip install -r requirements.txt
 ```
 
-### 3. Run the System (3 terminals)
+### 3. Run the System (4 terminals)
 
-**Terminal 1: Celery Worker**
+Run a dedicated grades worker (single concurrency, use --pool=solo for safer WebDriver usage):
 ```bash
-celery -A student_forum worker --loglevel=info --concurrency=3 -Q high,default,low
+celery -A student_forum worker --loglevel=info --concurrency=1 -Q grades --pool=solo
 ```
 
-**Terminal 2: Celery Beat (Scheduler)**
+Run a general worker for the rest of the tasks:
+```bash
+celery -A student_forum worker --loglevel=info --concurrency=2 -Q general,high,default,low
+```
+
+Run Celery Beat (scheduler):
 ```bash
 celery -A student_forum beat --loglevel=info
 ```
 
-**Terminal 3: Django Server**
+Run the Django development server:
 ```bash
 python manage.py runserver
 ```
@@ -44,10 +47,10 @@ python manage.py runserver
 
 ### Manual Grade Checking
 ```bash
-# Check all users' grades
+# Check all users' grades (dispatches grade tasks)
 python manage.py check_grades
 
-# Check specific user's grades
+# Check a specific user's grades
 python manage.py check_grades --user-email student@wpga.ca
 ```
 
@@ -61,16 +64,16 @@ celery -A student_forum flower
 ## How It Works
 
 ### System Architecture
-1. **Celery Beat** automatically schedules both `check_all_user_grades` and `autocomplete_courses` tasks every 30 minutes, but you can also trigger grade checks manually with the management command.
-2. When triggered, the main grade-checking task quickly creates individual `check_single_user_grades` tasks for each user and hands them off to Celery, which uses separate queues for different types of tasks (e.g., high, default, low, email).
-3. The Celery worker pool processes tasks in parallel from these queues, so grade checking, autocomplete, and email notifications do not block the Django server or each other.
-4. Email notifications and autocomplete requests are handled in their own queues, ensuring independent and efficient processing.
+1. Celery Beat schedules periodic triggers (for example, `periodic_grade_check_trigger`) which dispatch coordination tasks to the `grades` queue.
+2. The `grades_worker` consumes from the `grades` queue and is responsible for all WebDriver-heavy grade checks (single-concurrency recommended).
+3. The `general_worker` consumes from the `general`, `high`, `default`, and `low` queues and handles email notifications, autocomplete, and other lightweight background work.
+4. Separating workers prevents WebDriver tasks from starving other tasks for memory or CPU.
 
 ### Task Types
-- `check_all_user_grades` - Schedules grade checking for all users (runs every 30 minutes)
-- `check_single_user_grades` - Checks grades for one specific user
-- `send_email_notification` - Sends email notifications in separate queue
-- `autocomplete_courses` - Returns user's courses from WolfNet
+- `check_all_user_grades` / `periodic_grade_check_trigger` - Coordinates and dispatches grade checks (sent to `grades` queue).
+- `check_single_user_grades` - Performs a grade check for one user (runs on `grades` queue).
+- `send_email_notification` - Sent to the `general` queue.
+- `autocomplete_courses` / `auto_complete_courses` - Sent to the `general` queue.
 
 ## Heroku Deployment
 
@@ -83,27 +86,31 @@ heroku addons:create heroku-redis:mini
 heroku config:get REDIS_URL
 ```
 
-### Procfile Processes
+### Procfile Processes (recommended)
 ```
 web: gunicorn student_forum.wsgi --log-file -
-worker: celery -A student_forum worker --loglevel=info --concurrency=3 -Q high,default,low
+grades_worker: celery -A student_forum worker --loglevel=info --concurrency=1 -Q grades --pool=solo
+general_worker: celery -A student_forum worker --loglevel=info --concurrency=2 -Q general,high,default,low
 beat: celery -A student_forum beat --loglevel=info
 ```
 
 ### Scaling
 ```bash
-# Scale up workers for parallel processing
-heroku ps:scale worker=1 beat=1
+# Scale the general worker independently
+heroku ps:scale general_worker=1 beat=1 web=1
 
-# For heavy load, you can add more workers
-heroku ps:scale worker=2
+# If grade checks are heavy, add more grades workers carefully (use small dynos or single concurrency)
+heroku ps:scale grades_worker=1
 ```
 
 ### Heroku Logs
 ```bash
-# View worker logs
-heroku logs -t --dyno worker
+# View logs for the general worker
+heroku logs -t --dyno general_worker
 
-# View beat logs  
+# View logs for the grades worker
+heroku logs -t --dyno grades_worker
+
+# View beat logs
 heroku logs -t --dyno beat
 ```
