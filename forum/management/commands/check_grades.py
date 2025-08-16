@@ -1,5 +1,5 @@
 from django.core.management.base import BaseCommand
-from forum.tasks import periodic_grade_check_trigger, check_single_user_grades, periodic_grade_check_trigger
+from forum.tasks import periodic_grade_check_trigger, check_single_user_grades
 
 class Command(BaseCommand):
     help = 'Manually trigger grade checking for users'

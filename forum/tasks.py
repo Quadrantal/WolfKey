@@ -6,7 +6,6 @@ import re
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.options import Options
-from selenium.webdriver.chrome.service import Service as ChromeService
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 import requests
@@ -20,12 +19,6 @@ import traceback
 import gc
 import uuid
 import os
-import socket
-try:
-    import fcntl  # POSIX-only; used to serialize Chrome startup on Heroku
-except Exception:  # pragma: no cover
-    fcntl = None
-from selenium.common.exceptions import SessionNotCreatedException
 
 logger = logging.getLogger(__name__)
 
@@ -37,15 +30,13 @@ def get_memory_optimized_chrome_options():
         Options: Configured Chrome options
     """
     chrome_options = Options()
-    # Prefer generic --headless to avoid potential extra features in "new" headless
-    chrome_options.add_argument("--headless")
+    chrome_options.add_argument("--headless=new")
     chrome_options.add_argument("--no-sandbox")
     chrome_options.add_argument("--disable-dev-shm-usage")
     
     # Memory optimization flags
     chrome_options.add_argument("--memory-pressure-off")
-    # Lower V8 old space to reduce memory footprint
-    chrome_options.add_argument("--js-flags=--max_old_space_size=128")
+    chrome_options.add_argument("--max_old_space_size=256")
     chrome_options.add_argument("--disable-background-timer-throttling")
     chrome_options.add_argument("--disable-renderer-backgrounding")
     chrome_options.add_argument("--disable-backgrounding-occluded-windows")
@@ -54,195 +45,62 @@ def get_memory_optimized_chrome_options():
     chrome_options.add_argument("--disable-features=VizDisplayCompositor")
     chrome_options.add_argument("--disable-ipc-flooding-protection")
     chrome_options.add_argument("--disable-gpu")
+    chrome_options.add_argument("--single-process")  # Use single process to reduce memory
     chrome_options.add_argument("--disable-extensions")
     chrome_options.add_argument("--disable-plugins")
     chrome_options.add_argument("--disable-images")  # Don't load images to save memory
+    # JavaScript is needed for login forms, so we keep it enabled
     
-    # Avoid user data directory issues completely
-    chrome_options.add_argument("--no-first-run")
-    chrome_options.add_argument("--no-default-browser-check")
-    chrome_options.add_argument("--disable-default-apps")
-    chrome_options.add_argument("--disable-sync")
-    # Do not use incognito when providing a custom user-data-dir; it may conflict
-    chrome_options.add_argument("--disable-session-crashed-bubble")
-    chrome_options.add_argument("--disable-infobars")
-    chrome_options.add_argument("--disable-translate")
-    chrome_options.add_argument("--disable-component-extensions-with-background-pages")
-    # Extra stability flags for containerized Linux (Heroku)
-    chrome_options.add_argument("--disable-software-rasterizer")
-    chrome_options.add_argument("--no-zygote")
-    chrome_options.add_argument("--disable-setuid-sandbox")
-    # Reduce process model even further
-    chrome_options.add_argument("--single-process")
-    
-    # Reduce process count and site isolation overhead to lower memory footprint
-    chrome_options.add_argument("--renderer-process-limit=1")
-    chrome_options.add_argument("--disable-site-isolation-trials")
     return chrome_options
-
-def _get_free_port() -> int:
-    """Find a free localhost TCP port for Chrome's remote debugging."""
-    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-        s.bind(("127.0.0.1", 0))
-        s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-        return s.getsockname()[1]
-
-
-def _with_file_lock(lock_path):
-    """Context manager yielding a file lock if available, else a no-op context."""
-    class _Noop:
-        def __enter__(self):
-            return self
-        def __exit__(self, exc_type, exc, tb):
-            return False
-    if not fcntl:
-        # If fcntl is not available (non-POSIX), return a simple no-op context
-        return _Noop()
-    class _Lock:
-        def __init__(self, path):
-            self.path = path
-            self.fd = None
-        def __enter__(self):
-            self.fd = open(self.path, "w+")
-            fcntl.flock(self.fd.fileno(), fcntl.LOCK_EX)
-            return self
-        def __exit__(self, exc_type, exc, tb):
-            try:
-                fcntl.flock(self.fd.fileno(), fcntl.LOCK_UN)
-            finally:
-                self.fd.close()
-            return False
-    return _Lock(lock_path)
-
 
 def create_webdriver_with_cleanup():
     """
-    Create a WebDriver with proper cleanup handling and Heroku-compatible settings
-
+    Create a WebDriver with proper cleanup handling and unique user data directory
+    
     Returns:
-        tuple: (driver, unique_user_data_dir or None)
+        tuple: (driver, unique_user_data_dir)
     """
     chrome_options = get_memory_optimized_chrome_options()
-
-    # Check if we're running on Heroku
-    is_heroku = os.environ.get('DYNO') is not None
-    unique_user_data_dir = None
-
-    # Create a unique temporary directory for user data to avoid conflicts
+    
+    # Create truly unique temp directory with timestamp and UUID
     import time
     timestamp = str(int(time.time() * 1000))  # milliseconds
-    process_id = str(os.getpid())  # process ID
     unique_id = str(uuid.uuid4())[:8]
+    unique_user_data_dir = tempfile.mkdtemp(prefix=f"chrome_{timestamp}_{unique_id}_")
     
-    if is_heroku:
-        # For Heroku, use /tmp which is writable
-        temp_base = "/tmp"
-    else:
-        # For local development, use system temp dir
-        temp_base = tempfile.gettempdir()
+    # Ensure directory exists and has proper permissions
+    os.makedirs(unique_user_data_dir, exist_ok=True)
+    chrome_options.add_argument(f"--user-data-dir={unique_user_data_dir}")
     
-    unique_user_data_dir = os.path.join(temp_base, f"chrome_{timestamp}_{process_id}_{unique_id}")
+    # Add additional arguments to prevent session conflicts
+    chrome_options.add_argument(f"--remote-debugging-port=0")  # Use random available port
+    chrome_options.add_argument("--no-first-run")
+    chrome_options.add_argument("--no-default-browser-check")
     
-    # Set Chrome binary/driver paths if provided by environment (Heroku buildpack)
-    chrome_bin = os.environ.get("GOOGLE_CHROME_BIN") or os.environ.get("CHROME_BIN")
-    chromedriver_path = os.environ.get("CHROMEDRIVER_PATH") or shutil.which("chromedriver")
-    service = ChromeService(executable_path=chromedriver_path) if chromedriver_path else None
-
-    # Serialize Chrome startups slightly on Heroku to avoid transient races
-    lock_path = "/tmp/wolfkey_chrome.lock" if is_heroku else os.path.join(tempfile.gettempdir(), "wolfkey_chrome.lock")
-
-    def _start_once():
-        # Create a fresh, unique user-data directory and port for each attempt
-        nonlocal unique_user_data_dir
-        ts = str(int(time.time() * 1000))
-        pid = str(os.getpid())
-        uid = str(uuid.uuid4())[:8]
-        base = "/tmp" if is_heroku else tempfile.gettempdir()
-        unique_user_data_dir = os.path.join(base, f"chrome_{ts}_{pid}_{uid}")
-        os.makedirs(unique_user_data_dir, exist_ok=True)
-
-        # Use separate data/cache dirs inside user-data-dir to avoid conflicts
-        data_path = os.path.join(unique_user_data_dir, "data")
-        cache_path = os.path.join(unique_user_data_dir, "cache")
-        os.makedirs(data_path, exist_ok=True)
-        os.makedirs(cache_path, exist_ok=True)
-
-        local_opts = get_memory_optimized_chrome_options()
-        if chrome_bin:
-            local_opts.binary_location = chrome_bin
-        local_opts.add_argument(f"--user-data-dir={unique_user_data_dir}")
-        local_opts.add_argument("--profile-directory=Default")
-        local_opts.add_argument(f"--data-path={data_path}")
-        local_opts.add_argument(f"--disk-cache-dir={cache_path}")
-
-        env_label = "Heroku" if is_heroku else "local"
-        logger.info(f"Launching Chrome ({env_label}) with profile at {unique_user_data_dir}")
-
-        with _with_file_lock(lock_path):
-            return webdriver.Chrome(service=service, options=local_opts) if service else webdriver.Chrome(options=local_opts)
-
-    # Try up to 3 attempts in case of transient lock/memory issues; last attempt without user-data-dir
-    last_exc = None
-    for attempt in range(3):
-        try:
-            if attempt < 2:
-                driver = _start_once()
-            else:
-                # Final fallback: avoid user-data-dir entirely
-                local_opts = get_memory_optimized_chrome_options()
-                if chrome_bin:
-                    local_opts.binary_location = chrome_bin
-                logger.info("Launching Chrome fallback without explicit user-data-dir")
-                with _with_file_lock(lock_path):
-                    driver = webdriver.Chrome(service=service, options=local_opts) if service else webdriver.Chrome(options=local_opts)
-            driver.set_window_size(400, 300)
-            return driver, unique_user_data_dir
-        except SessionNotCreatedException as e:
-            last_exc = e
-            logger.warning(f"SessionNotCreatedException on attempt {attempt+1}: {e}. Retrying with fresh profile...")
-            try:
-                if unique_user_data_dir and os.path.exists(unique_user_data_dir):
-                    shutil.rmtree(unique_user_data_dir, ignore_errors=True)
-            except Exception:
-                pass
-            time.sleep(0.5)
-        except Exception as e:
-            last_exc = e
-            logger.error(f"Error starting Chrome on attempt {attempt+1}: {e}")
-            try:
-                if unique_user_data_dir and os.path.exists(unique_user_data_dir):
-                    shutil.rmtree(unique_user_data_dir, ignore_errors=True)
-            except Exception:
-                pass
-            time.sleep(0.5)
-
-    # If we get here, both attempts failed
-    raise last_exc if last_exc else RuntimeError("Failed to create WebDriver")
+    driver = webdriver.Chrome(options=chrome_options)
+    driver.set_window_size(400, 300)  # Smaller window size to save memory
+    
+    logger.info(f"Created WebDriver with user data dir: {unique_user_data_dir}")
+    return driver, unique_user_data_dir
 
 def cleanup_old_chrome_dirs():
     """
     Clean up old Chrome user data directories that might be left over
     """
     try:
-        # Check both /tmp (Heroku) and system temp directory (local)
-        temp_dirs = ["/tmp", tempfile.gettempdir()]
-        
-        for temp_dir in temp_dirs:
-            if not os.path.exists(temp_dir):
-                continue
-                
-            for item in os.listdir(temp_dir):
-                if item.startswith("chrome_") and os.path.isdir(os.path.join(temp_dir, item)):
-                    old_dir = os.path.join(temp_dir, item)
-                    try:
-                        # Check if directory is older than 1 hour
-                        dir_time = os.path.getctime(old_dir)
-                        current_time = time.time()
-                        if current_time - dir_time > 3600:  # 1 hour
-                            shutil.rmtree(old_dir, ignore_errors=True)
-                            logger.info(f"Cleaned up old Chrome directory: {old_dir}")
-                    except:
-                        pass
+        temp_dir = tempfile.gettempdir()
+        for item in os.listdir(temp_dir):
+            if item.startswith("chrome_") and os.path.isdir(os.path.join(temp_dir, item)):
+                old_dir = os.path.join(temp_dir, item)
+                try:
+                    # Check if directory is older than 1 hour
+                    dir_time = os.path.getctime(old_dir)
+                    current_time = time.time()
+                    if current_time - dir_time > 3600:  # 1 hour
+                        shutil.rmtree(old_dir, ignore_errors=True)
+                        logger.info(f"Cleaned up old Chrome directory: {old_dir}")
+                except:
+                    pass
     except:
         pass
 
@@ -344,6 +202,7 @@ def login_to_wolfnet(user_email, driver, wait, password=None):
                 return {"success": True}
             elif "activitiesContainer" in element.get_attribute("id"):
                 logger.info(f"Successfully logged in for {user_email}")
+                time.sleep(1)
                 return {"success": True}
             else:
                 logger.error(f"Wrong WolfNet password detected for {user_email}")
@@ -702,25 +561,24 @@ def check_user_grades_core(user_email):
         # Wait a moment for driver to fully close
         time.sleep(0.5)
         
-        # Clean up temporary directory more aggressively (only if it exists)
-        if unique_user_data_dir:
-            max_retries = 3
-            for attempt in range(max_retries):
-                try:
-                    if os.path.exists(unique_user_data_dir):
-                        shutil.rmtree(unique_user_data_dir, ignore_errors=True)
-                        if not os.path.exists(unique_user_data_dir):
-                            break
-                        time.sleep(1)  # Wait before retry
-                except Exception as e:
-                    logger.warning(f"Cleanup attempt {attempt + 1} failed: {e}")
+        # Clean up temporary directory more aggressively
+        max_retries = 3
+        for attempt in range(max_retries):
+            try:
+                if os.path.exists(unique_user_data_dir):
+                    shutil.rmtree(unique_user_data_dir, ignore_errors=True)
+                    if not os.path.exists(unique_user_data_dir):
+                        break
+                    time.sleep(1)  # Wait before retry
+            except Exception as e:
+                logger.warning(f"Cleanup attempt {attempt + 1} failed: {e}")
         
         # Force garbage collection to free memory
         gc.collect()
             
         logger.info(f"Grade check completed and cleaned up for {user_email}")
 
-@shared_task(bind=True, queue='selenium', routing_key='selenium.grades')
+@shared_task(bind=True, queue='grades', routing_key='grades.single_user')
 def check_single_user_grades(self, user_email):
     """
     Args:
@@ -735,7 +593,7 @@ def check_single_user_grades(self, user_email):
         logger.error(f"Error checking grades for {user_email}: {str(e)}")
         raise
 
-@shared_task(bind=True, queue='default', routing_key='default.coordination')
+@shared_task(bind=True, queue='grades', routing_key='grades.coordination')
 def check_all_user_grades_sequential_dispatch(self):
     """
     Dispatch individual grade check tasks for all users without waiting
@@ -789,7 +647,7 @@ def check_all_user_grades_sequential_dispatch(self):
     logger.info(f"Sequential dispatch completed: {summary['message']}")
     return summary
 
-@shared_task(bind=True, queue='default', routing_key='default.coordination')  
+@shared_task(bind=True, queue='grades', routing_key='grades.coordination')  
 def check_user_grades_batched_dispatch(self, batch_size=1):
     """
     Dispatch users in small batches without waiting for completion
@@ -851,7 +709,7 @@ def check_user_grades_batched_dispatch(self, batch_size=1):
     logger.info(f"Batched dispatch completed: {summary['message']}")
     return summary
 
-@shared_task(bind=True, queue='default', routing_key='default.trigger')
+@shared_task(bind=True, queue='grades', routing_key='grades.trigger')
 def periodic_grade_check_trigger(self):
     """
     Trigger periodic grade checking with sequential dispatch
@@ -866,7 +724,7 @@ def periodic_grade_check_trigger(self):
     check_all_user_grades_sequential_dispatch.delay()
     logger.info("Dispatched sequential grade check task")
 
-@shared_task(bind=True, queue='default', routing_key='default.email')
+@shared_task(bind=True, queue='general', routing_key='general.email')
 def send_email_notification(self, recipient_email, subject, message):
     """
     Args:
@@ -895,7 +753,7 @@ def send_email_notification(self, recipient_email, subject, message):
         logger.error(f"Failed to send email to {recipient_email}: {str(e)}")
         raise
 
-@shared_task(bind=True, queue='selenium', routing_key='selenium.auto')
+@shared_task(bind=True, queue='general', routing_key='general.auto')
 def auto_complete_courses(self, user_email, password=None):
     """
     Args:
@@ -1061,18 +919,17 @@ def auto_complete_courses(self, user_email, password=None):
         # Wait a moment for driver to fully close
         time.sleep(0.5)
         
-        # Clean up temporary directory more aggressively (only if it exists)
-        if unique_user_data_dir:
-            max_retries = 3
-            for attempt in range(max_retries):
-                try:
-                    if os.path.exists(unique_user_data_dir):
-                        shutil.rmtree(unique_user_data_dir, ignore_errors=True)
-                        if not os.path.exists(unique_user_data_dir):
-                            break
-                        time.sleep(1)  # Wait before retry
-                except Exception as e:
-                    logger.warning(f"Cleanup attempt {attempt + 1} failed: {e}")
+        # Clean up temporary directory more aggressively
+        max_retries = 3
+        for attempt in range(max_retries):
+            try:
+                if os.path.exists(unique_user_data_dir):
+                    shutil.rmtree(unique_user_data_dir, ignore_errors=True)
+                    if not os.path.exists(unique_user_data_dir):
+                        break
+                    time.sleep(1)  # Wait before retry
+            except Exception as e:
+                logger.warning(f"Cleanup attempt {attempt + 1} failed: {e}")
         
         # Force garbage collection to free memory
         gc.collect()
@@ -1080,7 +937,7 @@ def auto_complete_courses(self, user_email, password=None):
         logger.info(f"Auto-complete courses completed and cleaned up for {user_email}")
 
 
-@shared_task(bind=True, queue='selenium', routing_key='selenium.wolfnet')
+@shared_task(bind=True, queue='grades', routing_key='grades.wolfnet')
 def check_wolfnet_password(self, user_email, password):
     """
     Check if WolfNet password is valid for a user
@@ -1129,18 +986,17 @@ def check_wolfnet_password(self, user_email, password):
         # Wait a moment for driver to fully close
         time.sleep(0.5)
         
-        # Clean up temporary directory more aggressively (only if it exists)
-        if unique_user_data_dir:
-            max_retries = 3
-            for attempt in range(max_retries):
-                try:
-                    if os.path.exists(unique_user_data_dir):
-                        shutil.rmtree(unique_user_data_dir, ignore_errors=True)
-                        if not os.path.exists(unique_user_data_dir):
-                            break
-                        time.sleep(1)  # Wait before retry
-                except Exception as e:
-                    logger.warning(f"Cleanup attempt {attempt + 1} failed: {e}")
+        # Clean up temporary directory more aggressively
+        max_retries = 3
+        for attempt in range(max_retries):
+            try:
+                if os.path.exists(unique_user_data_dir):
+                    shutil.rmtree(unique_user_data_dir, ignore_errors=True)
+                    if not os.path.exists(unique_user_data_dir):
+                        break
+                    time.sleep(1)  # Wait before retry
+            except Exception as e:
+                logger.warning(f"Cleanup attempt {attempt + 1} failed: {e}")
         
         # Force garbage collection
         gc.collect()
