@@ -30,7 +30,8 @@ celery -A student_forum worker --loglevel=info --concurrency=1 -Q grades --pool=
 
 Run a general worker for the rest of the tasks:
 ```bash
-celery -A student_forum worker --loglevel=info --concurrency=2 -Q general,high,default,low
+general_worker: celery -A student_forum worker --loglevel=info --concurrency=1 -Q general,high,default,low --loglevel=debug --pool=solo
+
 ```
 
 Run Celery Beat (scheduler):

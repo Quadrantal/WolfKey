@@ -24,35 +24,63 @@ logger = logging.getLogger(__name__)
 
 def get_memory_optimized_chrome_options():
     """
-    Get Chrome options optimized for low memory usage
+    Get Chrome options optimized for low memory usage and crash prevention
     
     Returns:
         Options: Configured Chrome options
     """
     chrome_options = Options()
-    chrome_options.add_argument("--headless=new")  # Force headless mode for production
+    
+    # Check if running locally vs Heroku to prevent segfaults in local dev
+    is_heroku = os.environ.get('CHROME_BIN') is not None
+    
+    if is_heroku:
+        chrome_options.add_argument("--headless=new")  # Force headless mode for production
+    else:
+        # Local development - avoid headless to prevent segfaults
+        logger.info("Running locally - GUI mode enabled to prevent segmentation faults")
+    
+    # Essential crash prevention flags
     chrome_options.add_argument("--no-sandbox")
     chrome_options.add_argument("--disable-dev-shm-usage")
-
-    # Keep GPU disabled in CI or headless environments
     chrome_options.add_argument("--disable-gpu")
-
-    # Disable extensions/plugins to reduce overhead
+    
+    # Critical flags to prevent segfaults in fork processes
+    chrome_options.add_argument("--no-zygote")  # Disable zygote process
+    chrome_options.add_argument("--single-process")  # Force single process mode
+    chrome_options.add_argument("--disable-background-timer-throttling")
+    chrome_options.add_argument("--disable-backgrounding-occluded-windows")
+    chrome_options.add_argument("--disable-renderer-backgrounding")
+    
+    # Disable problematic features that can cause crashes
     chrome_options.add_argument("--disable-extensions")
     chrome_options.add_argument("--disable-plugins")
-
-    # Optionally avoid loading images to save memory. If redirects or content
-    # detection fail, try removing this flag.
-    chrome_options.add_argument("--blink-settings=imagesEnabled=false")
+    chrome_options.add_argument("--disable-software-rasterizer")
+    chrome_options.add_argument("--disable-background-networking")
+    chrome_options.add_argument("--disable-default-apps")
+    chrome_options.add_argument("--disable-sync")
+    chrome_options.add_argument("--disable-translate")
+    chrome_options.add_argument("--disable-features=TranslateUI")
+    chrome_options.add_argument("--disable-ipc-flooding-protection")
+    
+    # Memory and stability
+    chrome_options.add_argument("--max_old_space_size=4096")
+    chrome_options.add_argument("--no-first-run")
+    chrome_options.add_argument("--no-default-browser-check")
+    
+    # Only disable images if not causing redirect issues
+    # chrome_options.add_argument("--blink-settings=imagesEnabled=false")
 
     # Set a safer page load strategy (normal) to ensure redirects complete
     chrome_options.set_capability("pageLoadStrategy", "normal")
     
-    # Configure Chrome binary location for Heroku (from your comprehensive guide)
+    # Configure Chrome binary location for Heroku
     chrome_bin = os.environ.get('CHROME_BIN')
     if chrome_bin:
         chrome_options.binary_location = chrome_bin
         logger.info(f"Using Chrome binary from environment: {chrome_bin}")
+    
+    return chrome_options
     
     return chrome_options
 
@@ -84,7 +112,6 @@ def create_webdriver_with_cleanup():
     chrome_options.add_argument(f"--user-data-dir={temp_user_data_dir}")
     chrome_options.add_argument("--incognito")  # Still use incognito for additional privacy
     
-    
     # Add crash dumps to our temp directory
     chrome_options.add_argument(f"--crash-dumps-dir={temp_user_data_dir}")
     
@@ -94,21 +121,76 @@ def create_webdriver_with_cleanup():
     logger.info(f"Waiting {delay:.2f} seconds before creating WebDriver...")
     time.sleep(delay)
     
-    try:
-        driver = webdriver.Chrome(options=chrome_options)
-        driver.set_window_size(1000, 1000)  # Smaller window size to save memory
-        
-        logger.info(f"Created WebDriver with isolated temp dir: {temp_user_data_dir}")
-        return driver, temp_user_data_dir
-    except Exception as e:
-        # Clean up the directory if driver creation fails
+    # Multiple attempts with different configurations if Chrome keeps crashing
+    max_attempts = 3
+    driver = None
+    service = None
+    
+    for attempt in range(max_attempts):
         try:
-            if os.path.exists(temp_user_data_dir):
-                shutil.rmtree(temp_user_data_dir, ignore_errors=True)
-        except:
-            pass
-        logger.error(f"Failed to create WebDriver: {e}")
-        raise
+            logger.info(f"WebDriver creation attempt {attempt + 1}/{max_attempts}")
+            
+            # On retry attempts, add more aggressive stability flags
+            if attempt > 0:
+                chrome_options.add_argument("--disable-features=VizDisplayCompositor,VizServiceDisplay")
+                chrome_options.add_argument("--disable-gpu-sandbox")
+                
+            if attempt > 1:
+                # Last resort - disable most features
+                chrome_options.add_argument("--disable-web-security")
+                chrome_options.add_argument("--disable-features=site-per-process")
+                chrome_options.add_argument("--remote-debugging-port=0")  # Let Chrome pick a random port
+            
+            # Create ChromeDriver service with explicit configuration
+            from selenium.webdriver.chrome.service import Service
+            
+            # Create service with custom timeout and retry settings
+            service = Service(
+                log_output=os.path.join(temp_user_data_dir, 'chromedriver.log')
+            )
+            
+            driver = webdriver.Chrome(service=service, options=chrome_options)
+            
+            # Test the connection by getting the current URL
+            driver.current_url  # This will force a connection test
+            
+            driver.set_window_size(1000, 1000)  # Smaller window size to save memory
+            
+            logger.info(f"Created WebDriver with isolated temp dir: {temp_user_data_dir}")
+            return driver, temp_user_data_dir
+                
+        except Exception as e:
+            logger.error(f"WebDriver creation attempt {attempt + 1} failed: {e}")
+            
+            # Clean up any partial resources
+            if driver:
+                try:
+                    driver.quit()
+                except:
+                    pass
+                driver = None
+            
+            if service and hasattr(service, 'process') and service.process:
+                try:
+                    service.stop()
+                except:
+                    pass
+                service = None
+                
+            if attempt == max_attempts - 1:
+                # Last attempt failed, clean up and raise
+                try:
+                    if os.path.exists(temp_user_data_dir):
+                        shutil.rmtree(temp_user_data_dir, ignore_errors=True)
+                except:
+                    pass
+                logger.error(f"All WebDriver creation attempts failed")
+                raise
+            else:
+                # Wait before retry
+                logger.info(f"Waiting 2 seconds before retry...")
+                time.sleep(2)
+                continue
 
 def cleanup_old_chrome_dirs():
     """
