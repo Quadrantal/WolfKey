@@ -19,40 +19,84 @@ import traceback
 import gc
 import uuid
 import os
+import platform
 
 logger = logging.getLogger(__name__)
 
 def get_memory_optimized_chrome_options():
     """
-    Get Chrome options optimized for low memory usage
+    Get Chrome options optimized for low memory usage and crash prevention
     
     Returns:
         Options: Configured Chrome options
     """
     chrome_options = Options()
-    chrome_options.add_argument("--headless=new")  # Force headless mode for production
+    
+    # Check if running locally vs Heroku to prevent segfaults in local dev
+    is_heroku = os.environ.get('CHROME_BIN') is not None
+    
+    if is_heroku:
+        chrome_options.add_argument("--headless=new")  # Force headless mode for production
+    else:
+        # Local development - avoid headless to prevent segfaults
+        logger.info("Running locally - GUI mode enabled to prevent segmentation faults")
+    
+    # Essential crash prevention flags
     chrome_options.add_argument("--no-sandbox")
     chrome_options.add_argument("--disable-dev-shm-usage")
-
-    # Keep GPU disabled in CI or headless environments
     chrome_options.add_argument("--disable-gpu")
+    
+    # Critical flags to prevent segfaults in fork processes
+    # Only add zygote/single-process flags on Linux/Heroku where forking issues are common.
+    # These flags are known to cause Chrome to crash or close the DevTools connection on macOS.
+    try:
+        system_name = platform.system().lower()
+    except Exception:
+        system_name = ''
 
-    # Disable extensions/plugins to reduce overhead
+    add_isolation_flags = False
+    # If running on Heroku (CHROME_BIN set) or on Linux, enable these isolation flags
+    if os.environ.get('CHROME_BIN') is not None or system_name == 'linux':
+        add_isolation_flags = True
+
+    if add_isolation_flags:
+        chrome_options.add_argument("--no-zygote")  # Disable zygote process
+        chrome_options.add_argument("--single-process")  # Force single process mode
+    else:
+        logger.debug(f"Skipping --no-zygote/--single-process flags on platform={system_name}")
+    chrome_options.add_argument("--disable-background-timer-throttling")
+    chrome_options.add_argument("--disable-backgrounding-occluded-windows")
+    chrome_options.add_argument("--disable-renderer-backgrounding")
+    
+    # Disable problematic features that can cause crashes
     chrome_options.add_argument("--disable-extensions")
     chrome_options.add_argument("--disable-plugins")
-
-    # Optionally avoid loading images to save memory. If redirects or content
-    # detection fail, try removing this flag.
-    chrome_options.add_argument("--blink-settings=imagesEnabled=false")
+    chrome_options.add_argument("--disable-software-rasterizer")
+    chrome_options.add_argument("--disable-background-networking")
+    chrome_options.add_argument("--disable-default-apps")
+    chrome_options.add_argument("--disable-sync")
+    chrome_options.add_argument("--disable-translate")
+    chrome_options.add_argument("--disable-features=TranslateUI")
+    chrome_options.add_argument("--disable-ipc-flooding-protection")
+    
+    # Memory and stability
+    # chrome_options.add_argument("--max_old_space_size=4096")
+    # chrome_options.add_argument("--no-first-run")
+    # chrome_options.add_argument("--no-default-browser-check")
+    
+    # Only disable images if not causing redirect issues
+    # chrome_options.add_argument("--blink-settings=imagesEnabled=false")
 
     # Set a safer page load strategy (normal) to ensure redirects complete
     chrome_options.set_capability("pageLoadStrategy", "normal")
     
-    # Configure Chrome binary location for Heroku (from your comprehensive guide)
+    # Configure Chrome binary location for Heroku
     chrome_bin = os.environ.get('CHROME_BIN')
     if chrome_bin:
         chrome_options.binary_location = chrome_bin
         logger.info(f"Using Chrome binary from environment: {chrome_bin}")
+    
+    return chrome_options
     
     return chrome_options
 
@@ -63,91 +107,29 @@ def create_webdriver_with_cleanup():
     Returns:
         tuple: (driver, temp_user_data_dir)
     """
+    # Create a unique temporary user-data-dir per run to avoid conflicts
+    # when multiple WebDriver instances are created concurrently.
     chrome_options = get_memory_optimized_chrome_options()
-    
-    # Create a temporary user data directory even for incognito mode to ensure complete isolation
-    import time
-    import threading
-    timestamp = str(int(time.time() * 1000000))  # Use microseconds for better uniqueness
-    unique_id = str(uuid.uuid4()).replace('-', '')
-    process_id = str(os.getpid())
-    thread_id = str(threading.get_ident())
-    temp_user_data_dir = tempfile.mkdtemp(
-        prefix=f"chrome_isolated_",
-        suffix=f"_{timestamp}_{unique_id}_{process_id}_{thread_id}"
-    )
-    
-    # Ensure directory exists and has proper permissions
-    os.makedirs(temp_user_data_dir, exist_ok=True)
-    
-    # Force use of our temporary directory
-    chrome_options.add_argument(f"--user-data-dir={temp_user_data_dir}")
-    chrome_options.add_argument("--incognito")  # Still use incognito for additional privacy
-    
-    
-    # Add crash dumps to our temp directory
-    chrome_options.add_argument(f"--crash-dumps-dir={temp_user_data_dir}")
-    
-    # Add a larger random delay to prevent race conditions
-    import random
-    delay = random.uniform(1.0, 3.0)  # Increased delay significantly
-    logger.info(f"Waiting {delay:.2f} seconds before creating WebDriver...")
-    time.sleep(delay)
-    
-    try:
-        driver = webdriver.Chrome(options=chrome_options)
-        driver.set_window_size(1000, 1000)  # Smaller window size to save memory
-        
-        logger.info(f"Created WebDriver with isolated temp dir: {temp_user_data_dir}")
-        return driver, temp_user_data_dir
-    except Exception as e:
-        # Clean up the directory if driver creation fails
-        try:
-            if os.path.exists(temp_user_data_dir):
-                shutil.rmtree(temp_user_data_dir, ignore_errors=True)
-        except:
-            pass
-        logger.error(f"Failed to create WebDriver: {e}")
-        raise
 
-def cleanup_old_chrome_dirs():
-    """
-    Clean up old Chrome user data directories that might be left over
-    """
+    temp_user_data_dir = None
     try:
-        temp_dir = tempfile.gettempdir()
-        current_time = time.time()
-        
-        for item in os.listdir(temp_dir):
-            # Clean up both old and new directory prefixes
-            if (item.startswith("chrome_") or item.startswith("chrome_isolated_")) and os.path.isdir(os.path.join(temp_dir, item)):
-                old_dir = os.path.join(temp_dir, item)
-                try:
-                    # Check if directory is older than 15 minutes (reduced from 30 minutes)
-                    dir_time = os.path.getctime(old_dir)
-                    if current_time - dir_time > 900:  # 15 minutes
-                        # Force kill any Chrome processes that might be using this directory
-                        try:
-                            import subprocess
-                            subprocess.run(['pkill', '-f', old_dir], capture_output=True, timeout=5)
-                        except:
-                            pass
-                        
-                        # Wait a bit for processes to die
-                        time.sleep(0.5)
-                        
-                        # Try to remove the directory
-                        shutil.rmtree(old_dir, ignore_errors=True)
-                        if not os.path.exists(old_dir):
-                            logger.info(f"Cleaned up old Chrome directory: {old_dir}")
-                        else:
-                            logger.warning(f"Could not fully clean up directory: {old_dir}")
-                except Exception as cleanup_error:
-                    logger.warning(f"Error cleaning up {old_dir}: {cleanup_error}")
-    except Exception as e:
-        logger.warning(f"Error during Chrome directory cleanup: {e}")
-    except:
-        pass
+        temp_user_data_dir = tempfile.mkdtemp(prefix='chrome_user_data_')
+        # Ensure directory was created
+        if temp_user_data_dir and os.path.isdir(temp_user_data_dir):
+            chrome_options.add_argument(f"--user-data-dir={temp_user_data_dir}")
+    except Exception:
+        # If creation fails, proceed without explicitly setting user-data-dir.
+        temp_user_data_dir = None
+
+    chrome_options.add_argument("--incognito")
+
+    # Create ChromeDriver service
+    from selenium.webdriver.chrome.service import Service
+    service = Service()
+    driver = webdriver.Chrome(service=service, options=chrome_options)
+    driver.set_window_size(1000, 1000)
+    logger.info(f"Created WebDriver using temp user-data-dir: {temp_user_data_dir}")
+    return driver, temp_user_data_dir
 
 def get_decrypted_wolfnet_password(user_email):
     """
@@ -305,7 +287,6 @@ def check_user_grades_core(user_email):
         }
 
     # Use memory-optimized WebDriver
-    cleanup_old_chrome_dirs()  # Clean up any old directories first
     driver, temp_user_data_dir = create_webdriver_with_cleanup()
     wait = WebDriverWait(driver, 6)  # Reduced timeout for memory efficiency
 
@@ -322,7 +303,6 @@ def check_user_grades_core(user_email):
         # Check if login was successful but with limited content (account-nav found but no course content)
         if login_result.get("message") and "account navigation found" in login_result["message"]:
             logger.info(f"Login successful for {user_email} but no course content available for grade checking")
-            return {"success": False, "error": "No course content available for grade checking", "error_type": "no_courses"}
 
         # Wait for courses to load
         try:
@@ -602,27 +582,19 @@ def check_user_grades_core(user_email):
             driver.quit()
         except Exception as e:
             logger.warning(f"Error quitting driver: {e}")
-        
+        # Remove temporary user-data-dir if created
+        try:
+            if temp_user_data_dir:
+                shutil.rmtree(temp_user_data_dir, ignore_errors=True)
+                logger.info(f"Removed temp user-data-dir: {temp_user_data_dir}")
+        except Exception as e:
+            logger.warning(f"Error removing temp user-data-dir {temp_user_data_dir}: {e}")
+
         # Wait a moment for driver to fully close
         time.sleep(0.5)
-        
-        # Clean up temporary directory aggressively
-        if temp_user_data_dir and os.path.exists(temp_user_data_dir):
-            max_retries = 3
-            for attempt in range(max_retries):
-                try:
-                    shutil.rmtree(temp_user_data_dir, ignore_errors=True)
-                    if not os.path.exists(temp_user_data_dir):
-                        logger.info(f"Successfully cleaned up temp dir: {temp_user_data_dir}")
-                        break
-                    time.sleep(1)  # Wait before retry
-                except Exception as e:
-                    logger.warning(f"Cleanup attempt {attempt + 1} failed: {e}")
-        
-        # Force garbage collection to free memory
-        gc.collect()
-            
-        logger.info(f"Grade check completed and cleaned up for {user_email}")
+    # Force garbage collection to free memory
+    gc.collect()
+    logger.info(f"Grade check completed and cleaned up for {user_email}")
 
 @shared_task(bind=True, queue='grades', routing_key='grades.single_user')
 def check_single_user_grades(self, user_email):
@@ -812,7 +784,6 @@ def auto_complete_courses(self, user_email, password=None):
     logger.info(f"Starting auto-complete courses for user: {user_email}")
     
     # Use memory-optimized WebDriver
-    cleanup_old_chrome_dirs()  # Clean up any old directories first
     driver, temp_user_data_dir = create_webdriver_with_cleanup()
     wait = WebDriverWait(driver, 6)  # Reduced timeout
 
@@ -829,7 +800,6 @@ def auto_complete_courses(self, user_email, password=None):
         # Check if login was successful but with limited content (account-nav found but no course content)
         if login_result.get("message") and "account navigation found" in login_result["message"]:
             logger.info(f"Login successful for {user_email} but no course content available for auto-completion")
-            return {"success": False, "error": "No course content available for auto-completion", "error_type": "no_courses"}
 
         # Wait for the page to load and find the first .subnav-multicol element
         try:
@@ -961,26 +931,19 @@ def auto_complete_courses(self, user_email, password=None):
             driver.quit()
         except Exception as e:
             logger.warning(f"Error quitting driver: {e}")
-        
+        # Remove temporary user-data-dir if created
+        try:
+            if temp_user_data_dir:
+                shutil.rmtree(temp_user_data_dir, ignore_errors=True)
+                logger.info(f"Removed temp user-data-dir: {temp_user_data_dir}")
+        except Exception as e:
+            logger.warning(f"Error removing temp user-data-dir {temp_user_data_dir}: {e}")
+
         # Wait a moment for driver to fully close
         time.sleep(0.5)
         
-        # Clean up temporary directory aggressively
-        if temp_user_data_dir and os.path.exists(temp_user_data_dir):
-            max_retries = 3
-            for attempt in range(max_retries):
-                try:
-                    shutil.rmtree(temp_user_data_dir, ignore_errors=True)
-                    if not os.path.exists(temp_user_data_dir):
-                        logger.info(f"Successfully cleaned up temp dir: {temp_user_data_dir}")
-                        break
-                    time.sleep(1)  # Wait before retry
-                except Exception as e:
-                    logger.warning(f"Cleanup attempt {attempt + 1} failed: {e}")
-        
         # Force garbage collection to free memory
         gc.collect()
-            
         logger.info(f"Auto-complete courses completed and cleaned up for {user_email}")
 
 
@@ -999,7 +962,6 @@ def check_wolfnet_password(self, user_email, password):
     logger.info(f"Starting WolfNet password check for user: {user_email}")
     
     # Use memory-optimized WebDriver
-    cleanup_old_chrome_dirs()  # Clean up any old directories first
     driver, temp_user_data_dir = create_webdriver_with_cleanup()
     wait = WebDriverWait(driver, 6)  # Reduced timeout
 
@@ -1029,22 +991,16 @@ def check_wolfnet_password(self, user_email, password):
             driver.quit()
         except Exception as e:
             logger.warning(f"Error quitting driver: {e}")
-        
+        # Remove temporary user-data-dir if created
+        try:
+            if temp_user_data_dir:
+                shutil.rmtree(temp_user_data_dir, ignore_errors=True)
+                logger.info(f"Removed temp user-data-dir: {temp_user_data_dir}")
+        except Exception as e:
+            logger.warning(f"Error removing temp user-data-dir {temp_user_data_dir}: {e}")
+
         # Wait a moment for driver to fully close
         time.sleep(0.5)
-        
-        # Clean up temporary directory aggressively
-        if temp_user_data_dir and os.path.exists(temp_user_data_dir):
-            max_retries = 3
-            for attempt in range(max_retries):
-                try:
-                    shutil.rmtree(temp_user_data_dir, ignore_errors=True)
-                    if not os.path.exists(temp_user_data_dir):
-                        logger.info(f"Successfully cleaned up temp dir: {temp_user_data_dir}")
-                        break
-                    time.sleep(1)  # Wait before retry
-                except Exception as e:
-                    logger.warning(f"Cleanup attempt {attempt + 1} failed: {e}")
         
         # Force garbage collection
         gc.collect()
