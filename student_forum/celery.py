@@ -1,6 +1,7 @@
 import os
 from celery import Celery
 from kombu import Queue
+import ssl
 
 # Set the default Django settings module for the 'celery' program.
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'student_forum.settings')
@@ -45,3 +46,8 @@ CELERY_TASK_SOFT_TIME_LIMIT = 60
 CELERY_TASK_TIME_LIMIT = 120 
 
 app.conf.timezone = 'UTC'
+
+# Configure SSL for Redis broker
+app.conf.broker_use_ssl = {
+    'ssl_cert_reqs': ssl.CERT_NONE
+}
