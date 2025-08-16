@@ -129,6 +129,30 @@ else:
 print(f"\nUsing database: {DATABASES['default']['NAME']}")
 print(f"Database host: {DATABASES['default']['HOST']}")
 print(f"Running from: {sys.argv[0]}")
+
+# Cache configuration using Django's built-in Redis backend (Django 4.0+)
+# https://docs.djangoproject.com/en/4.2/topics/cache/#redis
+REDIS_URL = os.getenv('REDIS_URL')
+if REDIS_URL:
+    CACHES = {
+        "default": {
+            "BACKEND": "django.core.cache.backends.redis.RedisCache",
+            "LOCATION": REDIS_URL,
+            "OPTIONS": {
+                "ssl_cert_reqs": None  # Disable SSL certificate validation for Heroku Redis
+            } if REDIS_URL.startswith('rediss://') else {}
+        }
+    }
+    print(f"Django cache configured with Redis: {REDIS_URL[:50]}...")
+else:
+    # Fallback to dummy cache for local development without Redis
+    CACHES = {
+        "default": {
+            "BACKEND": "django.core.cache.backends.dummy.DummyCache",
+        }
+    }
+    print("Django cache configured with dummy backend (no Redis)")
+
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
 
@@ -353,6 +377,11 @@ try:
         # Also set the result backend SSL configuration
         CELERY_REDIS_BACKEND_USE_SSL = CELERY_BROKER_USE_SSL.copy()
         
+        # For debugging: disable result backend SSL temporarily if connections are problematic
+        if os.getenv('CELERY_DISABLE_RESULT_BACKEND', 'false').lower() == 'true':
+            CELERY_RESULT_BACKEND = None
+            print("Result backend disabled for debugging")
+        
         print(f"Cleaned Redis URL (removed ssl_cert_reqs parameter): {cleaned_url[:50]}...")
         print(f"Using SSL cert validation mode: {ssl_cert_reqs}")
             
@@ -375,6 +404,16 @@ CELERY_TASK_ALWAYS_EAGER = False
 CELERY_TASK_EAGER_PROPAGATES = True
 CELERY_TASK_STORE_EAGER_RESULT = False
 
+# Task execution robustness
+CELERY_TASK_IGNORE_RESULT = False  # Store results for debugging
+CELERY_TASK_TRACK_STARTED = True   # Track when tasks start
+CELERY_SEND_TASK_EVENTS = True     # Enable task events
+CELERY_TASK_SEND_SENT_EVENT = True # Send task sent events
+
+# Connection pool settings for result backend
+CELERY_RESULT_BACKEND_MAX_RETRIES = 10
+CELERY_RESULT_BACKEND_RETRY_ON_STARTUP = True
+
 # Memory optimization for Heroku
 CELERY_WORKER_PREFETCH_MULTIPLIER = 1
 CELERY_WORKER_MAX_TASKS_PER_CHILD = 10  # Restart worker after 10 tasks
@@ -382,6 +421,16 @@ CELERY_TASK_ACKS_LATE = True
 CELERY_TASK_REJECT_ON_WORKER_LOST = True
 CELERY_WORKER_DISABLE_RATE_LIMITS = True
 CELERY_RESULT_EXPIRES = 3600  # Results expire after 1 hour to save memory
+
+# Add result backend connection configuration
+CELERY_RESULT_BACKEND_TRANSPORT_OPTIONS = {
+    'socket_keepalive': True,
+    'socket_keepalive_options': {},
+    'socket_connect_timeout': 30,
+    'socket_timeout': 30,
+    'retry_on_timeout': True,
+    'max_connections': int(os.getenv('REDIS_MAX_CONNECTIONS', '10')),
+}
 
 # AWS S3 Configuration
 if not DEBUG:  # Use S3 in production only
