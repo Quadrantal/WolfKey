@@ -19,6 +19,7 @@ import dj_database_url
 import sys
 import json
 import base64
+import ssl
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -288,6 +289,16 @@ CELERY_BROKER_POOL_LIMIT = int(os.getenv('BROKER_POOL_LIMIT', '3'))
 CELERY_BROKER_TRANSPORT_OPTIONS = {
     'max_connections': int(os.getenv('REDIS_MAX_CONNECTIONS', '10'))
 }
+
+# If the broker URL uses TLS (rediss://), configure Celery/kombu to avoid
+# failing on self-signed certificates from some Heroku Redis instances.
+# This disables SSL certificate verification only when connecting over rediss://.
+try:
+    if CELERY_BROKER_URL and CELERY_BROKER_URL.startswith('rediss://'):
+        CELERY_BROKER_USE_SSL = {'cert_reqs': ssl.CERT_NONE}
+except Exception:
+    # If anything goes wrong reading the URL, do not set the override here.
+    pass
 
 # Optional: tighten connection timeouts so idle connections are released
 CELERY_BROKER_CONNECTION_TIMEOUT = int(os.getenv('BROKER_CONNECTION_TIMEOUT', '10'))
