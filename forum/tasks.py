@@ -37,13 +37,15 @@ def get_memory_optimized_chrome_options():
         Options: Configured Chrome options
     """
     chrome_options = Options()
-    chrome_options.add_argument("--headless=new")
+    # Prefer generic --headless to avoid potential extra features in "new" headless
+    chrome_options.add_argument("--headless")
     chrome_options.add_argument("--no-sandbox")
     chrome_options.add_argument("--disable-dev-shm-usage")
     
     # Memory optimization flags
     chrome_options.add_argument("--memory-pressure-off")
-    chrome_options.add_argument("--max_old_space_size=256")
+    # Lower V8 old space to reduce memory footprint
+    chrome_options.add_argument("--js-flags=--max_old_space_size=128")
     chrome_options.add_argument("--disable-background-timer-throttling")
     chrome_options.add_argument("--disable-renderer-backgrounding")
     chrome_options.add_argument("--disable-backgrounding-occluded-windows")
@@ -70,6 +72,8 @@ def get_memory_optimized_chrome_options():
     chrome_options.add_argument("--disable-software-rasterizer")
     chrome_options.add_argument("--no-zygote")
     chrome_options.add_argument("--disable-setuid-sandbox")
+    # Reduce process model even further
+    chrome_options.add_argument("--single-process")
     
     # Reduce process count and site isolation overhead to lower memory footprint
     chrome_options.add_argument("--renderer-process-limit=1")
@@ -92,7 +96,8 @@ def _with_file_lock(lock_path):
         def __exit__(self, exc_type, exc, tb):
             return False
     if not fcntl:
-        return _with_file_lock._Noop()  # type: ignore[attr-defined]
+        # If fcntl is not available (non-POSIX), return a simple no-op context
+        return _Noop()
     class _Lock:
         def __init__(self, path):
             self.path = path
@@ -165,28 +170,31 @@ def create_webdriver_with_cleanup():
         local_opts = get_memory_optimized_chrome_options()
         if chrome_bin:
             local_opts.binary_location = chrome_bin
-        # Choose a real free port
-        try:
-            rd_port_local = _get_free_port()
-        except Exception:
-            rd_port_local = 9222
-        local_opts.add_argument(f"--remote-debugging-port={rd_port_local}")
         local_opts.add_argument(f"--user-data-dir={unique_user_data_dir}")
         local_opts.add_argument("--profile-directory=Default")
         local_opts.add_argument(f"--data-path={data_path}")
         local_opts.add_argument(f"--disk-cache-dir={cache_path}")
 
         env_label = "Heroku" if is_heroku else "local"
-        logger.info(f"Launching Chrome ({env_label}) with profile at {unique_user_data_dir} on rd_port={rd_port_local}")
+        logger.info(f"Launching Chrome ({env_label}) with profile at {unique_user_data_dir}")
 
         with _with_file_lock(lock_path):
             return webdriver.Chrome(service=service, options=local_opts) if service else webdriver.Chrome(options=local_opts)
 
-    # Try up to 2 attempts in case of transient lock/memory issues
+    # Try up to 3 attempts in case of transient lock/memory issues; last attempt without user-data-dir
     last_exc = None
-    for attempt in range(2):
+    for attempt in range(3):
         try:
-            driver = _start_once()
+            if attempt < 2:
+                driver = _start_once()
+            else:
+                # Final fallback: avoid user-data-dir entirely
+                local_opts = get_memory_optimized_chrome_options()
+                if chrome_bin:
+                    local_opts.binary_location = chrome_bin
+                logger.info("Launching Chrome fallback without explicit user-data-dir")
+                with _with_file_lock(lock_path):
+                    driver = webdriver.Chrome(service=service, options=local_opts) if service else webdriver.Chrome(options=local_opts)
             driver.set_window_size(400, 300)
             return driver, unique_user_data_dir
         except SessionNotCreatedException as e:
@@ -712,7 +720,7 @@ def check_user_grades_core(user_email):
             
         logger.info(f"Grade check completed and cleaned up for {user_email}")
 
-@shared_task(bind=True, queue='low', routing_key='low.grades')
+@shared_task(bind=True, queue='selenium', routing_key='selenium.grades')
 def check_single_user_grades(self, user_email):
     """
     Args:
@@ -887,7 +895,7 @@ def send_email_notification(self, recipient_email, subject, message):
         logger.error(f"Failed to send email to {recipient_email}: {str(e)}")
         raise
 
-@shared_task(bind=True, queue='high', routing_key='high.auto')
+@shared_task(bind=True, queue='selenium', routing_key='selenium.auto')
 def auto_complete_courses(self, user_email, password=None):
     """
     Args:
@@ -1072,7 +1080,7 @@ def auto_complete_courses(self, user_email, password=None):
         logger.info(f"Auto-complete courses completed and cleaned up for {user_email}")
 
 
-@shared_task(bind=True, queue='default', routing_key='default.wolfnet')
+@shared_task(bind=True, queue='selenium', routing_key='selenium.wolfnet')
 def check_wolfnet_password(self, user_email, password):
     """
     Check if WolfNet password is valid for a user
