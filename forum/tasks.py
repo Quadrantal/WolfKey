@@ -49,44 +49,52 @@ def get_memory_optimized_chrome_options():
     chrome_options.add_argument("--disable-extensions")
     chrome_options.add_argument("--disable-plugins")
     chrome_options.add_argument("--disable-images")  # Don't load images to save memory
-    # JavaScript is needed for login forms, so we keep it enabled
+    
+    # Heroku-specific optimizations - avoid user data directory issues
+    chrome_options.add_argument("--no-first-run")
+    chrome_options.add_argument("--no-default-browser-check")
+    chrome_options.add_argument("--disable-default-apps")
+    chrome_options.add_argument("--disable-sync")
     
     return chrome_options
 
 def create_webdriver_with_cleanup():
     """
-    Create a WebDriver with proper cleanup handling and unique user data directory
-    
+    Create a WebDriver with proper cleanup handling and Heroku-compatible settings
+
     Returns:
-        tuple: (driver, unique_user_data_dir)
+        tuple: (driver, None)
     """
     chrome_options = get_memory_optimized_chrome_options()
-    
-    # Create truly unique temp directory with timestamp and UUID
-    import time
-    timestamp = str(int(time.time() * 1000))  # milliseconds
-    unique_id = str(uuid.uuid4())[:8]
-    unique_user_data_dir = tempfile.mkdtemp(prefix=f"chrome_{timestamp}_{unique_id}_")
-    
-    # Ensure directory exists and has proper permissions
-    os.makedirs(unique_user_data_dir, exist_ok=True)
-    chrome_options.add_argument(f"--user-data-dir={unique_user_data_dir}")
-    
+
+    # Check if we're running on Heroku (avoid user data directory issues)
+    is_heroku = os.environ.get('DYNO') is not None
+
     # Add additional arguments to prevent session conflicts
     chrome_options.add_argument(f"--remote-debugging-port=0")  # Use random available port
-    chrome_options.add_argument("--no-first-run")
-    chrome_options.add_argument("--no-default-browser-check")
-    
+
+    if is_heroku:
+        # Heroku deployment - avoid user data directory completely
+        chrome_options.add_argument("--disable-user-media-security")
+        chrome_options.add_argument("--allow-running-insecure-content")
+        logger.info("Created WebDriver for Heroku (no user data dir)")
+    else:
+        # Local development - no user data directory
+        logger.info("Created WebDriver for local environment (no user data dir)")
+
     driver = webdriver.Chrome(options=chrome_options)
     driver.set_window_size(400, 300)  # Smaller window size to save memory
-    
-    logger.info(f"Created WebDriver with user data dir: {unique_user_data_dir}")
-    return driver, unique_user_data_dir
+
+    return driver, None
 
 def cleanup_old_chrome_dirs():
     """
-    Clean up old Chrome user data directories that might be left over
+    Clean up old Chrome user data directories that might be left over (local development only)
     """
+    # Only run cleanup in local development, not on Heroku
+    if os.environ.get('DYNO') is not None:
+        return
+
     try:
         temp_dir = tempfile.gettempdir()
         for item in os.listdir(temp_dir):
@@ -561,17 +569,18 @@ def check_user_grades_core(user_email):
         # Wait a moment for driver to fully close
         time.sleep(0.5)
         
-        # Clean up temporary directory more aggressively
-        max_retries = 3
-        for attempt in range(max_retries):
-            try:
-                if os.path.exists(unique_user_data_dir):
-                    shutil.rmtree(unique_user_data_dir, ignore_errors=True)
-                    if not os.path.exists(unique_user_data_dir):
-                        break
-                    time.sleep(1)  # Wait before retry
-            except Exception as e:
-                logger.warning(f"Cleanup attempt {attempt + 1} failed: {e}")
+        # Clean up temporary directory more aggressively (only if it exists)
+        if unique_user_data_dir:
+            max_retries = 3
+            for attempt in range(max_retries):
+                try:
+                    if os.path.exists(unique_user_data_dir):
+                        shutil.rmtree(unique_user_data_dir, ignore_errors=True)
+                        if not os.path.exists(unique_user_data_dir):
+                            break
+                        time.sleep(1)  # Wait before retry
+                except Exception as e:
+                    logger.warning(f"Cleanup attempt {attempt + 1} failed: {e}")
         
         # Force garbage collection to free memory
         gc.collect()
@@ -919,17 +928,18 @@ def auto_complete_courses(self, user_email, password=None):
         # Wait a moment for driver to fully close
         time.sleep(0.5)
         
-        # Clean up temporary directory more aggressively
-        max_retries = 3
-        for attempt in range(max_retries):
-            try:
-                if os.path.exists(unique_user_data_dir):
-                    shutil.rmtree(unique_user_data_dir, ignore_errors=True)
-                    if not os.path.exists(unique_user_data_dir):
-                        break
-                    time.sleep(1)  # Wait before retry
-            except Exception as e:
-                logger.warning(f"Cleanup attempt {attempt + 1} failed: {e}")
+        # Clean up temporary directory more aggressively (only if it exists)
+        if unique_user_data_dir:
+            max_retries = 3
+            for attempt in range(max_retries):
+                try:
+                    if os.path.exists(unique_user_data_dir):
+                        shutil.rmtree(unique_user_data_dir, ignore_errors=True)
+                        if not os.path.exists(unique_user_data_dir):
+                            break
+                        time.sleep(1)  # Wait before retry
+                except Exception as e:
+                    logger.warning(f"Cleanup attempt {attempt + 1} failed: {e}")
         
         # Force garbage collection to free memory
         gc.collect()
@@ -986,17 +996,18 @@ def check_wolfnet_password(self, user_email, password):
         # Wait a moment for driver to fully close
         time.sleep(0.5)
         
-        # Clean up temporary directory more aggressively
-        max_retries = 3
-        for attempt in range(max_retries):
-            try:
-                if os.path.exists(unique_user_data_dir):
-                    shutil.rmtree(unique_user_data_dir, ignore_errors=True)
-                    if not os.path.exists(unique_user_data_dir):
-                        break
-                    time.sleep(1)  # Wait before retry
-            except Exception as e:
-                logger.warning(f"Cleanup attempt {attempt + 1} failed: {e}")
+        # Clean up temporary directory more aggressively (only if it exists)
+        if unique_user_data_dir:
+            max_retries = 3
+            for attempt in range(max_retries):
+                try:
+                    if os.path.exists(unique_user_data_dir):
+                        shutil.rmtree(unique_user_data_dir, ignore_errors=True)
+                        if not os.path.exists(unique_user_data_dir):
+                            break
+                        time.sleep(1)  # Wait before retry
+                except Exception as e:
+                    logger.warning(f"Cleanup attempt {attempt + 1} failed: {e}")
         
         # Force garbage collection
         gc.collect()
