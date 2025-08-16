@@ -287,7 +287,12 @@ CELERY_TIMEZONE = 'UTC'
 CELERY_BROKER_POOL_LIMIT = int(os.getenv('BROKER_POOL_LIMIT', '3'))
 # This controls redis-py's max connections for Celery transport
 CELERY_BROKER_TRANSPORT_OPTIONS = {
-    'max_connections': int(os.getenv('REDIS_MAX_CONNECTIONS', '10'))
+    'max_connections': int(os.getenv('REDIS_MAX_CONNECTIONS', '10')),
+    'socket_keepalive': True,
+    'socket_keepalive_options': {},
+    'socket_connect_timeout': 30,
+    'socket_timeout': 30,
+    'retry_on_timeout': True,
 }
 
 # Configure SSL for Redis broker when using TLS (rediss://)
@@ -342,6 +347,7 @@ try:
             CELERY_BROKER_USE_SSL = {
                 'ssl_cert_reqs': ssl.CERT_NONE,
                 'ssl_check_hostname': False,
+                'ssl_ca_certs': None,
             }
         
         # Also set the result backend SSL configuration
@@ -356,13 +362,18 @@ except Exception as e:
     pass
 
 # Improve connection reliability and timeouts
-CELERY_BROKER_CONNECTION_TIMEOUT = int(os.getenv('BROKER_CONNECTION_TIMEOUT', '30'))  # Increased from 10
-CELERY_BROKER_HEARTBEAT = int(os.getenv('BROKER_HEARTBEAT', '10'))  # Decreased from 30 for faster detection
+CELERY_BROKER_CONNECTION_TIMEOUT = int(os.getenv('BROKER_CONNECTION_TIMEOUT', '60'))  # Increased for stability
+CELERY_BROKER_HEARTBEAT = int(os.getenv('BROKER_HEARTBEAT', '30'))  # Increased for stability
 
 # Additional connection robustness settings
 CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP = True
 CELERY_BROKER_CONNECTION_RETRY = True
 CELERY_BROKER_CONNECTION_MAX_RETRIES = 10
+
+# Add retry settings for tasks
+CELERY_TASK_ALWAYS_EAGER = False
+CELERY_TASK_EAGER_PROPAGATES = True
+CELERY_TASK_STORE_EAGER_RESULT = False
 
 # Memory optimization for Heroku
 CELERY_WORKER_PREFETCH_MULTIPLIER = 1

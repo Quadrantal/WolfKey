@@ -118,6 +118,7 @@ try:
             app.conf.broker_use_ssl = {
                 'ssl_cert_reqs': ssl.CERT_NONE,      # Don't verify certificate
                 'ssl_check_hostname': False,         # Don't verify hostname
+                'ssl_ca_certs': None,                # No CA certificates
             }
             print(f"Using default Heroku SSL config (CERT_NONE)")
             
@@ -134,6 +135,7 @@ try:
                 app.conf.redis_backend_use_ssl = {
                     'ssl_cert_reqs': ssl.CERT_NONE,
                     'ssl_check_hostname': False,
+                    'ssl_ca_certs': None,
                 }
                 
 except Exception as e:
