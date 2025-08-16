@@ -445,5 +445,5 @@
 
 /* Container for connection lines */
 .schedule-blocks-container {
-    position: relative;
+    position: static;
 }

@@ -1,7 +1,8 @@
 /* User Selector Styles */
-.user-selector-wrapper {
+.user-selector-wrapper,
+.user-selector-wrapper .position-relative {
     position: relative;
-    z-index: 10000;
+    z-index: 30000 !important; /* Higher than cards */
 }
 
 .user-selector-wrapper .search-box {
@@ -31,7 +32,7 @@
     overflow-y: auto;
     box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
     position: absolute;
-    z-index: 20000 !important;
+    z-index: 40000 !important;
 }
 
 .user-dropdown .dropdown-item {
