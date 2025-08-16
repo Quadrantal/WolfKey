@@ -11,11 +11,18 @@ app = Celery('student_forum')
 # Using a string here means the worker doesn't have to serialize the configuration object to child processes.
 app.config_from_object('django.conf:settings', namespace='CELERY')
 
-# Define multiple queues with priorities
+# Define multiple queues with priorities and dedicated workers
+# grades: Dedicated worker for all grade checking operations (WebDriver intensive)
+# general: Worker for general tasks like emails, notifications, etc.
+# high: Interactive user tasks with high priority
+# default: Regular tasks (fallback queue)
+# low: Background batch jobs
 app.conf.task_queues = (
-    Queue('high', routing_key='high.#'),      # Interactive user tasks
-    Queue('default', routing_key='default.#'), # Regular tasks
-    Queue('low', routing_key='low.#'),        # Background batch jobs
+    Queue('grades', routing_key='grades.#'),    # Grade checking tasks (dedicated worker)
+    Queue('general', routing_key='general.#'),  # General tasks (emails, notifications, etc.)
+    Queue('high', routing_key='high.#'),        # Interactive user tasks
+    Queue('default', routing_key='default.#'),  # Regular tasks (fallback)
+    Queue('low', routing_key='low.#'),          # Background batch jobs
 )
 
 # Set default routing configuration
@@ -37,14 +44,14 @@ app.conf.task_reject_on_worker_lost = True
 app.conf.beat_schedule = {
     'check-all-user-grades': {
         'task': 'forum.tasks.periodic_grade_check_trigger',
-        'schedule': 30.0 * 60,  # Every 30 minutes
-        'options': {'queue': 'default', 'routing_key': 'default.trigger'}
+        'schedule': 60.0 * 60,  # Every 60 minutes
+        'options': {'queue': 'grades', 'routing_key': 'grades.trigger'}
     },
     # Alternative: Use batched approach (comment out above and uncomment below)
     # 'check-all-user-grades-batched': {
     #     'task': 'forum.tasks.check_user_grades_batched_dispatch',
     #     'schedule': 30.0 * 60,  # Every 30 minutes
-    #     'options': {'queue': 'default', 'routing_key': 'default.coordination'},
+    #     'options': {'queue': 'grades', 'routing_key': 'grades.coordination'},
     #     'kwargs': {'batch_size': 1}  # Process 1 user at a time for memory efficiency
     # },
 }
