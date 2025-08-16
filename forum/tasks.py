@@ -17,6 +17,8 @@ import shutil
 import concurrent.futures
 import traceback
 import gc
+import uuid
+import os
 
 logger = logging.getLogger(__name__)
 
@@ -53,21 +55,54 @@ def get_memory_optimized_chrome_options():
 
 def create_webdriver_with_cleanup():
     """
-    Create a WebDriver with proper cleanup handling
+    Create a WebDriver with proper cleanup handling and unique user data directory
     
     Returns:
         tuple: (driver, unique_user_data_dir)
     """
     chrome_options = get_memory_optimized_chrome_options()
     
-    # Create unique temp directory
-    unique_user_data_dir = tempfile.mkdtemp()
+    # Create truly unique temp directory with timestamp and UUID
+    import time
+    timestamp = str(int(time.time() * 1000))  # milliseconds
+    unique_id = str(uuid.uuid4())[:8]
+    unique_user_data_dir = tempfile.mkdtemp(prefix=f"chrome_{timestamp}_{unique_id}_")
+    
+    # Ensure directory exists and has proper permissions
+    os.makedirs(unique_user_data_dir, exist_ok=True)
     chrome_options.add_argument(f"--user-data-dir={unique_user_data_dir}")
+    
+    # Add additional arguments to prevent session conflicts
+    chrome_options.add_argument(f"--remote-debugging-port=0")  # Use random available port
+    chrome_options.add_argument("--no-first-run")
+    chrome_options.add_argument("--no-default-browser-check")
     
     driver = webdriver.Chrome(options=chrome_options)
     driver.set_window_size(400, 300)  # Smaller window size to save memory
     
+    logger.info(f"Created WebDriver with user data dir: {unique_user_data_dir}")
     return driver, unique_user_data_dir
+
+def cleanup_old_chrome_dirs():
+    """
+    Clean up old Chrome user data directories that might be left over
+    """
+    try:
+        temp_dir = tempfile.gettempdir()
+        for item in os.listdir(temp_dir):
+            if item.startswith("chrome_") and os.path.isdir(os.path.join(temp_dir, item)):
+                old_dir = os.path.join(temp_dir, item)
+                try:
+                    # Check if directory is older than 1 hour
+                    dir_time = os.path.getctime(old_dir)
+                    current_time = time.time()
+                    if current_time - dir_time > 3600:  # 1 hour
+                        shutil.rmtree(old_dir, ignore_errors=True)
+                        logger.info(f"Cleaned up old Chrome directory: {old_dir}")
+                except:
+                    pass
+    except:
+        pass
 
 def get_decrypted_wolfnet_password(user_email):
     """
@@ -225,6 +260,7 @@ def check_user_grades_core(user_email):
         }
 
     # Use memory-optimized WebDriver
+    cleanup_old_chrome_dirs()  # Clean up any old directories first
     driver, unique_user_data_dir = create_webdriver_with_cleanup()
     wait = WebDriverWait(driver, 6)  # Reduced timeout for memory efficiency
 
@@ -519,14 +555,23 @@ def check_user_grades_core(user_email):
     finally:
         try:
             driver.quit()
-        except:
-            pass
+        except Exception as e:
+            logger.warning(f"Error quitting driver: {e}")
         
-        # Clean up temporary directory
-        try:
-            shutil.rmtree(unique_user_data_dir, ignore_errors=True)
-        except:
-            pass
+        # Wait a moment for driver to fully close
+        time.sleep(0.5)
+        
+        # Clean up temporary directory more aggressively
+        max_retries = 3
+        for attempt in range(max_retries):
+            try:
+                if os.path.exists(unique_user_data_dir):
+                    shutil.rmtree(unique_user_data_dir, ignore_errors=True)
+                    if not os.path.exists(unique_user_data_dir):
+                        break
+                    time.sleep(1)  # Wait before retry
+            except Exception as e:
+                logger.warning(f"Cleanup attempt {attempt + 1} failed: {e}")
         
         # Force garbage collection to free memory
         gc.collect()
@@ -734,6 +779,7 @@ def auto_complete_courses(self, user_email, password=None):
     logger.info(f"Starting auto-complete courses for user: {user_email}")
     
     # Use memory-optimized WebDriver
+    cleanup_old_chrome_dirs()  # Clean up any old directories first
     driver, unique_user_data_dir = create_webdriver_with_cleanup()
     wait = WebDriverWait(driver, 6)  # Reduced timeout
 
@@ -880,14 +926,23 @@ def auto_complete_courses(self, user_email, password=None):
     finally:
         try:
             driver.quit()
-        except:
-            pass
+        except Exception as e:
+            logger.warning(f"Error quitting driver: {e}")
         
-        # Clean up temporary directory
-        try:
-            shutil.rmtree(unique_user_data_dir, ignore_errors=True)
-        except:
-            pass
+        # Wait a moment for driver to fully close
+        time.sleep(0.5)
+        
+        # Clean up temporary directory more aggressively
+        max_retries = 3
+        for attempt in range(max_retries):
+            try:
+                if os.path.exists(unique_user_data_dir):
+                    shutil.rmtree(unique_user_data_dir, ignore_errors=True)
+                    if not os.path.exists(unique_user_data_dir):
+                        break
+                    time.sleep(1)  # Wait before retry
+            except Exception as e:
+                logger.warning(f"Cleanup attempt {attempt + 1} failed: {e}")
         
         # Force garbage collection to free memory
         gc.collect()
@@ -910,6 +965,7 @@ def check_wolfnet_password(self, user_email, password):
     logger.info(f"Starting WolfNet password check for user: {user_email}")
     
     # Use memory-optimized WebDriver
+    cleanup_old_chrome_dirs()  # Clean up any old directories first
     driver, unique_user_data_dir = create_webdriver_with_cleanup()
     wait = WebDriverWait(driver, 6)  # Reduced timeout
 
@@ -935,6 +991,26 @@ def check_wolfnet_password(self, user_email, password):
             "error_type": error_type
         }
     finally:
-        driver.quit()
-        shutil.rmtree(unique_user_data_dir, ignore_errors=True)
+        try:
+            driver.quit()
+        except Exception as e:
+            logger.warning(f"Error quitting driver: {e}")
+        
+        # Wait a moment for driver to fully close
+        time.sleep(0.5)
+        
+        # Clean up temporary directory more aggressively
+        max_retries = 3
+        for attempt in range(max_retries):
+            try:
+                if os.path.exists(unique_user_data_dir):
+                    shutil.rmtree(unique_user_data_dir, ignore_errors=True)
+                    if not os.path.exists(unique_user_data_dir):
+                        break
+                    time.sleep(1)  # Wait before retry
+            except Exception as e:
+                logger.warning(f"Cleanup attempt {attempt + 1} failed: {e}")
+        
+        # Force garbage collection
+        gc.collect()
         logger.info(f"Cleaned up temporary user-data-dir for {user_email}")
