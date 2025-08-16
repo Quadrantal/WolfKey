@@ -84,26 +84,6 @@ def create_webdriver_with_cleanup():
     chrome_options.add_argument(f"--user-data-dir={temp_user_data_dir}")
     chrome_options.add_argument("--incognito")  # Still use incognito for additional privacy
     
-    # Add comprehensive isolation flags
-    chrome_options.add_argument(f"--remote-debugging-port=0")  # Use random available port
-    chrome_options.add_argument("--no-first-run")
-    chrome_options.add_argument("--no-default-browser-check") 
-    chrome_options.add_argument("--disable-background-timer-throttling")
-    chrome_options.add_argument("--disable-backgrounding-occluded-windows")
-    chrome_options.add_argument("--disable-renderer-backgrounding")
-    chrome_options.add_argument("--disable-web-security")  # For Selenium automation
-    chrome_options.add_argument("--disable-features=VizDisplayCompositor")
-    chrome_options.add_argument("--disable-blink-features=AutomationControlled")  # Hide automation
-    chrome_options.add_argument("--disable-infobars")
-    chrome_options.add_argument("--disable-notifications")
-    chrome_options.add_argument("--disable-popup-blocking")
-    chrome_options.add_argument("--no-zygote")  # Disable zygote process for better isolation
-    chrome_options.add_argument("--disable-software-rasterizer")
-    chrome_options.add_argument("--disable-background-networking")
-    chrome_options.add_argument("--disable-default-apps")
-    chrome_options.add_argument("--disable-sync")
-    chrome_options.add_argument("--metrics-recording-only")
-    chrome_options.add_argument("--no-report-upload")
     
     # Add crash dumps to our temp directory
     chrome_options.add_argument(f"--crash-dumps-dir={temp_user_data_dir}")
