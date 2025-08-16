@@ -279,6 +279,14 @@ CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
 CELERY_TIMEZONE = 'UTC'
 
+# Memory optimization for Heroku
+CELERY_WORKER_PREFETCH_MULTIPLIER = 1
+CELERY_WORKER_MAX_TASKS_PER_CHILD = 10  # Restart worker after 10 tasks
+CELERY_TASK_ACKS_LATE = True
+CELERY_TASK_REJECT_ON_WORKER_LOST = True
+CELERY_WORKER_DISABLE_RATE_LIMITS = True
+CELERY_RESULT_EXPIRES = 3600  # Results expire after 1 hour to save memory
+
 # AWS S3 Configuration
 if not DEBUG:  # Use S3 in production only
     print("Debug turned off")

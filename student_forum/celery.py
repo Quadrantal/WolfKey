@@ -26,6 +26,13 @@ app.conf.task_default_routing_key = 'default.default'
 # Load task modules from all registered Django app configs.
 app.autodiscover_tasks()
 
+# Memory optimization settings for Heroku
+app.conf.worker_prefetch_multiplier = 1  # Reduce task prefetching
+app.conf.worker_max_tasks_per_child = 10  # Restart worker after 10 tasks to free memory
+app.conf.worker_disable_rate_limits = True
+app.conf.task_acks_late = True
+app.conf.task_reject_on_worker_lost = True
+
 # Celery Beat Schedule for periodic tasks
 app.conf.beat_schedule = {
     'check-all-user-grades': {
@@ -38,12 +45,13 @@ app.conf.beat_schedule = {
     #     'task': 'forum.tasks.check_user_grades_batched_dispatch',
     #     'schedule': 30.0 * 60,  # Every 30 minutes
     #     'options': {'queue': 'default', 'routing_key': 'default.coordination'},
-    #     'kwargs': {'batch_size': 2}  # Process 3 users at a time
+    #     'kwargs': {'batch_size': 1}  # Process 1 user at a time for memory efficiency
     # },
 }
 
-CELERY_TASK_SOFT_TIME_LIMIT = 60 
-CELERY_TASK_TIME_LIMIT = 120 
+# Reduced time limits for memory efficiency
+CELERY_TASK_SOFT_TIME_LIMIT = 45 
+CELERY_TASK_TIME_LIMIT = 90 
 
 app.conf.timezone = 'UTC'
 

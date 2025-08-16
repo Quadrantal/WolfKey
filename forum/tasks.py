@@ -14,8 +14,60 @@ from django.http import HttpRequest
 import django
 import tempfile
 import shutil
+import concurrent.futures
+import traceback
+import gc
 
 logger = logging.getLogger(__name__)
+
+def get_memory_optimized_chrome_options():
+    """
+    Get Chrome options optimized for low memory usage
+    
+    Returns:
+        Options: Configured Chrome options
+    """
+    chrome_options = Options()
+    chrome_options.add_argument("--headless=new")
+    chrome_options.add_argument("--no-sandbox")
+    chrome_options.add_argument("--disable-dev-shm-usage")
+    
+    # Memory optimization flags
+    chrome_options.add_argument("--memory-pressure-off")
+    chrome_options.add_argument("--max_old_space_size=256")
+    chrome_options.add_argument("--disable-background-timer-throttling")
+    chrome_options.add_argument("--disable-renderer-backgrounding")
+    chrome_options.add_argument("--disable-backgrounding-occluded-windows")
+    chrome_options.add_argument("--disable-background-networking")
+    chrome_options.add_argument("--disable-web-security")
+    chrome_options.add_argument("--disable-features=VizDisplayCompositor")
+    chrome_options.add_argument("--disable-ipc-flooding-protection")
+    chrome_options.add_argument("--disable-gpu")
+    chrome_options.add_argument("--single-process")  # Use single process to reduce memory
+    chrome_options.add_argument("--disable-extensions")
+    chrome_options.add_argument("--disable-plugins")
+    chrome_options.add_argument("--disable-images")  # Don't load images to save memory
+    # JavaScript is needed for login forms, so we keep it enabled
+    
+    return chrome_options
+
+def create_webdriver_with_cleanup():
+    """
+    Create a WebDriver with proper cleanup handling
+    
+    Returns:
+        tuple: (driver, unique_user_data_dir)
+    """
+    chrome_options = get_memory_optimized_chrome_options()
+    
+    # Create unique temp directory
+    unique_user_data_dir = tempfile.mkdtemp()
+    chrome_options.add_argument(f"--user-data-dir={unique_user_data_dir}")
+    
+    driver = webdriver.Chrome(options=chrome_options)
+    driver.set_window_size(400, 300)  # Smaller window size to save memory
+    
+    return driver, unique_user_data_dir
 
 def get_decrypted_wolfnet_password(user_email):
     """
@@ -172,19 +224,9 @@ def check_user_grades_core(user_email):
             "error": "No WolfNet password found. Please add your WolfNet password in your profile settings to enable grade checking."
         }
 
-    chrome_options = Options()
-    chrome_options.add_argument("--headless=new")
-    chrome_options.add_argument("--no-sandbox")
-    chrome_options.add_argument("--disable-dev-shm-usage")
-
-    # Add unique user-data-dir to avoid session conflicts
-    unique_user_data_dir = tempfile.mkdtemp()
-    chrome_options.add_argument(f"--user-data-dir={unique_user_data_dir}")
-    
-    driver = webdriver.Chrome(options=chrome_options)
-    driver.set_window_size(800, 600)
-
-    wait = WebDriverWait(driver, 8)
+    # Use memory-optimized WebDriver
+    driver, unique_user_data_dir = create_webdriver_with_cleanup()
+    wait = WebDriverWait(driver, 6)  # Reduced timeout for memory efficiency
 
     try:
         login_result = login_to_wolfnet(user_email, driver, wait)
@@ -265,7 +307,7 @@ def check_user_grades_core(user_email):
             # If not found, fetch from API
             if not marking_period_id:
                 mp_url = f"https://wpga.myschoolapp.com/api/datadirect/GradeBookMarkingPeriodList?sectionId={first_section_id}"
-                mp_resp = requests.get(mp_url, cookies=cookies, headers=headers)
+                mp_resp = requests.get(mp_url, cookies=cookies, headers=headers, timeout=20)
                 if mp_resp.status_code == 200:
                     mp_json = mp_resp.json()
                     if mp_json:
@@ -295,7 +337,7 @@ def check_user_grades_core(user_email):
                     f"&sortAssignmentId=null&sortSkillPk=null&sortDesc=null&sortCumulative=null"
                     f"&studentUserId={student_id}&fromProgress=true"
                 )
-                hydrate_resp = requests.get(hydrate_url, cookies=cookies, headers=headers, timeout=30)
+                hydrate_resp = requests.get(hydrate_url, cookies=cookies, headers=headers, timeout=20)
                 if hydrate_resp.status_code == 200:
                     hydrate_json = hydrate_resp.json()
                     assignments = []
@@ -325,7 +367,7 @@ def check_user_grades_core(user_email):
                             f"https://wpga.myschoolapp.com/api/gradebook/AssignmentPerformanceStudent?"
                             f"sectionId={section_id}&markingPeriodId={marking_period_id}&studentId={student_id}"
                         )
-                        aps_resp = requests.get(aps_url, cookies=cookies, headers=headers, timeout=30)
+                        aps_resp = requests.get(aps_url, cookies=cookies, headers=headers, timeout=20)
                         assignment_names = {}
                         if aps_resp.status_code == 200:
                             aps_json = aps_resp.json()
@@ -439,8 +481,9 @@ def check_user_grades_core(user_email):
             
             return section_messages
         
-        # Process sections in parallel
-        with concurrent.futures.ThreadPoolExecutor(max_workers=2) as executor:
+        # Process sections sequentially to reduce memory usage instead of concurrent.futures
+        # Using ThreadPoolExecutor with max_workers=1 to maintain structure but reduce memory
+        with concurrent.futures.ThreadPoolExecutor(max_workers=1) as executor:
             future_to_section = {executor.submit(process_section, section_id): section_id for section_id in section_ids}
             
             for future in concurrent.futures.as_completed(future_to_section):
@@ -474,8 +517,21 @@ def check_user_grades_core(user_email):
                 email_body
             )
     finally:
-        driver.quit()
-        logger.info(f"Grade check completed for {user_email}")
+        try:
+            driver.quit()
+        except:
+            pass
+        
+        # Clean up temporary directory
+        try:
+            shutil.rmtree(unique_user_data_dir, ignore_errors=True)
+        except:
+            pass
+        
+        # Force garbage collection to free memory
+        gc.collect()
+            
+        logger.info(f"Grade check completed and cleaned up for {user_email}")
 
 @shared_task(bind=True, queue='low', routing_key='low.grades')
 def check_single_user_grades(self, user_email):
@@ -519,7 +575,7 @@ def check_all_user_grades_sequential_dispatch(self):
             logger.info(f"Dispatched task {task.id} for {user.school_email}, waiting for completion...")
             
             # Wait for the task to complete (with timeout)
-            result = task.apply_async(timeout=45)
+            result = task.apply_async(timeout=30)
             results.append({
                 "user": user.school_email,
                 "status": "success",
@@ -551,12 +607,12 @@ def check_all_user_grades_sequential_dispatch(self):
     return summary
 
 @shared_task(bind=True, queue='default', routing_key='default.coordination')  
-def check_user_grades_batched_dispatch(self, batch_size=2):
+def check_user_grades_batched_dispatch(self, batch_size=1):
     """
     Process users in small batches with controlled queue flooding
     
     Args:
-        batch_size (int): Number of users to process simultaneously per batch
+        batch_size (int): Number of users to process simultaneously per batch (default 1 for memory efficiency)
     
     Returns:
         dict: Summary with processed batches and results
@@ -585,7 +641,7 @@ def check_user_grades_batched_dispatch(self, batch_size=2):
         batch_results = []
         for user_email, task in batch_tasks:
             try:
-                result = task.apply_async(timeout=45)
+                result = task.apply_async(timeout=30)
                 batch_results.append({
                     "user": user_email,
                     "status": "success",
@@ -677,19 +733,9 @@ def auto_complete_courses(self, user_email, password=None):
     """
     logger.info(f"Starting auto-complete courses for user: {user_email}")
     
-    chrome_options = Options()
-    chrome_options.add_argument("--headless=new")
-    chrome_options.add_argument("--no-sandbox")
-    chrome_options.add_argument("--disable-dev-shm-usage")
-    
-
-    # Add unique user-data-dir to avoid session conflicts
-    unique_user_data_dir = tempfile.mkdtemp()
-    chrome_options.add_argument(f"--user-data-dir={unique_user_data_dir}")
-    
-    driver = webdriver.Chrome(options=chrome_options)
-    driver.set_window_size(800, 600)
-    wait = WebDriverWait(driver, 8)
+    # Use memory-optimized WebDriver
+    driver, unique_user_data_dir = create_webdriver_with_cleanup()
+    wait = WebDriverWait(driver, 6)  # Reduced timeout
 
     try:
         login_result = login_to_wolfnet(user_email, driver, wait, password)
@@ -832,8 +878,21 @@ def auto_complete_courses(self, user_email, password=None):
             "error_type": error_type
         }
     finally:
-        driver.quit()
-        logger.info(f"Auto-complete courses completed for {user_email}")
+        try:
+            driver.quit()
+        except:
+            pass
+        
+        # Clean up temporary directory
+        try:
+            shutil.rmtree(unique_user_data_dir, ignore_errors=True)
+        except:
+            pass
+        
+        # Force garbage collection to free memory
+        gc.collect()
+            
+        logger.info(f"Auto-complete courses completed and cleaned up for {user_email}")
 
 
 @shared_task(bind=True, queue='default', routing_key='default.wolfnet')
@@ -850,17 +909,9 @@ def check_wolfnet_password(self, user_email, password):
     """
     logger.info(f"Starting WolfNet password check for user: {user_email}")
     
-    chrome_options = Options()
-    chrome_options.add_argument("--headless=new")
-    chrome_options.add_argument("--no-sandbox")
-    chrome_options.add_argument("--disable-dev-shm-usage")
-
-    # Add unique user-data-dir to avoid session conflicts
-    unique_user_data_dir = tempfile.mkdtemp()
-    chrome_options.add_argument(f"--user-data-dir={unique_user_data_dir}")
-    
-    driver = webdriver.Chrome(options=chrome_options)
-    wait = WebDriverWait(driver, 8)
+    # Use memory-optimized WebDriver
+    driver, unique_user_data_dir = create_webdriver_with_cleanup()
+    wait = WebDriverWait(driver, 6)  # Reduced timeout
 
     try:
         login_result = login_to_wolfnet(user_email, driver, wait, password)
