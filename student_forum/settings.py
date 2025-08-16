@@ -302,27 +302,32 @@ try:
         if ssl_cert_reqs == 'required':
             # Strict SSL validation (for production with proper CA-signed certificates)
             CELERY_BROKER_USE_SSL = {
-                'cert_reqs': ssl.CERT_REQUIRED,
-                'ca_certs': None,  # Use system CA bundle
-                'check_hostname': False,
+                'ssl_cert_reqs': ssl.CERT_REQUIRED,  # Note: ssl_cert_reqs not cert_reqs
+                'ssl_ca_certs': None,  # Use system CA bundle
+                'ssl_check_hostname': False,
             }
         elif ssl_cert_reqs == 'optional':
             # Relaxed SSL validation (verify certs if present, but don't require)
             CELERY_BROKER_USE_SSL = {
-                'cert_reqs': ssl.CERT_OPTIONAL,
-                'ca_certs': None,
-                'check_hostname': False,
+                'ssl_cert_reqs': ssl.CERT_OPTIONAL,  # Note: ssl_cert_reqs not cert_reqs
+                'ssl_ca_certs': None,
+                'ssl_check_hostname': False,
             }
         else:
             # Heroku Redis configuration (default)
             # Uses SSL encryption but disables certificate verification for self-signed certs
             # This maintains encryption while working with Heroku's self-signed certificates
             CELERY_BROKER_USE_SSL = {
-                'cert_reqs': ssl.CERT_NONE,
-                'check_hostname': False,
-                'ssl_version': ssl.PROTOCOL_TLSv1_2,  # Ensure modern TLS
+                'ssl_cert_reqs': ssl.CERT_NONE,      # Note: ssl_cert_reqs not cert_reqs
+                'ssl_check_hostname': False,         # Note: ssl_check_hostname not check_hostname
+                'ssl_version': ssl.PROTOCOL_TLS,     # Use PROTOCOL_TLS instead of TLSv1_2 for better compatibility
             }
-except Exception:
+        
+        # Also set the result backend SSL configuration
+        CELERY_REDIS_BACKEND_USE_SSL = CELERY_BROKER_USE_SSL.copy()
+            
+except Exception as e:
+    print(f"Error configuring Redis SSL: {e}")
     # If anything goes wrong reading the URL, do not set the override here.
     pass
 
