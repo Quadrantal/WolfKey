@@ -30,7 +30,7 @@ def get_memory_optimized_chrome_options():
         Options: Configured Chrome options
     """
     chrome_options = Options()
-    # chrome_options.add_argument("--headless=new")
+    chrome_options.add_argument("--headless=new")  # Force headless mode for production
     chrome_options.add_argument("--no-sandbox")
     chrome_options.add_argument("--disable-dev-shm-usage")
 
@@ -59,26 +59,54 @@ def create_webdriver_with_cleanup():
     """
     chrome_options = get_memory_optimized_chrome_options()
     
-    # Create truly unique temp directory with timestamp and UUID
+    # Create truly unique temp directory with timestamp, UUID, and process ID
     import time
-    timestamp = str(int(time.time() * 1000))  # milliseconds
-    unique_id = str(uuid.uuid4())[:8]
-    unique_user_data_dir = tempfile.mkdtemp(prefix=f"chrome_{timestamp}_{unique_id}_")
+    import threading
+    timestamp = str(int(time.time() * 1000000))  # Use microseconds for better uniqueness
+    unique_id = str(uuid.uuid4()).replace('-', '')
+    process_id = str(os.getpid())
+    thread_id = str(threading.get_ident())
+    random_suffix = str(uuid.uuid4())[:8]
+    unique_user_data_dir = tempfile.mkdtemp(
+        prefix=f"chrome_user_data_",
+        suffix=f"_{timestamp}_{unique_id}_{process_id}_{thread_id}_{random_suffix}"
+    )
     
     # Ensure directory exists and has proper permissions
     os.makedirs(unique_user_data_dir, exist_ok=True)
     chrome_options.add_argument(f"--user-data-dir={unique_user_data_dir}")
     
-    # Add additional arguments to prevent session conflicts
+    # Add additional arguments to prevent session conflicts with enhanced isolation
     chrome_options.add_argument(f"--remote-debugging-port=0")  # Use random available port
     chrome_options.add_argument("--no-first-run")
     chrome_options.add_argument("--no-default-browser-check")
+    chrome_options.add_argument("--disable-background-timer-throttling")
+    chrome_options.add_argument("--disable-backgrounding-occluded-windows")
+    chrome_options.add_argument("--disable-renderer-backgrounding")
+    chrome_options.add_argument(f"--crash-dumps-dir={unique_user_data_dir}")
+    # Remove single-process flag as it may cause conflicts
+    chrome_options.add_argument("--disable-web-security")  # For Selenium automation
+    chrome_options.add_argument("--disable-features=VizDisplayCompositor")
     
-    driver = webdriver.Chrome(options=chrome_options)
-    driver.set_window_size(1000, 1000)  # Smaller window size to save memory
+    # Add a small random delay to prevent race conditions in concurrent requests
+    import random
+    time.sleep(random.uniform(0.2, 1.0))  # Increased delay
     
-    logger.info(f"Created WebDriver with user data dir: {unique_user_data_dir}")
-    return driver, unique_user_data_dir
+    try:
+        driver = webdriver.Chrome(options=chrome_options)
+        driver.set_window_size(1000, 1000)  # Smaller window size to save memory
+        
+        logger.info(f"Created WebDriver with user data dir: {unique_user_data_dir}")
+        return driver, unique_user_data_dir
+    except Exception as e:
+        # Clean up the directory if driver creation fails
+        try:
+            if os.path.exists(unique_user_data_dir):
+                shutil.rmtree(unique_user_data_dir, ignore_errors=True)
+        except:
+            pass
+        logger.error(f"Failed to create WebDriver: {e}")
+        raise
 
 def cleanup_old_chrome_dirs():
     """
@@ -86,18 +114,35 @@ def cleanup_old_chrome_dirs():
     """
     try:
         temp_dir = tempfile.gettempdir()
+        current_time = time.time()
+        
         for item in os.listdir(temp_dir):
             if item.startswith("chrome_") and os.path.isdir(os.path.join(temp_dir, item)):
                 old_dir = os.path.join(temp_dir, item)
                 try:
-                    # Check if directory is older than 1 hour
+                    # Check if directory is older than 30 minutes (reduced from 1 hour)
                     dir_time = os.path.getctime(old_dir)
-                    current_time = time.time()
-                    if current_time - dir_time > 3600:  # 1 hour
+                    if current_time - dir_time > 1800:  # 30 minutes
+                        # Force kill any Chrome processes that might be using this directory
+                        try:
+                            import subprocess
+                            subprocess.run(['pkill', '-f', old_dir], capture_output=True, timeout=5)
+                        except:
+                            pass
+                        
+                        # Wait a bit for processes to die
+                        time.sleep(0.5)
+                        
+                        # Try to remove the directory
                         shutil.rmtree(old_dir, ignore_errors=True)
-                        logger.info(f"Cleaned up old Chrome directory: {old_dir}")
-                except:
-                    pass
+                        if not os.path.exists(old_dir):
+                            logger.info(f"Cleaned up old Chrome directory: {old_dir}")
+                        else:
+                            logger.warning(f"Could not fully clean up directory: {old_dir}")
+                except Exception as cleanup_error:
+                    logger.warning(f"Error cleaning up {old_dir}: {cleanup_error}")
+    except Exception as e:
+        logger.warning(f"Error during Chrome directory cleanup: {e}")
     except:
         pass
 
