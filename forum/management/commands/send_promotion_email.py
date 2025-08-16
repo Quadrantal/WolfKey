@@ -12,7 +12,7 @@ class Command(BaseCommand):
         
         # Render the email content
         subject = "WolfKey Updates – Celebrating 40 Users!"
-        html_content = render_to_string('forum/newsletters/Promotion1.html')  # Path to your email template
+        html_content = render_to_string('forum/newsletters/Promotion2.html')  # Path to your email template
         
         # Send the email
         email = EmailMessage(subject, html_content, 'chunghugo99994@gmail.com', recipient_list)

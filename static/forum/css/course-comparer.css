@@ -399,3 +399,50 @@
 .course-item.empty {
     background-color: white;
 }
+
+/* Connection lines between matching courses */
+.course-connection-line {
+    position: absolute;
+    background-color: #10b981;
+    height: 3px;
+    border-radius: 2px;
+    z-index: 10;
+    pointer-events: none;
+    opacity: 0.8;
+    transition: all 0.3s ease;
+}
+
+.course-connection-line.highlight {
+    height: 4px;
+    background-color: #059669;
+    opacity: 1;
+    box-shadow: 0 2px 6px rgba(16, 185, 129, 0.3);
+}
+
+/* Enhanced styling for matching courses */
+.course-item.has-match {
+    position: relative;
+}
+
+.course-item.has-match::after {
+    content: '';
+    position: absolute;
+    top: -2px;
+    left: -2px;
+    right: -2px;
+    bottom: -2px;
+    border: 2px solid #10b981;
+    border-radius: 14px;
+    pointer-events: none;
+    opacity: 0.6;
+}
+
+.course-item.has-match:hover::after {
+    opacity: 1;
+    border-color: #059669;
+}
+
+/* Container for connection lines */
+.schedule-blocks-container {
+    position: relative;
+}
