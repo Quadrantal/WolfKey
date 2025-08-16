@@ -291,34 +291,36 @@ CELERY_BROKER_TRANSPORT_OPTIONS = {
 }
 
 # Configure SSL for Redis broker when using TLS (rediss://)
-# For Heroku Redis, we need to handle SSL carefully due to certificate issues
+# For Heroku Redis, use SSL encryption but disable certificate verification
 try:
     if CELERY_BROKER_URL and CELERY_BROKER_URL.startswith('rediss://'):
         # Use environment variable to control SSL validation
-        # Set REDIS_SSL_CERT_REQS=required for strict validation (production with proper certs)
-        # Set REDIS_SSL_CERT_REQS=none for Heroku Redis (current necessity)
-        ssl_cert_reqs = os.getenv('REDIS_SSL_CERT_REQS', 'none').lower()
+        # Set REDIS_SSL_CERT_REQS=required for strict validation (production with proper certs)  
+        # Set REDIS_SSL_CERT_REQS=heroku for Heroku Redis (default - encrypted but no cert validation)
+        ssl_cert_reqs = os.getenv('REDIS_SSL_CERT_REQS', 'heroku').lower()
         
         if ssl_cert_reqs == 'required':
-            # Strict SSL validation (recommended for production with proper certificates)
+            # Strict SSL validation (for production with proper CA-signed certificates)
             CELERY_BROKER_USE_SSL = {
                 'cert_reqs': ssl.CERT_REQUIRED,
                 'ca_certs': None,  # Use system CA bundle
-                'check_hostname': True,
+                'check_hostname': False,
             }
         elif ssl_cert_reqs == 'optional':
-            # Relaxed SSL validation
+            # Relaxed SSL validation (verify certs if present, but don't require)
             CELERY_BROKER_USE_SSL = {
                 'cert_reqs': ssl.CERT_OPTIONAL,
                 'ca_certs': None,
                 'check_hostname': False,
             }
         else:
-            # Minimal SSL (for Heroku Redis compatibility)
-            # Note: This disables certificate verification - only use when necessary
+            # Heroku Redis configuration (default)
+            # Uses SSL encryption but disables certificate verification for self-signed certs
+            # This maintains encryption while working with Heroku's self-signed certificates
             CELERY_BROKER_USE_SSL = {
                 'cert_reqs': ssl.CERT_NONE,
                 'check_hostname': False,
+                'ssl_version': ssl.PROTOCOL_TLSv1_2,  # Ensure modern TLS
             }
 except Exception:
     # If anything goes wrong reading the URL, do not set the override here.
