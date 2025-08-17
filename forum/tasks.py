@@ -211,31 +211,45 @@ def login_to_wolfnet(user_email, driver, wait, password=None):
         try:
             logger.info("start wait")
             time.sleep(1)
+            # Wait for any of the elements to appear
             element = wait.until(
                 EC.any_of(
-                    EC.presence_of_element_located((By.ID, "idSIButton9")),  # Stay signed in button (success)
-                    EC.presence_of_element_located((By.CSS_SELECTOR, "#passwordError, .error, .alert-error")),  # Error elements
-                    EC.presence_of_element_located((By.CSS_SELECTOR, "#attendance")) 
+                    EC.presence_of_element_located((By.CSS_SELECTOR, "#passwordError, .error, .alert-error")),
+                    EC.presence_of_element_located((By.ID, "idSIButton9")),
+                    EC.presence_of_element_located((By.CSS_SELECTOR, "#attendance"))
                 )
             )
 
             logger.info(element)
-            
+
+            # Check if password error is present and visible
+            error_elem = None
+            try:
+                error_elem = driver.find_element(By.CSS_SELECTOR, "#passwordError, .error, .alert-error")
+                if error_elem.is_displayed():
+                    logger.error(f"Wrong WolfNet password detected for {user_email} (error element visible)")
+                    return {"success": False, "error": "Invalid WolfNet credentials", "error_type": "wrong_password"}
+            except Exception:
+                pass
+
+            # If attendance is present, login is successful
+            if element.get_attribute("id") == "attendance" or "attendance" in element.get_attribute("id"):
+                logger.info(f"Successfully logged in for {user_email}")
+                time.sleep(1)
+                return {"success": True}
+
+            # If idSIButton9 is present and no error, proceed
             if element.get_attribute("id") == "idSIButton9":
-                # Stay signed in prompt
                 button = wait.until(EC.element_to_be_clickable((By.ID, "idSIButton9")))
                 button.click()
                 wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "#attendance")))
                 time.sleep(1)
                 logger.info(f"Successfully logged in for {user_email} after handling stay signed in prompt")
                 return {"success": True}
-            elif "attendance" in element.get_attribute("id"):
-                logger.info(f"Successfully logged in for {user_email}")
-                time.sleep(1)
-                return {"success": True}
-            else:
-                logger.error(f"Wrong WolfNet password detected for {user_email}")
-                return {"success": False, "error": "Invalid WolfNet credentials", "error_type": "wrong_password"}
+
+            # Fallback: treat as wrong password if error element is present
+            logger.error(f"Wrong WolfNet password detected for {user_email} (fallback)")
+            return {"success": False, "error": "Invalid WolfNet credentials", "error_type": "wrong_password"}
                     
         except Exception as e:
             try:
