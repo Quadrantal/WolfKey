@@ -233,7 +233,7 @@
                             <div class="card-header d-flex justify-content-between align-items-center">
                                 <h5 class="mb-0">Fill in your schedule info</h5>
                                 {% if user == profile_user %}
-                                <button type="button" class="btn btn-info btn-sm magic-btn" id="autoCompleteBtn" {% if not has_wolfnet_password %}disabled title = "Not connected to WolfNet Account. Add password under preferences tab"{% endif %}>
+                                <button type="button" class="btn btn-info btn-sm magic-btn" id="autoCompleteBtn" data-has-wolfnet="{% if has_wolfnet_password %}true{% else %}false{% endif %}" title="Not connected to WolfNet Account. Add password under preferences tab">
                                     <i class="fas fa-magic"></i> Auto-Complete from WolfNet
                                 </button>
                                 {% endif %}
@@ -502,11 +502,21 @@
     document.addEventListener('DOMContentLoaded', function() {
         const autoCompleteBtn = document.getElementById('autoCompleteBtn');
         if (autoCompleteBtn) {
+            const hasWolfnet = autoCompleteBtn.getAttribute('data-has-wolfnet') === 'true';
+
+            console.log(hasWolfnet);
+
             autoCompleteBtn.addEventListener('click', async function() {
+                const hasWolfnetNow = autoCompleteBtn.getAttribute('data-has-wolfnet') === 'true';
+                if (!hasWolfnetNow) {
+                    alert('Auto-complete unavailable because you do not have a WolfNet password set. Add it under the Preferences tab and then try again. \n\nIf you just set one, reload the page');
+                    return;
+                }
+
                 // Disable button and show loading state
                 autoCompleteBtn.disabled = true;
                 autoCompleteBtn.innerHTML = '<span style="display:inline-flex;align-items:center;gap:0.5em;"><div class="loader"></div><span>Loading...</span></span>';
-                
+
                 try {
                     const response = await fetch('{% url "auto_complete_courses" %}', {
                         method: 'POST',
@@ -515,16 +525,16 @@
                             'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
                         }
                     });
-                    
+
                     const data = await response.json();
-                    
+
                     if (data.success) {
                         // Update course selectors with the fetched data
                         updateCourseSelectors(data.courses);
                     } else {
                         const errorType = data.error_type || 'general';
                         let errorMessage = data.error || 'Failed to auto-complete courses';
-                        
+
                         if (errorType === 'authentication') {
                             if (data.error === 'wrong_password') {
                                 alert('Your WolfNet password appears to be incorrect. Please update it in the Preferences tab and try again.');
@@ -545,8 +555,9 @@
                     console.error('Error:', error);
                     alert('Network error occurred while auto-completing courses');
                 } finally {
-                    // Re-enable button
-                    autoCompleteBtn.disabled = false;
+                    // Restore visual disabled state (button remains clickable)
+                    autoCompleteBtn.classList.toggle('disabled', !hasWolfnet);
+                    autoCompleteBtn.setAttribute('aria-disabled', (!hasWolfnet).toString());
                     autoCompleteBtn.innerHTML = '<i class="fas fa-magic"></i> Auto-Complete from WolfNet';
                 }
             });
@@ -635,6 +646,8 @@
                         checkWolfnetBtn.innerHTML = '<i class="fas fa-check"></i> Saved Successfully';
                         checkWolfnetBtn.classList.remove('btn-primary');
                         checkWolfnetBtn.classList.add('btn-success');
+                        // Reload page so the auto-complete button and other UI reflect the saved password
+                        setTimeout(function() { window.location.reload(); }, 600);
                     } else {
                         let errorMessage = 'Invalid WolfNet password';
                         if (data.error_type === 'wrong_password') {
