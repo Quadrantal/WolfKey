@@ -343,53 +343,37 @@ def delete_files_from_urls(file_urls):
         except Exception as e:
             print(f"Error deleting file {url}: {str(e)}")
 
-def upload_screenshot_to_s3(local_path, filename=None):
+def upload_screenshot_to_storage(local_path, filename=None):
     """
-    Upload a screenshot file to S3 for debugging purposes.
+    Upload a screenshot file to configured Django storage for debugging purposes.
     
     Args:
         local_path (str): Local file path of the screenshot
         filename (str): Optional custom filename, defaults to basename of local_path
         
     Returns:
-        str: S3 URL of the uploaded screenshot, or None if upload failed
+        str: Storage URL of the uploaded screenshot, or None if upload failed
     """
     try:
-        import boto3
-        from botocore.exceptions import ClientError
-        
-        # Get AWS credentials from environment
-        aws_access_key = os.environ.get('AWS_ACCESS_KEY_ID')
-        aws_secret_key = os.environ.get('AWS_SECRET_ACCESS_KEY')
-        aws_region = os.environ.get('AWS_REGION', 'us-west-2')
-        s3_bucket = os.environ.get('AWS_S3_BUCKET', 'your-default-bucket-name')
-        
-        if not all([aws_access_key, aws_secret_key, s3_bucket]):
-            print("Missing AWS credentials or bucket name in environment variables")
-            return None
-        
         if not os.path.exists(local_path):
             print(f"Screenshot file not found: {local_path}")
             return None
             
-        # Generate S3 key
+        # Generate storage path
         if not filename:
             filename = os.path.basename(local_path)
-        s3_key = f"debug/screenshots/{filename}"
+        storage_path = f"debug/screenshots/{filename}"
         
-        # Upload to S3
-        s3_client = boto3.client(
-            's3',
-            aws_access_key_id=aws_access_key,
-            aws_secret_access_key=aws_secret_key,
-            region_name=aws_region
-        )
+        # Read the file content
+        with open(local_path, 'rb') as f:
+            file_content = f.read()
         
-        s3_client.upload_file(local_path, s3_bucket, s3_key)
+        # Save to Django's default storage
+        stored_path = default_storage.save(storage_path, ContentFile(file_content))
         
         # Generate public URL
-        s3_url = f"https://{s3_bucket}.s3.{aws_region}.amazonaws.com/{s3_key}"
-        print(f"Screenshot uploaded to S3: {s3_url}")
+        storage_url = default_storage.url(stored_path)
+        print(f"Screenshot uploaded to storage: {storage_url}")
         
         # Clean up local file
         try:
@@ -398,13 +382,10 @@ def upload_screenshot_to_s3(local_path, filename=None):
         except Exception as e:
             print(f"Warning: Could not remove local file {local_path}: {e}")
             
-        return s3_url
+        return storage_url
         
-    except ClientError as e:
-        print(f"AWS S3 error uploading screenshot: {e}")
-        return None
     except Exception as e:
-        print(f"Error uploading screenshot to S3: {e}")
+        print(f"Error uploading screenshot to storage: {e}")
         return None
 
 def extract_and_delete_files_from_content(content):

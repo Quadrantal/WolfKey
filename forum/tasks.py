@@ -258,8 +258,8 @@ def login_to_wolfnet(user_email, driver, wait, password=None):
                     logger.error(f"Wrong WolfNet password detected for {user_email} (error element visible)")
                     screenshot_path = f"/tmp/wolfnet_debug_{user_email}_{int(time.time())}.png"
                     driver.save_screenshot(screenshot_path)
-                    from forum.services.utils import upload_screenshot_to_s3
-                    s3_url = upload_screenshot_to_s3(screenshot_path)
+                    from forum.services.utils import upload_screenshot_to_storage
+                    s3_url = upload_screenshot_to_storage(screenshot_path)
                     if s3_url:
                         logger.info(f"Debug screenshot available at: {s3_url}")
                     return {"success": False, "error": "Invalid WolfNet credentials", "error_type": "wrong_password"}
@@ -285,8 +285,8 @@ def login_to_wolfnet(user_email, driver, wait, password=None):
             logger.error(f"Wrong WolfNet password detected for {user_email} (fallback)")
             screenshot_path = f"/tmp/wolfnet_debug_{user_email}_{int(time.time())}.png"
             driver.save_screenshot(screenshot_path)
-            from forum.services.utils import upload_screenshot_to_s3
-            s3_url = upload_screenshot_to_s3(screenshot_path)
+            from forum.services.utils import upload_screenshot_to_storage
+            s3_url = upload_screenshot_to_storage(screenshot_path)
             if s3_url:
                 logger.info(f"Debug screenshot available at: {s3_url}")
             return {"success": False, "error": "Invalid WolfNet credentials", "error_type": "wrong_password"}
@@ -296,8 +296,8 @@ def login_to_wolfnet(user_email, driver, wait, password=None):
             logger.error(traceback.format_exc())
             screenshot_path = f"/tmp/wolfnet_debug_{user_email}_{int(time.time())}.png"
             driver.save_screenshot(screenshot_path)
-            from forum.services.utils import upload_screenshot_to_s3
-            s3_url = upload_screenshot_to_s3(screenshot_path)
+            from forum.services.utils import upload_screenshot_to_storage
+            s3_url = upload_screenshot_to_storage(screenshot_path)
             if s3_url:
                 logger.info(f"Debug screenshot available at: {s3_url}")
             # Log all elements for selectors again
