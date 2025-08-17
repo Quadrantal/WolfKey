@@ -237,6 +237,7 @@ def login_to_wolfnet(user_email, driver, wait, password=None):
                     
         except Exception as e:
             # Before assuming password error, check if we can find account-nav (indicates successful login)
+            time.sleep(1)
             try:
                 account_nav = driver.find_element(By.CSS_SELECTOR, "#account-nav")
                 if account_nav:
