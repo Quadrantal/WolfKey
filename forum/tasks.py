@@ -213,7 +213,7 @@ def login_to_wolfnet(user_email, driver, wait, password=None):
             time.sleep(1)
             element = wait.until(
                 EC.any_of(
-                    EC.presence_of_element_located((By.ID, "idBtn_Back")),  # Stay signed in button (success)
+                    EC.presence_of_element_located((By.ID, "idSIButton9")),  # Stay signed in button (success)
                     EC.presence_of_element_located((By.CSS_SELECTOR, "#passwordError, .error, .alert-error")),  # Error elements
                     EC.presence_of_element_located((By.CSS_SELECTOR, "#attendance")) 
                 )
@@ -221,9 +221,10 @@ def login_to_wolfnet(user_email, driver, wait, password=None):
 
             logger.info(element)
             
-            if element.get_attribute("id") == "idBtn_Back":
+            if element.get_attribute("id") == "idSIButton9":
                 # Stay signed in prompt
-                element.click()
+                button = wait.until(EC.element_to_be_clickable((By.ID, "idSIButton9")))
+                button.click()
                 wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "#attendance")))
                 time.sleep(1)
                 logger.info(f"Successfully logged in for {user_email} after handling stay signed in prompt")
