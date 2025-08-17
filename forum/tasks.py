@@ -210,6 +210,7 @@ def login_to_wolfnet(user_email, driver, wait, password=None):
 
         try:
             logger.info("start wait")
+            time.sleep(1)
             element = wait.until(
                 EC.any_of(
                     EC.presence_of_element_located((By.ID, "idBtn_Back")),  # Stay signed in button (success)
@@ -236,28 +237,22 @@ def login_to_wolfnet(user_email, driver, wait, password=None):
                 return {"success": False, "error": "Invalid WolfNet credentials", "error_type": "wrong_password"}
                     
         except Exception as e:
-            # Before assuming password error, check if we can find account-nav (indicates successful login)
-            time.sleep(1)
             try:
                 account_nav = driver.find_element(By.CSS_SELECTOR, "#account-nav")
-
                 if account_nav:
-                    logger.info(f"Successfully logged in for {user_email} - found account-nav after timeout")
-                    return {"success": True, "message": "Login successful - account navigation found"}
-            except Exception as e:
-                try: 
+                    return {"success": True}
+            except Exception as inner_e1:
+                try:
                     calender_subnav = driver.find_element(By.CSS_SELECTOR, "#calendar-subnav")
                     if calender_subnav:
-                        logger.info(f"Successfully logged in for {user_email} - found calender-subnav after timeout")
-                        return {"success": True, "message": "Login successful - calender subnavigation found"}
-                except Exception as e:
-                    logger.info("Issue in finding navs", e)
+                        return {"success": True}
+                except Exception as inner_e2:
+                    logger.info("Issue in finding navs", inner_e2)
                     pass
-        
-            
-            # Login timeout or page loading issue
+
             logger.error(f"Login timeout or page loading issue for {user_email}: {str(e)}")
             return {"success": False, "error": f"Login timeout or page loading issue: {str(e)}", "error_type": "timeout"}
+
     except Exception as e:
         error_msg = str(e)
         logger.error(f"Failed to login for {user_email}: {error_msg}")
