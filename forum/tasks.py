@@ -209,7 +209,7 @@ def login_to_wolfnet(user_email, driver, wait, password=None):
         submit_btn.click()
 
         try:
-            logger.info("start wait")
+            logger.info("start wait e")
             time.sleep(1)
             # Wait for any of the elements to appear
             element = wait.until(
