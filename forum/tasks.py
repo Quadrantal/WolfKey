@@ -214,7 +214,7 @@ def login_to_wolfnet(user_email, driver, wait, password=None):
                 EC.any_of(
                     EC.presence_of_element_located((By.ID, "idBtn_Back")),  # Stay signed in button (success)
                     EC.presence_of_element_located((By.CSS_SELECTOR, "#passwordError, .error, .alert-error")),  # Error elements
-                    EC.presence_of_element_located((By.CSS_SELECTOR, "#activitiesContainer")) 
+                    EC.presence_of_element_located((By.CSS_SELECTOR, "#attendance")) 
                 )
             )
 
@@ -223,11 +223,11 @@ def login_to_wolfnet(user_email, driver, wait, password=None):
             if element.get_attribute("id") == "idBtn_Back":
                 # Stay signed in prompt
                 element.click()
-                wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "#activitiesContainer")))
+                wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "#attendance")))
                 time.sleep(1)
                 logger.info(f"Successfully logged in for {user_email} after handling stay signed in prompt")
                 return {"success": True}
-            elif "activitiesContainer" in element.get_attribute("id"):
+            elif "attendance" in element.get_attribute("id"):
                 logger.info(f"Successfully logged in for {user_email}")
                 time.sleep(1)
                 return {"success": True}
@@ -240,11 +240,19 @@ def login_to_wolfnet(user_email, driver, wait, password=None):
             time.sleep(1)
             try:
                 account_nav = driver.find_element(By.CSS_SELECTOR, "#account-nav")
+
                 if account_nav:
                     logger.info(f"Successfully logged in for {user_email} - found account-nav after timeout")
                     return {"success": True, "message": "Login successful - account navigation found"}
-            except:
-                pass
+            except Exception as e:
+                try: 
+                    calender_subnav = driver.find_element(By.CSS_SELECTOR, "#calendar-subnav")
+                    if calender_subnav:
+                        logger.info(f"Successfully logged in for {user_email} - found calender-subnav after timeout")
+                        return {"success": True, "message": "Login successful - calender subnavigation found"}
+                except Exception as e:
+                    logger.info("Issue in finding navs", e)
+                    pass
         
             
             # Login timeout or page loading issue
