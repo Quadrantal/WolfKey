@@ -97,8 +97,6 @@ def get_memory_optimized_chrome_options():
         logger.info(f"Using Chrome binary from environment: {chrome_bin}")
     
     return chrome_options
-    
-    return chrome_options
 
 def create_webdriver_with_cleanup():
     """
@@ -197,20 +195,48 @@ def login_to_wolfnet(user_email, driver, wait, password=None):
     try:
         logger.info(f"Navigating to login page for {user_email}")
         driver.get(LOGIN_URL)
+        logger.info(f"Current URL after navigation: {driver.current_url}")
+        logger.debug(f"Page source after navigation:\n{driver.page_source[:2000]}")
+
+        # Log elements for each key selector before interaction
+        for selector in ["#Username", "#nextBtn", "#i0118", "#idSIButton9"]:
+            elems = driver.find_elements(By.CSS_SELECTOR, selector)
+            logger.info(f"Found {len(elems)} elements for selector '{selector}' before interaction")
+            for i, elem in enumerate(elems):
+                try:
+                    logger.info(f"Element {i}: tag={elem.tag_name}, id={elem.get_attribute('id')}, visible={elem.is_displayed()}")
+                except Exception:
+                    pass
 
         username_input = wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, "#Username")))
         username_input.send_keys(user_email)
         next_btn = wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, "#nextBtn")))
         next_btn.click()
 
+        logger.info(f"Current URL after username/next: {driver.current_url}")
+        logger.debug(f"Page source after username/next:\n{driver.page_source[:2000]}")
+
         password_input = wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, "#i0118")))
         password_input.send_keys(PASSWORD)
         submit_btn = wait.until(EC.element_to_be_clickable((By.ID, "idSIButton9")))
         submit_btn.click()
 
+        logger.info(f"Current URL after password/submit: {driver.current_url}")
+        logger.debug(f"Page source after password/submit:\n{driver.page_source[:2000]}")
+
         try:
-            logger.info("start wait e")
+            logger.info("start wait for post-login elements")
             time.sleep(1)
+            # Log elements for each key selector before wait
+            for selector in ["#passwordError, .error, .alert-error", "#idSIButton9", "#attendance"]:
+                elems = driver.find_elements(By.CSS_SELECTOR, selector)
+                logger.info(f"Found {len(elems)} elements for selector '{selector}' before wait")
+                for i, elem in enumerate(elems):
+                    try:
+                        logger.info(f"Element {i}: tag={elem.tag_name}, id={elem.get_attribute('id')}, visible={elem.is_displayed()}")
+                    except Exception:
+                        pass
+
             # Wait for any of the elements to appear
             element = wait.until(
                 EC.any_of(
@@ -220,7 +246,9 @@ def login_to_wolfnet(user_email, driver, wait, password=None):
                 )
             )
 
-            logger.info(element)
+            logger.info(f"Element found after wait: tag={element.tag_name}, id={element.get_attribute('id')}, visible={element.is_displayed()}")
+            logger.info(f"Current URL after wait: {driver.current_url}")
+            logger.debug(f"Page source after wait:\n{driver.page_source[:2000]}")
 
             # Check if password error is present and visible
             error_elem = None
@@ -228,9 +256,15 @@ def login_to_wolfnet(user_email, driver, wait, password=None):
                 error_elem = driver.find_element(By.CSS_SELECTOR, "#passwordError, .error, .alert-error")
                 if error_elem.is_displayed():
                     logger.error(f"Wrong WolfNet password detected for {user_email} (error element visible)")
+                    screenshot_path = f"/tmp/wolfnet_debug_{user_email}_{int(time.time())}.png"
+                    driver.save_screenshot(screenshot_path)
+                    from forum.services.utils import upload_screenshot_to_s3
+                    s3_url = upload_screenshot_to_s3(screenshot_path)
+                    if s3_url:
+                        logger.info(f"Debug screenshot available at: {s3_url}")
                     return {"success": False, "error": "Invalid WolfNet credentials", "error_type": "wrong_password"}
-            except Exception:
-                pass
+            except Exception as e:
+                logger.debug(f"No error element found: {e}")
 
             # If attendance is present, login is successful
             if element.get_attribute("id") == "attendance" or "attendance" in element.get_attribute("id"):
@@ -249,24 +283,51 @@ def login_to_wolfnet(user_email, driver, wait, password=None):
 
             # Fallback: treat as wrong password if error element is present
             logger.error(f"Wrong WolfNet password detected for {user_email} (fallback)")
+            screenshot_path = f"/tmp/wolfnet_debug_{user_email}_{int(time.time())}.png"
+            driver.save_screenshot(screenshot_path)
+            from forum.services.utils import upload_screenshot_to_s3
+            s3_url = upload_screenshot_to_s3(screenshot_path)
+            if s3_url:
+                logger.info(f"Debug screenshot available at: {s3_url}")
             return {"success": False, "error": "Invalid WolfNet credentials", "error_type": "wrong_password"}
-                    
         except Exception as e:
-            try:
-                account_nav = driver.find_element(By.CSS_SELECTOR, "#account-nav")
-                if account_nav:
-                    return {"success": True}
-            except Exception as inner_e1:
-                try:
-                    calender_subnav = driver.find_element(By.CSS_SELECTOR, "#calendar-subnav")
-                    if calender_subnav:
-                        return {"success": True}
-                except Exception as inner_e2:
-                    logger.info("Issue in finding navs", inner_e2)
-                    pass
-
-            logger.error(f"Login timeout or page loading issue for {user_email}: {str(e)}")
+            import traceback
+            logger.error(f"Exception during post-login wait: {e}")
+            logger.error(traceback.format_exc())
+            screenshot_path = f"/tmp/wolfnet_debug_{user_email}_{int(time.time())}.png"
+            driver.save_screenshot(screenshot_path)
+            from forum.services.utils import upload_screenshot_to_s3
+            s3_url = upload_screenshot_to_s3(screenshot_path)
+            if s3_url:
+                logger.info(f"Debug screenshot available at: {s3_url}")
+            # Log all elements for selectors again
+            for selector in ["#passwordError, .error, .alert-error", "#idSIButton9", "#attendance"]:
+                elems = driver.find_elements(By.CSS_SELECTOR, selector)
+                logger.info(f"Found {len(elems)} elements for selector '{selector}' after exception")
+                for i, elem in enumerate(elems):
+                    try:
+                        logger.info(f"Element {i}: tag={elem.tag_name}, id={elem.get_attribute('id')}, visible={elem.is_displayed()}")
+                    except Exception:
+                        pass
+            logger.debug(f"Page source after exception:\n{driver.page_source[:2000]}")
             return {"success": False, "error": f"Login timeout or page loading issue: {str(e)}", "error_type": "timeout"}
+                    
+    except Exception as e:
+        try:
+            account_nav = driver.find_element(By.CSS_SELECTOR, "#account-nav")
+            if account_nav:
+                return {"success": True}
+        except Exception as inner_e1:
+            try:
+                calender_subnav = driver.find_element(By.CSS_SELECTOR, "#calendar-subnav")
+                if calender_subnav:
+                    return {"success": True}
+            except Exception as inner_e2:
+                logger.info("Issue in finding navs", inner_e2)
+                pass
+
+        logger.error(f"Login timeout or page loading issue for {user_email}: {str(e)}")
+        return {"success": False, "error": f"Login timeout or page loading issue: {str(e)}", "error_type": "timeout"}
 
     except Exception as e:
         error_msg = str(e)
