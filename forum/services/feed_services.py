@@ -53,27 +53,32 @@ def get_all_posts(user, query='', page=1, per_page=8):
     """
     Returns a dict with paginated posts and page_obj, similar to get_for_you_posts.
     """
-    posts = Post.objects.annotate(
-        solution_count=Count('solutions', distinct=True),
-        comment_count=Count('solutions__comments', distinct=True),
-        total_response_count=Count('solutions', distinct=True) + Count('solutions__comments', distinct=True)
-    ).order_by('-created_at')
+    base_qs = Post.objects.all().order_by('-created_at')
 
     if query:
         search_query = SearchQuery(query)
-        posts = posts.annotate(
+        base_qs = base_qs.annotate(
             rank=SearchRank(F('search_vector'), search_query) + TrigramSimilarity('title', query)
         ).filter(rank__gte=0.3).order_by('-rank')
 
-    posts = annotate_post_card_context(posts, user)
-
-    paginator = Paginator(posts, per_page)
+    # Paginate the base queryset first to preserve ordering
+    paginator = Paginator(base_qs, per_page)
     page_obj = paginator.get_page(page)
 
-    return {
-        "page_obj": page_obj,
-        "has_next": page_obj.has_next()
-    }
+    # Fetch the posts for this page with useful annotations and relations
+    post_ids = [post.id for post in page_obj.object_list]
+
+    posts_qs = Post.objects.filter(id__in=post_ids).annotate(
+        solution_count=Count('solutions', distinct=True),
+        comment_count=Count('solutions__comments', distinct=True),
+        total_response_count=Count('solutions', distinct=True) + Count('solutions__comments', distinct=True)
+    ).select_related('author').prefetch_related('courses', 'solutions__comments')
+    post_dic = {post.id: post for post in posts_qs}
+    ordered_posts = [post_dic[pid] for pid in post_ids if pid in post_dic]
+
+    ordered_posts = annotate_post_card_context(ordered_posts, user)
+
+    return ordered_posts, page_obj
 
 def paginate_posts(posts_queryset, page=1, limit=10):
     """

@@ -22,7 +22,9 @@ def for_you(request):
         return redirect('login')
     
     page = request.GET.get('page', 1)
-    posts, page_obj = get_for_you_posts(request.user, page)
+    query = request.GET.get('q', '')
+
+    posts, page_obj = get_all_posts(request.user, query, page)
 
     if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
         return render(request, 'forum/components/post_list.html', {'posts': posts, 'page_obj': page_obj})
@@ -71,14 +73,13 @@ def for_you(request):
 def all_posts(request):
     query = request.GET.get('q', '')
     page = request.GET.get('page', 1)
-    paginated_data = get_all_posts(request.user, query, page)
+    posts, page_obj = get_all_posts(request.user, query, page)
 
     if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-        return render(request, 'forum/components/post_list.html', 
-                     {'posts': paginated_data["page_obj"]})
+        return render(request, 'forum/components/post_list.html', {'posts': posts})
 
     return render(request, 'forum/all_posts.html', {
-        'posts': paginated_data["page_obj"],
+        'posts': posts,
         'query': query,
     })
 
