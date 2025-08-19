@@ -742,6 +742,28 @@
         document.addEventListener('click', function (e) {
             profilePictureMenu.style.display = 'none';
         });
+
+        // Enable/disable upload button based on file selection
+        const profilePictureForm = document.getElementById('profilePictureForm');
+        if (profilePictureForm) {
+            const fileInput = profilePictureForm.querySelector('#profile_picture');
+            const submitBtn = profilePictureForm.querySelector('button[type="submit"]');
+
+            const updateSubmitState = () => {
+                if (!submitBtn) return;
+                if (fileInput && fileInput.files && fileInput.files.length > 0) {
+                    submitBtn.disabled = false;
+                } else {
+                    submitBtn.disabled = true;
+                }
+            };
+
+            if (fileInput) {
+                fileInput.addEventListener('change', updateSubmitState);
+                // initialize state on load
+                updateSubmitState();
+            }
+        }
     });
     {% endif %}
 </script>
