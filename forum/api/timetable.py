@@ -6,8 +6,7 @@ import json
 from forum.services.timetable_services import evaluate_multiple_schedules, generate_possible_schedules
 from forum.models import Course, Block
 
-
-@login_required
+@csrf_exempt
 @require_http_methods(["GET"])
 def all_courses_blocks_api(request):
     """
@@ -42,7 +41,6 @@ def all_courses_blocks_api(request):
         return JsonResponse({'error': str(e)}, status=500)
 
 
-@login_required
 @csrf_exempt
 @require_http_methods(["POST"])
 def generate_schedules_api(request):
@@ -70,7 +68,6 @@ def generate_schedules_api(request):
         return JsonResponse({'error': str(e)}, status=500)
 
 
-@login_required
 @csrf_exempt
 @require_http_methods(["POST"])
 def evaluate_timetable_api(request):

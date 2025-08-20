@@ -67,7 +67,6 @@ function generateOptimalSchedules(selectedCourses) {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
-            'X-CSRFToken': getCsrfToken(),
         },
         body: JSON.stringify({
             requested_course_ids: selectedCourses.map(c => c.id),
@@ -464,21 +463,7 @@ function removeSchedule(index) {
     renderScheduleCards(generatedSchedules);
 }
 
-function getCsrfToken() {
-    const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]');
-    if (csrfToken) {
-        return csrfToken.value;
-    }
-    // Fallback: get from cookie
-    const cookies = document.cookie.split(';');
-    for (let cookie of cookies) {
-        const [name, value] = cookie.trim().split('=');
-        if (name === 'csrftoken') {
-            return value;
-        }
-    }
-    return '';
-}
+
 
 function init() {
     createSelectors();

@@ -21,14 +21,6 @@ Returned schedule shape matches the previous conventions:
 from typing import List, Dict, Optional, Set
 from forum.models import Course
 
-
-# Canonical list of blocks used by the front-end / DB conventions. Keep in sync
-# with the rest of the app.
-ALL_BLOCKS = ['1A', '1B', '1D', '1E', '2A', '2B', '2C', '2D', '2E']
-
-from typing import List, Dict, Optional, Set
-from forum.models import Course
-
 ALL_BLOCKS = ['1A', '1B', '1D', '1E', '2A', '2B', '2C', '2D', '2E']
 
 def generate_possible_schedules(requested_course_ids: List[int],
