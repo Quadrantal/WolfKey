@@ -151,7 +151,7 @@ function renderStaticBlockView() {
     const blockViewHeader = document.createElement('div');
     blockViewHeader.className = 'mb-3';
     blockViewHeader.innerHTML = `
-        <h5>All Available Courses by Block</h5>
+        <h5>All Available Courses by Block. Use this to see what you can fill a blank space with</h5>
     `;
     rc.appendChild(blockViewHeader);
     
