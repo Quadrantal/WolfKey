@@ -198,6 +198,7 @@ class Command(BaseCommand):
                 try:
                     with transaction.atomic():
                         for b in block_objs:
+                            self.stdout.write(course_name, course_obj.name)
                             course_obj.blocks.add(b)
                     report.append((course_name, [b.code for b in block_objs], 'ADDED'))
                     applied_count += 1
