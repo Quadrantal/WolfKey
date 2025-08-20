@@ -160,7 +160,7 @@ class WolfKeyDeepLink:
             'type': 'course_comparer',
             'screen': 'CourseComparer',
             'params': {},
-            'web_url': f"{getattr(settings, 'SITE_URL', '')}/course-comparer/"
+            'web_url': f"{getattr(settings, 'SITE_URL', '')}/match/"
         }
         
         if users:

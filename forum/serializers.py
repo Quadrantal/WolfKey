@@ -98,7 +98,7 @@ class ScheduleSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = UserProfile
-    fields = ['user_id', 'username', 'full_name', 'profile_picture_url', 'schedule', 'grade_level']
+        fields = ['user_id', 'username', 'full_name', 'profile_picture_url', 'schedule', 'grade_level']
     
     def get_full_name(self, obj):
         return obj.user.get_full_name()
