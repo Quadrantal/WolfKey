@@ -22,14 +22,31 @@ def all_courses_blocks_api(request):
     }
     """
     try:
-        # Get all blocks
         all_blocks = ['1A', '1B', '1D', '1E', '2A', '2B', '2C', '2D', '2E']
         
-        # Initialize blocks dictionary
         blocks_data = {block_code: [] for block_code in all_blocks}
         
-        # Get all courses with their blocks
-        courses = Course.objects.prefetch_related('blocks').all()
+        # Determine grade threshold: use provided ?maxgrade= or user's profile grade if authenticated
+        maxgrade_param = request.GET.get('maxgrade')
+        user_grade = None
+        try:
+            if maxgrade_param is not None:
+                user_grade = int(maxgrade_param)
+            elif request.user and request.user.is_authenticated:
+                try:
+                    user_grade = int(request.user.userprofile.grade_level) if request.user.userprofile.grade_level is not None else None
+                except Exception:
+                    user_grade = None
+        except ValueError:
+            return JsonResponse({'error': 'Invalid maxgrade parameter'}, status=400)
+
+        # Get all courses with their blocks, and filter by max_grade if user_grade provided
+        courses_qs = Course.objects.prefetch_related('blocks').all()
+        if user_grade is not None:
+            # Include courses where max_grade is null (available to all) or max_grade >= user_grade
+            from django.db.models import Q
+            courses_qs = courses_qs.filter(Q(max_grade__isnull=True) | Q(max_grade__gte=user_grade))
+        courses = courses_qs
         
         for course in courses:
             for block in course.blocks.all():

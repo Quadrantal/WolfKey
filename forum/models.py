@@ -154,6 +154,8 @@ class Course(models.Model):
     name = models.CharField(max_length=100)
     category = models.CharField(max_length=100, default = "Misc")
     description = models.TextField(blank=True)
+    # Maximum grade level eligible for this course (e.g., 12). If null, course is available to all grades.
+    max_grade = models.IntegerField(null=True, blank=True)
     blocks = models.ManyToManyField(Block, blank=True, related_name='courses')
     
     def __str__(self):
@@ -364,6 +366,8 @@ class UserProfile(models.Model):
     bio = models.TextField(max_length=500, blank=True)
     points = models.IntegerField(default=0)
     is_moderator = models.BooleanField(default=False)
+    # Grade level for the user (e.g., 9, 10, 11, 12). Nullable for staff or unknown.
+    grade_level = models.IntegerField(null=True, blank=True, help_text="User's current grade level (e.g., 11)")
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     background_hue = models.IntegerField(default=231)
