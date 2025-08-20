@@ -142,18 +142,21 @@ class Command(BaseCommand):
             # 2) If no exact match, try the service search (trigram/prefix) which
             #    may return close matches for human-entered names. We call
             #    course_search with a mock request object exposing GET['q'].
-            mock_request = type('MockRequest', (), {'GET': {'q': course_name}})()
-            try:
-                response = course_search(mock_request)
-                # course_search returns a JsonResponse with a JSON list
-                data = json.loads(response.content)
-                # data is a list of dicts with 'id' and 'name' keys
-                if data:
-                    # take up to 3 suggestions from search as potential matches
-                    suggested_ids = [d['id'] for d in data[:3]]
-                    matches = list(Course.objects.filter(id__in=suggested_ids))
-            except Exception:
-                matches = []
+            if not matches:
+
+                mock_request = type('MockRequest', (), {'GET': {'q': course_name}})()
+                try:
+                    response = course_search(mock_request)
+                    # course_search returns a JsonResponse with a JSON list
+                    data = json.loads(response.content)
+                    # data is a list of dicts with 'id' and 'name' keys
+                    if data:
+                        # take up to 3 suggestions from search as potential matches
+                        suggested_ids = [d['id'] for d in data[:3]]
+                        matches = list(Course.objects.filter(id__in=suggested_ids))
+                except Exception as e:
+                    print(e)
+                    matches = []
 
             # 3) Fallback to icontains if still no matches
             if not matches:
