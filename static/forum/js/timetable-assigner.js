@@ -166,7 +166,7 @@ function renderStaticBlockView() {
     const blockViewHeader = document.createElement('div');
     blockViewHeader.className = 'mb-3';
     blockViewHeader.innerHTML = `
-        <h5>All Available Courses by Block. Use this to see what you can fill a blank space with</h5>
+        <h4>All Available Courses by Block. Use this to see what you can fill a blank space with</h4>
     `;
     rc.appendChild(blockViewHeader);
     
@@ -289,8 +289,8 @@ function renderScheduleCards(schedules) {
                 <p>Unable to generate schedules that accommodate your selected courses.</p>
             </div>
         `;
-        // Insert before the block view
-        const blockViewHeader = rc.querySelector('h5');
+        // Insert before the block view; support either <h4> or <h5> in template
+        let blockViewHeader = rc.querySelector('h4');
         if (blockViewHeader && blockViewHeader.textContent.includes('All Available Courses')) {
             rc.insertBefore(noSchedulesDiv, blockViewHeader.parentElement);
         } else {
@@ -395,8 +395,7 @@ function renderScheduleCards(schedules) {
     
     scheduleSection.appendChild(scrollContainer);
     
-    // Insert before the block view
-    const blockViewHeader = rc.querySelector('h5');
+    let blockViewHeader = rc.querySelector('h4');
     if (blockViewHeader && blockViewHeader.textContent.includes('All Available Courses')) {
         rc.insertBefore(scheduleSection, blockViewHeader.parentElement);
     } else {
