@@ -12,7 +12,7 @@ from django.contrib.staticfiles import finders
 class Command(BaseCommand):
     help = (
         'Import Course -> Block relationships from a plaintext file. '
-        'Each non-empty line should be: "Course Name: B1, B2, ..."'
+        'Each non-empty line should be: "Course Name: 1B,1C, ..."'
     )
 
     def add_arguments(self, parser):
@@ -116,6 +116,25 @@ class Command(BaseCommand):
         if dry_run:
             self.stdout.write(self.style.NOTICE('Dry run: no DB changes will be made'))
 
+        # Remove existing course<->block mappings before applying new ones.
+        # Use the through table for an efficient bulk delete.
+        through_model = Course.blocks.through
+        existing_rel_count = through_model.objects.count()
+        if existing_rel_count:
+            if dry_run:
+                self.stdout.write(self.style.WARNING(
+                    f'Dry run: would remove {existing_rel_count} existing course<->block mappings'
+                ))
+            else:
+                try:
+                    with transaction.atomic():
+                        through_model.objects.all().delete()
+                    self.stdout.write(self.style.SUCCESS(
+                        f'Removed {existing_rel_count} existing course<->block mappings'
+                    ))
+                except Exception as e:
+                    raise CommandError(f'Failed to clear existing mappings: {e}')
+
         for course_name, block_codes in mappings:
             # 1) Try exact match first (case-insensitive)
             matches = list(Course.objects.filter(name__iexact=course_name))
@@ -123,19 +142,18 @@ class Command(BaseCommand):
             # 2) If no exact match, try the service search (trigram/prefix) which
             #    may return close matches for human-entered names. We call
             #    course_search with a mock request object exposing GET['q'].
-            if not matches:
-                mock_request = type('MockRequest', (), {'GET': {'q': course_name}})()
-                try:
-                    response = course_search(mock_request)
-                    # course_search returns a JsonResponse with a JSON list
-                    data = json.loads(response.content)
-                    # data is a list of dicts with 'id' and 'name' keys
-                    if data:
-                        # take up to 3 suggestions from search as potential matches
-                        suggested_ids = [d['id'] for d in data[:3]]
-                        matches = list(Course.objects.filter(id__in=suggested_ids))
-                except Exception:
-                    matches = []
+            mock_request = type('MockRequest', (), {'GET': {'q': course_name}})()
+            try:
+                response = course_search(mock_request)
+                # course_search returns a JsonResponse with a JSON list
+                data = json.loads(response.content)
+                # data is a list of dicts with 'id' and 'name' keys
+                if data:
+                    # take up to 3 suggestions from search as potential matches
+                    suggested_ids = [d['id'] for d in data[:3]]
+                    matches = list(Course.objects.filter(id__in=suggested_ids))
+            except Exception:
+                matches = []
 
             # 3) Fallback to icontains if still no matches
             if not matches:
