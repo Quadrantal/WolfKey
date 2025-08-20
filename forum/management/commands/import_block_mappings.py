@@ -114,7 +114,9 @@ class Command(BaseCommand):
         skipped_count = 0
 
         if dry_run:
-            self.stdout.write(self.style.NOTICE('Dry run: no DB changes will be made'))
+            # NOTICE style isn't provided by BaseCommand.style in some Django versions
+            # use WARNING for visibility instead
+            self.stdout.write(self.style.WARNING('Dry run: no DB changes will be made'))
 
         # Remove existing course<->block mappings before applying new ones.
         # Use the through table for an efficient bulk delete.
@@ -197,9 +199,12 @@ class Command(BaseCommand):
             else:
                 try:
                     with transaction.atomic():
-                        for b in block_objs:
-                            self.stdout.write(course_name, course_obj.name)
-                            course_obj.blocks.add(b)
+                        # Add all blocks for the course in a single call
+                        course_obj.blocks.add(*block_objs)
+                        # Log the addition with course details
+                        self.stdout.write(
+                            f"Added blocks for Course(id={course_obj.id}, name={course_obj.name!r}): {[b.code for b in block_objs]}"
+                        )
                     report.append((course_name, [b.code for b in block_objs], 'ADDED'))
                     applied_count += 1
                 except Exception as e:
@@ -219,4 +224,4 @@ class Command(BaseCommand):
             self.stdout.write(f' Created blocks: {sorted(created_blocks)}')
 
         if dry_run:
-            self.stdout.write(self.style.NOTICE('Dry run completed — no changes were made. Rerun without --dry-run to apply.'))
+            self.stdout.write(self.style.WARNING('Dry run completed — no changes were made. Rerun without --dry-run to apply.'))
