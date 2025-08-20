@@ -45,7 +45,7 @@
                         <div class="ms-4">
                             <h2>{{ profile_user.get_full_name }}</h2>
                             <span class="text-muted">Joined: {{ profile_user.date_joined|date:"F j, Y" }}</span>
-                            <span class="text-muted">Grade: {{ profile_user.userprofile.grade_level}}</span>
+                            <p class="text-muted">Grade: {{ profile_user.userprofile.grade_level}}</p>
                             <p>{{ profile_user.userprofile.bio }}</p>
                         </div>
                     </div>

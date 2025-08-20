@@ -238,8 +238,8 @@ urlpatterns = [
     path('api/courses/', course_search, name='course-search'),
     
     # Course comparer URLs
-    path('course-comparer/', course_comparer, name='course_comparer'),
-    path('timetable-assigner/', timetable_assigner, name='timetable_assigner'),
+    path('match/', course_comparer, name='course_comparer'),
+    path('atlas/', timetable_assigner, name='timetable_assigner'),
     path('api/search-users/', search_users_api, name='search_users_api'),
     path('api/user-schedule/<int:user_id>/', get_user_schedule_api, name='get_user_schedule_api'),
 
