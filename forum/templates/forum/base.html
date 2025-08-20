@@ -239,10 +239,15 @@
                 <li>
                     <a href="{% url 'course_comparer' %}" class="sidebar-item" data-title="Course Comparer">
                         {% if request.resolver_match.url_name == 'course_comparer' %} 
-                        <i class="bi bi-calendar-range-fill"></i> <span class="sidebar-text">Compare Course</span>
+                        <i class="bi bi-calendar-range-fill"></i> <span class="sidebar-text">Match</span>
                         {% else %}
-                        <i class="bi bi-calendar4-range"></i> <span class="sidebar-text">Compare Course</span>
+                        <i class="bi bi-calendar4-range"></i> <span class="sidebar-text">Match</span>
                         {% endif %}
+                    </a>
+                </li>
+                <li>
+                    <a href="{% url 'timetable_assigner' %}" class="sidebar-item{% if request.resolver_match.url_name == 'timetable_assigner' %} active{% endif %}" data-title="Timetable Assigner">
+                        <i class="bi {% if request.resolver_match.url_name == 'timetable_assigner' %}bi-grid-1x2-fill{% else %}bi-grid-1x2{% endif %}"></i> <span class="sidebar-text">Atlas</span>
                     </a>
                 </li>
                 {% if user.is_authenticated %}
