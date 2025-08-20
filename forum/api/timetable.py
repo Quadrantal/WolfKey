@@ -27,18 +27,17 @@ def all_courses_blocks_api(request):
         blocks_data = {block_code: [] for block_code in all_blocks}
         
         # Determine grade threshold: use provided ?maxgrade= or user's profile grade if authenticated
-        maxgrade_param = request.GET.get('maxgrade')
+        maxgrade_param = request.GET.get('maxgrade', None)
         user_grade = None
-        try:
-            if maxgrade_param is not None:
-                user_grade = int(maxgrade_param)
-            elif request.user and request.user.is_authenticated:
-                try:
-                    user_grade = int(request.user.userprofile.grade_level) if request.user.userprofile.grade_level is not None else None
-                except Exception:
-                    user_grade = None
-        except ValueError:
-            return JsonResponse({'error': 'Invalid maxgrade parameter'}, status=400)
+
+        if maxgrade_param is not None:
+            user_grade = int(maxgrade_param)
+        elif request.user and request.user.is_authenticated:
+            try:
+                user_grade = int(request.user.userprofile.grade_level) if request.user.userprofile.grade_level is not None else None
+            except Exception as e:
+                print(e)
+                user_grade = None
 
         # Get all courses with their blocks, and filter by max_grade if user_grade provided
         courses_qs = Course.objects.prefetch_related('blocks').all()

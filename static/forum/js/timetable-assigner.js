@@ -1,8 +1,8 @@
 import { CourseSelector } from '/static/forum/js/course-selector.js';
 
-const blocks = ['1A','1B','1D','1E','2A','2B','2C','2D','2E'];
+const BLOCK_CODES = ['1A','1B','1D','1E','2A','2B','2C','2D','2E'];
 
-const courseSelectors = [];
+const selectors = [];
 
 function createSelectors() {
     const container = document.getElementById('selectors-container');
@@ -54,43 +54,59 @@ function createSelectors() {
             });
         }
 
-        courseSelectors.push(selector);
+    selectors.push(selector);
     }
 }
 
 // Keep track of generated schedules
-let generatedSchedules = [];
+let schedulesCache = [];
 
-function generateOptimalSchedules(selectedCourses) {
+async function requestSchedulesFromApi(selectedCourses) {
     // Call API to generate possible schedules for the selected courses
-    fetch('/api/timetable/generate/', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-            requested_course_ids: selectedCourses.map(c => c.id),
-            required_course_ids: collectRequiredCourseIds()
-        })
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            generatedSchedules = data.schedules;
-            renderScheduleCards(data.schedules);
-        } else {
+    try {
+        const response = await fetch('/api/timetable/generate/', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                requested_course_ids: selectedCourses.map(c => c.id),
+                required_course_ids: collectRequiredCourseIds()
+            })
+        });
+
+        const data = await response.json();
+        if (!data.success) {
             alert('Error: ' + (data.error || 'Unknown error'));
+            return;
         }
-    })
-    .catch(error => {
-        console.error('Error generating schedules:', error);
-        alert('Error generating schedules: ' + error.message);
-    });
+
+        const requestedCourseNames = selectedCourses.map(c => (c.name || c.course_name || '')).filter(Boolean);
+        const requestedCourseIds = selectedCourses.map(c => c.id).filter(Boolean);
+
+        const normalized = (data.schedules || []).map((s, idx) => {
+            const mapping = s.mapping || {};
+            const blocks = s.blocks || {};
+            const matched = s.matched_courses != null ? s.matched_courses : Object.keys(mapping).length;
+            return Object.assign({}, s, {
+                mapping,
+                blocks,
+                matchedCourses: matched,
+                requestedCourseNames,
+                requestedCourseIds,
+                name: s.name || `Schedule Option ${idx + 1}`
+            });
+        });
+
+        schedulesCache = normalized;
+        renderScheduleCards(normalized);
+    } catch (err) {
+        console.error('Error generating schedules:', err);
+        alert('Error generating schedules: ' + (err.message || err));
+    }
 }
 
 function collectRequiredCourseIds() {
     const ids = [];
-    courseSelectors.forEach(sel => {
+        selectors.forEach(sel => {
         try {
             if (sel.required) {
                 const arr = sel.getSelectedCourses();
@@ -116,8 +132,8 @@ function evaluateSchedules() {
         return;
     }
 
-    // Generate schedules based on selected courses instead of using predefined ones
-    generateOptimalSchedules(actionable);
+        // Generate schedules based on selected courses instead of using predefined ones
+        requestSchedulesFromApi(actionable);
 }
 
 function initializeBlockView() {
@@ -164,7 +180,7 @@ function renderStaticBlockView() {
     // Fetch all courses and their block relationships
     fetchAllCoursesAndBlocks().then(blockCoursesData => {
         // For each block, show all courses that are available in it
-        blocks.forEach(block => {
+        BLOCK_CODES.forEach(block => {
             const blockRow = document.createElement('div');
             blockRow.className = 'block-row d-flex align-items-center py-2 border-bottom';
             
@@ -216,51 +232,10 @@ function renderStaticBlockView() {
     rc.appendChild(blockViewContainer);
 }
 
-function renderScheduleCard(schedule) {
-    const container = document.getElementById('schedules-container');
-    const card = document.createElement('div');
-    card.className = 'schedule-card card p-2';
-    card.style.minWidth = '240px';
-
-    const title = document.createElement('div');
-    title.className = 'd-flex justify-content-between align-items-center';
-    title.innerHTML = `<strong>${schedule.name || 'Schedule'}</strong>`;
-
-    const removeBtn = document.createElement('button');
-    removeBtn.className = 'btn btn-sm btn-outline-danger';
-    removeBtn.textContent = 'Remove';
-    removeBtn.addEventListener('click', () => {
-        card.remove();
-    });
-
-    title.appendChild(removeBtn);
-    card.appendChild(title);
-
-    const list = document.createElement('div');
-    list.className = 'mt-2 schedule-blocks-list';
-
-    blocks.forEach(b => {
-        const line = document.createElement('div');
-        line.className = 'd-flex justify-content-between small';
-        const left = document.createElement('div');
-        left.textContent = b;
-        const right = document.createElement('div');
-        const offerings = (schedule.blocks && schedule.blocks[b]) || [];
-        right.textContent = offerings.join(', ');
-        line.appendChild(left);
-        line.appendChild(right);
-        list.appendChild(line);
-    });
-
-    card.appendChild(list);
-    card._scheduleData = schedule;
-    container.appendChild(card);
-}
-
 function collectSelectedCourses() {
     const selected = [];
 
-    courseSelectors.forEach(sel => {
+    selectors.forEach(sel => {
         const arr = sel.getSelectedCourses();
         if (arr && arr.length > 0) {
             const c = arr[0];
@@ -336,7 +311,6 @@ function renderScheduleCards(schedules) {
     `;
     scheduleSection.appendChild(header);
 
-    // Create horizontal scrollable container
     const scrollContainer = document.createElement('div');
     scrollContainer.className = 'schedules-scroll-container d-flex gap-3 pb-2 pt-2';
     scrollContainer.style.overflowX = 'auto';
@@ -375,7 +349,7 @@ function renderScheduleCards(schedules) {
         const scheduleGrid = document.createElement('div');
         scheduleGrid.className = 'schedule-grid';
         
-        blocks.forEach(block => {
+    BLOCK_CODES.forEach(block => {
             const blockRow = document.createElement('div');
             blockRow.className = 'd-flex justify-content-between align-items-center py-1 border-bottom';
             
@@ -402,6 +376,17 @@ function renderScheduleCards(schedules) {
         });
         
         cardBody.appendChild(scheduleGrid);
+
+        // Show missing courses (italic small text)
+        const missingText = computeMissingText(schedule);
+        if (missingText) {
+            const miss = document.createElement('div');
+            miss.className = 'text-muted small';
+            miss.style.fontStyle = 'italic';
+            miss.style.marginTop = '8px';
+            miss.textContent = missingText;
+            cardBody.appendChild(miss);
+        }
         
         card.appendChild(cardHeader);
         card.appendChild(cardBody);
@@ -459,8 +444,31 @@ function getCourseForBlock(schedule, block) {
 }
 
 function removeSchedule(index) {
-    generatedSchedules.splice(index, 1);
-    renderScheduleCards(generatedSchedules);
+    schedulesCache.splice(index, 1);
+    renderScheduleCards(schedulesCache);
+}
+
+function computeMissingText(schedule) {
+    // Determine which requested courses are not assigned in this schedule
+    try {
+        const requested = (schedule.requestedCourseNames || schedule.requested_course_names || []);
+        // If requested is an array of objects with name, normalize
+        const requestedNames = requested.map(r => (typeof r === 'string') ? r : (r.name || r.course_name || ''))
+            .filter(Boolean);
+
+        const assigned = [];
+        if (schedule.mapping) {
+            for (const [k, v] of Object.entries(schedule.mapping)) {
+                if (v && v.course_name) assigned.push(v.course_name);
+            }
+        }
+
+        const missing = requestedNames.filter(n => !assigned.includes(n));
+        if (missing.length === 0) return null;
+        return `Missing: ${missing.join(', ')}`;
+    } catch (e) {
+        return null;
+    }
 }
 
 
