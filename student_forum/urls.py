@@ -92,6 +92,9 @@ from forum.views.comments_views import (
 from forum.views.course_comparer_views import (
     course_comparer
 )
+from forum.views.timetable_assigner_views import (
+    timetable_assigner
+)
 from forum.api.schedule import(
     get_daily_schedule,
     get_user_schedule_api,
@@ -116,6 +119,12 @@ from forum.services.schedule_services import (
 )
 
 from django.views.generic import RedirectView
+
+from forum.api.timetable import (
+    evaluate_timetable_api,
+    generate_schedules_api,
+    all_courses_blocks_api
+)
 
 from forum.views.about_view import about_view
 
@@ -230,6 +239,7 @@ urlpatterns = [
     
     # Course comparer URLs
     path('course-comparer/', course_comparer, name='course_comparer'),
+    path('timetable-assigner/', timetable_assigner, name='timetable_assigner'),
     path('api/search-users/', search_users_api, name='search_users_api'),
     path('api/user-schedule/<int:user_id>/', get_user_schedule_api, name='get_user_schedule_api'),
 
@@ -257,6 +267,11 @@ urlpatterns = [
     path('reset/<uidb64>/<token>/', CustomPasswordResetConfirmView.as_view(), name='password_reset_confirm'),
     path('reset/done/', CustomPasswordResetCompleteView.as_view(), name='password_reset_complete'),
 
+    # Timetable API
+    path('api/timetable/generate/', generate_schedules_api, name='api_generate_schedules'),
+    path('api/timetable/evaluate/', evaluate_timetable_api, name='api_evaluate_timetable'),
+    path('api/courses/all-blocks/', all_courses_blocks_api, name='api_all_courses_blocks'),
+    
     # Authentication API endpoints
     path('api/auth/login/', api_login, name='api_login'),
     path('api/auth/register/', api_register, name='api_register'),

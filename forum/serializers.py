@@ -6,10 +6,11 @@ from .services.utils import process_post_preview
 class CourseSerializer(serializers.ModelSerializer):
     is_experienced = serializers.SerializerMethodField()
     needs_help = serializers.SerializerMethodField()
+    blocks = serializers.SlugRelatedField(many=True, read_only=True, slug_field='code')
     
     class Meta:
         model = Course
-        fields = ['id', 'name', 'category', 'description', 'is_experienced', 'needs_help']
+        fields = ['id', 'name', 'category', 'description', 'is_experienced', 'needs_help', 'blocks']
     
     def get_is_experienced(self, obj):
         request = self.context.get('request')

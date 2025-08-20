@@ -143,10 +143,18 @@ class GradebookSnapshot(models.Model):
     def __str__(self):
         return f"Snapshot for {self.user.school_email} | Section {self.section_id} | MP {self.marking_period_id} @ {self.timestamp}"
     
+class Block(models.Model):
+    code = models.CharField(max_length=8, unique=True)  # e.g. '1A', '2C'
+    label = models.CharField(max_length=64, blank=True)
+
+    def __str__(self):
+        return self.code
+
 class Course(models.Model):
     name = models.CharField(max_length=100)
     category = models.CharField(max_length=100, default = "Misc")
     description = models.TextField(blank=True)
+    blocks = models.ManyToManyField(Block, blank=True, related_name='courses')
     
     def __str__(self):
         return f"{self.name}"
