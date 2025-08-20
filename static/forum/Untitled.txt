@@ -74,7 +74,7 @@ Law Studies 12: 1A,1D\
 Life Sciences 11: 1D,2E\
 Literary Studies 11: 2A,2C,2D,2E\
 Literary Studies 11 Honours: 1B,2B\
-LIterary Studies 10 Honours: 1B,2C\
+Literary Studies 10 Honours: 1B,2C\
 Mandarin 10: 2C\
 Mandarin 10 Accelerated: 2A\
 Mandarin 11: 2B\

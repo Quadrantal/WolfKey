@@ -155,7 +155,14 @@ class Command(BaseCommand):
                     if data:
                         # take up to 3 suggestions from search as potential matches
                         suggested_ids = [d['id'] for d in data[:3]]
+                        # fetch Course objects and preserve the ordering returned by course_search
                         matches = list(Course.objects.filter(id__in=suggested_ids))
+                        id_order = list(suggested_ids)
+                        matches = sorted(matches, key=lambda c: id_order.index(c.id) if c.id in id_order else len(id_order))
+                        # Prefer an exact-name match among suggestions (avoid picking 'Honours' when exact exists)
+                        exact_in_suggested = [m for m in matches if m.name.strip().lower() == course_name.strip().lower()]
+                        if exact_in_suggested:
+                            matches = exact_in_suggested
                 except Exception as e:
                     print(e)
                     matches = []
