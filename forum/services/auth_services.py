@@ -18,25 +18,6 @@ def authenticate_user(request, school_email, password):
 def get_csrf_token(request):
     return JsonResponse({'csrfToken': request.META.get('CSRF_COOKIE')})
 
-def get_user_profile_data(user):
-    """Centralized function to get user profile data"""
-    profile = user.userprofile
-    return {
-        'id': user.id,
-        'first_name': user.first_name,
-        'last_name': user.last_name,
-        'name': user.get_full_name(),
-        'school_email': user.school_email,
-        'is_moderator': profile.is_moderator,
-        'points': profile.points,
-        'profile_picture': profile.profile_picture.url if profile.profile_picture else None,
-        'background_hue': profile.background_hue,
-        'courses': {
-            f'block_{block}': getattr(profile, f'block_{block}').name 
-            for block in ['1A', '1B', '1D', '1E', '2A', '2B', '2C', '2D', '2E']
-            if getattr(profile, f'block_{block}')
-        }
-    }
 
 def register_user(request, form, help_courses, experience_courses, wolfnet_password=None, schedule_data=None):
     """

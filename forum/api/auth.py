@@ -1,7 +1,6 @@
 from forum.services.auth_services import (
     authenticate_user,
     register_user,
-    get_user_profile_data
 )
 from django.contrib.auth import authenticate, login, logout
 from django.http import JsonResponse
