@@ -343,6 +343,51 @@ def delete_files_from_urls(file_urls):
         except Exception as e:
             print(f"Error deleting file {url}: {str(e)}")
 
+def upload_screenshot_to_storage(local_path, filename=None):
+    """
+    Upload a screenshot file to configured Django storage for debugging purposes.
+    
+    Args:
+        local_path (str): Local file path of the screenshot
+        filename (str): Optional custom filename, defaults to basename of local_path
+        
+    Returns:
+        str: Storage URL of the uploaded screenshot, or None if upload failed
+    """
+    try:
+        if not os.path.exists(local_path):
+            print(f"Screenshot file not found: {local_path}")
+            return None
+            
+        # Generate storage path
+        if not filename:
+            filename = os.path.basename(local_path)
+        storage_path = f"debug/screenshots/{filename}"
+        
+        # Read the file content
+        with open(local_path, 'rb') as f:
+            file_content = f.read()
+        
+        # Save to Django's default storage
+        stored_path = default_storage.save(storage_path, ContentFile(file_content))
+        
+        # Generate public URL
+        storage_url = default_storage.url(stored_path)
+        print(f"Screenshot uploaded to storage: {storage_url}")
+        
+        # Clean up local file
+        try:
+            os.remove(local_path)
+            print(f"Cleaned up local screenshot: {local_path}")
+        except Exception as e:
+            print(f"Warning: Could not remove local file {local_path}: {e}")
+            
+        return storage_url
+        
+    except Exception as e:
+        print(f"Error uploading screenshot to storage: {e}")
+        return None
+
 def extract_and_delete_files_from_content(content):
     """
     Extract and delete all files referenced in EditorJS content.

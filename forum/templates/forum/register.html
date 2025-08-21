@@ -103,6 +103,14 @@
                     <div class="error-message" id="error-password2"></div>
                 </div>
 
+                <div class="mb-3">
+                    {{ form.grade_level }}
+                    {% if form.grade_level.help_text %}
+                        <small class="help-text">{{ form.grade_level.help_text }}</small>
+                    {% endif %}
+                    <div class="error-message" id="error-grade_level"></div>
+                </div>
+
                 <div class="continue-btn">
                     <button type="button" class="btn btn-primary" id="nextBtn1">Continue <i class="fas fa-arrow-right"></i></button>
                 </div>
@@ -181,6 +189,8 @@
                     <div class="mt-2">
                         <small id="helpCoursesCount" class="text-muted">0 courses selected (minimum 3)</small>
                     </div>
+
+
                 </div>
             
                 <h6 class="mb-0 text-success"><i class="fas fa-star"></i> Courses You're Proficient In</h6>
@@ -278,6 +288,13 @@
         let scheduleError = null;
         let currentHelpCourses = [];
         let currentExperienceCourses = [];
+
+        // Prefill grade if server provided a saved value
+        const savedGradeLevel = '{{ saved_grade_level|default:"" }}';
+        if (savedGradeLevel) {
+            const gradeField = document.getElementById('id_grade_level');
+            if (gradeField) gradeField.value = savedGradeLevel;
+        }
 
         // Load saved data from server if form had errors
         const savedWolfnetPassword = '{{ saved_wolfnet_password|default:"" }}';

@@ -45,6 +45,7 @@
                         <div class="ms-4">
                             <h2>{{ profile_user.get_full_name }}</h2>
                             <span class="text-muted">Joined: {{ profile_user.date_joined|date:"F j, Y" }}</span>
+                            <p class="text-muted">Grade: {{ profile_user.userprofile.grade_level}}</p>
                             <p>{{ profile_user.userprofile.bio }}</p>
                         </div>
                     </div>
@@ -555,9 +556,10 @@
                     console.error('Error:', error);
                     alert('Network error occurred while auto-completing courses');
                 } finally {
-                    // Restore visual disabled state (button remains clickable)
-                    autoCompleteBtn.classList.toggle('disabled', !hasWolfnet);
-                    autoCompleteBtn.setAttribute('aria-disabled', (!hasWolfnet).toString());
+                    // Always enable the button after task completes
+                    autoCompleteBtn.disabled = false;
+                    autoCompleteBtn.classList.remove('disabled');
+                    autoCompleteBtn.setAttribute('aria-disabled', 'false');
                     autoCompleteBtn.innerHTML = '<i class="fas fa-magic"></i> Auto-Complete from WolfNet';
                 }
             });
@@ -741,6 +743,28 @@
         document.addEventListener('click', function (e) {
             profilePictureMenu.style.display = 'none';
         });
+
+        // Enable/disable upload button based on file selection
+        const profilePictureForm = document.getElementById('profilePictureForm');
+        if (profilePictureForm) {
+            const fileInput = profilePictureForm.querySelector('#profile_picture');
+            const submitBtn = profilePictureForm.querySelector('button[type="submit"]');
+
+            const updateSubmitState = () => {
+                if (!submitBtn) return;
+                if (fileInput && fileInput.files && fileInput.files.length > 0) {
+                    submitBtn.disabled = false;
+                } else {
+                    submitBtn.disabled = true;
+                }
+            };
+
+            if (fileInput) {
+                fileInput.addEventListener('change', updateSubmitState);
+                // initialize state on load
+                updateSubmitState();
+            }
+        }
     });
     {% endif %}
 </script>

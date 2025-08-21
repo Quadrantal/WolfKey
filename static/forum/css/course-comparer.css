@@ -116,9 +116,8 @@
 /* Block label space for user headers */
 .user-headers-row .block-label-space {
     background-color: #3b82f6;
-    min-width: 80px;
-    width: 80px;
-    border-right: 1px solid #e2e8f0;
+    min-width: 50px;
+    width: 50px;
 }
 
 /* Make sure user headers align properly with course columns */
@@ -357,8 +356,8 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    min-width: 80px;
-    width: 80px;
+    min-width: 50px;
+    width: 50px;
 }
 
 /* Course row container */
@@ -435,7 +434,7 @@
     border-radius: 14px;
     pointer-events: none;
     opacity: 0.75;
-    z-index: 1000;
+    z-index: 0;
 }
 
 .course-item.has-match:hover::after {

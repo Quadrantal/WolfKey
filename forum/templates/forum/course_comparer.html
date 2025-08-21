@@ -15,7 +15,7 @@
 <div class="container-fluid">
 
     <!-- User Management Section -->
-    <div class="card mb-4">
+    <div class="card mb-4" style="z-index: 2 !important;">
         <div class="card-body text-center">
             <h5 class="card-title mb-3">Comparing users:</h5>
             
@@ -133,7 +133,7 @@
         full_name: '{{ user.get_full_name }}',
         school_email: '{{ user.school_email }}',
         profile_picture_url: '{{user.userprofile.profile_picture.url}}',
-    };
+    }; 
 </script>
 {% endif %}
 
@@ -431,7 +431,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 
                 // Highlight all matching courses in the same block
                 document.querySelectorAll(`[data-block="${block}"][data-course-name="${courseName}"]`).forEach(matchingItem => {
-                    matchingItem.style.boxShadow = '0 4px 12px rgba(16, 185, 129, 0.3)';
+                    matchingItem.style.boxShadow = '0px 0px 20px rgba(16, 185, 129, 0.8)';
                 });
                 
                 // Highlight connection lines in the same block

@@ -243,7 +243,20 @@ class CustomUserCreationForm(UserCreationForm):
 
     class Meta:
         model = User
+        # grade_level is stored on UserProfile, but we expose it on the registration form
         fields = ('first_name', 'last_name', 'school_email', 'personal_email', 'password1', 'password2')
+
+    GRADE_CHOICES = [('', 'Select grade'), ('8', '8'), ('9', '9'), ('10', '10'), ('11', '11'), ('12', '12'),('13', '13')] # 13 is alumni
+
+    grade_level = forms.ChoiceField(
+        required=False,
+        choices=GRADE_CHOICES,
+        widget=forms.Select(attrs={
+            'class': 'form-select',
+            'id': 'id_grade_level'
+        }),
+        help_text='Your current grade level (8 - 13 for alumni). If in summer, grade level in Sept'
+    )
 
     def clean_school_email(self):
         email = self.cleaned_data.get('school_email')
@@ -262,6 +275,17 @@ class CustomUserCreationForm(UserCreationForm):
 
         if not user.personal_email:
             user.personal_email = user.school_email
+        # Save grade_level to the related UserProfile if provided
+        grade_val = self.cleaned_data.get('grade_level')
+        try:
+            # grade_level on profile is IntegerField, allow blank
+            if grade_val is not None and grade_val != '':
+                user.userprofile.grade_level = int(grade_val)
+                user.userprofile.save()
+        except Exception:
+            # If profile doesn't exist yet or conversion fails, ignore silently
+            pass
+
         return user
 
 class UserUpdateForm(forms.ModelForm):

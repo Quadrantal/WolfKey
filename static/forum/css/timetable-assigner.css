@@ -1,0 +1,94 @@
+.timetable-assigner .selector-row { display: flex; flex-direction: column; gap: 6px; margin-bottom: 8px; }
+.schedules-scroll { overflow-x: auto; white-space: nowrap; }
+.schedules-scroll-container { 
+    overflow-x: auto; 
+    padding-bottom: 10px;
+    scrollbar-width: thin;
+}
+.schedules-scroll-container::-webkit-scrollbar {
+    height: 8px;
+}
+.schedules-scroll-container::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 4px;
+}
+.schedules-scroll-container::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 4px;
+}
+.schedules-scroll-container::-webkit-scrollbar-thumb:hover {
+    background: #a8a8a8;
+}
+
+.schedule-card { display: inline-block; vertical-align: top; }
+.schedule-blocks-list { max-height: 200px; overflow-y: auto; }
+.schedule-grid { font-size: 0.85rem; }
+.schedule-grid .border-bottom { border-bottom: 1px solid #dee2e6 !important; }
+.course-selector-root { width: 100%; }
+
+/* Result styling */
+.badge-outline-primary {
+    color: #007bff;
+    border: 1px solid #007bff;
+    background-color: transparent;
+    padding: 0.25rem 0.5rem;
+    font-size: 0.75rem;
+    border-radius: 0.25rem;
+}
+
+.border-success { border-color: #28a745 !important; }
+.border-warning { border-color: #ffc107 !important; }
+.border-info { border-color: #17a2b8 !important; }
+
+.badge-success { background-color: #28a745; }
+.badge-warning { background-color: #ffc107; color: #212529; }
+.badge-info { background-color: #17a2b8; }
+.badge-secondary { background-color: #6c757d; }
+
+/* Block view styling */
+.block-view-container {
+    border: 1px solid #dee2e6;
+    border-radius: 6px;
+}
+
+.block-row {
+    min-height: 50px;
+}
+
+.block-row:last-child {
+    border-bottom: none !important;
+}
+
+.block-label {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #007bff;
+    text-align: center;
+    padding: 0.25rem;
+    background-color: #f8f9fa;
+    border-radius: 4px;
+}
+
+.courses-container {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.courses-container .badge {
+    font-size: 0.75rem;
+    padding: 0.3rem 0.6rem;
+    border-radius: 12px;
+    font-weight: 500;
+}
+
+.courses-container .badge-secondary {
+    background-color: #6c757d;
+    color: white;
+}
+
+.courses-container .badge-secondary:hover {
+    background-color: #5a6268;
+    cursor: default;
+}

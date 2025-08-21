@@ -6,10 +6,11 @@ from .services.utils import process_post_preview
 class CourseSerializer(serializers.ModelSerializer):
     is_experienced = serializers.SerializerMethodField()
     needs_help = serializers.SerializerMethodField()
+    blocks = serializers.SlugRelatedField(many=True, read_only=True, slug_field='code')
     
     class Meta:
         model = Course
-        fields = ['id', 'name', 'category', 'description', 'is_experienced', 'needs_help']
+        fields = ['id', 'name', 'category', 'description', 'is_experienced', 'needs_help', 'blocks']
     
     def get_is_experienced(self, obj):
         request = self.context.get('request')
@@ -43,6 +44,7 @@ class UserProfileSerializer(serializers.ModelSerializer):
     block_2C = CourseSerializer(read_only=True)
     block_2D = CourseSerializer(read_only=True)
     block_2E = CourseSerializer(read_only=True)
+    grade_level = serializers.IntegerField(read_only=True)
     
     class Meta:
         model = UserProfile
@@ -51,19 +53,21 @@ class UserProfileSerializer(serializers.ModelSerializer):
             'background_hue', 'profile_picture',
             'block_1A', 'block_1B', 'block_1D', 'block_1E',
             'block_2A', 'block_2B', 'block_2C', 'block_2D', 'block_2E'
+            , 'grade_level'
         ]
 
 class UserSerializer(serializers.ModelSerializer):
     userprofile = UserProfileSerializer(read_only=True)
     full_name = serializers.SerializerMethodField()
     profile_picture_url = serializers.SerializerMethodField()
+    grade_level = serializers.SerializerMethodField()
     
     class Meta:
         model = User
         fields = [
             'id', 'username', 'first_name', 'last_name', 'full_name',
             'school_email', 'personal_email', 'phone_number', 
-            'date_joined', 'userprofile', 'profile_picture_url'
+            'date_joined', 'userprofile', 'profile_picture_url', 'grade_level'
         ]
     
     def get_full_name(self, obj):
@@ -77,6 +81,12 @@ class UserSerializer(serializers.ModelSerializer):
         except:
             return None
 
+    def get_grade_level(self, obj):
+        try:
+            return obj.userprofile.grade_level if hasattr(obj, 'userprofile') else None
+        except Exception:
+            return None
+
 class ScheduleSerializer(serializers.ModelSerializer):
     """Serializer for user schedule data - returns user info + schedule blocks"""
     user_id = serializers.IntegerField(source='user.id', read_only=True)
@@ -84,10 +94,11 @@ class ScheduleSerializer(serializers.ModelSerializer):
     full_name = serializers.SerializerMethodField()
     profile_picture_url = serializers.SerializerMethodField()
     schedule = serializers.SerializerMethodField()
+    grade_level = serializers.IntegerField(read_only=True)
     
     class Meta:
         model = UserProfile
-        fields = ['user_id', 'username', 'full_name', 'profile_picture_url', 'schedule']
+        fields = ['user_id', 'username', 'full_name', 'profile_picture_url', 'schedule', 'grade_level']
     
     def get_full_name(self, obj):
         return obj.user.get_full_name()

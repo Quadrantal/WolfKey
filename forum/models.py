@@ -143,10 +143,20 @@ class GradebookSnapshot(models.Model):
     def __str__(self):
         return f"Snapshot for {self.user.school_email} | Section {self.section_id} | MP {self.marking_period_id} @ {self.timestamp}"
     
+class Block(models.Model):
+    code = models.CharField(max_length=8, unique=True)  # e.g. '1A', '2C'
+    label = models.CharField(max_length=64, blank=True)
+
+    def __str__(self):
+        return self.code
+
 class Course(models.Model):
     name = models.CharField(max_length=100)
     category = models.CharField(max_length=100, default = "Misc")
     description = models.TextField(blank=True)
+    # Maximum grade level eligible for this course (e.g., 12). If null, course is available to all grades.
+    max_grade = models.IntegerField(null=True, blank=True)
+    blocks = models.ManyToManyField(Block, blank=True, related_name='courses')
     
     def __str__(self):
         return f"{self.name}"
@@ -356,6 +366,8 @@ class UserProfile(models.Model):
     bio = models.TextField(max_length=500, blank=True)
     points = models.IntegerField(default=0)
     is_moderator = models.BooleanField(default=False)
+    # Grade level for the user (e.g., 9, 10, 11, 12). Nullable for staff or unknown.
+    grade_level = models.IntegerField(null=True, blank=True, help_text="User's current grade level (e.g., 11)")
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     background_hue = models.IntegerField(default=231)

@@ -34,15 +34,14 @@ def api_all_posts(request):
         page = int(request.GET.get('page', 1))
         per_page = int(request.GET.get('limit', 10))
         query = request.GET.get('q', '')
-        
-        result = get_all_posts(request.user, query, page, per_page)
-        page_obj = result['page_obj']
-        
-        serializer = PostListSerializer(page_obj.object_list, many=True, context={'request': request})
-        
+
+        posts, page_obj = get_all_posts(request.user, query, page, per_page)
+
+        serializer = PostListSerializer(posts, many=True, context={'request': request})
+
         return Response({
             "posts": serializer.data,
-            "has_next": result['has_next'],
+            "has_next": page_obj.has_next(),
             "page": page_obj.number,
             "total_pages": page_obj.paginator.num_pages,
             "query": query
