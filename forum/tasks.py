@@ -1045,7 +1045,7 @@ def check_wolfnet_password(self, user_email, password):
     
     # Use memory-optimized WebDriver
     driver, temp_user_data_dir = create_webdriver_with_cleanup()
-    wait = WebDriverWait(driver, 6)  # Reduced timeout
+    wait = WebDriverWait(driver, 6)
 
     try:
         login_result = login_to_wolfnet(user_email, driver, wait, password)
