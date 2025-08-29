@@ -986,10 +986,53 @@ def auto_complete_courses(self, user_email, password=None):
                 logger.error(f"Error searching for course {course_name}: {str(e)}")
                 continue
         
+        # Try to get the user and use BlockSerializer format
+        try:
+            from django.contrib.auth import get_user_model
+            from forum.serializers import BlockSerializer
+            User = get_user_model()
+            
+            user = User.objects.get(school_email=user_email)
+            if hasattr(user, 'userprofile'):
+                # User exists and has profile - use BlockSerializer
+                serializer = BlockSerializer(user.userprofile)
+                return {
+                    "success": True,
+                    "user_data": serializer.data,
+                }
+        except User.DoesNotExist:
+            pass
+        except Exception as e:
+            logger.warning(f"Could not use BlockSerializer for {user_email}: {str(e)}")
+        
+        # User doesn't exist or no profile - create compatible format manually
+        schedule = {}
+        all_blocks = ['1A', '1B', '1D', '1E', '2A', '2B', '2C', '2D', '2E']
+        for block in all_blocks:
+            if block in matched_courses:
+                schedule[block] = {
+                    'course': matched_courses[block]['name'],
+                    'course_id': matched_courses[block]['id']
+                }
+            else:
+                schedule[block] = {
+                    'course': None,
+                    'course_id': None
+                }
+        
+        # Create BlockSerializer-compatible format for registration
+        user_data = {
+            'user_id': None,  # No user yet during registration
+            'username': None,
+            'full_name': None,
+            'profile_picture_url': None,
+            'schedule': schedule,
+            'grade_level': None
+        }
+        
         return {
-            "success": True, 
-            "courses": matched_courses,
-            "raw_data": courses_data
+            "success": True,
+            "user_data": user_data,
         }
         
     except Exception as e:

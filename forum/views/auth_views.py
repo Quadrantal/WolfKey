@@ -63,6 +63,7 @@ def register(request):
 
         wolfnet_password = request.POST.get('wolfnet_password', '').strip()
         
+        # Build schedule data in BlockSerializer format for form re-rendering
         schedule_data = {}
         blocks = ['1A', '1B', '1D', '1E', '2A', '2B', '2C', '2D', '2E']
         for block in blocks:
@@ -71,11 +72,19 @@ def register(request):
                 try:
                     course = Course.objects.get(id=int(block_course))
                     schedule_data[block] = {
-                        'id': course.id,
-                        'name': course.name,
+                        'course': course.name,
+                        'course_id': course.id,
                     }
                 except (Course.DoesNotExist, ValueError):
-                    pass
+                    schedule_data[block] = {
+                        'course': None,
+                        'course_id': None,
+                    }
+            else:
+                schedule_data[block] = {
+                    'course': None,
+                    'course_id': None,
+                }
 
         return render(request, 'forum/register.html', {
             'form': form,

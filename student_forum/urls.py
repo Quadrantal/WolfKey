@@ -95,10 +95,19 @@ from forum.views.course_comparer_views import (
 from forum.views.timetable_assigner_views import (
     timetable_assigner
 )
+from forum.views.timetable_assigner_views import (
+    all_courses_blocks_view,
+    generate_schedules_view,
+)
 from forum.api.schedule import(
     get_daily_schedule,
-    get_user_schedule_api,
-    check_ceremonial_uniform
+    get_user_blocks_api,
+    check_ceremonial_uniform,
+    process_schedule_api,
+)
+from forum.views.schedule_views import (
+    daily_schedule_view,
+    user_blocks_view,
 )
 from forum.api.auth import(
     api_login,
@@ -113,9 +122,6 @@ from forum.views.auth_views import register, login_view, logout_view
 from forum.api.wolfnet_integration import(
     auto_complete_courses_api,
     auto_complete_courses_registration_api
-)
-from forum.services.schedule_services import (
-    is_ceremonial_uniform_required
 )
 
 from django.views.generic import RedirectView
@@ -241,7 +247,6 @@ urlpatterns = [
     path('match/', course_comparer, name='course_comparer'),
     path('atlas/', timetable_assigner, name='timetable_assigner'),
     path('api/search-users/', search_users_api, name='search_users_api'),
-    path('api/user-schedule/<int:user_id>/', get_user_schedule_api, name='get_user_schedule_api'),
 
     # Saved posts URLs
     path('followed-posts/', followed_posts, name='followed_posts'),
@@ -270,7 +275,10 @@ urlpatterns = [
     # Timetable API
     path('api/timetable/generate/', generate_schedules_api, name='api_generate_schedules'),
     path('api/timetable/evaluate/', evaluate_timetable_api, name='api_evaluate_timetable'),
-    path('api/courses/all-blocks/', all_courses_blocks_api, name='api_all_courses_blocks'),
+    path('api/courses/all-courses-by-block/', all_courses_blocks_api, name='api_all_courses_blocks'),
+    # Session-backed endpoints for website
+    path('timetable/generate/', generate_schedules_view, name='session_generate_schedules'),
+    path('courses/all-courses-by-block/', all_courses_blocks_view, name='session_all_courses_blocks'),
     
     # Authentication API endpoints
     path('api/auth/login/', api_login, name='api_login'),
@@ -280,7 +288,11 @@ urlpatterns = [
     path('api/auth/verify-token/', api_verify_token, name='api_verify_token'),
     path('api/upload-image/', api_upload_image, name='api_upload_image'),
     
-    path('api/schedules/daily/<str:target_date>/', get_daily_schedule),
+    path('schedules/daily/<str:target_date>/', daily_schedule_view, name='daily_schedule_view'),
+    path('user-blocks/<int:user_id>/', user_blocks_view, name='user_schedule_view'),
+    path('api/schedules/daily/<str:target_date>/', get_daily_schedule, name='api_get_daily_schedule'),
+    path('api/user-blocks/<int:user_id>/', get_user_blocks_api, name='api_get_user_schedule'),
+    path('api/process-schedule/<int:user_id>/', process_schedule_api, name='api_process_schedule'),
     path('api/schedules/uniform/<str:target_date>/', check_ceremonial_uniform),
 
     path('api/for-you/', api_for_you, name='api_for_you'),

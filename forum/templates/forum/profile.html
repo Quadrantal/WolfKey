@@ -531,7 +531,7 @@
 
                     if (data.success) {
                         // Update course selectors with the fetched data
-                        updateCourseSelectors(data.courses);
+                        updateCourseSelectors(data);
                     } else {
                         const errorType = data.error_type || 'general';
                         let errorMessage = data.error || 'Failed to auto-complete courses';
@@ -566,33 +566,35 @@
         }
     });
 
-    function updateCourseSelectors(courses) {
+    function updateCourseSelectors(data) {
+        // Use BlockSerializer format user_data.schedule
+        if (!data || !data.user_data || !data.user_data.schedule) return;
+
+        const schedule = data.user_data.schedule;
         const blocks = ['1A', '1B', '1D', '1E', '2A', '2B', '2C', '2D', '2E'];
-        
+
         blocks.forEach(block => {
-            const course = courses[block];
-            if (course) {
-                // Find the course selector instance for this block
-                const blockId = `block_${block}`;
-                const selector = window.courseSelectors && window.courseSelectors[blockId];
-                
-                if (selector) {
-                    try {
-                        // Clear existing selection and add the new course
-                        selector.selectedCourses = [course];
-                        selector.updateSelectedCourses();
-                        selector.updateFormData();
-                        
-                        // Also update the buttons visibility using the general function
-                        const experiencedCourses = JSON.parse('{{ experienced_courses_json|escapejs }}');
-                        const helpNeededCourses = JSON.parse('{{ help_needed_courses_json|escapejs }}');
-                        window.updateBlockButtons(blockId, course, experiencedCourses, helpNeededCourses);
-                    } catch (error) {
-                        console.error(`Error updating selector for block ${block}:`, error);
-                    }
-                } else {
-                    console.warn(`Course selector not found for block ${block}`);
+            const blockData = schedule[block];
+            if (!blockData || !blockData.course_id) return;
+
+            const course = { id: blockData.course_id, name: blockData.course };
+            const blockId = `block_${block}`;
+            const selector = window.courseSelectors && window.courseSelectors[blockId];
+
+            if (selector) {
+                try {
+                    selector.selectedCourses = [course];
+                    selector.updateSelectedCourses();
+                    selector.updateFormData();
+
+                    const experiencedCourses = JSON.parse('{{ experienced_courses_json|escapejs }}');
+                    const helpNeededCourses = JSON.parse('{{ help_needed_courses_json|escapejs }}');
+                    window.updateBlockButtons(blockId, course, experiencedCourses, helpNeededCourses);
+                } catch (error) {
+                    console.error(`Error updating selector for block ${block}:`, error);
                 }
+            } else {
+                console.warn(`Course selector not found for block ${block}`);
             }
         });
     }
@@ -952,7 +954,16 @@
 <!-- Course Experience/Help Buttons -->
 <script>
     document.addEventListener('DOMContentLoaded', function () {
-        const initialCourses = JSON.parse('{{ initial_courses_json|escapejs }}');
+        // The serializer returns schedule keyed by block name (e.g. "1A").
+        // Normalize to the older "block_1A" shape that the template expects.
+        const rawInitialCourses = JSON.parse('{{ initial_courses_json|escapejs }}') || {};
+        const initialCourses = {};
+        const _blocks = ['1A', '1B', '1D', '1E', '2A', '2B', '2C', '2D', '2E'];
+        _blocks.forEach(b => {
+            const blockKey = `block_${b}`;
+            const src = rawInitialCourses[b];
+            initialCourses[blockKey] = src ? { id: src.course_id || src.id, name: src.course || src.name } : null;
+        });
 
         // Handle "Proficient" and "Need Help" buttons
         document.querySelectorAll('.add-experience-btn, .add-help-btn').forEach(button => {
@@ -1063,10 +1074,16 @@
     import { CourseSelector } from '{% static "forum/js/course-selector.js" %}';
     
     document.addEventListener('DOMContentLoaded', () => {
-        const initialCourses = JSON.parse('{{ initial_courses_json|escapejs }}');
+        const rawInitialCourses = JSON.parse('{{ initial_courses_json|escapejs }}') || {};
         const experiencedCourses = JSON.parse('{{ experienced_courses_json|escapejs }}');
         const helpNeededCourses = JSON.parse('{{ help_needed_courses_json|escapejs }}');        
         const blocks = ['1A', '1B', '1D', '1E', '2A', '2B', '2C', '2D', '2E'];
+        const initialCourses = {};
+        blocks.forEach(b => {
+            const blockKey = `block_${b}`;
+            const src = rawInitialCourses[b];
+            initialCourses[blockKey] = src ? { id: src.course_id || src.id, name: src.course || src.name } : null;
+        });
 
         // Store course selectors globally for auto-complete function
         window.courseSelectors = {};

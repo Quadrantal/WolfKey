@@ -87,8 +87,8 @@ class UserSerializer(serializers.ModelSerializer):
         except Exception:
             return None
 
-class ScheduleSerializer(serializers.ModelSerializer):
-    """Serializer for user schedule data - returns user info + schedule blocks"""
+class BlockSerializer(serializers.ModelSerializer):
+    """Serializer for user blocks data - returns user info + schedule blocks"""
     user_id = serializers.IntegerField(source='user.id', read_only=True)
     username = serializers.CharField(source='user.username', read_only=True)
     full_name = serializers.SerializerMethodField()

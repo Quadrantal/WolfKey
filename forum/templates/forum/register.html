@@ -311,7 +311,14 @@
         }
         
         if (Object.keys(savedScheduleData).length > 0) {
-            retrievedCourses = savedScheduleData;
+            // Convert savedScheduleData to the expected retrievedCourses format
+            retrievedCourses = {
+                success: true,
+                user_data: {
+                    schedule: savedScheduleData
+                },
+                courses: null // Will be populated from savedScheduleData if needed
+            };
         }
 
         // ===============================================
@@ -519,8 +526,8 @@
 
                 console.log("Result: ", result);
                 
-                if (result.success && result.courses) {
-                    retrievedCourses = result.courses;
+                if (result.success && result.user_data) {
+                    retrievedCourses = result;  // Store the full result object (BlockSerializer in user_data)
                     scheduleError = null; // Clear any previous errors
                     // If selectors are already initialized, apply the courses immediately
                     if (courseSelectors['block_1A']) {
@@ -619,21 +626,26 @@
             });
             
             // Apply retrieved courses if they exist (from auto-complete)
-            if (retrievedCourses && Object.keys(retrievedCourses).length > 0) {
+            if (retrievedCourses && retrievedCourses.user_data && retrievedCourses.user_data.schedule) {
                 updateCourseSelectors(retrievedCourses);
             }
         }
 
         // Update course selectors with retrieved courses
-        function updateCourseSelectors(courses) {
+        function updateCourseSelectors(data) {
+            // Use BlockSerializer format user_data.schedule
+            if (!data || !data.user_data || !data.user_data.schedule) return;
+
+            const schedule = data.user_data.schedule;
             const blocks = ['1A', '1B', '1D', '1E', '2A', '2B', '2C', '2D', '2E'];
 
-            console.log("Courses: ", courses);
-            
             blocks.forEach(block => {
                 const blockId = `block_${block}`;
-                const course = courses[block];
-                if (course && courseSelectors[blockId]) {
+                const blockData = schedule[block];
+                if (!blockData || !blockData.course_id) return;
+
+                const course = { id: blockData.course_id, name: blockData.course };
+                if (courseSelectors[blockId]) {
                     courseSelectors[blockId].addCourse(course);
                     updateBlockButtons(blockId, course, [], []);
                 }
@@ -838,7 +850,11 @@
                 // Save current course selections before leaving step 3
                 saveCourseSelections();
                 
-                if (wolfnetPassword) {
+                // If we have a wolfnet password OR there is a scheduleError (e.g. authentication failed)
+                // we must show the schedule/error step instead of skipping to completion. This prevents
+                // the case where an auth error cleared the in-memory password and the flow incorrectly
+                // skips the schedule step.
+                if (wolfnetPassword || scheduleError) {
                     // Show schedule step
                     currentStep = 4;
                     document.querySelector('.form-step[data-step="4"]').style.display = 'block';

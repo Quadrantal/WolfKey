@@ -66,22 +66,23 @@ def api_register(request):
     try:
         data = json.loads(request.body)
         form = CustomUserCreationForm(data)
-        
+        schedule = data.get('schedule', {})
+
         if not form.is_valid():
             return JsonResponse({'error': form.errors}, status=400)
-            
+
         help_needed_courses = data.get('help_needed_courses', [])
         experienced_courses = data.get('experienced_courses', [])
-        
-        user, error = register_user(request, form, help_needed_courses, experienced_courses)
-        
+
+        user, error = register_user(request, form, help_needed_courses, experienced_courses, schedule_data=schedule)
+
         if error:
             return JsonResponse({'error': error}, status=400)
-        
+
         token, _ = Token.objects.get_or_create(user=user)
-        
+
         user_serializer = UserSerializer(user)
-            
+
         return JsonResponse({
             'success': True,
             'message': 'Registration successful',
@@ -94,7 +95,7 @@ def api_register(request):
                 'user': user_serializer.data,
             }
         }, status=201)
-        
+
     except json.JSONDecodeError:
         return JsonResponse({'error': 'Invalid JSON'}, status=400)
     except Exception as e:

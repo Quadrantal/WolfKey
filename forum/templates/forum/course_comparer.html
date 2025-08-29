@@ -196,7 +196,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     function fetchUserSchedule(user) {
-        fetch(`/api/user-schedule/${user.id}/`)
+        fetch(`/user-schedule/${user.id}/`)
             .then(response => response.json())
             .then(data => {
                 selectedUsersData.push(data);
@@ -396,8 +396,8 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         });
         
-        // Add hover effects
-        addConnectionLineHoverEffects();
+        //   hover effects
+         ConnectionLineHoverEffects();
     }
     
     function drawLineBetweenItems(item1, item2, container) {

@@ -3,6 +3,7 @@ from django.shortcuts import get_object_or_404
 from forum.models import User, Course, Post, Solution, UserCourseExperience, UserCourseHelp, UserProfile
 from forum.forms import UserCourseExperienceForm, UserCourseHelpForm
 from forum.services.utils import detect_bad_words
+from forum.serializers import BlockSerializer
 
 def get_profile_context(request, username):
     profile_user = get_object_or_404(User, username=username)
@@ -13,16 +14,10 @@ def get_profile_context(request, username):
     posts_count = Post.objects.filter(author=profile_user).count()
     solutions_count = Solution.objects.filter(author=profile_user).count()
 
-    initial_courses = {}
-    blocks = ['1A', '1B', '1D', '1E', '2A', '2B', '2C', '2D', '2E']
-    for block in blocks:
-        course = getattr(profile_user.userprofile, f'block_{block}', None)
-        if course:
-            initial_courses[f'block_{block}'] = {
-                'id': course.id,
-                'name': course.name,
-                'category': course.category,
-            }
+    # Use the BlockSerializer as the canonical source for schedule data
+    serializer = BlockSerializer(profile_user.userprofile)
+    initial_courses = serializer.data.get('schedule', {}) if serializer and serializer.data else {}
+    
     initial_courses_json = json.dumps(initial_courses)
 
     experienced_courses = UserCourseExperience.objects.filter(user=profile_user)
