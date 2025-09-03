@@ -196,7 +196,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     function fetchUserSchedule(user) {
-        fetch(`/user-schedule/${user.id}/`)
+        fetch(`/user-blocks/${user.id}/`)
             .then(response => response.json())
             .then(data => {
                 selectedUsersData.push(data);
