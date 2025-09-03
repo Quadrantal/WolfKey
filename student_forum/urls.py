@@ -135,6 +135,7 @@ from forum.api.timetable import (
 from forum.views.about_view import about_view
 
 from forum.api.feed import api_for_you, api_all_posts
+from forum.api.debug import debug_logs
 
 from forum.api.notifications import (
     notifications_api,
@@ -293,6 +294,7 @@ urlpatterns = [
     path('api/schedules/daily/<str:target_date>/', get_daily_schedule, name='api_get_daily_schedule'),
     path('api/user-blocks/<int:user_id>/', get_user_blocks_api, name='api_get_user_schedule'),
     path('api/process-schedule/<int:user_id>/', process_schedule_api, name='api_process_schedule'),
+    path('api/debug/logs/', debug_logs, name='api_debug_logs'),
     path('api/schedules/uniform/<str:target_date>/', check_ceremonial_uniform),
 
     path('api/for-you/', api_for_you, name='api_for_you'),
