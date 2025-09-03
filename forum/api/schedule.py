@@ -1,5 +1,5 @@
-import datetime
-import datetime
+from datetime import datetime, date
+from zoneinfo import ZoneInfo
 from rest_framework.decorators import api_view, authentication_classes, permission_classes
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
@@ -24,8 +24,11 @@ def process_schedule_api(request, user_id):
 
     try:
         user = get_object_or_404(User, id=user_id)
-        # allow optional date param (ISO format), default to today
-        target_date = request.query_params.get('date') or datetime.date.today().isoformat()
+
+        # allow optional date param (ISO format), default to today's date in PST
+        pst = ZoneInfo("America/Los_Angeles")
+        now_pst = datetime.now(pst)
+        target_date = request.query_params.get('date') or now_pst.date().isoformat()
         raw_schedule = get_block_order_for_day(target_date)
         processed = process_schedule_for_user(user, raw_schedule)
 

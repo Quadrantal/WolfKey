@@ -239,7 +239,7 @@ CSRF_TRUSTED_ORIGINS = [
     "http://localhost:8081",
     "http://localhost:19000",
     "http://localhost:19006"
-    'http://10.0.0.38:8000'
+    , 'http://10.0.0.38:8000'
 ]
 
 CORS_ALLOW_METHODS = [
