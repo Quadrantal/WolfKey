@@ -133,6 +133,7 @@ from forum.api.timetable import (
 )
 
 from forum.views.about_view import about_view
+from forum.views.privacy_view import privacy_view
 
 from forum.api.feed import api_for_you, api_all_posts
 from forum.api.debug import debug_logs
@@ -210,6 +211,7 @@ urlpatterns = [
     path('solution/<int:solution_id>/comments/', get_comments, name='get_solution_comments'),
 
     path('about', about_view, name = 'site_info'),
+    path('privacy', privacy_view, name = 'privacy_policy'),
     
     # Auth related URLs
     path('register/', register, name='register'),
