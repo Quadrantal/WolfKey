@@ -228,3 +228,70 @@ def api_refresh_token(request):
                 'message': 'Failed to refresh token'
             }
         }, status=500)
+
+@api_view(['DELETE'])
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
+def api_delete_account(request):
+    """
+    Delete the authenticated user's account
+    This is a permanent action that cannot be undone
+    """
+    try:
+        user = request.user
+        user_id = user.id
+        username = user.username
+        
+        # Optional: Require password confirmation for extra security
+        data = json.loads(request.body) if request.body else {}
+        password = data.get('password')
+        
+        if password:
+            # Verify password before deletion
+            if not user.check_password(password):
+                return JsonResponse({
+                    'success': False,
+                    'error': {
+                        'code': 'INVALID_PASSWORD',
+                        'message': 'Invalid password provided'
+                    }
+                }, status=400)
+        
+        # Delete the user's token first
+        if hasattr(user, 'auth_token'):
+            user.auth_token.delete()
+        
+        # Log the account deletion
+        logger.info(f"Account deletion initiated for user {user_id} ({username})")
+        
+        # Delete the user (this will cascade delete related objects)
+        user.delete()
+        
+        logger.info(f"Account successfully deleted for user {user_id} ({username})")
+        
+        return JsonResponse({
+            'success': True,
+            'data': {
+                'message': 'Account successfully deleted',
+                'deleted_at': timezone.now().isoformat(),
+                'api_version': '1.0'
+            }
+        })
+        
+    except json.JSONDecodeError:
+        return JsonResponse({
+            'success': False,
+            'error': {
+                'code': 'INVALID_JSON',
+                'message': 'Invalid JSON provided'
+            }
+        }, status=400)
+    except Exception as e:
+        logger.error(f"Error deleting account for user {request.user.id}: {str(e)}")
+        return JsonResponse({
+            'success': False,
+            'error': {
+                'code': 'ACCOUNT_DELETION_ERROR',
+                'message': 'Failed to delete account'
+            }
+        }, status=500)

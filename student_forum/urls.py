@@ -116,7 +116,8 @@ from forum.api.auth import(
     search_users_api,
     api_refresh_token,
     api_verify_token,
-    api_logout
+    api_logout,
+    api_delete_account
 )
 from forum.views.auth_views import register, login_view, logout_view
 from forum.api.wolfnet_integration import(
@@ -289,6 +290,7 @@ urlpatterns = [
     path('api/auth/logout/', api_logout, name='api_logout'),
     path('api/auth/refresh-token/', api_refresh_token, name='api_refresh_token'),
     path('api/auth/verify-token/', api_verify_token, name='api_verify_token'),
+    path('api/auth/delete-account/', api_delete_account, name='api_delete_account'),
     path('api/upload-image/', api_upload_image, name='api_upload_image'),
     
     path('schedules/daily/<str:target_date>/', daily_schedule_view, name='daily_schedule_view'),
