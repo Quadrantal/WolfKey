@@ -503,6 +503,17 @@
     document.addEventListener('DOMContentLoaded', function() {
         const autoCompleteBtn = document.getElementById('autoCompleteBtn');
         if (autoCompleteBtn) {
+            // TEMPORARILY DISABLED - WolfNet integration issues being resolved with IT department
+            autoCompleteBtn.disabled = true;
+            autoCompleteBtn.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Temporarily Unavailable';
+            autoCompleteBtn.title = 'WolfNet integration temporarily disabled while we resolve issues with the IT department';
+            autoCompleteBtn.style.opacity = '0.6';
+            
+            autoCompleteBtn.addEventListener('click', function() {
+                alert('WolfNet auto-complete is temporarily unavailable while we sort out issues with the IT department. Please check back later.');
+            });
+            
+            /* ORIGINAL CODE - COMMENTED OUT TEMPORARILY
             const hasWolfnet = autoCompleteBtn.getAttribute('data-has-wolfnet') === 'true';
 
             console.log(hasWolfnet);
@@ -563,6 +574,7 @@
                     autoCompleteBtn.innerHTML = '<i class="fas fa-magic"></i> Auto-Complete from WolfNet';
                 }
             });
+            */
         }
     });
 
@@ -618,6 +630,17 @@
         // Handle Check WolfNet Password button
         const checkWolfnetBtn = document.getElementById('checkWolfnetBtn');
         if (checkWolfnetBtn) {
+            // TEMPORARILY DISABLED - WolfNet integration issues being resolved with IT department
+            checkWolfnetBtn.disabled = true;
+            checkWolfnetBtn.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Temporarily Unavailable';
+            checkWolfnetBtn.title = 'WolfNet integration temporarily disabled while we resolve issues with the IT department';
+            checkWolfnetBtn.style.opacity = '0.6';
+            
+            checkWolfnetBtn.addEventListener('click', function() {
+                alert('WolfNet password verification is temporarily unavailable while we sort out issues with the IT department. Please check back later.');
+            });
+            
+            /* ORIGINAL CODE - COMMENTED OUT TEMPORARILY
             checkWolfnetBtn.addEventListener('click', async function() {
                 const passwordInput = document.getElementById('id_wolfnet_password');
                 const password = passwordInput.value.trim();
@@ -677,6 +700,7 @@
                     checkWolfnetBtn.disabled = false;
                 }
             });
+            */
         }
     });
 
