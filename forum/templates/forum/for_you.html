@@ -82,7 +82,7 @@
                             {% else %}
                             <li class="list-group-item">
                                 <div class="d-flex justify-content-between align-items-center mb-1">
-                                    <p style = "margin-bottom: 0px;">{{ item.block }}</p>
+                                    <p style = "margin-bottom: 0px;">{{ "<b>Unknown Course</b>" if item.block is None else item.block}}</p>
                                     {% if item.time %}
                                         <p style = "margin-bottom: 0px;">{{ item.time }} </p>
                                     {% endif %}
